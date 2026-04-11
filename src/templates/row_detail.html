@@ -1,117 +1,70 @@
 {% extends "base.html" %}
 {% block title %}Строка {{ row_index }} — {{ sheet_code }}{% endblock %}
 {% block content %}
-<section class="panel">
-  <h1>{{ sheet_code }} · строка {{ row_index }}</h1>
-  <p class="muted">id={{ row_id }} · режим консистентности: <strong>{{ mode }}</strong>
-    {% if mode == "strict" %} (сохранение отклоняется при ошибках проверок){% endif %}
-  </p>
-  {% if consistency_errors and consistency_errors|length > 0 %}
-  <div class="errors">
-    <strong>Проблемы консистентности:</strong>
-    <ul>{% for e in consistency_errors %}<li>{{ e }}</li>{% endfor %}</ul>
+{# Данные для row_editor.js: плоские поля и разобранный JSON. #}
+<script type="application/json" id="row-editor-bootstrap">{{ editor_bootstrap_json }}</script>
+
+<div class="row-edit-layout">
+    <aside class="edit-nav panel" aria-label="Навигация по разделам">
+      <div class="edit-nav-title">Разделы</div>
+      <a href="#sec-meta">Общее</a>
+      <a href="#sec-flat">Поля таблицы</a>
+      <a href="#json-columns-mount">JSON</a>
+      {% for jb in json_blocks %}
+      <a class="edit-nav-sub" href="#sec-json-{{ jb.section_slug }}">↳ {{ jb.column }}</a>
+      {% endfor %}
+      {% if rel.links %}
+      <a href="#sec-relations">Связи</a>
+      {% endif %}
+    </aside>
+
+    <div class="edit-main">
+      <section id="sec-meta" class="panel">
+        <h1>{{ sheet_code }} · строка {{ row_index }}</h1>
+        <p class="muted">id={{ row_id }} · режим консистентности: <strong>{{ mode }}</strong>
+          {% if mode == "strict" %} (сохранение отклоняется при ошибках проверок){% endif %}
+        </p>
+        {% if consistency_errors and consistency_errors|length > 0 %}
+        <div class="errors">
+          <strong>Проблемы консистентности:</strong>
+          <ul>{% for e in consistency_errors %}<li>{{ e }}</li>{% endfor %}</ul>
+        </div>
+        {% endif %}
+      </section>
+
+      <section id="sec-flat" class="panel">
+        <h2>Поля таблицы (не JSON)</h2>
+        <p class="muted">Сетка: несколько колонок в ряд. Поиск сужает список.</p>
+        <input type="search" id="flat-field-filter" class="field-filter" placeholder="Фильтр по имени колонки…" autocomplete="off" />
+        <div id="flat-field-grid" class="scalar-field-grid"></div>
+      </section>
+
+      <div id="json-columns-mount" class="json-mount"></div>
+
+      {% if rel.links %}
+      <section id="sec-relations" class="panel">
+        <h2>Связи</h2>
+        <div class="relations-grid">
+          {% for rel_block in rel.links %}
+          {% if rel_block["items"] %}
+          <div class="relation-card">
+            <h3 class="muted relation-card-title">{{ rel_block["title"] }}</h3>
+            {% for item in rel_block["items"] %}
+            <pre class="link-block">{{ item | tojson(indent=2) }}</pre>
+            {% endfor %}
+          </div>
+          {% endif %}
+          {% endfor %}
+        </div>
+      </section>
+      {% endif %}
+    </div>
   </div>
-  {% endif %}
-</section>
 
-<section class="panel">
-  <h2>Поля (не JSON)</h2>
-  {% for col in flat_columns %}
-  <div class="field">
-    <label for="f-{{ loop.index }}">{{ col }}</label>
-    <input id="f-{{ loop.index }}" data-col="{{ col }}" type="text" value="{{ cells[col] | e }}" />
-  </div>
-  {% endfor %}
-  {% if not flat_columns %}
-  <p class="muted">Нет обычных колонок для отображения (все значения — в JSON-блоках ниже или строка пуста).</p>
-  {% endif %}
-</section>
-
-{% if json_blocks %}
-<section class="panel">
-  <h2>JSON-колонки</h2>
-  <p class="muted">Если значение не является JSON (например литерал из SPOD), оно уходит в базу как есть.</p>
-  {% for jb in json_blocks %}
-  <div class="field">
-    <label>{{ jb.column }}</label>
-    {% if jb.parse_error %}
-    <p class="muted">Разбор: <span class="badge badge-bad">не JSON</span> — {{ jb.parse_error | e }}</p>
-    <textarea data-json="{{ jb.column }}" rows="8">{{ jb.raw | e }}</textarea>
-    {% else %}
-    <textarea data-json="{{ jb.column }}" rows="12">{{ jb.pretty | e }}</textarea>
-    {% endif %}
-  </div>
-  {% endfor %}
-</section>
-{% endif %}
-
-{% if rel.links %}
-<section class="panel">
-  <h2>Связи</h2>
-  {# Имя rel_block: у словаря нельзя писать block.items — в Jinja это метод .items(), а не ключ "items". #}
-  {% for rel_block in rel.links %}
-  {% if rel_block["items"] %}
-  <h3 class="muted">{{ rel_block["title"] }}</h3>
-  {% for item in rel_block["items"] %}
-  <pre class="link-block">{{ item | tojson(indent=2) }}</pre>
-  {% endfor %}
-  {% endif %}
-  {% endfor %}
-</section>
-{% endif %}
-
-<section class="panel">
+<div class="edit-dock">
   <button type="button" class="btn btn-primary" id="btn-save">Сохранить в базу</button>
   <a class="btn btn-ghost" href="/sheet/{{ sheet_code }}">Назад к списку</a>
-</section>
+</div>
 
-<script>
-(function() {
-  const sheetCode = {{ sheet_code | tojson }};
-  const rowId = {{ row_id }};
-
-  function collectPayload() {
-    const o = {};
-    document.querySelectorAll("[data-col]").forEach(function(el) {
-      o[el.dataset.col] = el.value;
-    });
-    document.querySelectorAll("[data-json]").forEach(function(el) {
-      const col = el.dataset.json;
-      const t = el.value.trim();
-      if (!t) {
-        o[col] = "";
-        return;
-      }
-      try {
-        o[col] = JSON.stringify(JSON.parse(t));
-      } catch (e) {
-        o[col] = el.value;
-      }
-    });
-    return o;
-  }
-
-  document.getElementById("btn-save").addEventListener("click", async function() {
-    const payload = collectPayload();
-    const res = await fetch("/sheet/" + encodeURIComponent(sheetCode) + "/row/" + rowId + "/save", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
-    });
-    if (res.ok) {
-      window.location.href = "/sheet/" + encodeURIComponent(sheetCode) + "/row/" + rowId;
-      return;
-    }
-    const txt = await res.text();
-    try {
-      const j = JSON.parse(txt);
-      if (j.detail) {
-        alert(String(j.detail));
-        return;
-      }
-    } catch (e) { /* не JSON */ }
-    alert("Ошибка сохранения: " + res.status + " " + txt.slice(0, 500));
-  });
-})();
-</script>
+<script src="/static/row_editor.js" defer></script>
 {% endblock %}

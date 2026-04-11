@@ -12,7 +12,7 @@
 
 1. Импорт шести листов из `IN/SPOD` в базу данных SQLite.
 2. Просмотр списка строк по каждому листу с поиском и индикатором консистентности.
-3. Просмотр и редактирование одной строки: обычные поля как текст, колонки JSON — в отдельных блоках с подсветкой ошибок разбора.
+3. Просмотр и редактирование одной строки: плоские поля в **сетке** с поиском; JSON-колонки — **развёртка в отдельные параметры** (строка, число, логический, null) плюс режим **«Сырой JSON»**; боковая навигация по разделам; нижняя панель «Сохранить».
 4. Сохранение строки в БД с пересчётом проверок; опционально запрет сохранения при ошибках (`consistency.mode: strict`).
 5. Экспорт листа обратно в CSV (`;`, UTF-8).
 6. Переимпорт всех CSV из папки (сброс данных в БД).
@@ -30,8 +30,9 @@
 - **Проверки:** `src/consistency.py` — множества кодов конкурсов/наград, пары `(CONTEST_CODE, GROUP_CODE)`, ссылки REWARD-LINK, INDICATOR, TOURNAMENT-SCHEDULE.
 - **Связи на карточке строки:** `src/relations.py` — выборки связанных фрагментов по кодам.
 - **Экспорт:** `src/export_csv.py` — восстановление CSV по заголовкам из первой строки данных листа.
+- **Редактор строки (клиент):** `src/static/row_editor.js` — читает JSON из `#row-editor-bootstrap` (формирует сервер в `app.row_detail`), строит сетки полей, собирает JSON обратно при сохранении; при ошибке разбора колонки доступен только сырой текст.
 
-Точка входа: `main.py` поднимает Uvicorn на `host`/`port` из конфига (по умолчанию `http://127.0.0.1:8765/`).
+Точка входа: `main.py` или **`run.sh`** поднимают Uvicorn на `host`/`port` из конфига (по умолчанию `http://127.0.0.1:8765/`).
 
 ---
 
@@ -40,6 +41,7 @@
 | Путь | Назначение |
 |------|------------|
 | `main.py` | Запуск сервера |
+| `run.sh` | Запуск через `.venv/bin/python main.py` (удобно, если в IDE выбран другой Python) |
 | `config.json` | Настройки листов и путей |
 | `requirements.txt` | Зависимости Python |
 | `IN/SPOD/` | Входные CSV (копия выгрузок) |
@@ -54,6 +56,7 @@
 | `src/export_csv.py` | Экспорт листа |
 | `src/relations.py` | Контекст связей для шаблона |
 | `src/static/app.css` | Оформление |
+| `src/static/row_editor.js` | Логика сетки полей и JSON на странице строки |
 | `src/templates/` | Шаблоны Jinja2 |
 | `src/Tests/` | Модульные проверки (unittest) |
 
@@ -92,7 +95,8 @@
 | `consistency.run_all_checks` | Пересчёт `consistency_ok` / `consistency_errors` для всех строк; параметр `do_commit=False` для транзакции сохранения |
 | `export_csv.export_sheet_to_csv` | Запись CSV в `OUT/export/` |
 | `relations.build_context_for_row` | Словарь блоков «Связи» для шаблона |
-| `app.index`, `sheet_list`, `row_detail` | HTML-страницы |
+| `app.index`, `sheet_list`, `row_detail` | HTML-страницы; в `row_detail` передаётся `editor_bootstrap_json` для скрипта |
+| `app._json_for_script_tag` | Безопасная вставка JSON внутрь `<script type="application/json">` |
 | `app.row_save` | POST JSON тела «колонка → значение», сохранение и проверки |
 | `app.admin_reimport` | Повторный импорт из `IN/SPOD` |
 | `app.sheet_export_csv` | Скачивание CSV |
@@ -119,7 +123,20 @@ curl -X POST "http://127.0.0.1:8765/sheet/CONTEST-DATA/row/1/save" \
 | POST | `/sheet/{code}/row/{id}/save` | Сохранение (JSON) |
 | POST | `/admin/reimport` | Переимпорт CSV |
 | GET | `/sheet/{code}/export.csv` | Экспорт листа |
-| GET | `/static/...` | Статика |
+| GET | `/static/...` | Статика (`app.css`, `row_editor.js`) |
+
+---
+
+## 6a. Интерфейс страницы строки
+
+| Элемент | Описание |
+|---------|----------|
+| Левая колонка | Якорные ссылки: общее, плоские поля, блок JSON, подпункты по имени JSON-колонки, связи |
+| «Поля таблицы» | Сетка `auto-fill`, фильтр по имени колонки |
+| Каждая JSON-колонка | Карточка: фильтр по пути параметра, переключатель «По полям» / «Сырой JSON», сборка в компактный JSON при сохранении |
+| Нижняя панель | Фиксированная: «Сохранить в базу», «Назад к списку» |
+
+**Ограничение:** добавление новых элементов в массив через форму не поддерживается — только правка существующих «листьев»; расширение структуры — в режиме «Сырой JSON».
 
 ---
 
@@ -133,13 +150,21 @@ python3 -m venv .venv
 source .venv/bin/activate   # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 python main.py
+# или: ./run.sh
 ```
 
 **Важно:** зависимости панели (`uvicorn`, `fastapi`, …) ставятся **только** из `spod_tournament_admin/requirements.txt` в **это** виртуальное окружение (`.venv` внутри папки панели). Запуск через интерпретатор из `SPOD_PROM/venv` без `pip install -r requirements.txt` в этой папке даст ошибку `ModuleNotFoundError: uvicorn`.
 
+**Если в IDE выбран Python из корня репозитория** (`SPOD_PROM/venv/bin/python`), не запускайте `main.py` этим интерпретатором. Варианты:
+
+- в терминале после `cd spod_tournament_admin`: **`./run.sh`** — всегда вызывает `.venv/bin/python main.py`;
+- либо в Cursor: **Python: Select Interpreter** → указать `spod_tournament_admin/.venv/bin/python`, затем **Run** на `main.py`.
+
 Откройте в браузере адрес из консоли (по умолчанию `http://127.0.0.1:8765/`).
 
 Проверки: `python -m unittest discover -s src/Tests -p "test_*.py"`
+
+**Остановка сервера:** в терминале, где запущен процесс, **Ctrl+C**; либо `lsof -i :8765` и `kill <PID>`.
 
 ---
 
@@ -150,6 +175,7 @@ python main.py
 | 0.1.0 | Первый рабочий каркас: импорт, БД, проверки, экспорт, UI. |
 | 0.1.1 | Шаблоны Jinja2, исправление вызова `TemplateResponse` под актуальный Starlette, режим `strict` при сохранении, правка `GROUP.json_columns`, исправление docstring в `spod_json`, связи для `TOURNAMENT_CODE` в расписании. |
 | 0.1.2 | Подсказка при отсутствии `uvicorn`; тесты: список листа, карточка строки, сохранение; исправление шаблона «Связи» (`block.items` → `rel_block["items"]` в Jinja2). |
+| 0.1.3 | Редактор строки: сетка плоских полей, развёртка JSON в параметры, `row_editor.js`, боковое меню, нижняя панель; `run.sh`; логирование с `force=True`; расширена документация. |
 
 ---
 

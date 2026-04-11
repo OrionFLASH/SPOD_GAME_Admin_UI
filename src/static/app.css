@@ -248,3 +248,220 @@ table.data th {
   border: 1px solid rgba(0, 0, 0, 0.08);
   background: rgba(255, 255, 255, 0.8);
 }
+
+/* ---------- Страница редактирования строки ---------- */
+
+.wrap:has(.row-edit-layout) {
+  max-width: 1440px;
+  padding-bottom: 5rem;
+}
+
+.row-edit-layout {
+  display: grid;
+  grid-template-columns: minmax(200px, 240px) minmax(0, 1fr);
+  gap: 1.25rem;
+  align-items: start;
+}
+
+@media (max-width: 900px) {
+  .row-edit-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .edit-nav {
+    position: relative !important;
+    top: auto !important;
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  .edit-nav a {
+    font-size: 0.82rem;
+  }
+}
+
+.edit-nav {
+  position: sticky;
+  top: 4.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  padding: 1rem 1.1rem !important;
+}
+
+.edit-nav-title {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+  margin-bottom: 0.35rem;
+}
+
+.edit-nav a {
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.9rem;
+  padding: 0.25rem 0;
+  border-radius: 8px;
+}
+
+.edit-nav a:hover {
+  text-decoration: underline;
+}
+
+.edit-nav-sub {
+  padding-left: 0.5rem !important;
+  font-weight: 500 !important;
+  font-size: 0.82rem !important;
+}
+
+.edit-main .panel h2 {
+  margin-top: 0;
+}
+
+.field-filter {
+  width: 100%;
+  max-width: 420px;
+  margin-bottom: 1rem;
+  padding: 0.45rem 0.75rem;
+  border-radius: 10px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  background: rgba(255, 255, 255, 0.85);
+}
+
+.scalar-field-grid,
+.json-field-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr));
+  gap: 1rem 1.25rem;
+}
+
+.scalar-cell label,
+.json-path-label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--muted);
+  margin-bottom: 0.3rem;
+  word-break: break-word;
+}
+
+.json-path-label {
+  font-family: ui-monospace, "Cascadia Code", monospace;
+  font-size: 0.72rem;
+  color: #4a5f78;
+}
+
+.scalar-cell input,
+.json-leaf-row input.json-leaf-input {
+  width: 100%;
+  padding: 0.45rem 0.6rem;
+  border-radius: 10px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  background: rgba(255, 255, 255, 0.88);
+  font-size: 0.88rem;
+}
+
+.json-leaf-row input[type="checkbox"] {
+  width: auto;
+  transform: scale(1.15);
+}
+
+.json-mount {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.json-column-panel h2 {
+  font-size: 1.05rem;
+  margin-bottom: 0.65rem;
+}
+
+.json-column-card {
+  padding: 0.25rem 0;
+}
+
+.json-column-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.65rem;
+  margin-bottom: 1rem;
+}
+
+.json-column-toolbar .json-filter {
+  flex: 1;
+  min-width: 200px;
+  max-width: 360px;
+  padding: 0.4rem 0.65rem;
+  border-radius: 10px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.json-mode-toggle {
+  display: flex;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+}
+
+.btn-sm {
+  padding: 0.28rem 0.7rem;
+  font-size: 0.8rem;
+  border-radius: 10px;
+}
+
+.json-raw-textarea {
+  width: 100%;
+  min-height: 280px;
+  font-family: ui-monospace, monospace;
+  font-size: 0.82rem;
+  padding: 0.65rem 0.75rem;
+  border-radius: 12px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  background: rgba(255, 255, 255, 0.92);
+}
+
+.is-hidden {
+  display: none !important;
+}
+
+.relations-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 380px), 1fr));
+  gap: 1rem;
+}
+
+.relation-card {
+  background: rgba(255, 255, 255, 0.45);
+  border: 1px solid var(--glass-border);
+  border-radius: 14px;
+  padding: 0.85rem 1rem;
+}
+
+.relation-card-title {
+  margin: 0 0 0.5rem;
+  font-size: 0.88rem;
+}
+
+.edit-dock {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 25;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.65rem;
+  padding: 0.75rem 1.25rem;
+  background: var(--glass);
+  backdrop-filter: blur(var(--blur));
+  -webkit-backdrop-filter: blur(var(--blur));
+  border-top: 1px solid var(--glass-border);
+  box-shadow: 0 -6px 24px rgba(31, 56, 88, 0.1);
+}

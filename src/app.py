@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import json
 import logging
+import re
 import sqlite3
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone
@@ -15,6 +16,7 @@ from fastapi import Body, FastAPI, HTTPException, Request
 from fastapi.responses import FileResponse, HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+from markupsafe import Markup
 
 from src import consistency, db, export_csv, ingest, relations, spod_json
 
@@ -22,6 +24,13 @@ ROOT = Path(__file__).resolve().parent.parent
 CFG: Dict[str, Any] = {}
 CONN: sqlite3.Connection | None = None
 DB_PATH: Path | None = None
+
+
+def _json_for_script_tag(obj: Any) -> Markup:
+    """Сериализация JSON для вставки в <script type=\"application/json\"> без поломки разметки."""
+    s = json.dumps(obj, ensure_ascii=False)
+    s = s.replace("<", "\\u003c").replace(">", "\\u003e")
+    return Markup(s)
 
 
 def _load_config() -> Dict[str, Any]:
@@ -39,6 +48,7 @@ def _setup_logging() -> None:
         level=getattr(logging, CFG["logging"].get("level", "INFO"), logging.INFO),
         format="%(asctime)s | %(levelname)s | %(message)s",
         handlers=[logging.FileHandler(path, encoding="utf-8"), logging.StreamHandler()],
+        force=True,
     )
 
 
@@ -162,6 +172,7 @@ def row_detail(request: Request, code: str, row_id: int):
         json_blocks.append(
             {
                 "column": col,
+                "section_slug": re.sub(r"[^a-zA-Z0-9_-]", "_", col),
                 "raw": raw,
                 "pretty": spod_json.format_json_for_edit(parsed) if parsed is not None else "",
                 "parse_error": err,
@@ -169,6 +180,26 @@ def row_detail(request: Request, code: str, row_id: int):
         )
     rel = relations.build_context_for_row(conn, code, cells)
     flat_columns = [k for k in cells.keys() if k not in json_cols]
+    # Данные для клиентского редактора: плоские поля + разобранный JSON по колонкам.
+    json_cols_boot: List[Dict[str, Any]] = []
+    for col in json_cols:
+        raw_cell = cells.get(col, "") or ""
+        parsed_cell, err_cell = spod_json.try_parse_cell(raw_cell)
+        json_cols_boot.append(
+            {
+                "column": col,
+                "section_slug": re.sub(r"[^a-zA-Z0-9_-]", "_", col),
+                "raw": raw_cell,
+                "ok": err_cell is None,
+                "parsed": parsed_cell,
+            }
+        )
+    editor_bootstrap = {
+        "sheetCode": code,
+        "rowId": row_id,
+        "flat": {k: cells.get(k, "") for k in flat_columns},
+        "jsonCols": json_cols_boot,
+    }
     return templates.TemplateResponse(
         request,
         "row_detail.html",
@@ -180,6 +211,7 @@ def row_detail(request: Request, code: str, row_id: int):
             "json_columns": json_cols,
             "flat_columns": flat_columns,
             "json_blocks": json_blocks,
+            "editor_bootstrap_json": _json_for_script_tag(editor_bootstrap),
             "consistency_ok": r["consistency_ok"],
             "consistency_errors": json.loads(r["consistency_errors"] or "[]"),
             "rel": rel,

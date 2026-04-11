@@ -30,13 +30,16 @@ def main() -> None:
         req = ROOT / "requirements.txt"
         raise SystemExit(
             "Не установлен пакет uvicorn (и, вероятно, остальной стек панели).\n"
-            "Панель нужно запускать в своём виртуальном окружении внутри этой папки:\n"
+            "Сейчас используется не тот Python: нужен интерпретатор из spod_tournament_admin/.venv\n"
+            "или скрипт ./run.sh из этой папки.\n\n"
+            "Установка и запуск:\n"
             f"  cd {ROOT}\n"
             "  python3 -m venv .venv\n"
             "  source .venv/bin/activate\n"
             f"  pip install -r {req.name}\n"
             "  python main.py\n"
-            "Не используйте для запуска панели только venv корневого проекта SPOD_PROM без установки зависимостей панели."
+            "либо после установки зависимостей:  ./run.sh\n\n"
+            "Не запускайте main.py через SPOD_PROM/venv/bin/python — там нет зависимостей панели."
         ) from None
 
     print(f"Откройте в браузере: http://{host}:{port}/")
