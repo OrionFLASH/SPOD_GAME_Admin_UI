@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}{{ sheet_title }} — строки{% endblock %}
+{% block content %}
+<section class="panel">
+  <h1>{{ sheet_title }}</h1>
+  <p class="muted">Код листа: <strong>{{ sheet_code }}</strong></p>
+  <form class="search" method="get" action="/sheet/{{ sheet_code }}">
+    <input type="search" name="q" value="{{ q }}" placeholder="Поиск по содержимому строки…" />
+    <button type="submit" class="btn btn-primary">Найти</button>
+  </form>
+  <table class="data">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Ключ / превью</th>
+        <th>Консистентность</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for r in rows %}
+      <tr>
+        <td>{{ r.row_index }}</td>
+        <td>{{ r.preview }}</td>
+        <td>
+          {% if r.ok %}
+          <span class="badge badge-ok">OK</span>
+          {% else %}
+          <span class="badge badge-bad">Проблемы</span>
+          {% endif %}
+        </td>
+        <td><a class="btn btn-ghost" href="/sheet/{{ sheet_code }}/row/{{ r.id }}">Просмотр</a></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+{% endblock %}

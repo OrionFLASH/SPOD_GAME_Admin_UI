@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Главная — SPOD Tournament Admin{% endblock %}
+{% block content %}
+<section class="panel">
+  <h1>Панель администратора турниров</h1>
+  <p class="muted">Просмотр и правка CSV-выгрузок SPOD. Данные в SQLite; импорт из <code>IN/SPOD</code>.</p>
+  <form method="post" action="/admin/reimport" onsubmit="return confirm('Перезагрузить все листы из CSV? Несохранённые правки в БД будут потеряны.');">
+    <button type="submit" class="btn btn-danger">Переимпорт из IN/SPOD</button>
+  </form>
+</section>
+<section class="panel">
+  <h2>Листы</h2>
+  <div class="grid-cards">
+    {% for s in sheets %}
+    <div class="card">
+      <h3>{{ s.title or s.code }}</h3>
+      <div class="meta">{{ s.file_name }} · {{ s.n }} строк</div>
+      <a class="btn btn-primary" href="/sheet/{{ s.code }}">Открыть</a>
+      <a class="btn btn-ghost" href="/sheet/{{ s.code }}/export.csv">CSV</a>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

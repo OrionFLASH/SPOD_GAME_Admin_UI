@@ -1,0 +1,66 @@
+{
+  "paths": {
+    "input_spod": "IN/SPOD",
+    "output_db_dir": "OUT/DB",
+    "logs": "log"
+  },
+  "database": {
+    "filename": "tournament_admin.sqlite"
+  },
+  "server": {
+    "host": "127.0.0.1",
+    "port": 8765
+  },
+  "logging": {
+    "level": "INFO",
+    "base_name": "admin"
+  },
+  "consistency": {
+    "mode": "warn",
+    "comment": "strict — не сохранять при ошибках; warn — сохранять с флагом; soft — только подсветка"
+  },
+  "sheets": [
+    {
+      "code": "CONTEST-DATA",
+      "title": "Конкурсы",
+      "file": "CONTEST (PROM) 09-04 v1.csv",
+      "json_columns": ["CONTEST_FEATURE"],
+      "primary_key_column": "CONTEST_CODE"
+    },
+    {
+      "code": "GROUP",
+      "title": "Группы / уровни",
+      "file": "GROUP (PROM) 09-04 v1.csv",
+      "json_columns": [],
+      "primary_key_column": "GROUP_CODE"
+    },
+    {
+      "code": "INDICATOR",
+      "title": "Показатели",
+      "file": "INDICATOR (PROM) 09-04 v1.csv",
+      "json_columns": ["INDICATOR_OBJECT", "INDICATOR_FILTER", "CONTESTANT_SELECTION"],
+      "primary_key_column": "INDICATOR_CODE"
+    },
+    {
+      "code": "REWARD",
+      "title": "Награды",
+      "file": "REWARD (PROM) 09-04 v1.csv",
+      "json_columns": ["REWARD_ADD_DATA"],
+      "primary_key_column": "REWARD_CODE"
+    },
+    {
+      "code": "REWARD-LINK",
+      "title": "Связи конкурс — группа — награда",
+      "file": "REWARD-LINK (PROM) 09-04 v1.csv",
+      "json_columns": [],
+      "primary_key_column": null
+    },
+    {
+      "code": "TOURNAMENT-SCHEDULE",
+      "title": "Расписание турниров",
+      "file": "SCHEDULE (PROM) 09-04 v1.csv",
+      "json_columns": ["FILTER_PERIOD_ARR", "TARGET_TYPE", "TRN_INDICATOR_FILTER"],
+      "primary_key_column": "TOURNAMENT_CODE"
+    }
+  ]
+}
