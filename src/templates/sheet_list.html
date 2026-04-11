@@ -3,36 +3,42 @@
 {% block content %}
 <section class="panel">
   <h1>{{ sheet_title }}</h1>
-  <p class="muted">Код листа: <strong>{{ sheet_code }}</strong></p>
+  <p class="muted">Код листа: <strong>{{ sheet_code }}</strong> · в таблице: ключ, название из строки или связей, подтянутые турниры/конкурсы где применимо.</p>
   <form class="search" method="get" action="/sheet/{{ sheet_code }}">
     <input type="search" name="q" value="{{ q }}" placeholder="Поиск по содержимому строки…" />
     <button type="submit" class="btn btn-primary">Найти</button>
   </form>
-  <table class="data">
-    <thead>
-      <tr>
-        <th>#</th>
-        <th>Ключ / превью</th>
-        <th>Консистентность</th>
-        <th></th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for r in rows %}
-      <tr>
-        <td>{{ r.row_index }}</td>
-        <td>{{ r.preview }}</td>
-        <td>
-          {% if r.ok %}
-          <span class="badge badge-ok">OK</span>
-          {% else %}
-          <span class="badge badge-bad">Проблемы</span>
-          {% endif %}
-        </td>
-        <td><a class="btn btn-ghost" href="/sheet/{{ sheet_code }}/row/{{ r.id }}">Просмотр</a></td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
+  <div class="table-scroll">
+    <table class="data data-list-wide">
+      <thead>
+        <tr>
+          <th class="col-idx">#</th>
+          <th>Ключ</th>
+          <th>Название / описание</th>
+          <th>Связи</th>
+          <th class="col-flag">Консистентность</th>
+          <th class="col-action"></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in rows %}
+        <tr>
+          <td class="col-idx">{{ r.row_index }}</td>
+          <td class="cell-mono">{{ r.preview }}</td>
+          <td class="cell-wrap">{{ r.title_line }}</td>
+          <td class="cell-wrap cell-muted">{{ r.relations_line }}</td>
+          <td class="col-flag">
+            {% if r.ok %}
+            <span class="badge badge-ok">OK</span>
+            {% else %}
+            <span class="badge badge-bad">Проблемы</span>
+            {% endif %}
+          </td>
+          <td class="col-action"><a class="btn btn-ghost" href="/sheet/{{ sheet_code }}/row/{{ r.id }}">Просмотр</a></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
 </section>
 {% endblock %}

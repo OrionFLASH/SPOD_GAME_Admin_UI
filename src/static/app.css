@@ -160,6 +160,50 @@ table.data td {
   padding: 0.5rem 0.65rem;
   text-align: left;
   border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  vertical-align: top;
+}
+
+.table-scroll {
+  overflow-x: auto;
+  margin: 0 -0.25rem;
+  padding: 0 0.25rem;
+}
+
+.data-list-wide {
+  min-width: 720px;
+}
+
+.data-list-wide .col-idx {
+  width: 3rem;
+  white-space: nowrap;
+}
+
+.data-list-wide .col-flag {
+  width: 8.5rem;
+}
+
+.data-list-wide .col-action {
+  width: 7.5rem;
+  white-space: nowrap;
+}
+
+.cell-mono {
+  font-family: ui-monospace, monospace;
+  font-size: 0.82rem;
+  max-width: 14rem;
+  word-break: break-all;
+}
+
+.cell-wrap {
+  max-width: 22rem;
+  font-size: 0.88rem;
+  line-height: 1.35;
+}
+
+.cell-muted {
+  color: var(--muted);
+  font-size: 0.82rem;
+  max-width: 26rem;
 }
 
 table.data th {

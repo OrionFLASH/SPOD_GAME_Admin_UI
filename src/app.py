@@ -18,7 +18,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from markupsafe import Markup
 
-from src import consistency, db, export_csv, ingest, relations, spod_json
+from src import consistency, db, export_csv, ingest, relations, sheet_list_display, spod_json
 
 ROOT = Path(__file__).resolve().parent.parent
 CFG: Dict[str, Any] = {}
@@ -114,23 +114,21 @@ def sheet_list(request: Request, code: str, q: str = ""):
     )
     rows_out: List[Dict[str, Any]] = []
     spec = next((s for s in CFG["sheets"] if s["code"] == code), None)
-    pk = (spec or {}).get("primary_key_column")
     ql = q.strip().lower() if q else ""
+    lu = sheet_list_display.build_lookup_tables(conn)
     for r in cur.fetchall():
         cells = json.loads(r["cells_json"])
-        preview = ""
-        if pk and pk in cells:
-            preview = str(cells[pk])[:80]
-        elif cells:
-            preview = str(next(iter(cells.values())))[:80]
-        blob = json.dumps(cells, ensure_ascii=False).lower()
+        disp = sheet_list_display.display_for_sheet_row(code, cells, lu)
+        blob = sheet_list_display.search_blob(cells, disp)
         if ql and ql not in blob:
             continue
         rows_out.append(
             {
                 "id": r["id"],
                 "row_index": r["row_index"],
-                "preview": preview,
+                "preview": disp["primary_key"],
+                "title_line": disp["title_line"],
+                "relations_line": disp["relations_line"],
                 "ok": r["consistency_ok"],
                 "errors": json.loads(r["consistency_errors"] or "[]"),
             }
