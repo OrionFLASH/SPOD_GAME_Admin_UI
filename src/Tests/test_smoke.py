@@ -38,6 +38,13 @@ class SmokeTest(unittest.TestCase):
             r2 = client.get("/sheet/CONTEST-DATA")
             self.assertEqual(r2.status_code, 200)
             self.assertIn("CONTEST-DATA", r2.text)
+            rw = client.get("/wizard/new-contest")
+            self.assertEqual(rw.status_code, 200)
+            self.assertIn("wizard-schema-json", rw.text)
+            self.assertIn("CONTEST-DATA", rw.text)
+            rd = client.get("/wizard/new-contest/drafts")
+            self.assertEqual(rd.status_code, 200)
+            self.assertIsInstance(rd.json(), list)
 
     def test_row_detail_and_save_roundtrip(self) -> None:
         """Карточка строки: без изменений — 400; с изменением — 303 и новая версия строки."""
@@ -64,6 +71,7 @@ class SmokeTest(unittest.TestCase):
             conn.close()
             r = client.get(f"/sheet/CONTEST-DATA/row/{rid}")
             self.assertEqual(r.status_code, 200)
+            self.assertIn('"fieldUi"', r.text)
             r_same = client.post(
                 f"/sheet/CONTEST-DATA/row/{rid}/save",
                 json=cells,

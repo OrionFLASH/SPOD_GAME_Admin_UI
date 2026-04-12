@@ -1,7 +1,8 @@
 /**
  * Редактор строки: сетка плоских полей, развёртка JSON в параметры, сборка при сохранении.
  * Списки допустимых значений и «Задать своё» задаются в config.json (field_enums по листам);
- * календарь для дат — в editor_textareas (подсказка с input_type "date" или date_picker: true);
+ * календарь для дат — `spod_date_picker.js` + подсказки в editor_textareas (`input_type` date / datepicker);
+ * подписи и описания полей — editor_field_ui (развёртка в bootstrap.fieldUi);
  * в bootstrap приходят плоские списки (развёртка на сервере).
  */
 (function () {
@@ -70,14 +71,18 @@
     return null;
   }
 
-  /** Подсказка по min_rows/max_rows для textarea (плоское поле или путь в JSON). */
+  /** Подсказка по min_rows/max_rows для textarea (плоское поле или путь в JSON). Записи-календарь пропускаются. */
   function findTextareaHint(bootstrap, column, jsonParts) {
     var list = bootstrap.editorTextareas || [];
     var sc = bootstrap.sheetCode;
     var jParts = jsonParts === undefined ? null : jsonParts;
+    var api = typeof window !== "undefined" ? window.SpodDatePicker : null;
     for (var j = 0; j < list.length; j++) {
       var h = list[j];
       if (h.sheet_code !== sc || h.column !== column) {
+        continue;
+      }
+      if (api && typeof api.hintIsDate === "function" && api.hintIsDate(h)) {
         continue;
       }
       if (!ruleHasJsonPath(h)) {
@@ -99,17 +104,20 @@
     var list = bootstrap.editorTextareas || [];
     var sc = bootstrap.sheetCode;
     var jParts = jsonParts === undefined ? null : jsonParts;
+    var api = typeof window !== "undefined" ? window.SpodDatePicker : null;
     for (var j = 0; j < list.length; j++) {
       var h = list[j];
       if (h.sheet_code !== sc || h.column !== column) {
         continue;
       }
       var isDate =
-        h.input_type === "date" ||
-        h.input_type === "datepicker" ||
-        h.date_picker === true ||
-        h.date_picker === 1 ||
-        h.date_picker === "yes";
+        api && typeof api.hintIsDate === "function"
+          ? api.hintIsDate(h)
+          : h.input_type === "date" ||
+            h.input_type === "datepicker" ||
+            h.date_picker === true ||
+            h.date_picker === 1 ||
+            h.date_picker === "yes";
       if (!isDate) {
         continue;
       }
@@ -124,561 +132,146 @@
     return null;
   }
 
-  /** Строка YYYY-MM-DD, допустимая для input[type=date] без сдвига дня. */
-  function isStrictIsoCalendarDate(s) {
-    var t = (s || "").trim();
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(t)) {
+  /**
+   * Метаданные подписи поля из editor_field_ui (плоская колонка или json_path внутри JSON-колонки).
+   * jsonParts: null — только плоские поля; иначе массив пути как у field_enums.
+   */
+  /**
+   * Последнее подходящее правило выигрывает (можно переопределить сгенерированное правило ниже по файлу).
+   */
+  function findFieldUi(bootstrap, column, jsonParts) {
+    var list = bootstrap.fieldUi || [];
+    var sc = bootstrap.sheetCode;
+    var jParts = jsonParts === undefined ? null : jsonParts;
+    var found = null;
+    for (var i = 0; i < list.length; i++) {
+      var r = list[i];
+      if (r.sheet_code !== sc || r.column !== column) {
+        continue;
+      }
+      if (!ruleHasJsonPath(r)) {
+        if (jParts === null) {
+          found = r;
+        }
+      } else if (partsMatchJsonPath(jParts || [], r.json_path)) {
+        found = r;
+      }
+    }
+    return found;
+  }
+
+  function showDescriptionEnabled(r) {
+    if (!r) {
       return false;
     }
-    var p = t.split("-");
-    var y = parseInt(p[0], 10);
-    var m = parseInt(p[1], 10);
-    var d = parseInt(p[2], 10);
-    var dt = new Date(y, m - 1, d);
-    return dt.getFullYear() === y && dt.getMonth() === m - 1 && dt.getDate() === d;
+    var v = r.show_description;
+    return v === true || v === 1 || v === "yes" || v === "true" || v === "Y";
   }
 
-  /** Двузначный компонент даты для ISO. */
-  function pad2(n) {
-    return n < 10 ? "0" + n : String(n);
-  }
-
-  /** Сборка YYYY-MM-DD (месяц 1–12). */
-  function formatYMD(y, m, d) {
-    return y + "-" + pad2(m) + "-" + pad2(d);
-  }
-
-  /** Разбор валидной ISO-даты → {y,m,d} или null. */
-  function parseYMDParts(s) {
-    var t = (s || "").trim();
-    if (!isStrictIsoCalendarDate(t)) {
-      return null;
+  function fieldUiRequired(r) {
+    if (!r) {
+      return false;
     }
-    var p = t.split("-");
-    return { y: parseInt(p[0], 10), m: parseInt(p[1], 10), d: parseInt(p[2], 10) };
+    var v = r.required;
+    return v === true || v === 1 || v === "yes" || v === "true";
   }
 
-  /** Сегодня по локальному времени браузера. */
-  function localTodayYmd() {
-    var t = new Date();
-    return { y: t.getFullYear(), m: t.getMonth() + 1, d: t.getDate() };
+  /** По умолчанию true, если ключ отсутствует (старые конфиги). */
+  function fieldUiAllowsEmpty(r) {
+    if (!r) {
+      return true;
+    }
+    if (!Object.prototype.hasOwnProperty.call(r, "allows_empty")) {
+      return true;
+    }
+    var v = r.allows_empty;
+    if (v === false || v === 0 || v === "no" || v === "false") {
+      return false;
+    }
+    return true;
   }
-
-  var MONTHS_RU = [
-    "Январь",
-    "Февраль",
-    "Март",
-    "Апрель",
-    "Май",
-    "Июнь",
-    "Июль",
-    "Август",
-    "Сентябрь",
-    "Октябрь",
-    "Ноябрь",
-    "Декабрь",
-  ];
 
   /**
-   * Одно модальное окно поверх страницы: сетка месяца, черновик даты до «ОК»,
-   * кнопки Сегодня / Начало года / Конец года (для года, отображаемого в шапке календаря).
+   * Подпись поля: верхняя строка (название + опционально формат даты снаружи), слот описания с min-height
+   * — чтобы при отсутствии текста описания поля ввода в сетке оставались на одной линии с соседними ячейками.
    */
-  var SpodDateModal = (function () {
-    var overlay = null;
-    var monthTrigger = null;
-    var monthDropdown = null;
-    var monthWrap = null;
-    var yearInputEl = null;
-    var yearHint = null;
-    var quickBar = null;
-    var gridEl = null;
-    var targetHidden = null;
-    var afterCommit = null;
-    var viewY = 2020;
-    var viewM = 0;
-    var draft = null;
-
-    /** Скрыть выпадающий список месяцев. */
-    function hideMonthDropdown() {
-      if (monthDropdown) {
-        monthDropdown.classList.add("is-hidden");
+  function applyFieldUiLabel(bootstrap, labEl, column, jsonParts, fallbackText) {
+    var r = findFieldUi(bootstrap, column, jsonParts);
+    var display = fallbackText;
+    var desc = "";
+    if (r) {
+      if (r.label != null && String(r.label).trim() !== "") {
+        display = String(r.label);
+      }
+      if (r.description != null) {
+        desc = String(r.description);
       }
     }
-
-    /** Если есть черновик даты — ограничить число дня длиной месяца (год/месяц из черновика). */
-    function clampDraftDay() {
-      if (!draft) {
-        return;
-      }
-      var dim = new Date(draft.y, draft.m, 0).getDate();
-      if (draft.d > dim) {
-        draft.d = dim;
-      }
+    labEl.textContent = "";
+    labEl.removeAttribute("title");
+    var top = document.createElement("span");
+    top.className = "spod-field-ui-label-top";
+    var cap = document.createElement("span");
+    cap.className = "spod-field-ui-caption";
+    cap.textContent = display;
+    top.appendChild(cap);
+    var signals = document.createElement("span");
+    signals.className = "spod-field-ui-signals";
+    if (fieldUiRequired(r)) {
+      var star = document.createElement("span");
+      star.className = "spod-field-req-star";
+      star.setAttribute("aria-hidden", "true");
+      star.textContent = "*";
+      signals.appendChild(star);
     }
-
-    /** Применить год из поля ввода (число в допустимом диапазоне). */
-    function applyYearFromInput() {
-      if (!yearInputEl) {
-        return;
-      }
-      var y = parseInt(String(yearInputEl.value).trim(), 10);
-      if (!isFinite(y)) {
-        yearInputEl.value = String(viewY);
-        return;
-      }
-      y = Math.max(1000, Math.min(3999, y));
-      viewY = y;
-      clampDraftDay();
-      renderCalendar();
+    if (!fieldUiAllowsEmpty(r)) {
+      var fillMk = document.createElement("span");
+      fillMk.className = "spod-field-fill-mark";
+      fillMk.setAttribute("aria-hidden", "true");
+      signals.appendChild(fillMk);
     }
-
-    function onEscape(e) {
-      if (e.key === "Escape") {
-        e.preventDefault();
-        hideMonthDropdown();
-        cancel();
-      }
+    if (signals.firstChild) {
+      top.insertBefore(signals, cap);
     }
-
-    function ensureDom() {
-      if (overlay) {
-        return;
-      }
-      overlay = document.createElement("div");
-      /* Не используем общий класс .is-hidden: у него display:none !important — конфликты при показе. */
-      overlay.className = "spod-date-modal-overlay spod-date-modal-overlay--closed";
-      overlay.setAttribute("role", "dialog");
-      overlay.setAttribute("aria-modal", "true");
-      overlay.setAttribute("aria-label", "Выбор даты");
-      overlay.addEventListener("click", function (e) {
-        if (e.target === overlay) {
-          hideMonthDropdown();
-          cancel();
-        }
-      });
-
-      var dlg = document.createElement("div");
-      dlg.className = "spod-date-modal-dialog";
-      dlg.addEventListener("click", function (e) {
-        e.stopPropagation();
-      });
-      /* Клик вне блока месяца — закрыть список месяцев. */
-      dlg.addEventListener("click", function (e) {
-        if (monthWrap && !monthWrap.contains(e.target)) {
-          hideMonthDropdown();
-        }
-      });
-
-      var head = document.createElement("div");
-      head.className = "spod-date-modal-head";
-      var navL = document.createElement("div");
-      navL.className = "spod-date-modal-nav";
-      var bPrevY = document.createElement("button");
-      bPrevY.type = "button";
-      bPrevY.className = "btn btn-ghost btn-sm spod-date-nav-btn";
-      bPrevY.title = "Предыдущий год";
-      bPrevY.textContent = "«";
-      var bPrevM = document.createElement("button");
-      bPrevM.type = "button";
-      bPrevM.className = "btn btn-ghost btn-sm spod-date-nav-btn";
-      bPrevM.title = "Предыдущий месяц";
-      bPrevM.textContent = "‹";
-
-      monthWrap = document.createElement("div");
-      monthWrap.className = "spod-date-month-wrap";
-      monthTrigger = document.createElement("button");
-      monthTrigger.type = "button";
-      monthTrigger.className = "btn btn-ghost btn-sm spod-date-month-trigger";
-      monthTrigger.setAttribute("aria-expanded", "false");
-      monthTrigger.setAttribute("aria-haspopup", "listbox");
-      monthTrigger.title = "Список месяцев";
-      monthDropdown = document.createElement("div");
-      monthDropdown.className = "spod-date-month-dropdown is-hidden";
-      monthDropdown.setAttribute("role", "listbox");
-      monthDropdown.setAttribute("aria-label", "Выбор месяца");
-      for (var mi = 0; mi < 12; mi++) {
-        (function (mIdx) {
-          var opt = document.createElement("button");
-          opt.type = "button";
-          opt.className = "spod-date-month-option";
-          opt.setAttribute("role", "option");
-          opt.textContent = MONTHS_RU[mIdx];
-          opt.addEventListener("click", function (ev) {
-            ev.stopPropagation();
-            viewM = mIdx;
-            clampDraftDay();
-            hideMonthDropdown();
-            monthTrigger.setAttribute("aria-expanded", "false");
-            renderCalendar();
-          });
-          monthDropdown.appendChild(opt);
-        })(mi);
-      }
-      monthTrigger.addEventListener("click", function (ev) {
-        ev.stopPropagation();
-        if (monthDropdown.classList.contains("is-hidden")) {
-          monthDropdown.classList.remove("is-hidden");
-          monthTrigger.setAttribute("aria-expanded", "true");
-        } else {
-          monthDropdown.classList.add("is-hidden");
-          monthTrigger.setAttribute("aria-expanded", "false");
-        }
-      });
-      monthWrap.appendChild(monthTrigger);
-      monthWrap.appendChild(monthDropdown);
-
-      yearInputEl = document.createElement("input");
-      yearInputEl.type = "number";
-      yearInputEl.className = "spod-date-year-input";
-      yearInputEl.min = "1000";
-      yearInputEl.max = "3999";
-      yearInputEl.step = "1";
-      yearInputEl.title = "Год (можно ввести с клавиатуры)";
-      yearInputEl.setAttribute("aria-label", "Год");
-      yearInputEl.addEventListener("change", function () {
-        applyYearFromInput();
-      });
-      yearInputEl.addEventListener("blur", function () {
-        applyYearFromInput();
-      });
-      yearInputEl.addEventListener("keydown", function (ev) {
-        if (ev.key === "Enter") {
-          ev.preventDefault();
-          applyYearFromInput();
-          yearInputEl.blur();
-        }
-      });
-
-      var bNextM = document.createElement("button");
-      bNextM.type = "button";
-      bNextM.className = "btn btn-ghost btn-sm spod-date-nav-btn";
-      bNextM.title = "Следующий месяц";
-      bNextM.textContent = "›";
-      var bNextY = document.createElement("button");
-      bNextY.type = "button";
-      bNextY.className = "btn btn-ghost btn-sm spod-date-nav-btn";
-      bNextY.title = "Следующий год";
-      bNextY.textContent = "»";
-      navL.appendChild(bPrevY);
-      navL.appendChild(bPrevM);
-      navL.appendChild(monthWrap);
-      navL.appendChild(yearInputEl);
-      navL.appendChild(bNextM);
-      navL.appendChild(bNextY);
-      head.appendChild(navL);
-      yearHint = document.createElement("p");
-      yearHint.className = "muted spod-date-modal-year-hint";
-      head.appendChild(yearHint);
-
-      bPrevY.addEventListener("click", function () {
-        viewY -= 1;
-        clampDraftDay();
-        renderCalendar();
-      });
-      bNextY.addEventListener("click", function () {
-        viewY += 1;
-        clampDraftDay();
-        renderCalendar();
-      });
-      bPrevM.addEventListener("click", function () {
-        viewM -= 1;
-        if (viewM < 0) {
-          viewM = 11;
-          viewY -= 1;
-        }
-        clampDraftDay();
-        renderCalendar();
-      });
-      bNextM.addEventListener("click", function () {
-        viewM += 1;
-        if (viewM > 11) {
-          viewM = 0;
-          viewY += 1;
-        }
-        clampDraftDay();
-        renderCalendar();
-      });
-
-      quickBar = document.createElement("div");
-      quickBar.className = "spod-date-modal-quick";
-
-      function mkBtn(text, cls, handler) {
-        var b = document.createElement("button");
-        b.type = "button";
-        b.className = cls || "btn btn-secondary btn-sm";
-        b.textContent = text;
-        b.addEventListener("click", handler);
-        return b;
-      }
-
-      quickBar.appendChild(
-        mkBtn("Начало", "btn btn-secondary btn-sm", function () {
-          draft = { y: viewY, m: 1, d: 1 };
-          viewM = 0;
-          hideMonthDropdown();
-          renderCalendar();
-        })
-      );
-      quickBar.appendChild(
-        mkBtn("Конец", "btn btn-secondary btn-sm", function () {
-          draft = { y: viewY, m: 12, d: 31 };
-          viewM = 11;
-          hideMonthDropdown();
-          renderCalendar();
-        })
-      );
-
-      gridEl = document.createElement("div");
-      gridEl.className = "spod-date-modal-grid";
-
-      var actions = document.createElement("div");
-      actions.className = "spod-date-modal-actions";
-
-      actions.appendChild(
-        mkBtn("ОК", "btn btn-primary btn-sm spod-date-btn-ok", function () {
-          if (!targetHidden) {
-            return;
-          }
-          if (draft) {
-            targetHidden.value = formatYMD(draft.y, draft.m, draft.d);
-          } else {
-            targetHidden.value = "";
-          }
-          if (afterCommit) {
-            afterCommit();
-          }
-          document.dispatchEvent(new Event("spod-editor-change"));
-          hideMonthDropdown();
-          close();
-        })
-      );
-      actions.appendChild(
-        mkBtn("Сегодня", "btn btn-secondary btn-sm", function () {
-          var t = localTodayYmd();
-          draft = { y: t.y, m: t.m, d: t.d };
-          viewY = t.y;
-          viewM = t.m - 1;
-          hideMonthDropdown();
-          renderCalendar();
-        })
-      );
-      actions.appendChild(
-        mkBtn("Отмена", "btn btn-ghost btn-sm", function () {
-          hideMonthDropdown();
-          cancel();
-        })
-      );
-
-      dlg.appendChild(head);
-      dlg.appendChild(quickBar);
-      dlg.appendChild(gridEl);
-      dlg.appendChild(actions);
-      overlay.appendChild(dlg);
-      document.body.appendChild(overlay);
+    labEl.appendChild(top);
+    var slot = document.createElement("span");
+    slot.className = "spod-field-ui-desc-slot";
+    if (showDescriptionEnabled(r) && desc.trim()) {
+      var d = document.createElement("span");
+      d.className = "spod-field-ui-desc";
+      d.textContent = desc.trim();
+      slot.appendChild(d);
     }
+    labEl.appendChild(slot);
+  }
 
-    function renderCalendar() {
-      if (!gridEl || !monthTrigger || !yearInputEl || !yearHint) {
-        return;
-      }
-      monthTrigger.textContent = MONTHS_RU[viewM];
-      if (document.activeElement !== yearInputEl) {
-        yearInputEl.value = String(viewY);
-      }
-      monthTrigger.setAttribute("aria-expanded", monthDropdown.classList.contains("is-hidden") ? "false" : "true");
-      var opts = monthDropdown.querySelectorAll(".spod-date-month-option");
-      for (var oi = 0; oi < opts.length; oi++) {
-        opts[oi].classList.toggle("is-current-month", oi === viewM);
-      }
-      yearHint.textContent =
-        "«Начало» и «Конец» — 1 января и 31 декабря года " +
-        viewY +
-        ". Год можно ввести в поле справа от названия месяца.";
-      gridEl.innerHTML = "";
-      var weekHead = document.createElement("div");
-      weekHead.className = "spod-date-cal-week spod-date-cal-week--head";
-      ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"].forEach(function (w) {
-        var c = document.createElement("div");
-        c.className = "spod-date-cal-hd";
-        c.textContent = w;
-        weekHead.appendChild(c);
-      });
-      gridEl.appendChild(weekHead);
-
-      var dim = new Date(viewY, viewM + 1, 0).getDate();
-      var firstWd = new Date(viewY, viewM, 1).getDay();
-      var pad = (firstWd + 6) % 7;
-      var total = pad + dim;
-      var rows = Math.ceil(total / 7);
-      var dayNum = 1;
-      var tloc = localTodayYmd();
-      for (var r = 0; r < rows; r++) {
-        var row = document.createElement("div");
-        row.className = "spod-date-cal-week";
-        for (var c = 0; c < 7; c++) {
-          var cell = document.createElement("button");
-          cell.type = "button";
-          cell.className = "spod-date-cal-cell";
-          var idx = r * 7 + c;
-          if (idx < pad || dayNum > dim) {
-            cell.classList.add("spod-date-cal-cell--empty");
-            cell.disabled = true;
-            cell.textContent = "";
-          } else {
-            var d = dayNum++;
-            cell.textContent = String(d);
-            cell.classList.add("spod-date-cal-cell--day");
-            if (draft && draft.y === viewY && draft.m === viewM + 1 && draft.d === d) {
-              cell.classList.add("is-selected");
-            }
-            if (viewY === tloc.y && viewM + 1 === tloc.m && d === tloc.d) {
-              cell.classList.add("is-today");
-            }
-            (function (dd) {
-              cell.addEventListener("click", function () {
-                draft = { y: viewY, m: viewM + 1, d: dd };
-                renderCalendar();
-              });
-            })(d);
-          }
-          row.appendChild(cell);
-        }
-        gridEl.appendChild(row);
-      }
-    }
-
-    function close() {
-      hideMonthDropdown();
-      if (overlay) {
-        overlay.classList.add("spod-date-modal-overlay--closed");
-      }
-      document.body.classList.remove("spod-date-modal-open");
-      document.removeEventListener("keydown", onEscape, true);
-      targetHidden = null;
-      afterCommit = null;
-    }
-
-    function cancel() {
-      close();
-    }
-
-    function open(hiddenInput, syncCallback) {
-      try {
-        ensureDom();
-        hideMonthDropdown();
-        targetHidden = hiddenInput;
-        afterCommit = syncCallback || null;
-        var p = parseYMDParts(hiddenInput.value);
-        var t = localTodayYmd();
-        if (p) {
-          viewY = p.y;
-          viewM = p.m - 1;
-          draft = { y: p.y, m: p.m, d: p.d };
-        } else {
-          viewY = t.y;
-          viewM = t.m - 1;
-          draft = null;
-        }
-        overlay.classList.remove("spod-date-modal-overlay--closed");
-        document.body.classList.add("spod-date-modal-open");
-        renderCalendar();
-        document.addEventListener("keydown", onEscape, true);
-        var okBtn = overlay.querySelector(".spod-date-btn-ok");
-        if (okBtn) {
-          okBtn.focus();
-        }
-      } catch (err) {
-        console.error("SpodDateModal.open", err);
-      }
-    }
-
-    return { open: open };
-  })();
+  /** Куда вешать «· YYYY-MM-DD» рядом с названием: внутрь .spod-field-ui-label-top. */
+  function fieldUiLabelTop(labEl) {
+    return labEl.querySelector(".spod-field-ui-label-top");
+  }
 
   /**
-   * Поле даты: скрытое значение (YYYY-MM-DD) + кнопка-поле со значением + компактная кнопка с иконкой календаря.
-   * @param {string} initV начальное значение ячейки
-   * @param {string|null} col имя колонки для data-col или null в JSON-листьях
-   * @param {string|null} dispId id для подписи label (только плоские поля)
-   * @param {boolean} isJsonLeaf добавить класс json-leaf-input на скрытое поле
+   * Поле даты: модальное окно календаря вынесено в /static/spod_date_picker.js (подключать в шаблоне до этого файла).
    */
   function buildDatePickerShell(initV, col, dispId, isJsonLeaf) {
-    var wrap = document.createElement("div");
-    wrap.className = "spod-date-field";
-
-    var hidden = document.createElement("input");
-    hidden.type = "hidden";
-    hidden.className = "spod-date-value";
-    if (isJsonLeaf) {
-      hidden.classList.add("json-leaf-input");
-    }
-    if (col) {
-      hidden.setAttribute("data-col", col);
-    }
-    var s0 = initV != null ? String(initV) : "";
-    hidden.setAttribute("data-initial", s0);
-    hidden.value = s0;
-
-    var row = document.createElement("div");
-    row.className = "spod-date-picker-row";
-
-    /* Кнопка вместо readonly input: стабильно получает клик и фокус с клавиатуры (в т.ч. с label[for]). */
-    var dispBtn = document.createElement("button");
-    dispBtn.type = "button";
-    dispBtn.className = isJsonLeaf
-      ? "spod-date-display-btn spod-date-display-btn--json"
-      : "spod-leaf-control spod-date-display-btn";
-    if (dispId) {
-      dispBtn.id = dispId;
-    }
-    dispBtn.setAttribute("aria-haspopup", "dialog");
-    dispBtn.setAttribute(
-      "aria-label",
-      "Выбрать дату, формат YYYY-MM-DD. Текущее значение в подписи кнопки."
-    );
-
-    var btn = document.createElement("button");
-    btn.type = "button";
-    btn.className = "spod-date-open-btn spod-date-open-btn--icon";
-    btn.setAttribute("aria-haspopup", "dialog");
-    btn.setAttribute("aria-label", "Открыть календарь");
-    btn.title = "Календарь";
-    /* Компактная иконка календаря (SVG), без текста — подсказка в title и aria-label. */
-    btn.innerHTML =
-      '<svg class="spod-date-open-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">' +
-      '<rect x="3" y="5" width="18" height="16" rx="2" stroke="currentColor" stroke-width="1.85"/>' +
-      '<path d="M3 10h18M8 3V7M16 3V7" stroke="currentColor" stroke-width="1.85" stroke-linecap="round"/>' +
-      "</svg>";
-
-    function syncDisplay() {
-      var v = hidden.value || "";
-      dispBtn.textContent = v || "— нажмите, чтобы выбрать дату —";
-      dispBtn.classList.toggle("spod-date-display-btn--empty", !v);
-    }
-    syncDisplay();
-
-    function openModal() {
-      try {
-        SpodDateModal.open(hidden, syncDisplay);
-      } catch (err) {
-        console.error("spod-date-modal", err);
+    var api = typeof window !== "undefined" ? window.SpodDatePicker : null;
+    if (!api || typeof api.buildShell !== "function") {
+      console.error("Не загружен /static/spod_date_picker.js");
+      var fb = document.createElement("input");
+      fb.type = "text";
+      fb.className = "spod-leaf-control";
+      if (col) {
+        fb.setAttribute("data-col", col);
       }
+      fb.value = initV != null ? String(initV) : "";
+      return fb;
     }
-
-    btn.addEventListener("click", function (e) {
-      e.preventDefault();
-      openModal();
+    return api.buildShell(initV, {
+      column: col,
+      valueAttribute: "data-col",
+      displayId: dispId,
+      isJsonLeaf: !!isJsonLeaf,
     });
-    dispBtn.addEventListener("click", function (e) {
-      e.preventDefault();
-      openModal();
-    });
-
-    row.appendChild(dispBtn);
-    row.appendChild(btn);
-    wrap.appendChild(hidden);
-    wrap.appendChild(row);
-    return wrap;
   }
 
   /** Число строк textarea: из подсказки конфига и/или по длине текста. */
@@ -1055,11 +648,18 @@
       row.className = "json-leaf-row grid-cell";
       row.setAttribute("data-json-path", JSON.stringify(leaf.parts));
       row.setAttribute("data-vtype", leaf.vtype);
-      row.setAttribute("data-filter-text", formatPath(leaf.parts).toLowerCase());
+      {
+        var pathDisp = formatPath(leaf.parts);
+        var uiR = findFieldUi(bootstrap, col, leaf.parts);
+        var labForFilter = uiR && uiR.label != null && String(uiR.label).trim() !== "" ? String(uiR.label) : pathDisp;
+        var descJf =
+          uiR && showDescriptionEnabled(uiR) && uiR.description != null ? String(uiR.description) : "";
+        row.setAttribute("data-filter-text", (pathDisp + " " + labForFilter + " " + descJf).toLowerCase());
+      }
 
       var lab = document.createElement("label");
       lab.className = "json-path-label";
-      lab.textContent = formatPath(leaf.parts);
+      applyFieldUiLabel(bootstrap, lab, col, leaf.parts, formatPath(leaf.parts));
       row.appendChild(lab);
 
       if (leaf.vtype === "empty-array" || leaf.vtype === "empty-object") {
@@ -1112,7 +712,12 @@
           var fmtLab = document.createElement("span");
           fmtLab.className = "muted spod-date-format-hint";
           fmtLab.textContent = " · " + fmtJ;
-          lab.appendChild(fmtLab);
+          var topJ = fieldUiLabelTop(lab);
+          if (topJ) {
+            topJ.appendChild(fmtLab);
+          } else {
+            lab.appendChild(fmtLab);
+          }
           var dispLeaf = leaf.display != null ? String(leaf.display) : "";
           row.appendChild(buildDatePickerShell(dispLeaf, null, null, true));
         } else {
@@ -1210,11 +815,17 @@
     keys.forEach(function (col) {
       var cell = document.createElement("div");
       cell.className = "scalar-cell grid-cell";
-      cell.setAttribute("data-filter-text", col.toLowerCase());
+      {
+        var ui0 = findFieldUi(bootstrap, col, null);
+        var labDisp0 = ui0 && ui0.label != null && String(ui0.label).trim() !== "" ? String(ui0.label) : col;
+        var descF =
+          ui0 && showDescriptionEnabled(ui0) && ui0.description != null ? String(ui0.description) : "";
+        cell.setAttribute("data-filter-text", (col + " " + labDisp0 + " " + descF).toLowerCase());
+      }
       var safeId = "col-" + col.replace(/[^a-zA-Z0-9_]/g, "_");
       var lab = document.createElement("label");
       lab.setAttribute("for", safeId);
-      lab.textContent = col;
+      applyFieldUiLabel(bootstrap, lab, col, null, col);
       var was = document.createElement("div");
       was.className = "was-value is-hidden";
 
@@ -1227,7 +838,12 @@
         var fmtSpan = document.createElement("span");
         fmtSpan.className = "muted spod-date-format-hint";
         fmtSpan.textContent = " · " + fmt;
-        lab.appendChild(fmtSpan);
+        var topD = fieldUiLabelTop(lab);
+        if (topD) {
+          topD.appendChild(fmtSpan);
+        } else {
+          lab.appendChild(fmtSpan);
+        }
         cell.appendChild(lab);
         cell.appendChild(buildDatePickerShell(initV, col, safeId, false));
         cell.appendChild(was);
@@ -1242,7 +858,7 @@
         hidden.value = initV;
         var sel = document.createElement("select");
         sel.className = "spod-enum-select spod-leaf-control";
-        sel.setAttribute("aria-label", col);
+        sel.setAttribute("aria-label", lab.textContent || col);
         var taC = document.createElement("textarea");
         taC.className = "spod-enum-custom spod-leaf-control is-hidden";
         taC.rows = 4;

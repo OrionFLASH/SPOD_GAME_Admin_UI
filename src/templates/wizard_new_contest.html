@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}{{ title }} — SPOD Tournament Admin{% endblock %}
+{% block content %}
+<section class="panel">
+  <h1>{{ title }}</h1>
+  <p class="muted">До финального подтверждения строки листов не создаются; черновик шага сохраняется в таблицу <code>wizard_draft</code> (статус EDIT) при «Далее», «Назад» и по кнопке «Временное сохранение». Поля с * и точкой — из <code>editor_field_ui</code>.</p>
+  <div id="wiz-draft-panel" class="panel wiz-draft-panel is-hidden" aria-live="polite"></div>
+  <div id="wiz-draft-note" class="muted is-hidden"></div>
+  <div id="wiz-error" class="panel panel-warn is-hidden" role="alert" aria-live="polite"></div>
+  <p id="wiz-progress" class="muted"></p>
+  <h2 id="wiz-step-title"></h2>
+  <div class="wiz-actions-top">
+    <button type="button" class="btn btn-secondary" id="wiz-btn-back">Назад</button>
+    <button type="button" class="btn btn-primary" id="wiz-btn-next">Далее</button>
+    <button type="button" class="btn btn-secondary" id="wiz-btn-save-draft">Временное сохранение</button>
+    <button type="button" class="btn btn-ghost" id="wiz-btn-cancel">Отмена</button>
+  </div>
+  <div id="wiz-body" class="wiz-body"></div>
+</section>
+<script type="application/json" id="wizard-schema-json">{{ wizard_schema_json }}</script>
+<script src="/static/spod_date_picker.js"></script>
+<script src="/static/wizard_contest.js" defer></script>
+{% endblock %}

@@ -572,6 +572,102 @@ table.data th {
   color: #4a5f78;
 }
 
+/* Подпись поля: верхняя строка + слот под описание (всегда min-height — выравнивание инпутов в сетке). */
+.spod-field-ui-label-top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 0.2rem 0.45rem;
+}
+
+.spod-field-ui-caption {
+  font-weight: inherit;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+/* Обязательность и запрет пустого: только маркеры, без длинных подписей (* — обязательное поле, точка — нельзя оставлять пустым). */
+.spod-field-ui-signals {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.22rem;
+  flex-shrink: 0;
+  margin-top: 0.06rem;
+  line-height: 1;
+}
+
+.spod-field-req-star {
+  font-size: 0.82em;
+  font-weight: 800;
+  color: #c43d3d;
+  line-height: 1;
+  position: relative;
+  top: -0.12em;
+  letter-spacing: 0;
+}
+
+.spod-field-fill-mark {
+  display: inline-block;
+  width: 0.4rem;
+  height: 0.4rem;
+  min-width: 0.4rem;
+  min-height: 0.4rem;
+  border-radius: 50%;
+  background: linear-gradient(155deg, #d4923a, #a85f18);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.45);
+  flex-shrink: 0;
+}
+
+.wiz-label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--muted);
+  margin-bottom: 0.3rem;
+  word-break: break-word;
+}
+
+/* Пустой слот резервирует место под строку описания, как у соседей с show_description */
+.spod-field-ui-desc-slot {
+  display: block;
+  min-height: calc(0.68rem * 1.38 + 0.12rem);
+  margin-top: 0.12rem;
+}
+
+.spod-field-ui-desc {
+  display: block;
+  margin-top: 0;
+  max-width: 100%;
+  font-size: 0.68rem;
+  font-weight: 400;
+  line-height: 1.38;
+  letter-spacing: 0.01em;
+  color: rgba(74, 95, 120, 0.78);
+}
+
+.scalar-cell label .spod-field-ui-desc {
+  font-family: inherit;
+}
+
+.json-path-label .spod-field-ui-desc-slot {
+  min-height: calc(0.66rem * 1.38 + 0.1rem);
+}
+
+.json-path-label .spod-field-ui-desc {
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-size: 0.66rem;
+  color: rgba(74, 95, 120, 0.72);
+}
+
+/* Резерв под строку метаданных (если понадобится снова); маркеры required / пустое — в .spod-field-ui-signals. */
+.spod-field-ui-meta-slot {
+  display: none;
+}
+
+.spod-field-ui-meta {
+  display: none;
+}
+
 .scalar-cell input,
 .scalar-cell textarea,
 .json-leaf-row input.json-leaf-input,
@@ -918,8 +1014,7 @@ body.spod-date-modal-open {
   min-width: 0;
 }
 
-.scalar-cell label .spod-date-format-hint,
-.json-leaf-row .json-path-label .spod-date-format-hint {
+.spod-field-ui-label-top .spod-date-format-hint {
   font-weight: 500;
   white-space: nowrap;
 }
@@ -1172,4 +1267,75 @@ body.spod-date-modal-open {
   border-radius: 8px;
   white-space: pre-wrap;
   word-break: break-word;
+}
+
+/* Мастер «Создать конкурс»: панель шагов и предпросмотр JSON */
+.wiz-actions-top {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  margin: 0.75rem 0 1rem;
+}
+
+.wiz-body {
+  margin-top: 0.5rem;
+}
+
+.wiz-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.wiz-subpanel {
+  margin-bottom: 1rem;
+}
+
+.wiz-subpanel h3 {
+  margin: 0 0 0.5rem;
+  font-size: 1rem;
+}
+
+.wiz-preview-json {
+  max-height: 28rem;
+  overflow: auto;
+  padding: 0.75rem 1rem;
+  font-size: 0.78rem;
+  line-height: 1.4;
+  background: rgba(255, 255, 255, 0.45);
+  border: 1px solid var(--glass-border);
+  border-radius: 10px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.wiz-preview-actions {
+  margin-top: 1rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.wiz-draft-panel {
+  margin-bottom: 1rem;
+}
+
+.wiz-draft-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  margin: 0.4rem 0;
+}
+
+.wiz-draft-meta {
+  flex: 1 1 14rem;
+  font-size: 0.84rem;
+}
+
+.wiz-draft-note--err {
+  color: #b03030;
 }

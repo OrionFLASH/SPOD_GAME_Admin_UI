@@ -13,12 +13,12 @@ from pathlib import Path
 from typing import Any, Dict, List
 
 from fastapi import Body, FastAPI, HTTPException, Request
-from fastapi.responses import FileResponse, HTMLResponse, RedirectResponse
+from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from markupsafe import Markup, escape
 
-from src import config_validate, consistency, db, editor_config, export_csv, ingest, relations, server_stop, sheet_list_display, spod_json
+from src import config_validate, consistency, db, editor_config, export_csv, ingest, relations, server_stop, sheet_list_display, spod_json, wizard_contest
 
 ROOT = Path(__file__).resolve().parent.parent
 CFG: Dict[str, Any] = {}
@@ -78,6 +78,7 @@ async def lifespan(app: FastAPI):
     CONN = db.open_connection(DB_PATH)
     db.init_schema(CONN)
     db.migrate_data_row_versioning(CONN)
+    db.ensure_wizard_draft_table(CONN)
     cur = CONN.execute("SELECT COUNT(*) FROM sheet")
     if cur.fetchone()[0] == 0:
         counts = ingest.import_all(ROOT, CFG, CONN, clear=True)
@@ -116,6 +117,71 @@ def index(request: Request):
         "index.html",
         {"sheets": sheets, "title": "Панель турниров SPOD"},
     )
+
+
+@app.get("/wizard/new-contest", response_class=HTMLResponse)
+def wizard_new_contest(request: Request):
+    """Мастер пошагового создания конкурса без записи в БД до финального подтверждения."""
+    sch = wizard_contest.build_schema(ROOT, CFG)
+    return templates.TemplateResponse(
+        request,
+        "wizard_new_contest.html",
+        {
+            "title": "Создать конкурс",
+            "wizard_schema_json": _json_for_script_tag(sch),
+        },
+    )
+
+
+@app.post("/wizard/new-contest/commit")
+async def wizard_new_contest_commit(payload: Dict[str, Any] = Body(...)):
+    """Атомарная вставка строк мастера и проверка консистентности."""
+    conn = get_conn()
+    try:
+        res = wizard_contest.commit_wizard(conn, CFG, payload)
+    except ValueError as e:
+        raise HTTPException(400, detail=str(e)) from e
+    rid = int(res.get("contest_row_id") or 0)
+    return RedirectResponse(f"/sheet/CONTEST-DATA/row/{rid}", status_code=303)
+
+
+@app.get("/wizard/new-contest/drafts")
+def wizard_list_drafts():
+    """JSON: незавершённые черновики мастера (статус EDIT в wizard_draft)."""
+    conn = get_conn()
+    rows = wizard_contest.list_wizard_drafts(conn)
+    return JSONResponse(rows)
+
+
+@app.get("/wizard/new-contest/draft/{draft_uuid}")
+def wizard_get_draft(draft_uuid: str):
+    """JSON: одно состояние черновика для возобновления."""
+    conn = get_conn()
+    try:
+        return JSONResponse(wizard_contest.get_wizard_draft(conn, draft_uuid))
+    except ValueError as e:
+        raise HTTPException(404, detail=str(e)) from e
+
+
+@app.put("/wizard/new-contest/draft")
+async def wizard_put_draft(payload: Dict[str, Any] = Body(...)):
+    """Промежуточное сохранение шагов мастера в wizard_draft."""
+    conn = get_conn()
+    try:
+        wizard_contest.upsert_wizard_draft(conn, payload)
+        conn.commit()
+    except ValueError as e:
+        raise HTTPException(400, detail=str(e)) from e
+    return JSONResponse({"ok": True})
+
+
+@app.delete("/wizard/new-contest/draft/{draft_uuid}")
+def wizard_delete_draft(draft_uuid: str):
+    """Удалить черновик (пользователь отказался от незавершённого создания)."""
+    conn = get_conn()
+    wizard_contest.delete_wizard_draft(conn, draft_uuid)
+    conn.commit()
+    return JSONResponse({"ok": True})
 
 
 @app.get("/sheet/{code}", response_class=HTMLResponse)
@@ -220,6 +286,7 @@ def row_detail(request: Request, code: str, row_id: int):
         "fullRow": dict(cells),
         "fieldEnums": editor_config.flatten_field_enums(CFG),
         "editorTextareas": editor_config.flatten_editor_textareas(CFG),
+        "fieldUi": editor_config.flatten_editor_field_ui(CFG),
         "longTextThreshold": int(CFG.get("editor_long_text_threshold", 120)),
     }
     sheet_title = str(spec.get("title") or code)

@@ -3,7 +3,8 @@
 Развёртка настроек редактора из config.json в плоский вид для row_editor.js.
 
 В конфиге допускается группировка по листу: один объект с полем sheet_code и массивом
-rules (перечисления) или hints (размеры textarea), вместо повторения sheet_code в каждой записи.
+rules (перечисления), hints (размеры textarea) или rules в editor_field_ui (подписи и описания полей),
+вместо повторения sheet_code в каждой записи.
 Поддерживается и старый плоский формат (каждый элемент — полное правило с sheet_code).
 """
 
@@ -68,6 +69,41 @@ def flatten_editor_textareas(cfg: Dict[str, Any]) -> List[Dict[str, Any]]:
             for hint in block.get("hints") or []:
                 if isinstance(hint, dict):
                     merged = dict(hint)
+                    merged["sheet_code"] = sc
+                    out.append(merged)
+            continue
+        if "column" in block:
+            out.append(dict(block))
+    return out
+
+
+def flatten_editor_field_ui(cfg: Dict[str, Any]) -> List[Dict[str, Any]]:
+    """
+    Плоский список подписей и описаний полей для UI: {sheet_code, column, label?, description?, show_description?, json_path?}.
+
+    Формат в config.json — как у field_enums: блоки {\"sheet_code\", \"rules\": [ {...}, ... ] }.
+    Поле json_path (массив строк и/или чисел) — для листьев внутри JSON-колонки; без json_path — плоская колонка листа.
+
+    - label: подпись в форме; если пусто — на клиенте подставляется имя колонки или путь.
+    - description: поясняющий текст под подписью поля в UI, если show_description истинно.
+    - show_description: если истинно — description показывается сразу под названием (не во всплывающей подсказке).
+    - required: в мастере и карточке строки — красная «*» слева от подписи (обязательное поле в данных листа), по выводам из CSV.
+    - allows_empty: если false — у подписи оранжевая точка (пустое значение недопустимо); валидация на клиенте и в мастере.
+    """
+    raw = cfg.get("editor_field_ui")
+    if not raw or not isinstance(raw, list):
+        return []
+    out: List[Dict[str, Any]] = []
+    for block in raw:
+        if not isinstance(block, dict):
+            continue
+        sc = block.get("sheet_code")
+        if sc is None:
+            continue
+        if "rules" in block:
+            for rule in block.get("rules") or []:
+                if isinstance(rule, dict):
+                    merged: Dict[str, Any] = dict(rule)
                     merged["sheet_code"] = sc
                     out.append(merged)
             continue

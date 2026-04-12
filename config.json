@@ -1333,5 +1333,2376 @@
       ],
       "primary_key_column": "TOURNAMENT_CODE"
     }
+  ],
+  "editor_field_ui": [
+    {
+      "sheet_code": "CONTEST-DATA",
+      "rules": [
+        {
+          "column": "CONTEST_CODE",
+          "label": "CONTEST_CODE",
+          "description": "CONTEST_CODE",
+          "show_description": false,
+          "required": true,
+          "allows_empty": false
+        },
+        {
+          "column": "FULL_NAME",
+          "label": "FULL_NAME",
+          "description": "FULL_NAME",
+          "show_description": false,
+          "required": true,
+          "allows_empty": false
+        },
+        {
+          "column": "CREATE_DT",
+          "label": "CREATE_DT",
+          "description": "CREATE_DT",
+          "show_description": false,
+          "required": true,
+          "allows_empty": false
+        },
+        {
+          "column": "CLOSE_DT",
+          "label": "CLOSE_DT",
+          "description": "CLOSE_DT",
+          "show_description": false,
+          "required": true,
+          "allows_empty": false
+        },
+        {
+          "column": "BUSINESS_STATUS",
+          "label": "BUSINESS_STATUS",
+          "description": "BUSINESS_STATUS",
+          "show_description": false,
+          "required": true,
+          "allows_empty": false
+        },
+        {
+          "column": "CONTEST_TYPE",
+          "label": "CONTEST_TYPE",
+          "description": "CONTEST_TYPE",
+          "show_description": false,
+          "required": true,
+          "allows_empty": false
+        },
+        {
+          "column": "CONTEST_DESCRIPTION",
+          "label": "CONTEST_DESCRIPTION",
+          "description": "CONTEST_DESCRIPTION",
+          "show_description": false,
+          "required": true,
+          "allows_empty": false
+        },
+        {
+          "column": "SHOW_INDICATOR",
+          "label": "SHOW_INDICATOR",
+          "description": "SHOW_INDICATOR",
+          "show_description": false,
+          "required": true,
+          "allows_empty": false
+        },
+        {
+          "column": "PRODUCT_GROUP",
+          "label": "PRODUCT_GROUP",
+          "description": "PRODUCT_GROUP",
+          "show_description": false,
+          "required": true,
+          "allows_empty": false
+        },
+        {
+          "column": "PRODUCT",
+          "label": "PRODUCT",
+          "description": "PRODUCT",
+          "show_description": false,
+          "required": true,
+          "allows_empty": false
+        },
+        {
+          "column": "CONTEST_SUBJECT",
+          "label": "CONTEST_SUBJECT",
+          "description": "CONTEST_SUBJECT",
+          "show_description": false,
+          "required": true,
+          "allows_empty": false
+        },
+        {
+          "column": "FACTOR_MARK_TYPE",
+          "label": "FACTOR_MARK_TYPE",
+          "description": "FACTOR_MARK_TYPE",
+          "show_description": false,
+          "required": true,
+          "allows_empty": false
+        },
+        {
+          "column": "CONTEST_INDICATOR_METHOD",
+          "label": "CONTEST_INDICATOR_METHOD",
+          "description": "CONTEST_INDICATOR_METHOD",
+          "show_description": false,
+          "required": true,
+          "allows_empty": false
+        },
+        {
+          "column": "CONTEST_FACTOR_METHOD",
+          "label": "CONTEST_FACTOR_METHOD",
+          "description": "CONTEST_FACTOR_METHOD",
+          "show_description": false,
+          "required": true,
+          "allows_empty": false
+        },
+        {
+          "column": "PLAN_METHOD_CODE",
+          "label": "PLAN_METHOD_CODE",
+          "description": "PLAN_METHOD_CODE",
+          "show_description": false,
+          "required": true,
+          "allows_empty": false
+        },
+        {
+          "column": "PLAN_MOD_METOD",
+          "label": "PLAN_MOD_METOD",
+          "description": "PLAN_MOD_METOD",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "PLAN_MOD_VALUE",
+          "label": "PLAN_MOD_VALUE",
+          "description": "PLAN_MOD_VALUE",
+          "show_description": false,
+          "required": true,
+          "allows_empty": false
+        },
+        {
+          "column": "FACTOR_MATCH",
+          "label": "FACTOR_MATCH",
+          "description": "FACTOR_MATCH",
+          "show_description": false,
+          "required": true,
+          "allows_empty": false
+        },
+        {
+          "column": "CONTEST_PERIOD",
+          "label": "CONTEST_PERIOD",
+          "description": "CONTEST_PERIOD",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "TARGET_TYPE",
+          "label": "TARGET_TYPE",
+          "description": "TARGET_TYPE",
+          "show_description": false,
+          "required": true,
+          "allows_empty": false
+        },
+        {
+          "column": "SOURCE_UPD_FREQUENCY",
+          "label": "SOURCE_UPD_FREQUENCY",
+          "description": "SOURCE_UPD_FREQUENCY",
+          "show_description": false,
+          "required": true,
+          "allows_empty": false
+        },
+        {
+          "column": "CALC_TYPE",
+          "label": "CALC_TYPE",
+          "description": "CALC_TYPE",
+          "show_description": false,
+          "required": true,
+          "allows_empty": false
+        },
+        {
+          "column": "BUSINESS_BLOCK",
+          "label": "BUSINESS_BLOCK",
+          "description": "BUSINESS_BLOCK",
+          "show_description": false,
+          "required": true,
+          "allows_empty": false
+        },
+        {
+          "column": "FACT_POST_PROCESSING",
+          "label": "FACT_POST_PROCESSING",
+          "description": "FACT_POST_PROCESSING",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "CONTEST_FEATURE",
+          "json_path": [
+            "accuracy"
+          ],
+          "label": "accuracy",
+          "description": "accuracy",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "CONTEST_FEATURE",
+          "json_path": [
+            "avatarShow"
+          ],
+          "label": "avatarShow",
+          "description": "avatarShow",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "CONTEST_FEATURE",
+          "json_path": [
+            "businessBlock"
+          ],
+          "label": "businessBlock",
+          "description": "businessBlock",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "CONTEST_FEATURE",
+          "json_path": [
+            "businessBlock",
+            0
+          ],
+          "label": "businessBlock[0]",
+          "description": "businessBlock[0]",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "CONTEST_FEATURE",
+          "json_path": [
+            "capacity"
+          ],
+          "label": "capacity",
+          "description": "capacity",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "CONTEST_FEATURE",
+          "json_path": [
+            "feature"
+          ],
+          "label": "feature",
+          "description": "feature",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "CONTEST_FEATURE",
+          "json_path": [
+            "feature",
+            0
+          ],
+          "label": "feature[0]",
+          "description": "feature[0]",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "CONTEST_FEATURE",
+          "json_path": [
+            "feature",
+            1
+          ],
+          "label": "feature[1]",
+          "description": "feature[1]",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "CONTEST_FEATURE",
+          "json_path": [
+            "feature",
+            2
+          ],
+          "label": "feature[2]",
+          "description": "feature[2]",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "CONTEST_FEATURE",
+          "json_path": [
+            "feature",
+            3
+          ],
+          "label": "feature[3]",
+          "description": "feature[3]",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "CONTEST_FEATURE",
+          "json_path": [
+            "feature",
+            4
+          ],
+          "label": "feature[4]",
+          "description": "feature[4]",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "CONTEST_FEATURE",
+          "json_path": [
+            "feature",
+            5
+          ],
+          "label": "feature[5]",
+          "description": "feature[5]",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "CONTEST_FEATURE",
+          "json_path": [
+            "gosbHidden"
+          ],
+          "label": "gosbHidden",
+          "description": "gosbHidden",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "CONTEST_FEATURE",
+          "json_path": [
+            "gosbVisible"
+          ],
+          "label": "gosbVisible",
+          "description": "gosbVisible",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "CONTEST_FEATURE",
+          "json_path": [
+            "helpCodeList",
+            0
+          ],
+          "label": "helpCodeList[0]",
+          "description": "helpCodeList[0]",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "CONTEST_FEATURE",
+          "json_path": [
+            "helpCodeList",
+            1
+          ],
+          "label": "helpCodeList[1]",
+          "description": "helpCodeList[1]",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "CONTEST_FEATURE",
+          "json_path": [
+            "masking"
+          ],
+          "label": "masking",
+          "description": "masking",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "CONTEST_FEATURE",
+          "json_path": [
+            "minNumber"
+          ],
+          "label": "minNumber",
+          "description": "minNumber",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "CONTEST_FEATURE",
+          "json_path": [
+            "momentRewarding"
+          ],
+          "label": "momentRewarding",
+          "description": "momentRewarding",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "CONTEST_FEATURE",
+          "json_path": [
+            "persomanNumberHidden"
+          ],
+          "label": "persomanNumberHidden",
+          "description": "persomanNumberHidden",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "CONTEST_FEATURE",
+          "json_path": [
+            "persomanNumberVisible"
+          ],
+          "label": "persomanNumberVisible",
+          "description": "persomanNumberVisible",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "CONTEST_FEATURE",
+          "json_path": [
+            "persomanNumberVisible",
+            0
+          ],
+          "label": "persomanNumberVisible[0]",
+          "description": "persomanNumberVisible[0]",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "CONTEST_FEATURE",
+          "json_path": [
+            "persomanNumberVisible",
+            1
+          ],
+          "label": "persomanNumberVisible[1]",
+          "description": "persomanNumberVisible[1]",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "CONTEST_FEATURE",
+          "json_path": [
+            "persomanNumberVisible",
+            2
+          ],
+          "label": "persomanNumberVisible[2]",
+          "description": "persomanNumberVisible[2]",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "CONTEST_FEATURE",
+          "json_path": [
+            "persomanNumberVisible",
+            3
+          ],
+          "label": "persomanNumberVisible[3]",
+          "description": "persomanNumberVisible[3]",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "CONTEST_FEATURE",
+          "json_path": [
+            "persomanNumberVisible",
+            4
+          ],
+          "label": "persomanNumberVisible[4]",
+          "description": "persomanNumberVisible[4]",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "CONTEST_FEATURE",
+          "json_path": [
+            "persomanNumberVisible",
+            5
+          ],
+          "label": "persomanNumberVisible[5]",
+          "description": "persomanNumberVisible[5]",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "CONTEST_FEATURE",
+          "json_path": [
+            "persomanNumberVisible",
+            6
+          ],
+          "label": "persomanNumberVisible[6]",
+          "description": "persomanNumberVisible[6]",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "CONTEST_FEATURE",
+          "json_path": [
+            "preferences"
+          ],
+          "label": "preferences",
+          "description": "preferences",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "CONTEST_FEATURE",
+          "json_path": [
+            "preferences",
+            0
+          ],
+          "label": "preferences[0]",
+          "description": "preferences[0]",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "CONTEST_FEATURE",
+          "json_path": [
+            "preferences",
+            1
+          ],
+          "label": "preferences[1]",
+          "description": "preferences[1]",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "CONTEST_FEATURE",
+          "json_path": [
+            "preferences",
+            2
+          ],
+          "label": "preferences[2]",
+          "description": "preferences[2]",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "CONTEST_FEATURE",
+          "json_path": [
+            "preferences",
+            3
+          ],
+          "label": "preferences[3]",
+          "description": "preferences[3]",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "CONTEST_FEATURE",
+          "json_path": [
+            "tbHidden"
+          ],
+          "label": "tbHidden",
+          "description": "tbHidden",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "CONTEST_FEATURE",
+          "json_path": [
+            "tbVisible"
+          ],
+          "label": "tbVisible",
+          "description": "tbVisible",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "CONTEST_FEATURE",
+          "json_path": [
+            "tbVisible",
+            0
+          ],
+          "label": "tbVisible[0]",
+          "description": "tbVisible[0]",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "CONTEST_FEATURE",
+          "json_path": [
+            "tbVisible",
+            1
+          ],
+          "label": "tbVisible[1]",
+          "description": "tbVisible[1]",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "CONTEST_FEATURE",
+          "json_path": [
+            "tbVisible",
+            2
+          ],
+          "label": "tbVisible[2]",
+          "description": "tbVisible[2]",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "CONTEST_FEATURE",
+          "json_path": [
+            "tbVisible",
+            3
+          ],
+          "label": "tbVisible[3]",
+          "description": "tbVisible[3]",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "CONTEST_FEATURE",
+          "json_path": [
+            "tournamentEndMailing"
+          ],
+          "label": "tournamentEndMailing",
+          "description": "tournamentEndMailing",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "CONTEST_FEATURE",
+          "json_path": [
+            "tournamentLikeMailing"
+          ],
+          "label": "tournamentLikeMailing",
+          "description": "tournamentLikeMailing",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "CONTEST_FEATURE",
+          "json_path": [
+            "tournamentListMailing"
+          ],
+          "label": "tournamentListMailing",
+          "description": "tournamentListMailing",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "CONTEST_FEATURE",
+          "json_path": [
+            "tournamentRewardingMailing"
+          ],
+          "label": "tournamentRewardingMailing",
+          "description": "tournamentRewardingMailing",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "CONTEST_FEATURE",
+          "json_path": [
+            "tournamentStartMailing"
+          ],
+          "label": "tournamentStartMailing",
+          "description": "tournamentStartMailing",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "CONTEST_FEATURE",
+          "json_path": [
+            "tournamentTeam"
+          ],
+          "label": "tournamentTeam",
+          "description": "tournamentTeam",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "CONTEST_FEATURE",
+          "json_path": [
+            "typeRewarding"
+          ],
+          "label": "typeRewarding",
+          "description": "typeRewarding",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "CONTEST_FEATURE",
+          "json_path": [
+            "vid"
+          ],
+          "label": "vid",
+          "description": "vid",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        }
+      ]
+    },
+    {
+      "sheet_code": "GROUP",
+      "rules": [
+        {
+          "column": "CONTEST_CODE",
+          "label": "CONTEST_CODE",
+          "description": "CONTEST_CODE",
+          "show_description": false,
+          "required": true,
+          "allows_empty": false
+        },
+        {
+          "column": "GROUP_CODE",
+          "label": "GROUP_CODE",
+          "description": "GROUP_CODE",
+          "show_description": false,
+          "required": true,
+          "allows_empty": false
+        },
+        {
+          "column": "GROUP_VALUE",
+          "label": "GROUP_VALUE",
+          "description": "GROUP_VALUE",
+          "show_description": false,
+          "required": true,
+          "allows_empty": false
+        },
+        {
+          "column": "GET_CALC_METHOD",
+          "label": "GET_CALC_METHOD",
+          "description": "GET_CALC_METHOD",
+          "show_description": false,
+          "required": true,
+          "allows_empty": false
+        },
+        {
+          "column": "GET_CALC_CRITERION",
+          "label": "GET_CALC_CRITERION",
+          "description": "GET_CALC_CRITERION",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "ADD_CALC_CRITERION",
+          "label": "ADD_CALC_CRITERION",
+          "description": "ADD_CALC_CRITERION",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "ADD_CALC_CRITERION_2",
+          "label": "ADD_CALC_CRITERION_2",
+          "description": "ADD_CALC_CRITERION_2",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "BASE_CALC_CODE",
+          "label": "BASE_CALC_CODE",
+          "description": "BASE_CALC_CODE",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        }
+      ]
+    },
+    {
+      "sheet_code": "INDICATOR",
+      "rules": [
+        {
+          "column": "CONTEST_CODE",
+          "label": "CONTEST_CODE",
+          "description": "CONTEST_CODE",
+          "show_description": false,
+          "required": true,
+          "allows_empty": false
+        },
+        {
+          "column": "INDICATOR_CALC_TYPE",
+          "label": "INDICATOR_CALC_TYPE",
+          "description": "INDICATOR_CALC_TYPE",
+          "show_description": false,
+          "required": true,
+          "allows_empty": false
+        },
+        {
+          "column": "INDICATOR_ADD_CALC_TYPE",
+          "label": "INDICATOR_ADD_CALC_TYPE",
+          "description": "INDICATOR_ADD_CALC_TYPE",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "FULL_NAME",
+          "label": "FULL_NAME",
+          "description": "FULL_NAME",
+          "show_description": false,
+          "required": true,
+          "allows_empty": false
+        },
+        {
+          "column": "INDICATOR_CODE",
+          "label": "INDICATOR_CODE",
+          "description": "INDICATOR_CODE",
+          "show_description": false,
+          "required": true,
+          "allows_empty": false
+        },
+        {
+          "column": "INDICATOR_AGG_FUNCTION",
+          "label": "INDICATOR_AGG_FUNCTION",
+          "description": "INDICATOR_AGG_FUNCTION",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "INDICATOR_WEIGHT",
+          "label": "INDICATOR_WEIGHT",
+          "description": "INDICATOR_WEIGHT",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "INDICATOR_MARK_TYPE",
+          "label": "INDICATOR_MARK_TYPE",
+          "description": "INDICATOR_MARK_TYPE",
+          "show_description": false,
+          "required": true,
+          "allows_empty": false
+        },
+        {
+          "column": "INDICATOR_MATCH",
+          "label": "INDICATOR_MATCH",
+          "description": "INDICATOR_MATCH",
+          "show_description": false,
+          "required": true,
+          "allows_empty": false
+        },
+        {
+          "column": "INDICATOR_VALUE",
+          "label": "INDICATOR_VALUE",
+          "description": "INDICATOR_VALUE",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "CONTEST_CRITERION",
+          "label": "CONTEST_CRITERION",
+          "description": "CONTEST_CRITERION",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "CALC_TYPE",
+          "label": "CALC_TYPE",
+          "description": "CALC_TYPE",
+          "show_description": false,
+          "required": true,
+          "allows_empty": false
+        },
+        {
+          "column": "N",
+          "label": "N",
+          "description": "N",
+          "show_description": false,
+          "required": true,
+          "allows_empty": false
+        },
+        {
+          "column": "CONTESTANT_SELECTION",
+          "json_path": [],
+          "label": "(корень)",
+          "description": "(корень)",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "INDICATOR_FILTER",
+          "label": "INDICATOR_FILTER",
+          "description": "INDICATOR_FILTER",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "INDICATOR_OBJECT",
+          "label": "INDICATOR_OBJECT",
+          "description": "INDICATOR_OBJECT",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        }
+      ]
+    },
+    {
+      "sheet_code": "REWARD",
+      "rules": [
+        {
+          "column": "REWARD_CODE",
+          "label": "REWARD_CODE",
+          "description": "REWARD_CODE",
+          "show_description": false,
+          "required": true,
+          "allows_empty": false
+        },
+        {
+          "column": "REWARD_TYPE",
+          "label": "REWARD_TYPE",
+          "description": "REWARD_TYPE",
+          "show_description": false,
+          "required": true,
+          "allows_empty": false
+        },
+        {
+          "column": "FULL_NAME",
+          "label": "FULL_NAME",
+          "description": "FULL_NAME",
+          "show_description": false,
+          "required": true,
+          "allows_empty": false
+        },
+        {
+          "column": "REWARD_DESCRIPTION",
+          "label": "REWARD_DESCRIPTION",
+          "description": "REWARD_DESCRIPTION",
+          "show_description": false,
+          "required": true,
+          "allows_empty": false
+        },
+        {
+          "column": "REWARD_CONDITION",
+          "label": "REWARD_CONDITION",
+          "description": "REWARD_CONDITION",
+          "show_description": false,
+          "required": true,
+          "allows_empty": false
+        },
+        {
+          "column": "REWARD_COST",
+          "label": "REWARD_COST",
+          "description": "REWARD_COST",
+          "show_description": false,
+          "required": true,
+          "allows_empty": false
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": [
+            "bookingRequired"
+          ],
+          "label": "bookingRequired",
+          "description": "bookingRequired",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": [
+            "businessBlock",
+            0
+          ],
+          "label": "businessBlock[0]",
+          "description": "businessBlock[0]",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": [
+            "commingSoon"
+          ],
+          "label": "commingSoon",
+          "description": "commingSoon",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": [
+            "deliveryRequired"
+          ],
+          "label": "deliveryRequired",
+          "description": "deliveryRequired",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": [
+            "feature"
+          ],
+          "label": "feature",
+          "description": "feature",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": [
+            "feature",
+            0
+          ],
+          "label": "feature[0]",
+          "description": "feature[0]",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": [
+            "feature",
+            1
+          ],
+          "label": "feature[1]",
+          "description": "feature[1]",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": [
+            "feature",
+            2
+          ],
+          "label": "feature[2]",
+          "description": "feature[2]",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": [
+            "feature",
+            3
+          ],
+          "label": "feature[3]",
+          "description": "feature[3]",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": [
+            "feature",
+            4
+          ],
+          "label": "feature[4]",
+          "description": "feature[4]",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": [
+            "feature",
+            5
+          ],
+          "label": "feature[5]",
+          "description": "feature[5]",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": [
+            "fileName"
+          ],
+          "label": "fileName",
+          "description": "fileName",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": [
+            "getCondition",
+            "employeeRating",
+            "minCrystalEarnedTotal"
+          ],
+          "label": "getCondition.employeeRating.minCrystalEarnedTotal",
+          "description": "getCondition.employeeRating.minCrystalEarnedTotal",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": [
+            "getCondition",
+            "employeeRating",
+            "minRatingBANK"
+          ],
+          "label": "getCondition.employeeRating.minRatingBANK",
+          "description": "getCondition.employeeRating.minRatingBANK",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": [
+            "getCondition",
+            "employeeRating",
+            "minRatingGOSB"
+          ],
+          "label": "getCondition.employeeRating.minRatingGOSB",
+          "description": "getCondition.employeeRating.minRatingGOSB",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": [
+            "getCondition",
+            "employeeRating",
+            "minRatingTB"
+          ],
+          "label": "getCondition.employeeRating.minRatingTB",
+          "description": "getCondition.employeeRating.minRatingTB",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": [
+            "getCondition",
+            "employeeRating",
+            "seasonCode"
+          ],
+          "label": "getCondition.employeeRating.seasonCode",
+          "description": "getCondition.employeeRating.seasonCode",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": [
+            "getCondition",
+            "nonRewards"
+          ],
+          "label": "getCondition.nonRewards",
+          "description": "getCondition.nonRewards",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": [
+            "getCondition",
+            "nonRewards",
+            0,
+            "nonRewardCode"
+          ],
+          "label": "getCondition.nonRewards[0].nonRewardCode",
+          "description": "getCondition.nonRewards[0].nonRewardCode",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": [
+            "getCondition",
+            "nonRewards",
+            1,
+            "nonRewardCode"
+          ],
+          "label": "getCondition.nonRewards[1].nonRewardCode",
+          "description": "getCondition.nonRewards[1].nonRewardCode",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": [
+            "getCondition",
+            "nonRewards",
+            2,
+            "nonRewardCode"
+          ],
+          "label": "getCondition.nonRewards[2].nonRewardCode",
+          "description": "getCondition.nonRewards[2].nonRewardCode",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": [
+            "getCondition",
+            "nonRewards",
+            3,
+            "nonRewardCode"
+          ],
+          "label": "getCondition.nonRewards[3].nonRewardCode",
+          "description": "getCondition.nonRewards[3].nonRewardCode",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": [
+            "getCondition",
+            "nonRewards",
+            4,
+            "nonRewardCode"
+          ],
+          "label": "getCondition.nonRewards[4].nonRewardCode",
+          "description": "getCondition.nonRewards[4].nonRewardCode",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": [
+            "getCondition",
+            "nonRewards",
+            5,
+            "nonRewardCode"
+          ],
+          "label": "getCondition.nonRewards[5].nonRewardCode",
+          "description": "getCondition.nonRewards[5].nonRewardCode",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": [
+            "getCondition",
+            "nonRewards",
+            6,
+            "nonRewardCode"
+          ],
+          "label": "getCondition.nonRewards[6].nonRewardCode",
+          "description": "getCondition.nonRewards[6].nonRewardCode",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": [
+            "getCondition",
+            "nonRewards",
+            7,
+            "nonRewardCode"
+          ],
+          "label": "getCondition.nonRewards[7].nonRewardCode",
+          "description": "getCondition.nonRewards[7].nonRewardCode",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": [
+            "getCondition",
+            "rewards"
+          ],
+          "label": "getCondition.rewards",
+          "description": "getCondition.rewards",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": [
+            "getCondition",
+            "rewards",
+            0,
+            "amount"
+          ],
+          "label": "getCondition.rewards[0].amount",
+          "description": "getCondition.rewards[0].amount",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": [
+            "getCondition",
+            "rewards",
+            0,
+            "rewardCode"
+          ],
+          "label": "getCondition.rewards[0].rewardCode",
+          "description": "getCondition.rewards[0].rewardCode",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": [
+            "getCondition",
+            "rewards",
+            1,
+            "amount"
+          ],
+          "label": "getCondition.rewards[1].amount",
+          "description": "getCondition.rewards[1].amount",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": [
+            "getCondition",
+            "rewards",
+            1,
+            "rewardCode"
+          ],
+          "label": "getCondition.rewards[1].rewardCode",
+          "description": "getCondition.rewards[1].rewardCode",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": [
+            "helpCodeList",
+            0
+          ],
+          "label": "helpCodeList[0]",
+          "description": "helpCodeList[0]",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": [
+            "helpCodeList",
+            1
+          ],
+          "label": "helpCodeList[1]",
+          "description": "helpCodeList[1]",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": [
+            "hidden"
+          ],
+          "label": "hidden",
+          "description": "hidden",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": [
+            "hiddenRewardList"
+          ],
+          "label": "hiddenRewardList",
+          "description": "hiddenRewardList",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": [
+            "ignoreConditions"
+          ],
+          "label": "ignoreConditions",
+          "description": "ignoreConditions",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": [
+            "ignoreConditions",
+            0
+          ],
+          "label": "ignoreConditions[0]",
+          "description": "ignoreConditions[0]",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": [
+            "ignoreConditions",
+            10
+          ],
+          "label": "ignoreConditions[10]",
+          "description": "ignoreConditions[10]",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": [
+            "ignoreConditions",
+            11
+          ],
+          "label": "ignoreConditions[11]",
+          "description": "ignoreConditions[11]",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": [
+            "ignoreConditions",
+            12
+          ],
+          "label": "ignoreConditions[12]",
+          "description": "ignoreConditions[12]",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": [
+            "ignoreConditions",
+            13
+          ],
+          "label": "ignoreConditions[13]",
+          "description": "ignoreConditions[13]",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": [
+            "ignoreConditions",
+            1
+          ],
+          "label": "ignoreConditions[1]",
+          "description": "ignoreConditions[1]",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": [
+            "ignoreConditions",
+            2
+          ],
+          "label": "ignoreConditions[2]",
+          "description": "ignoreConditions[2]",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": [
+            "ignoreConditions",
+            3
+          ],
+          "label": "ignoreConditions[3]",
+          "description": "ignoreConditions[3]",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": [
+            "ignoreConditions",
+            4
+          ],
+          "label": "ignoreConditions[4]",
+          "description": "ignoreConditions[4]",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": [
+            "ignoreConditions",
+            5
+          ],
+          "label": "ignoreConditions[5]",
+          "description": "ignoreConditions[5]",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": [
+            "ignoreConditions",
+            6
+          ],
+          "label": "ignoreConditions[6]",
+          "description": "ignoreConditions[6]",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": [
+            "ignoreConditions",
+            7
+          ],
+          "label": "ignoreConditions[7]",
+          "description": "ignoreConditions[7]",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": [
+            "ignoreConditions",
+            8
+          ],
+          "label": "ignoreConditions[8]",
+          "description": "ignoreConditions[8]",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": [
+            "ignoreConditions",
+            9
+          ],
+          "label": "ignoreConditions[9]",
+          "description": "ignoreConditions[9]",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": [
+            "isGrouping"
+          ],
+          "label": "isGrouping",
+          "description": "isGrouping",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": [
+            "isGroupingName"
+          ],
+          "label": "isGroupingName",
+          "description": "isGroupingName",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": [
+            "isGroupingTitle"
+          ],
+          "label": "isGroupingTitle",
+          "description": "isGroupingTitle",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": [
+            "isGroupingTultip"
+          ],
+          "label": "isGroupingTultip",
+          "description": "isGroupingTultip",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": [
+            "itemAmount"
+          ],
+          "label": "itemAmount",
+          "description": "itemAmount",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": [
+            "itemFeature"
+          ],
+          "label": "itemFeature",
+          "description": "itemFeature",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": [
+            "itemFeature",
+            0
+          ],
+          "label": "itemFeature[0]",
+          "description": "itemFeature[0]",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": [
+            "itemFeature",
+            1
+          ],
+          "label": "itemFeature[1]",
+          "description": "itemFeature[1]",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": [
+            "itemFeature",
+            2
+          ],
+          "label": "itemFeature[2]",
+          "description": "itemFeature[2]",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": [
+            "itemFeature",
+            3
+          ],
+          "label": "itemFeature[3]",
+          "description": "itemFeature[3]",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": [
+            "itemFeature",
+            4
+          ],
+          "label": "itemFeature[4]",
+          "description": "itemFeature[4]",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": [
+            "itemFeature",
+            5
+          ],
+          "label": "itemFeature[5]",
+          "description": "itemFeature[5]",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": [
+            "itemGroupAmount"
+          ],
+          "label": "itemGroupAmount",
+          "description": "itemGroupAmount",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": [
+            "itemGroupAmount",
+            0,
+            "itemParam"
+          ],
+          "label": "itemGroupAmount[0].itemParam",
+          "description": "itemGroupAmount[0].itemParam",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": [
+            "itemGroupAmount",
+            0,
+            "itemParamAmount"
+          ],
+          "label": "itemGroupAmount[0].itemParamAmount",
+          "description": "itemGroupAmount[0].itemParamAmount",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": [
+            "itemGroupAmount",
+            1,
+            "itemParam"
+          ],
+          "label": "itemGroupAmount[1].itemParam",
+          "description": "itemGroupAmount[1].itemParam",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": [
+            "itemGroupAmount",
+            1,
+            "itemParamAmount"
+          ],
+          "label": "itemGroupAmount[1].itemParamAmount",
+          "description": "itemGroupAmount[1].itemParamAmount",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": [
+            "itemGroupAmount",
+            2,
+            "itemParam"
+          ],
+          "label": "itemGroupAmount[2].itemParam",
+          "description": "itemGroupAmount[2].itemParam",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": [
+            "itemGroupAmount",
+            2,
+            "itemParamAmount"
+          ],
+          "label": "itemGroupAmount[2].itemParamAmount",
+          "description": "itemGroupAmount[2].itemParamAmount",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": [
+            "itemGroupAmount",
+            3,
+            "itemParam"
+          ],
+          "label": "itemGroupAmount[3].itemParam",
+          "description": "itemGroupAmount[3].itemParam",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": [
+            "itemGroupAmount",
+            3,
+            "itemParamAmount"
+          ],
+          "label": "itemGroupAmount[3].itemParamAmount",
+          "description": "itemGroupAmount[3].itemParamAmount",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": [
+            "itemGroupAmount",
+            4,
+            "itemParam"
+          ],
+          "label": "itemGroupAmount[4].itemParam",
+          "description": "itemGroupAmount[4].itemParam",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": [
+            "itemGroupAmount",
+            4,
+            "itemParamAmount"
+          ],
+          "label": "itemGroupAmount[4].itemParamAmount",
+          "description": "itemGroupAmount[4].itemParamAmount",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": [
+            "itemGroupAmount",
+            5,
+            "itemParam"
+          ],
+          "label": "itemGroupAmount[5].itemParam",
+          "description": "itemGroupAmount[5].itemParam",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": [
+            "itemGroupAmount",
+            5,
+            "itemParamAmount"
+          ],
+          "label": "itemGroupAmount[5].itemParamAmount",
+          "description": "itemGroupAmount[5].itemParamAmount",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": [
+            "itemGroupAmount",
+            6,
+            "itemParam"
+          ],
+          "label": "itemGroupAmount[6].itemParam",
+          "description": "itemGroupAmount[6].itemParam",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": [
+            "itemGroupAmount",
+            6,
+            "itemParamAmount"
+          ],
+          "label": "itemGroupAmount[6].itemParamAmount",
+          "description": "itemGroupAmount[6].itemParamAmount",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": [
+            "itemLimitCount"
+          ],
+          "label": "itemLimitCount",
+          "description": "itemLimitCount",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": [
+            "itemLimitPeriod"
+          ],
+          "label": "itemLimitPeriod",
+          "description": "itemLimitPeriod",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": [
+            "itemMinShow"
+          ],
+          "label": "itemMinShow",
+          "description": "itemMinShow",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": [
+            "masterBadge"
+          ],
+          "label": "masterBadge",
+          "description": "masterBadge",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": [
+            "newsType"
+          ],
+          "label": "newsType",
+          "description": "newsType",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": [
+            "nftFlg"
+          ],
+          "label": "nftFlg",
+          "description": "nftFlg",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": [
+            "outstanding"
+          ],
+          "label": "outstanding",
+          "description": "outstanding",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": [
+            "parentRewardCode"
+          ],
+          "label": "parentRewardCode",
+          "description": "parentRewardCode",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": [
+            "persomanNumberVisible"
+          ],
+          "label": "persomanNumberVisible",
+          "description": "persomanNumberVisible",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": [
+            "preferences",
+            0
+          ],
+          "label": "preferences[0]",
+          "description": "preferences[0]",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": [
+            "priority"
+          ],
+          "label": "priority",
+          "description": "priority",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": [
+            "recommendationLevel"
+          ],
+          "label": "recommendationLevel",
+          "description": "recommendationLevel",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": [
+            "refreshOldNews"
+          ],
+          "label": "refreshOldNews",
+          "description": "refreshOldNews",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": [
+            "rewardAgainGlobal"
+          ],
+          "label": "rewardAgainGlobal",
+          "description": "rewardAgainGlobal",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": [
+            "rewardAgainTournament"
+          ],
+          "label": "rewardAgainTournament",
+          "description": "rewardAgainTournament",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": [
+            "rewardRule"
+          ],
+          "label": "rewardRule",
+          "description": "rewardRule",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": [
+            "seasonItem"
+          ],
+          "label": "seasonItem",
+          "description": "seasonItem",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": [
+            "seasonItem",
+            0
+          ],
+          "label": "seasonItem[0]",
+          "description": "seasonItem[0]",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": [
+            "singleNews"
+          ],
+          "label": "singleNews",
+          "description": "singleNews",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": [
+            "tagColor"
+          ],
+          "label": "tagColor",
+          "description": "tagColor",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": [
+            "tagEndDT"
+          ],
+          "label": "tagEndDT",
+          "description": "tagEndDT",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": [
+            "teamNews"
+          ],
+          "label": "teamNews",
+          "description": "teamNews",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": [
+            "tournamentTeam"
+          ],
+          "label": "tournamentTeam",
+          "description": "tournamentTeam",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": [
+            "winCriterion"
+          ],
+          "label": "winCriterion",
+          "description": "winCriterion",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        }
+      ]
+    },
+    {
+      "sheet_code": "REWARD-LINK",
+      "rules": [
+        {
+          "column": "CONTEST_CODE",
+          "label": "CONTEST_CODE",
+          "description": "CONTEST_CODE",
+          "show_description": false,
+          "required": true,
+          "allows_empty": false
+        },
+        {
+          "column": "GROUP_CODE",
+          "label": "GROUP_CODE",
+          "description": "GROUP_CODE",
+          "show_description": false,
+          "required": true,
+          "allows_empty": false
+        },
+        {
+          "column": "REWARD_CODE",
+          "label": "REWARD_CODE",
+          "description": "REWARD_CODE",
+          "show_description": false,
+          "required": true,
+          "allows_empty": false
+        }
+      ]
+    },
+    {
+      "sheet_code": "TOURNAMENT-SCHEDULE",
+      "rules": [
+        {
+          "column": "TOURNAMENT_CODE",
+          "label": "TOURNAMENT_CODE",
+          "description": "TOURNAMENT_CODE",
+          "show_description": false,
+          "required": true,
+          "allows_empty": false
+        },
+        {
+          "column": "PERIOD_TYPE",
+          "label": "PERIOD_TYPE",
+          "description": "PERIOD_TYPE",
+          "show_description": false,
+          "required": true,
+          "allows_empty": false
+        },
+        {
+          "column": "START_DT",
+          "label": "START_DT",
+          "description": "START_DT",
+          "show_description": false,
+          "required": true,
+          "allows_empty": false
+        },
+        {
+          "column": "END_DT",
+          "label": "END_DT",
+          "description": "END_DT",
+          "show_description": false,
+          "required": true,
+          "allows_empty": false
+        },
+        {
+          "column": "RESULT_DT",
+          "label": "RESULT_DT",
+          "description": "RESULT_DT",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "PLAN_PERIOD_START_DT",
+          "label": "PLAN_PERIOD_START_DT",
+          "description": "PLAN_PERIOD_START_DT",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "PLAN_PERIOD_END_DT",
+          "label": "PLAN_PERIOD_END_DT",
+          "description": "PLAN_PERIOD_END_DT",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "CRITERION_MARK_TYPE",
+          "label": "CRITERION_MARK_TYPE",
+          "description": "CRITERION_MARK_TYPE",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "CRITERION_MARK_VALUE",
+          "label": "CRITERION_MARK_VALUE",
+          "description": "CRITERION_MARK_VALUE",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "TOURNAMENT_STATUS",
+          "label": "TOURNAMENT_STATUS",
+          "description": "TOURNAMENT_STATUS",
+          "show_description": false,
+          "required": true,
+          "allows_empty": false
+        },
+        {
+          "column": "CONTEST_CODE",
+          "label": "CONTEST_CODE",
+          "description": "CONTEST_CODE",
+          "show_description": false,
+          "required": true,
+          "allows_empty": false
+        },
+        {
+          "column": "CALC_TYPE",
+          "label": "CALC_TYPE",
+          "description": "CALC_TYPE",
+          "show_description": false,
+          "required": true,
+          "allows_empty": false
+        },
+        {
+          "column": "FILTER_PERIOD_ARR",
+          "label": "FILTER_PERIOD_ARR",
+          "description": "FILTER_PERIOD_ARR",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "TARGET_TYPE",
+          "json_path": [
+            "seasonCode"
+          ],
+          "label": "seasonCode",
+          "description": "seasonCode",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        },
+        {
+          "column": "TRN_INDICATOR_FILTER",
+          "label": "TRN_INDICATOR_FILTER",
+          "description": "TRN_INDICATOR_FILTER",
+          "show_description": false,
+          "required": false,
+          "allows_empty": true
+        }
+      ]
+    }
   ]
 }

@@ -51,6 +51,27 @@ def init_schema(conn: sqlite3.Connection) -> None:
     conn.commit()
 
 
+def ensure_wizard_draft_table(conn: sqlite3.Connection) -> None:
+    """
+    Черновики мастера «Создать конкурс»: статус EDIT, JSON состояния, без вставки в sheet/data_row.
+    """
+    conn.executescript(
+        """
+        CREATE TABLE IF NOT EXISTS wizard_draft (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            draft_uuid TEXT NOT NULL UNIQUE,
+            step_index INTEGER NOT NULL DEFAULT 0,
+            status TEXT NOT NULL DEFAULT 'EDIT',
+            state_json TEXT NOT NULL,
+            contest_code_preview TEXT,
+            updated_at TEXT NOT NULL
+        );
+        CREATE INDEX IF NOT EXISTS idx_wizard_draft_status ON wizard_draft(status, updated_at);
+        """
+    )
+    conn.commit()
+
+
 def migrate_data_row_versioning(conn: sqlite3.Connection) -> None:
     """
     Перенос старой схемы (без is_current / sort_key) на новую.

@@ -4,6 +4,7 @@
 <section class="panel">
   <h1>Панель администратора турниров</h1>
   <p class="muted">Просмотр и правка CSV-выгрузок SPOD. Данные в SQLite; импорт из <code>IN/SPOD</code>.</p>
+  <p><a class="btn btn-primary" href="/wizard/new-contest">Создать конкурс</a></p>
   <form method="post" action="/admin/reimport" onsubmit="return confirm('Перезагрузить все листы из CSV? Несохранённые правки в БД будут потеряны.');">
     <button type="submit" class="btn btn-danger">Переимпорт из IN/SPOD</button>
   </form>
