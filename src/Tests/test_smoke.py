@@ -41,6 +41,7 @@ class SmokeTest(unittest.TestCase):
             rw = client.get("/wizard/new-contest")
             self.assertEqual(rw.status_code, 200)
             self.assertIn("wizard-schema-json", rw.text)
+            self.assertIn("/static/row_editor.js", rw.text)
             self.assertIn("CONTEST-DATA", rw.text)
             rd = client.get("/wizard/new-contest/drafts")
             self.assertEqual(rd.status_code, 200)

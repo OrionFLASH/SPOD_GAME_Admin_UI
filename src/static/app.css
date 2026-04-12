@@ -586,36 +586,40 @@ table.data th {
   min-width: 0;
 }
 
-/* Обязательность и запрет пустого: только маркеры, без длинных подписей (* — обязательное поле, точка — нельзя оставлять пустым). */
+/* Ограничения поля: два независимых бейджа (required и allows_empty из editor_field_ui). */
 .spod-field-ui-signals {
   display: inline-flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 0.22rem;
+  gap: 0.28rem;
   flex-shrink: 0;
-  margin-top: 0.06rem;
-  line-height: 1;
+  margin-top: 0.04rem;
+  line-height: 1.25;
+  max-width: 100%;
 }
 
-.spod-field-req-star {
-  font-size: 0.82em;
-  font-weight: 800;
-  color: #c43d3d;
-  line-height: 1;
-  position: relative;
-  top: -0.12em;
-  letter-spacing: 0;
-}
-
-.spod-field-fill-mark {
+.spod-field-badge {
   display: inline-block;
-  width: 0.4rem;
-  height: 0.4rem;
-  min-width: 0.4rem;
-  min-height: 0.4rem;
-  border-radius: 50%;
-  background: linear-gradient(155deg, #d4923a, #a85f18);
-  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.45);
-  flex-shrink: 0;
+  font-size: 0.62rem;
+  font-weight: 600;
+  line-height: 1.2;
+  padding: 0.1rem 0.32rem;
+  border-radius: 5px;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  cursor: help;
+}
+
+.spod-field-badge--required {
+  color: #7a1c1c;
+  background: rgba(196, 61, 61, 0.14);
+  border: 1px solid rgba(196, 61, 61, 0.38);
+}
+
+.spod-field-badge--noempty {
+  color: #5c4010;
+  background: rgba(212, 146, 58, 0.18);
+  border: 1px solid rgba(168, 95, 24, 0.42);
 }
 
 .wiz-label {
@@ -1103,6 +1107,40 @@ body.spod-date-modal-open {
 
 .json-column-card {
   padding: 0.25rem 0;
+}
+
+/* JSON в мастере: общий редактор на всю ширину сетки шага */
+.wiz-json-editor-mount {
+  width: 100%;
+  min-width: 0;
+}
+
+.scalar-field-grid.wiz-grid .wiz-json-cell--panel {
+  grid-column: 1 / -1;
+}
+
+/* Мастер: составной код r_<CONTEST>[_суффикс] и t_<CONTEST>_#### */
+.wiz-split-code {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem;
+  width: 100%;
+}
+
+.wiz-split-code .wiz-code-prefix {
+  font-family: ui-monospace, "Cascadia Code", monospace;
+  font-size: 0.78rem;
+  white-space: pre-wrap;
+  word-break: break-all;
+  max-width: 100%;
+}
+
+.wiz-split-code .wiz-split-reward-suffix,
+.wiz-split-code .wiz-split-tournament-suffix {
+  flex: 1 1 120px;
+  min-width: 6rem;
+  max-width: 16rem;
 }
 
 .json-column-toolbar {

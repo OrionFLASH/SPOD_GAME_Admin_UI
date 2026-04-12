@@ -86,6 +86,69 @@
     return !(v === false || v === 0 || v === "no" || v === "false");
   }
 
+  /** Бейджи «Обязательно» / «Не пусто» — общая логика с row_editor.js (SpodFieldUiSignals). */
+  function appendWizardConstraintSignals(signals, r) {
+    var api = window.SpodFieldUiSignals;
+    if (api && typeof api.appendConstraintBadges === "function") {
+      api.appendConstraintBadges(signals, r);
+      return;
+    }
+    if (fieldRequired(r)) {
+      var br = document.createElement("span");
+      br.className = "spod-field-badge spod-field-badge--required";
+      br.setAttribute("role", "note");
+      br.setAttribute(
+        "title",
+        "Обязательное поле: его нужно учитывать при заполнении формы (в карточке строки и в мастере)."
+      );
+      br.textContent = "Обязательно";
+      signals.appendChild(br);
+    }
+    if (!fieldAllowsEmpty(r)) {
+      var bn = document.createElement("span");
+      bn.className = "spod-field-badge spod-field-badge--noempty";
+      bn.setAttribute("role", "note");
+      bn.setAttribute(
+        "title",
+        "Пустое значение недопустимо: нужно ввести содержимое; одни пробелы не считаются заполнением."
+      );
+      bn.textContent = "Не пусто";
+      signals.appendChild(bn);
+    }
+  }
+
+  /** Значение по json_path внутри распарсенной ячейки (для проверок мастера). */
+  function getJsonAtPath(obj, parts) {
+    var c = obj;
+    for (var i = 0; i < parts.length; i++) {
+      if (c == null || typeof c !== "object") {
+        return undefined;
+      }
+      c = c[parts[i]];
+    }
+    return c;
+  }
+
+  /** Считаем ли лист JSON «заполненным» для required / allows_empty. */
+  function jsonLeafLooksFilled(v) {
+    if (v === undefined || v === null) {
+      return false;
+    }
+    if (typeof v === "string") {
+      return v.trim() !== "";
+    }
+    if (typeof v === "number" || typeof v === "boolean") {
+      return true;
+    }
+    if (Array.isArray(v)) {
+      return v.length > 0;
+    }
+    if (typeof v === "object") {
+      return Object.keys(v).length > 0;
+    }
+    return true;
+  }
+
   function validateCells(sheetCode, cells) {
     var errs = [];
     var sh = schema.sheets[sheetCode];
@@ -111,6 +174,35 @@
       if (!fieldAllowsEmpty(r0) && raw.trim() === "") {
         errs.push(jc + ": JSON не может быть пустым.");
       }
+      if (!raw.trim()) {
+        return;
+      }
+      var parsedJ;
+      try {
+        parsedJ = JSON.parse(raw);
+      } catch (eJ) {
+        errs.push(jc + ": невалидный JSON.");
+        return;
+      }
+      if (parsedJ === null || typeof parsedJ !== "object" || Array.isArray(parsedJ)) {
+        return;
+      }
+      (schema.fieldUi || []).forEach(function (ru) {
+        if (!ru || ru.sheet_code !== sheetCode || ru.column !== jc || !ruleHasJsonPath(ru)) {
+          return;
+        }
+        var jp = ru.json_path;
+        if (!jp || !jp.length) {
+          return;
+        }
+        var val = getJsonAtPath(parsedJ, jp);
+        if (fieldRequired(ru) && !jsonLeafLooksFilled(val)) {
+          errs.push(jc + " → " + jp.join(".") + ": обязательное поле.");
+        }
+        if (!fieldAllowsEmpty(ru) && !jsonLeafLooksFilled(val)) {
+          errs.push(jc + " → " + jp.join(".") + ": пустое значение недопустимо.");
+        }
+      });
     });
     return errs;
   }
@@ -205,7 +297,43 @@
     }
   }
 
+  /**
+   * Собирает составные поля REWARD_CODE / TOURNAMENT_CODE из префикса (CONTEST_CODE) и суффикса в форме мастера.
+   */
+  function wizSyncSplitCodesInRoot(root) {
+    if (!root || !root.querySelectorAll) {
+      return;
+    }
+    root.querySelectorAll(".wiz-split-reward-code").forEach(function (wrap) {
+      var hid = wrap.querySelector('input[data-wiz-col="REWARD_CODE"]');
+      var sufEl = wrap.querySelector(".wiz-split-reward-suffix");
+      var prefR = wrap.getAttribute("data-prefix") || "";
+      var tot = parseInt(wrap.getAttribute("data-link-total") || "1", 10) || 1;
+      if (!hid || !sufEl) {
+        return;
+      }
+      var s = String(sufEl.value || "").trim();
+      if (tot > 1) {
+        hid.value = s ? prefR + "_" + s : prefR + "_";
+      } else {
+        hid.value = s ? prefR + "_" + s : prefR;
+      }
+    });
+    root.querySelectorAll(".wiz-split-tournament-code").forEach(function (wrap) {
+      var hid = wrap.querySelector('input[data-wiz-col="TOURNAMENT_CODE"]');
+      var sufEl = wrap.querySelector(".wiz-split-tournament-suffix");
+      var prefT = wrap.getAttribute("data-prefix") || "";
+      if (!hid || !sufEl) {
+        return;
+      }
+      var digits = String(sufEl.value || "").replace(/\D/g, "").slice(0, 4);
+      var d4 = digits.length >= 4 ? digits.slice(0, 4) : digits.padStart(4, "0");
+      hid.value = prefT + d4;
+    });
+  }
+
   function collectForm(root, sheetCode) {
+    wizSyncSplitCodesInRoot(root);
     var cells = {};
     root.querySelectorAll("[data-wiz-col]").forEach(function (inp) {
       var c = inp.getAttribute("data-wiz-col");
@@ -214,6 +342,17 @@
       } else {
         cells[c] = inp.value;
       }
+    });
+    root.querySelectorAll("[data-json-column]").forEach(function (box) {
+      var jcol = box.getAttribute("data-json-column");
+      if (
+        !jcol ||
+        !window.SpodJsonEditor ||
+        typeof window.SpodJsonEditor.buildJsonFromFields !== "function"
+      ) {
+        return;
+      }
+      cells[jcol] = window.SpodJsonEditor.buildJsonFromFields(box);
     });
     root.querySelectorAll("textarea[data-wiz-json]").forEach(function (ta) {
       cells[ta.getAttribute("data-wiz-json")] = ta.value;
@@ -235,7 +374,8 @@
     return cells;
   }
 
-  function renderFieldRow(sheetCode, col, val, locked) {
+  function renderFieldRow(sheetCode, col, val, locked, wizMeta) {
+    var meta = wizMeta || {};
     var row = document.createElement("div");
     row.className = "scalar-cell grid-cell wiz-field";
     var isLocked = locked && Object.prototype.hasOwnProperty.call(locked, col);
@@ -248,25 +388,13 @@
     var cap = document.createElement("span");
     cap.className = "spod-field-ui-caption";
     cap.textContent = col;
+    top.appendChild(cap);
     var signals = document.createElement("span");
     signals.className = "spod-field-ui-signals";
-    if (fieldRequired(r)) {
-      var st = document.createElement("span");
-      st.className = "spod-field-req-star";
-      st.setAttribute("aria-hidden", "true");
-      st.textContent = "*";
-      signals.appendChild(st);
-    }
-    if (!fieldAllowsEmpty(r)) {
-      var fillMk = document.createElement("span");
-      fillMk.className = "spod-field-fill-mark";
-      fillMk.setAttribute("aria-hidden", "true");
-      signals.appendChild(fillMk);
-    }
+    appendWizardConstraintSignals(signals, r);
     if (signals.firstChild) {
       top.appendChild(signals);
     }
-    top.appendChild(cap);
     if (dh) {
       var fmtSpan = document.createElement("span");
       fmtSpan.className = "muted spod-date-format-hint";
@@ -292,6 +420,99 @@
       ro.setAttribute("data-wiz-col", col);
       ro.value = locked[col] != null ? String(locked[col]) : "";
       row.appendChild(ro);
+      return row;
+    }
+    /* REWARD-LINK: REWARD_CODE = r_<CONTEST_CODE>[_суффикс]; при нескольких связях суффикс обязателен и разный. */
+    if (sheetCode === "REWARD-LINK" && col === "REWARD_CODE") {
+      var ccR = contestCode();
+      var prefR = "r_" + ccR;
+      var totL = meta.linkRowTotal != null ? meta.linkRowTotal : 1;
+      var ixL = meta.linkRowIndex != null ? meta.linkRowIndex : 0;
+      var wrapR = document.createElement("div");
+      wrapR.className = "wiz-split-code wiz-split-reward-code";
+      wrapR.setAttribute("data-prefix", prefR);
+      wrapR.setAttribute("data-link-total", String(totL));
+      var fullR = String(val != null ? val : "").trim();
+      var sufR = "";
+      if (fullR.indexOf(prefR + "_") === 0) {
+        sufR = fullR.slice((prefR + "_").length);
+      } else if (fullR === prefR) {
+        sufR = "";
+      } else if (fullR.indexOf(prefR) === 0) {
+        sufR = fullR.slice(prefR.length).replace(/^_+/, "");
+      } else {
+        sufR = fullR.replace(/^r_[^_]+_?/, "");
+      }
+      if (totL > 1 && !String(sufR).trim()) {
+        sufR = String(ixL + 1);
+      }
+      var preSpan = document.createElement("span");
+      preSpan.className = "muted wiz-code-prefix";
+      preSpan.textContent = totL > 1 ? prefR + "_" : prefR;
+      var sufInp = document.createElement("input");
+      sufInp.type = "text";
+      sufInp.className = "spod-leaf-control wiz-split-reward-suffix";
+      sufInp.setAttribute("aria-label", "Суффикс REWARD_CODE");
+      sufInp.autocomplete = "off";
+      sufInp.placeholder = totL > 1 ? "суффикс (обязательно)" : "суффикс (необязательно)";
+      sufInp.value = sufR;
+      var hidR = document.createElement("input");
+      hidR.type = "hidden";
+      hidR.setAttribute("data-wiz-col", "REWARD_CODE");
+      hidR.value = fullR || (totL > 1 ? prefR + "_" + sufInp.value : prefR);
+      function syncRw() {
+        wizSyncSplitCodesInRoot(wrapR.parentNode || wrapR);
+      }
+      sufInp.addEventListener("input", syncRw);
+      sufInp.addEventListener("change", syncRw);
+      wrapR.appendChild(preSpan);
+      wrapR.appendChild(sufInp);
+      wrapR.appendChild(hidR);
+      row.appendChild(wrapR);
+      wizSyncSplitCodesInRoot(wrapR.parentNode || wrapR);
+      return row;
+    }
+    /* TOURNAMENT-SCHEDULE: TOURNAMENT_CODE = t_<CONTEST_CODE>_<4 цифры>. */
+    if (sheetCode === "TOURNAMENT-SCHEDULE" && col === "TOURNAMENT_CODE") {
+      var ccT = contestCode();
+      var prefT = "t_" + ccT + "_";
+      var wrapT = document.createElement("div");
+      wrapT.className = "wiz-split-code wiz-split-tournament-code";
+      wrapT.setAttribute("data-prefix", prefT);
+      var fullT = String(val != null ? val : "").trim();
+      var suf4 = "";
+      if (fullT.indexOf(prefT) === 0 && fullT.length >= prefT.length + 4) {
+        suf4 = fullT.slice(-4).replace(/\D/g, "");
+      }
+      if (suf4.length !== 4) {
+        var ixS = meta.scheduleRowIndex != null ? meta.scheduleRowIndex : 0;
+        suf4 = String(1001 + ixS).padStart(4, "0").slice(-4);
+      }
+      var preT = document.createElement("span");
+      preT.className = "muted wiz-code-prefix";
+      preT.textContent = prefT;
+      var sufInpT = document.createElement("input");
+      sufInpT.type = "text";
+      sufInpT.inputMode = "numeric";
+      sufInpT.maxLength = 4;
+      sufInpT.className = "spod-leaf-control wiz-split-tournament-suffix";
+      sufInpT.setAttribute("aria-label", "4 цифры кода турнира");
+      sufInpT.placeholder = "0000";
+      sufInpT.value = suf4;
+      var hidT = document.createElement("input");
+      hidT.type = "hidden";
+      hidT.setAttribute("data-wiz-col", "TOURNAMENT_CODE");
+      hidT.value = prefT + sufInpT.value.replace(/\D/g, "").slice(0, 4).padStart(4, "0");
+      function syncTn() {
+        wizSyncSplitCodesInRoot(wrapT.parentNode || wrapT);
+      }
+      sufInpT.addEventListener("input", syncTn);
+      sufInpT.addEventListener("change", syncTn);
+      wrapT.appendChild(preT);
+      wrapT.appendChild(sufInpT);
+      wrapT.appendChild(hidT);
+      row.appendChild(wrapT);
+      wizSyncSplitCodesInRoot(wrapT.parentNode || wrapT);
       return row;
     }
     var en = findEnum(sheetCode, col);
@@ -369,16 +590,17 @@
     return row;
   }
 
-  function renderSheetForm(sheetCode, cells, locked) {
+  function renderSheetForm(sheetCode, cells, locked, wizMeta) {
     var sh = schema.sheets[sheetCode];
+    var meta = wizMeta || {};
     var grid = document.createElement("div");
     grid.className = "scalar-field-grid wiz-grid";
     (sh.flat_columns || []).forEach(function (col) {
-      grid.appendChild(renderFieldRow(sheetCode, col, cells[col], locked));
+      grid.appendChild(renderFieldRow(sheetCode, col, cells[col], locked, meta));
     });
     (sh.json_columns || []).forEach(function (jc) {
       var row = document.createElement("div");
-      row.className = "scalar-cell grid-cell wiz-field wiz-json-cell";
+      row.className = "scalar-cell grid-cell wiz-field wiz-json-cell wiz-json-cell--panel";
       var lab = document.createElement("label");
       lab.className = "wiz-label";
       var rj = findUi(sheetCode, jc, null);
@@ -387,33 +609,53 @@
       var jcap = document.createElement("span");
       jcap.className = "spod-field-ui-caption";
       jcap.textContent = jc + " (JSON)";
+      jtop.appendChild(jcap);
       var jsig = document.createElement("span");
       jsig.className = "spod-field-ui-signals";
-      if (fieldRequired(rj)) {
-        var jst = document.createElement("span");
-        jst.className = "spod-field-req-star";
-        jst.setAttribute("aria-hidden", "true");
-        jst.textContent = "*";
-        jsig.appendChild(jst);
-      }
-      if (!fieldAllowsEmpty(rj)) {
-        var jfill = document.createElement("span");
-        jfill.className = "spod-field-fill-mark";
-        jfill.setAttribute("aria-hidden", "true");
-        jsig.appendChild(jfill);
-      }
+      appendWizardConstraintSignals(jsig, rj);
       if (jsig.firstChild) {
         jtop.appendChild(jsig);
       }
-      jtop.appendChild(jcap);
       lab.appendChild(jtop);
       row.appendChild(lab);
-      var ta = document.createElement("textarea");
-      ta.className = "spod-leaf-control wiz-json-ta";
-      ta.rows = 10;
-      ta.setAttribute("data-wiz-json", jc);
-      ta.value = cells[jc] != null ? String(cells[jc]) : "{}";
-      row.appendChild(ta);
+      var rawJson = cells[jc] != null ? String(cells[jc]) : "{}";
+      var editorApi = window.SpodJsonEditor;
+      if (editorApi && typeof editorApi.renderJsonColumn === "function") {
+        var mount = document.createElement("div");
+        mount.className = "wiz-json-editor-mount json-column-card";
+        row.appendChild(mount);
+        var parsedJc;
+        var jcOk = true;
+        try {
+          var tr = rawJson.trim();
+          parsedJc = tr ? JSON.parse(tr) : {};
+        } catch (eParse) {
+          jcOk = false;
+          parsedJc = null;
+        }
+        var pseudoBoot = {
+          sheetCode: sheetCode,
+          fieldUi: schema.fieldUi,
+          fieldEnums: schema.fieldEnums,
+          editorTextareas: schema.editorTextareas || [],
+          longTextThreshold: schema.longTextThreshold || 120,
+        };
+        var jcBoot = {
+          column: jc,
+          section_slug: String(jc).replace(/[^a-zA-Z0-9_-]/g, "_"),
+          raw: rawJson,
+          ok: jcOk,
+          parsed: parsedJc,
+        };
+        editorApi.renderJsonColumn(mount, jcBoot, pseudoBoot);
+      } else {
+        var ta = document.createElement("textarea");
+        ta.className = "spod-leaf-control wiz-json-ta";
+        ta.rows = 10;
+        ta.setAttribute("data-wiz-json", jc);
+        ta.value = rawJson;
+        row.appendChild(ta);
+      }
       grid.appendChild(row);
     });
     return grid;
@@ -904,7 +1146,10 @@
         var cc = contestCode();
         state.reward_links = [];
         for (var j = 0; j < n; j++) {
-          state.reward_links.push({ cells: { CONTEST_CODE: cc, GROUP_CODE: ug[j % ug.length] || "", REWARD_CODE: "" } });
+          var rc0 = n > 1 ? "r_" + cc + "_" + (j + 1) : "r_" + cc;
+          state.reward_links.push({
+            cells: { CONTEST_CODE: cc, GROUP_CODE: ug[j % ug.length] || "", REWARD_CODE: rc0 },
+          });
         }
         render();
       });
@@ -926,9 +1171,14 @@
         h.textContent = "Связь " + (ix + 1);
         sec.appendChild(h);
         sec.appendChild(
-          renderSheetForm("REWARD-LINK", ln.cells || {}, {
-            CONTEST_CODE: contestCode(),
-          })
+          renderSheetForm(
+            "REWARD-LINK",
+            ln.cells || {},
+            {
+              CONTEST_CODE: contestCode(),
+            },
+            { linkRowIndex: ix, linkRowTotal: (state.reward_links || []).length }
+          )
         );
         box2.appendChild(sec);
       });
@@ -1024,7 +1274,8 @@
         var cc = contestCode();
         state.schedules = [];
         for (var s = 0; s < state.scheduleCount; s++) {
-          state.schedules.push({ cells: { CONTEST_CODE: cc } });
+          var tSuf = String(1001 + s).padStart(4, "0");
+          state.schedules.push({ cells: { CONTEST_CODE: cc, TOURNAMENT_CODE: "t_" + cc + "_" + tSuf } });
         }
         render();
       });
@@ -1040,7 +1291,14 @@
         var h = document.createElement("h3");
         h.textContent = "Расписание " + (ix + 1);
         sec.appendChild(h);
-        sec.appendChild(renderSheetForm("TOURNAMENT-SCHEDULE", sc.cells || {}, { CONTEST_CODE: contestCode() }));
+        sec.appendChild(
+          renderSheetForm(
+            "TOURNAMENT-SCHEDULE",
+            sc.cells || {},
+            { CONTEST_CODE: contestCode() },
+            { scheduleRowIndex: ix }
+          )
+        );
         box5.appendChild(sec);
       });
     } else if (state.stepIndex === 6) {
@@ -1152,6 +1410,10 @@
         return ["Нужно не меньше " + ug.length + " строк REWARD-LINK."];
       }
       var all2 = [];
+      var nLk = (state.reward_links || []).length;
+      var ccV = contestCode();
+      var prefV = "r_" + ccV;
+      var sufSeen = {};
       host.querySelectorAll("#wiz-link-box .wiz-subpanel").forEach(function (sec, ix) {
         var c = collectForm(sec, "REWARD-LINK");
         c.CONTEST_CODE = contestCode();
@@ -1159,6 +1421,26 @@
         e.forEach(function (x) {
           all2.push("Связь " + (ix + 1) + ": " + x);
         });
+        var rc = String(c.REWARD_CODE || "").trim();
+        if (rc.indexOf(prefV) !== 0) {
+          all2.push("Связь " + (ix + 1) + ": REWARD_CODE должен начинаться с «" + prefV + "».");
+        }
+        if (nLk > 1) {
+          if (rc === prefV || rc.indexOf(prefV + "_") !== 0) {
+            all2.push(
+              "Связь " + (ix + 1) + ": при нескольких связях укажите суффикс после «" + prefV + "_» (разный у каждой строки)."
+            );
+          } else {
+            var sx = rc.slice((prefV + "_").length).trim();
+            if (!sx) {
+              all2.push("Связь " + (ix + 1) + ": суффикс REWARD_CODE не может быть пустым.");
+            }
+            if (Object.prototype.hasOwnProperty.call(sufSeen, sx)) {
+              all2.push("Связь " + (ix + 1) + ": суффикс «" + sx + "» уже используется в другой связи.");
+            }
+            sufSeen[sx] = true;
+          }
+        }
       });
       return all2;
     }
@@ -1196,12 +1478,24 @@
         return ["Сформируйте строки расписания."];
       }
       var all5 = [];
+      var ccSch = contestCode();
+      var prefSch = "t_" + ccSch + "_";
       host.querySelectorAll("#wiz-sch-box .wiz-subpanel").forEach(function (sec, ix) {
         var c = collectForm(sec, "TOURNAMENT-SCHEDULE");
         c.CONTEST_CODE = contestCode();
         validateCells("TOURNAMENT-SCHEDULE", c).forEach(function (x) {
           all5.push("Расписание " + (ix + 1) + ": " + x);
         });
+        var tc = String(c.TOURNAMENT_CODE || "").trim();
+        if (tc.indexOf(prefSch) !== 0 || tc.length !== prefSch.length + 4 || !/^\d{4}$/.test(tc.slice(-4))) {
+          all5.push(
+            "Расписание " +
+              (ix + 1) +
+              ": TOURNAMENT_CODE должен быть в формате «" +
+              prefSch +
+              "####» (ровно четыре цифры после префикса)."
+          );
+        }
       });
       return all5;
     }
@@ -1252,21 +1546,36 @@
       redirect: "manual",
     })
       .then(function (r) {
-        if (r.status === 303 || r.status === 302) {
+        if ([301, 302, 303, 307, 308].indexOf(r.status) !== -1) {
           leaveGuardSuspended = true;
           var loc = r.headers.get("Location");
           if (loc) {
-            window.location.href = loc;
+            /* Сразу после 303 браузер может прервать fetch (AbortError) — откладываем переход. */
+            setTimeout(function () {
+              window.location.assign(loc);
+            }, 0);
+          } else {
+            showErr("Редирект " + r.status + " без заголовка Location.");
           }
           return;
         }
-        return r.json().then(function (j) {
-          var d = (j && j.detail) || r.statusText;
+        return r.text().then(function (txt) {
+          var j = null;
+          try {
+            j = txt ? JSON.parse(txt) : {};
+          } catch (eJ) {
+            showErr("Ответ сервера " + r.status + ": " + (txt || "").slice(0, 600));
+            return;
+          }
+          var d = (j && j.detail !== undefined) ? j.detail : (txt || r.statusText);
           showErr(typeof d === "string" ? d : JSON.stringify(d));
         });
       })
-      .catch(function () {
-        showErr("Ошибка сети.");
+      .catch(function (err) {
+        if (err && (err.name === "AbortError" || (err.message && String(err.message).toLowerCase().indexOf("abort") !== -1))) {
+          return;
+        }
+        showErr("Ошибка сети" + (err && err.message ? ": " + err.message : "."));
       });
   }
 

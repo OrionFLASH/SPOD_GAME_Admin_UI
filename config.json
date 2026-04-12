@@ -96,6 +96,14 @@
           "column": "FULL_NAME",
           "min_rows": 2,
           "max_rows": 10
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": [
+            "tagEndDT"
+          ],
+          "input_type": "date",
+          "storage_format": "YYYY-MM-DD"
         }
       ]
     },
@@ -126,6 +134,16 @@
           "column": "RESULT_DT",
           "input_type": "date",
           "storage_format": "YYYY-MM-DD"
+        },
+        {
+          "column": "PLAN_PERIOD_START_DT",
+          "input_type": "date",
+          "storage_format": "YYYY-MM-DD"
+        },
+        {
+          "column": "PLAN_PERIOD_END_DT",
+          "input_type": "date",
+          "storage_format": "YYYY-MM-DD"
         }
       ]
     }
@@ -144,7 +162,7 @@
         },
         {
           "column": "CONTEST_TYPE",
-          "allow_custom": true,
+          "allow_custom": false,
           "options": [
             "ИНДИВИДУАЛЬНЫЙ",
             "ИНДИВИДУАЛЬНЫЙ НАКОПИТЕЛЬНЫЙ",
@@ -212,7 +230,7 @@
         },
         {
           "column": "CONTEST_FACTOR_METHOD",
-          "allow_custom": true,
+          "allow_custom": false,
           "options": [
             "FACT",
             "FACT0-FACT1",
@@ -230,7 +248,7 @@
         },
         {
           "column": "PLAN_MOD_METOD",
-          "allow_custom": true,
+          "allow_custom": false,
           "options": [
             "",
             "MULTIPLIER"
@@ -272,7 +290,7 @@
         },
         {
           "column": "CONTEST_SUBJECT",
-          "allow_custom": true,
+          "allow_custom": false,
           "options": [
             "EMPLOYEE"
           ]
@@ -314,6 +332,78 @@
           ]
         },
         {
+          "column": "PRODUCT",
+          "allow_custom": true,
+          "options": [
+            "AI-featured",
+            "AI-native",
+            "COM",
+            "CSI",
+            "ESG",
+            "HR",
+            "IT",
+            "RAIT",
+            "SLA",
+            "Алгоритмика",
+            "Бизнес девелопмент",
+            "Брокер",
+            "Все продукты",
+            "Гарантии",
+            "Гемба",
+            "Герой продаж",
+            "ДМС",
+            "Депозиты",
+            "Залоги",
+            "Защита 360",
+            "Индия",
+            "Инициативы",
+            "Интернализация",
+            "Исследование",
+            "Карта влияния",
+            "Клиенты ЮЛ",
+            "Кредиты все",
+            "Кристаллы",
+            "ЛПП",
+            "Лестница доверия",
+            "Лига",
+            "Лизинг",
+            "Манжерок",
+            "Метки",
+            "Мрия",
+            "Новый год",
+            "Образовательные",
+            "Одним сердцем",
+            "Пакеты",
+            "Пассивы все",
+            "Преференции",
+            "Приветственные",
+            "Рейтинг",
+            "Рупии",
+            "Рыночные Продажи",
+            "СБСЖ",
+            "СМР",
+            "СФН",
+            "СберЗдоровье",
+            "СберПраво",
+            "Сверхбонус",
+            "Сезоны",
+            "ТОП-проект",
+            "ТФиДО",
+            "УКП",
+            "Условные сделки",
+            "Участник мастерской РКПК",
+            "ФОТ",
+            "Факторинг",
+            "Хедж кредитов",
+            "ЦКП",
+            "Эффективность",
+            "Эффективность КМ",
+            "брокерское обслуживание",
+            "эквайринг весь",
+            "экосистема все"
+          ]
+        },
+        {
           "column": "CONTEST_FEATURE",
           "json_path": [
             "vid"
@@ -350,7 +440,7 @@
           "json_path": [
             "capacity"
           ],
-          "allow_custom": true,
+          "allow_custom": false,
           "options": [
             "",
             "MILLIONS",
@@ -430,7 +520,8 @@
           ],
           "allow_custom": false,
           "options": [
-            "Y"
+            "Y",
+            "N"
           ]
         },
         {
@@ -451,13 +542,15 @@
           "json_path": [
             "accuracy"
           ],
-          "allow_custom": true,
+          "allow_custom": false,
           "options": [
             "0",
             "1",
             "2",
             "3",
             "5",
+            "6",
+            "7",
             "8"
           ]
         }
@@ -478,7 +571,7 @@
         },
         {
           "column": "GROUP_VALUE",
-          "allow_custom": true,
+          "allow_custom": false,
           "options": [
             "*",
             "[13]",
@@ -560,7 +653,7 @@
         },
         {
           "column": "BASE_CALC_CODE",
-          "allow_custom": true,
+          "allow_custom": false,
           "options": [
             "",
             "BANK",
@@ -603,6 +696,38 @@
             "",
             "DIVIDER",
             "NUMERATOR"
+          ]
+        },
+        {
+          "column": "INDICATOR_CODE",
+          "allow_custom": true,
+          "options": [
+            "CC360_CLIENT_VOLUM_FOT_M",
+            "CC360_NKD_DETAIL_CHKD",
+            "COMPASARS_KKP_ID",
+            "EFFICIENCYARSKKSB_EFF",
+            "EFFICIENCYARSKKSB_OD_YEAR_GROWTH",
+            "EFFICIENCYARSKKSB_OD_YEAR_TEMP",
+            "FUNNELARS_ACTIVE_CUSTOMER_ID",
+            "FUNNELARS_ACTIVE_DEAL_ID",
+            "FUNNELARS_ACTIVE_DEAL_MARGIN",
+            "INCOME",
+            "INSURANCEMIS_BANK_COMMISION",
+            "LEAGUEDEL",
+            "PFIMIS_CUSTOMER_ID",
+            "PPO_ALL",
+            "PPO_IN",
+            "PULMIS_AGRMNT_AMT_RUB",
+            "PULMIS_BALANCE_OUT_RUB",
+            "PULMIS_SDO_IN_RUB",
+            "TRUSTLEVELCC360_LEVEL0_COUNT",
+            "TRUSTLEVELCC360_LEVEL3_COUNT",
+            "TRUSTLEVELCC360_LEVEL4_COUNT",
+            "TRUSTLEVELCC360_LEVEL5_COUNT",
+            "TRUSTLEVELCC360_STAR_COUNT",
+            "TRUSTLEVELCC360_STAR_START_COUNT",
+            "WAIT",
+            "WD"
           ]
         },
         {
@@ -837,7 +962,8 @@
           ],
           "allow_custom": false,
           "options": [
-            "Y"
+            "Y",
+            "N"
           ]
         },
         {
@@ -847,7 +973,8 @@
           ],
           "allow_custom": false,
           "options": [
-            "Y"
+            "Y",
+            "N"
           ]
         },
         {
@@ -887,9 +1014,10 @@
           "json_path": [
             "rewardAgainTournament"
           ],
-          "allow_custom": true,
+          "allow_custom": false,
           "options": [
-            "N"
+            "N",
+            "Y"
           ]
         },
         {
@@ -981,7 +1109,8 @@
           ],
           "allow_custom": false,
           "options": [
-            "Y"
+            "Y",
+            "N"
           ]
         },
         {
@@ -990,7 +1119,7 @@
             "businessBlock",
             0
           ],
-          "allow_custom": true,
+          "allow_custom": false,
           "options": [
             "IMUB",
             "KMFACTORING",
@@ -1009,7 +1138,7 @@
             "employeeRating",
             "seasonCode"
           ],
-          "allow_custom": true,
+          "allow_custom": false,
           "options": [
             "SEASON_2024",
             "SEASON_2025_1",
@@ -1112,18 +1241,6 @@
             "pink-80",
             "purple-80"
           ]
-        },
-        {
-          "column": "REWARD_ADD_DATA",
-          "json_path": [
-            "tagEndDT"
-          ],
-          "allow_custom": true,
-          "options": [
-            "2024-12-31",
-            "2026-06-30",
-            "4000-01-01"
-          ]
         }
       ]
     },
@@ -1143,11 +1260,14 @@
         },
         {
           "column": "CRITERION_MARK_TYPE",
-          "allow_custom": true,
+          "allow_custom": false,
           "options": [
             "",
             ">",
-            ">="
+            ">=",
+            "<",
+            "<=",
+            "="
           ]
         },
         {
@@ -1203,58 +1323,11 @@
           ]
         },
         {
-          "column": "PLAN_PERIOD_START_DT",
-          "allow_custom": true,
-          "options": [
-            "",
-            "2023-06-01",
-            "2023-07-01",
-            "2023-08-01",
-            "2023-09-01",
-            "2023-10-01",
-            "2023-11-01",
-            "2023-12-01",
-            "2024-01-01",
-            "2024-02-01",
-            "2024-03-01",
-            "2024-04-01",
-            "2024-05-01",
-            "2024-06-01",
-            "2024-07-01",
-            "2024-08-01",
-            "2024-09-01",
-            "2024-10-01"
-          ]
-        },
-        {
-          "column": "PLAN_PERIOD_END_DT",
-          "allow_custom": true,
-          "options": [
-            "",
-            "2023-06-30",
-            "2023-07-31",
-            "2023-08-31",
-            "2023-09-30",
-            "2023-10-31",
-            "2023-11-30",
-            "2023-12-31",
-            "2024-02-29",
-            "2024-03-31",
-            "2024-04-30",
-            "2024-05-31",
-            "2024-06-30",
-            "2024-07-31",
-            "2024-08-31",
-            "2024-09-30",
-            "2024-10-31"
-          ]
-        },
-        {
           "column": "TARGET_TYPE",
           "json_path": [
             "seasonCode"
           ],
-          "allow_custom": true,
+          "allow_custom": false,
           "options": [
             "",
             "NON",

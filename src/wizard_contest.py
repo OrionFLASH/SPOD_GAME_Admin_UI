@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import json
 import logging
+import re
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Tuple
@@ -203,6 +204,28 @@ def validate_payload(payload: Dict[str, Any]) -> List[str]:
         if not rc:
             errs.append(f"REWARD-LINK {i + 1}: пустой REWARD_CODE.")
         reward_codes.append(rc)
+    # Формат REWARD_CODE: r_<CONTEST_CODE> или r_<CONTEST_CODE>_<суффикс>; при нескольких связях суффикс обязателен и уникален.
+    if cc and isinstance(links, list) and len(links) > 0:
+        pr = "r_" + cc
+        n_links = len(links)
+        suffixes: List[str] = []
+        for i, rc in enumerate(reward_codes):
+            if not rc.startswith(pr):
+                errs.append(f"REWARD-LINK {i + 1}: REWARD_CODE должен начинаться с «{pr}».")
+                continue
+            if rc != pr and not rc.startswith(pr + "_"):
+                errs.append(f"REWARD-LINK {i + 1}: ожидается «{pr}» или «{pr}_<суффикс>».")
+                continue
+            if rc.startswith(pr + "_"):
+                suf = rc[len(pr) + 1 :].strip()
+                if not suf:
+                    errs.append(f"REWARD-LINK {i + 1}: пустой суффикс после «{pr}_».")
+                else:
+                    suffixes.append(suf)
+            elif n_links > 1 and rc == pr:
+                errs.append(f"REWARD-LINK {i + 1}: при {n_links} связях нужен суффикс: «{pr}_<суффикс>».")
+        if n_links > 1 and len(suffixes) == n_links and len(set(suffixes)) < len(suffixes):
+            errs.append("REWARD-LINK: суффиксы REWARD_CODE должны быть уникальны для каждой строки.")
     uniq_rewards = sorted(set(reward_codes))
     rewards = payload.get("rewards") or []
     if not isinstance(rewards, list):
@@ -231,10 +254,19 @@ def validate_payload(payload: Dict[str, Any]) -> List[str]:
     sch = payload.get("schedules") or []
     if not isinstance(sch, list) or len(sch) < 1:
         errs.append("Нужна хотя бы одна строка TOURNAMENT-SCHEDULE.")
+    # TOURNAMENT_CODE: t_<CONTEST_CODE>_#### (ровно четыре цифры).
+    tourn_pat: re.Pattern[str] | None = None
+    if cc:
+        tourn_pat = re.compile(r"^t_" + re.escape(cc) + r"_\d{4}$")
     for i, sc in enumerate(sch if isinstance(sch, list) else []):
         c = (sc or {}).get("cells") or {}
         if str(c.get("CONTEST_CODE") or "").strip() != cc:
             errs.append(f"SCHEDULE строка {i + 1}: CONTEST_CODE не совпадает с конкурсом.")
+        tc = str(c.get("TOURNAMENT_CODE") or "").strip()
+        if tourn_pat is not None and (not tc or not tourn_pat.match(tc)):
+            errs.append(
+                f"SCHEDULE строка {i + 1}: TOURNAMENT_CODE должен быть в формате «t_{cc}_####» (четыре цифры)."
+            )
     return errs
 
 

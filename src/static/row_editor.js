@@ -1,5 +1,7 @@
 /**
  * Редактор строки: сетка плоских полей, развёртка JSON в параметры, сборка при сохранении.
+ * Пустой объект JSON дополняется шаблоном из field_enums и обязательных json_path в editor_field_ui;
+ * экспорт window.SpodJsonEditor — тот же UI в мастере создания конкурса.
  * Списки допустимых значений и «Задать своё» задаются в config.json (field_enums по листам);
  * календарь для дат — `spod_date_picker.js` + подсказки в editor_textareas (`input_type` date / datepicker);
  * подписи и описания полей — editor_field_ui (развёртка в bootstrap.fieldUi);
@@ -192,6 +194,35 @@
   }
 
   /**
+   * Наглядные подписи вместо «*» и точки: два независимых правила из editor_field_ui.
+   * rule — элемент field_ui или null (ничего не добавляется).
+   */
+  function appendConstraintBadges(signals, rule) {
+    if (fieldUiRequired(rule)) {
+      var br = document.createElement("span");
+      br.className = "spod-field-badge spod-field-badge--required";
+      br.setAttribute("role", "note");
+      br.setAttribute(
+        "title",
+        "Обязательное поле: его нужно учитывать при заполнении формы (в карточке строки и в мастере)."
+      );
+      br.textContent = "Обязательно";
+      signals.appendChild(br);
+    }
+    if (!fieldUiAllowsEmpty(rule)) {
+      var bn = document.createElement("span");
+      bn.className = "spod-field-badge spod-field-badge--noempty";
+      bn.setAttribute("role", "note");
+      bn.setAttribute(
+        "title",
+        "Пустое значение недопустимо: нужно ввести содержимое; одни пробелы не считаются заполнением."
+      );
+      bn.textContent = "Не пусто";
+      signals.appendChild(bn);
+    }
+  }
+
+  /**
    * Подпись поля: верхняя строка (название + опционально формат даты снаружи), слот описания с min-height
    * — чтобы при отсутствии текста описания поля ввода в сетке оставались на одной линии с соседними ячейками.
    */
@@ -217,21 +248,9 @@
     top.appendChild(cap);
     var signals = document.createElement("span");
     signals.className = "spod-field-ui-signals";
-    if (fieldUiRequired(r)) {
-      var star = document.createElement("span");
-      star.className = "spod-field-req-star";
-      star.setAttribute("aria-hidden", "true");
-      star.textContent = "*";
-      signals.appendChild(star);
-    }
-    if (!fieldUiAllowsEmpty(r)) {
-      var fillMk = document.createElement("span");
-      fillMk.className = "spod-field-fill-mark";
-      fillMk.setAttribute("aria-hidden", "true");
-      signals.appendChild(fillMk);
-    }
+    appendConstraintBadges(signals, r);
     if (signals.firstChild) {
-      top.insertBefore(signals, cap);
+      top.appendChild(signals);
     }
     labEl.appendChild(top);
     var slot = document.createElement("span");
@@ -452,6 +471,117 @@
     cur[parts[parts.length - 1]] = val;
   }
 
+  /**
+   * Значение по пути в объекте JSON; отсутствие ключа — undefined (отличие от null в данных).
+   */
+  function getDeepValue(obj, parts) {
+    var c = obj;
+    for (var i = 0; i < parts.length; i++) {
+      if (c == null || typeof c !== "object") {
+        return undefined;
+      }
+      var key = parts[i];
+      if (!(key in c)) {
+        return undefined;
+      }
+      c = c[key];
+    }
+    return c;
+  }
+
+  /**
+   * Первое значение из справочника field_enums для шаблона: если все варианты — числа, в объект кладётся number.
+   */
+  function defaultValueFromEnumRule(rule) {
+    var opts = rule.options || [];
+    if (!opts.length) {
+      return "";
+    }
+    function optVal(o) {
+      if (o !== null && typeof o === "object" && !Array.isArray(o)) {
+        return o.value != null ? o.value : "";
+      }
+      return o;
+    }
+    var first = optVal(opts[0]);
+    if (typeof first === "number") {
+      return first;
+    }
+    var allNumeric = true;
+    for (var i = 0; i < opts.length; i++) {
+      var v = optVal(opts[i]);
+      if (v === "" || v === null) {
+        continue;
+      }
+      if (typeof v !== "string" || isNaN(parseFloat(v)) || !isFinite(parseFloat(v))) {
+        allNumeric = false;
+        break;
+      }
+    }
+    if (allNumeric) {
+      var n0 = parseFloat(String(optVal(opts[0])));
+      return isFinite(n0) ? n0 : String(first);
+    }
+    return first;
+  }
+
+  /**
+   * Дополняет объект корня JSON объявленными в конфиге путями (без перезаписи уже заданных ключей):
+   * — все json_path из field_enums для этой колонки (первое допустимое значение);
+   * — json_path из editor_field_ui с required: true (если нет enum — пустая строка, setDeep создаст вложенность).
+   * Длинные пути обрабатываются раньше коротких, чтобы массивы/объекты создавались корректно.
+   */
+  function mergeDeclaredJsonTemplate(parsed, column, bootstrap) {
+    var out = JSON.parse(JSON.stringify(parsed));
+    var sc = bootstrap.sheetCode;
+    var paths = [];
+    var seen = Object.create(null);
+    function addPath(jp) {
+      if (!jp || jp.length === 0) {
+        return;
+      }
+      var k = JSON.stringify(jp);
+      if (seen[k]) {
+        return;
+      }
+      seen[k] = true;
+      paths.push(jp.slice());
+    }
+    var fe = bootstrap.fieldEnums || [];
+    var ii;
+    for (ii = 0; ii < fe.length; ii++) {
+      var r = fe[ii];
+      if (r && r.sheet_code === sc && r.column === column && ruleHasJsonPath(r)) {
+        addPath(r.json_path);
+      }
+    }
+    var fu = bootstrap.fieldUi || [];
+    for (ii = 0; ii < fu.length; ii++) {
+      var u = fu[ii];
+      if (u && u.sheet_code === sc && u.column === column && ruleHasJsonPath(u) && fieldUiRequired(u)) {
+        addPath(u.json_path);
+      }
+    }
+    paths.sort(function (aParts, bParts) {
+      return bParts.length - aParts.length;
+    });
+    for (ii = 0; ii < paths.length; ii++) {
+      var parts = paths[ii];
+      if (getDeepValue(out, parts) !== undefined) {
+        continue;
+      }
+      var enumRule = findFieldEnum(bootstrap, column, parts);
+      var defL;
+      if (enumRule && enumRule.options && enumRule.options.length) {
+        defL = defaultValueFromEnumRule(enumRule);
+      } else {
+        defL = "";
+      }
+      setDeep(out, parts, defL);
+    }
+    return out;
+  }
+
   function coerceLeafValue(row) {
     if (row.getAttribute("data-json-enum") === "1") {
       var sel = row.querySelector(".spod-enum-select");
@@ -614,6 +744,10 @@
     }
 
     var parsed = jc.parsed;
+    /* Пустая ячейка с валидным «отсутствием» значения — показываем как объект с шаблоном полей. */
+    if (jc.ok && (parsed === null || parsed === undefined)) {
+      parsed = {};
+    }
     var rk = rootKindOf(parsed);
     container.setAttribute("data-root-kind", rk);
 
@@ -626,6 +760,11 @@
         document.dispatchEvent(new Event("spod-editor-change"));
       });
       return;
+    }
+
+    if (rk === "object" && parsed !== null && !Array.isArray(parsed)) {
+      parsed = mergeDeclaredJsonTemplate(parsed, col, bootstrap);
+      jc.parsed = parsed;
     }
 
     var leaves = [];
@@ -1455,4 +1594,19 @@
   } else {
     init();
   }
+
+  /**
+   * API для мастера и внешних страниц: тот же рендер JSON-колонки, что и в карточке строки.
+   */
+  window.SpodJsonEditor = {
+    renderJsonColumn: renderJsonColumn,
+    buildJsonFromFields: buildJsonFromFields,
+    normalizeJsonCell: normalizeJsonCell,
+    mergeDeclaredJsonTemplate: mergeDeclaredJsonTemplate,
+  };
+
+  /** Общие бейджи ограничений для мастера (те же правила, что в applyFieldUiLabel). */
+  window.SpodFieldUiSignals = {
+    appendConstraintBadges: appendConstraintBadges,
+  };
 })();

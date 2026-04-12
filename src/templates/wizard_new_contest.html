@@ -3,7 +3,7 @@
 {% block content %}
 <section class="panel">
   <h1>{{ title }}</h1>
-  <p class="muted">До финального подтверждения строки листов не создаются; черновик шага сохраняется в таблицу <code>wizard_draft</code> (статус EDIT) при «Далее», «Назад» и по кнопке «Временное сохранение». Поля с * и точкой — из <code>editor_field_ui</code>.</p>
+  <p class="muted">До финального подтверждения строки листов не создаются; черновик шага сохраняется в таблицу <code>wizard_draft</code> (статус EDIT) при «Далее», «Назад» и по кнопке «Временное сохранение». Подписи к полям и бейджи ограничений — из <code>editor_field_ui</code> (наведите на бейдж за пояснением).</p>
   <div id="wiz-draft-panel" class="panel wiz-draft-panel is-hidden" aria-live="polite"></div>
   <div id="wiz-draft-note" class="muted is-hidden"></div>
   <div id="wiz-error" class="panel panel-warn is-hidden" role="alert" aria-live="polite"></div>
@@ -19,5 +19,7 @@
 </section>
 <script type="application/json" id="wizard-schema-json">{{ wizard_schema_json }}</script>
 <script src="/static/spod_date_picker.js"></script>
+{# row_editor.js: общий рендер JSON-колонок (по полям / сырой JSON) и window.SpodJsonEditor для мастера. #}
+<script src="/static/row_editor.js" defer></script>
 <script src="/static/wizard_contest.js" defer></script>
 {% endblock %}

@@ -141,6 +141,10 @@ async def wizard_new_contest_commit(payload: Dict[str, Any] = Body(...)):
         res = wizard_contest.commit_wizard(conn, CFG, payload)
     except ValueError as e:
         raise HTTPException(400, detail=str(e)) from e
+    except Exception as e:
+        # Исключения БД и пр.: отдаём JSON, чтобы fetch на клиенте не падал на разборе HTML.
+        logging.exception("wizard_new_contest_commit")
+        raise HTTPException(500, detail="Ошибка при создании: " + str(e)[:500]) from e
     rid = int(res.get("contest_row_id") or 0)
     return RedirectResponse(f"/sheet/CONTEST-DATA/row/{rid}", status_code=303)
 
