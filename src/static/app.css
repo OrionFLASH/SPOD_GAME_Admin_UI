@@ -572,6 +572,33 @@ table.data th {
   color: #4a5f78;
 }
 
+/* Массив скаляров (json_scalar_array): подпись одна, значения — список строк с кнопками. */
+.json-scalar-array-host .json-scalar-array-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.json-scalar-array-line {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.4rem;
+}
+
+.json-scalar-array-line .json-scalar-array-item {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.json-scalar-array-line .js-json-scalar-array-remove {
+  flex-shrink: 0;
+  margin-top: 0.12rem;
+}
+
+.json-scalar-array-host .js-json-scalar-array-add {
+  align-self: flex-start;
+}
+
 /* Подпись поля: верхняя строка + слот под описание (всегда min-height — выравнивание инпутов в сетке). */
 .spod-field-ui-label-top {
   display: flex;

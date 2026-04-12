@@ -91,6 +91,78 @@
           "column": "CLOSE_DT",
           "input_type": "date",
           "storage_format": "YYYY-MM-DD"
+        },
+        {
+          "column": "CONTEST_FEATURE",
+          "json_path": [
+            "persomanNumberVisible"
+          ],
+          "json_scalar_array": true,
+          "min_rows": 2,
+          "max_rows": 8
+        },
+        {
+          "column": "CONTEST_FEATURE",
+          "json_path": [
+            "persomanNumberHidden"
+          ],
+          "json_scalar_array": true,
+          "min_rows": 2,
+          "max_rows": 8
+        },
+        {
+          "column": "CONTEST_FEATURE",
+          "json_path": [
+            "gosbVisible"
+          ],
+          "json_scalar_array": true,
+          "min_rows": 2,
+          "max_rows": 8
+        },
+        {
+          "column": "CONTEST_FEATURE",
+          "json_path": [
+            "gosbHidden"
+          ],
+          "json_scalar_array": true,
+          "min_rows": 2,
+          "max_rows": 8
+        },
+        {
+          "column": "CONTEST_FEATURE",
+          "json_path": [
+            "tbVisible"
+          ],
+          "json_scalar_array": true,
+          "min_rows": 2,
+          "max_rows": 8
+        },
+        {
+          "column": "CONTEST_FEATURE",
+          "json_path": [
+            "tbHidden"
+          ],
+          "json_scalar_array": true,
+          "min_rows": 2,
+          "max_rows": 8
+        },
+        {
+          "column": "CONTEST_FEATURE",
+          "json_path": [
+            "feature"
+          ],
+          "json_scalar_array": true,
+          "min_rows": 2,
+          "max_rows": 10
+        },
+        {
+          "column": "CONTEST_FEATURE",
+          "json_path": [
+            "businessBlock"
+          ],
+          "json_scalar_array": true,
+          "min_rows": 2,
+          "max_rows": 8
         }
       ]
     },
@@ -114,6 +186,62 @@
           ],
           "input_type": "date",
           "storage_format": "YYYY-MM-DD"
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": [
+            "feature"
+          ],
+          "json_scalar_array": true,
+          "min_rows": 2,
+          "max_rows": 10
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": [
+            "itemFeature"
+          ],
+          "json_scalar_array": true,
+          "min_rows": 2,
+          "max_rows": 10
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": [
+            "persomanNumberVisible"
+          ],
+          "json_scalar_array": true,
+          "min_rows": 2,
+          "max_rows": 8
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": [
+            "getCondition",
+            "rewards"
+          ],
+          "json_scalar_array": true,
+          "min_rows": 2,
+          "max_rows": 12
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": [
+            "getCondition",
+            "nonRewards"
+          ],
+          "json_scalar_array": true,
+          "min_rows": 2,
+          "max_rows": 12
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": [
+            "ignoreConditions"
+          ],
+          "json_scalar_array": true,
+          "min_rows": 2,
+          "max_rows": 12
         }
       ]
     },

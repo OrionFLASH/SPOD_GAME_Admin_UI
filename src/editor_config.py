@@ -52,6 +52,11 @@ def flatten_editor_textareas(cfg: Dict[str, Any]) -> List[Dict[str, Any]]:
     Дополнительно для дат (см. row_editor.js): input_type date или date_picker true — календарь HTML;
     storage_format (например YYYY-MM-DD) — подпись в UI, в ячейку пишется строка в формате ISO.
 
+    Массив примитивов в JSON (строки/числа/boolean): json_scalar_array true, json_path — путь к **самому**
+    массиву (не к элементу с индексом); min_rows/max_rows — высота textarea для каждой строки элемента;
+    array_allows_empty — можно ли сохранить [] (по умолчанию да); array_max_items — максимум элементов
+    (если не задано — без ограничения).
+
     Новый формат: sheet_code и массив hints с полями column, min_rows, input_type и т.д.
     Устаревший: один объект на строку с полем column без массива hints.
     """

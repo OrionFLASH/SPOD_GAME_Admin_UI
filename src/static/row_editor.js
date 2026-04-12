@@ -6,6 +6,7 @@
  * Списки допустимых значений и «Задать своё» задаются в config.json (field_enums по листам);
  * календарь для дат — `spod_date_picker.js` + подсказки в editor_textareas (`input_type` date / datepicker);
  * подписи и описания полей — editor_field_ui (развёртка в bootstrap.fieldUi);
+ * массивы примитивов в JSON — подсказки editor_textareas с json_scalar_array и json_path на корень массива;
  * в bootstrap приходят плоские списки (развёртка на сервере).
  */
 (function () {
@@ -107,6 +108,16 @@
 
   /** Есть ли у листа непустое значение (чтобы показать поле, не предусмотренное для типа). */
   function rewardAddDataLeafHasMeaningfulValue(leaf) {
+    if (leaf.vtype === "json-scalar-array") {
+      var ai = leaf.arrayItems || [];
+      var zi = 0;
+      for (zi = 0; zi < ai.length; zi++) {
+        if (String(ai[zi] != null ? ai[zi] : "").trim() !== "") {
+          return true;
+        }
+      }
+      return false;
+    }
     if (leaf.vtype === "empty-array" || leaf.vtype === "empty-object") {
       return false;
     }
@@ -216,6 +227,9 @@
       if (api && typeof api.hintIsDate === "function" && api.hintIsDate(h)) {
         continue;
       }
+      if (truthyJsonScalarArrayHint(h)) {
+        continue;
+      }
       if (!ruleHasJsonPath(h)) {
         if (jParts === null) {
           return h;
@@ -225,6 +239,71 @@
       }
     }
     return null;
+  }
+
+  /** Флаг «массив скаляров» в editor_textareas (json_scalar_array). */
+  function truthyJsonScalarArrayHint(h) {
+    return (
+      h &&
+      (h.json_scalar_array === true ||
+        h.json_scalar_array === 1 ||
+        h.json_scalar_array === "yes" ||
+        h.json_scalar_array === "true")
+    );
+  }
+
+  /**
+   * Подсказка editor_textareas: массив примитивов (строка/число/boolean) по пути к самому массиву.
+   * Опционально: array_max_items (число), array_allows_empty (по умолчанию true).
+   */
+  function jsonScalarArrayHintForPath(bootstrap, column, pathToArray) {
+    if (!bootstrap || !pathToArray || !pathToArray.length) {
+      return null;
+    }
+    var list = bootstrap.editorTextareas || [];
+    var sc = bootstrap.sheetCode;
+    var j = 0;
+    for (j = 0; j < list.length; j++) {
+      var h = list[j];
+      if (h.sheet_code !== sc || h.column !== column || !ruleHasJsonPath(h)) {
+        continue;
+      }
+      if (!truthyJsonScalarArrayHint(h)) {
+        continue;
+      }
+      if (partsMatchJsonPath(pathToArray, h.json_path)) {
+        return h;
+      }
+    }
+    return null;
+  }
+
+  /** Массив непустой и каждый элемент — null или примитив (не объект). */
+  function isPrimitiveScalarArray(arr) {
+    if (!Array.isArray(arr) || !arr.length) {
+      return false;
+    }
+    var i = 0;
+    for (i = 0; i < arr.length; i++) {
+      var x = arr[i];
+      var t = typeof x;
+      if (x !== null && t !== "string" && t !== "number" && t !== "boolean") {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  /** Путь вида [..., i] — индекс в массиве с корнем, для которого задан json_scalar_array. */
+  function jsonPathIsIndexedUnderScalarArrayRoot(bootstrap, column, parts) {
+    if (!parts || parts.length < 2) {
+      return false;
+    }
+    var last = parts[parts.length - 1];
+    if (typeof last !== "number") {
+      return false;
+    }
+    return !!jsonScalarArrayHintForPath(bootstrap, column, parts.slice(0, -1));
   }
 
   /**
@@ -250,6 +329,9 @@
             h.date_picker === 1 ||
             h.date_picker === "yes";
       if (!isDate) {
+        continue;
+      }
+      if (truthyJsonScalarArrayHint(h)) {
         continue;
       }
       if (!ruleHasJsonPath(h)) {
@@ -537,7 +619,9 @@
     });
   }
 
-  function flattenLeaves(value, pathParts, out) {
+  function flattenLeaves(value, pathParts, out, bootstrap, column) {
+    var boot = bootstrap;
+    var col = column;
     if (value === null) {
       out.push({ parts: pathParts.slice(), vtype: "null", display: "" });
       return;
@@ -552,12 +636,34 @@
       return;
     }
     if (Array.isArray(value)) {
+      if (
+        boot &&
+        col &&
+        pathParts.length &&
+        jsonScalarArrayHintForPath(boot, col, pathParts) &&
+        (value.length === 0 || isPrimitiveScalarArray(value))
+      ) {
+        out.push({
+          parts: pathParts.slice(),
+          vtype: "json-scalar-array",
+          arrayItems: value.map(function (x) {
+            return x;
+          }),
+        });
+        return;
+      }
       if (value.length === 0) {
-        out.push({ parts: pathParts.slice(), vtype: "empty-array", display: "" });
+        /* Пустой [] без json_scalar_array: один слот […, 0] (см. editor_textareas). */
+        out.push({
+          parts: pathParts.concat(0),
+          vtype: "string",
+          display: "",
+          fromEmptyArrayPlaceholder: true,
+        });
         return;
       }
       value.forEach(function (item, i) {
-        flattenLeaves(item, pathParts.concat(i), out);
+        flattenLeaves(item, pathParts.concat(i), out, boot, col);
       });
       return;
     }
@@ -567,7 +673,7 @@
       return;
     }
     keys.forEach(function (k) {
-      flattenLeaves(value[k], pathParts.concat(k), out);
+      flattenLeaves(value[k], pathParts.concat(k), out, boot, col);
     });
   }
 
@@ -703,6 +809,9 @@
           continue;
         }
       }
+      if (jsonPathIsIndexedUnderScalarArrayRoot(bootstrap, column, parts)) {
+        continue;
+      }
       if (getDeepValue(out, parts) !== undefined) {
         continue;
       }
@@ -795,7 +904,8 @@
     }
 
     var leaves = container.querySelectorAll(".json-leaf-row[data-json-path]");
-    if (leaves.length === 0) {
+    var scalarHosts = container.querySelectorAll(".json-leaf-row[data-json-scalar-array-host='1']");
+    if (leaves.length === 0 && scalarHosts.length === 0) {
       if (rk === "array") {
         return "[]";
       }
@@ -823,14 +933,53 @@
       root = {};
     }
 
+    var emptyArrayParentsToRestore = [];
+
     leaves.forEach(function (row) {
       var vt3 = row.getAttribute("data-vtype");
       if (vt3 === "empty-array" || vt3 === "empty-object") {
         return;
       }
       var parts = JSON.parse(row.getAttribute("data-json-path"));
+      if (row.getAttribute("data-spod-empty-array-slot") === "1") {
+        var valSlot = coerceLeafValue(row);
+        if (valSlot === "" || valSlot === null) {
+          if (parts.length > 0) {
+            emptyArrayParentsToRestore.push(parts.slice(0, parts.length - 1));
+          }
+          return;
+        }
+      }
       var val = coerceLeafValue(row);
       setDeep(root, parts, val);
+    });
+
+    /* Пустой массив из копии БД: слот не трогали — сохраняем [] вместо отсутствия ключа. */
+    for (var pi = 0; pi < emptyArrayParentsToRestore.length; pi++) {
+      var par = emptyArrayParentsToRestore[pi];
+      if (getDeepValue(root, par) === undefined) {
+        setDeep(root, par, []);
+      }
+    }
+
+    /* Массивы скаляров (json_scalar_array): при нуле строк ввода — явно []. */
+    scalarHosts.forEach(function (host) {
+      var bp = host.getAttribute("data-json-base-path");
+      if (!bp) {
+        return;
+      }
+      var baseParts;
+      try {
+        baseParts = JSON.parse(bp);
+      } catch (eH) {
+        return;
+      }
+      if (!baseParts || !baseParts.length) {
+        return;
+      }
+      if (getDeepValue(root, baseParts) === undefined) {
+        setDeep(root, baseParts, []);
+      }
     });
 
     return JSON.stringify(root);
@@ -904,7 +1053,7 @@
     }
 
     var leaves = [];
-    flattenLeaves(parsed, [], leaves);
+    flattenLeaves(parsed, [], leaves, bootstrap, col);
     leaves = filterRewardAddDataLeaves(leaves, col, bootstrap);
 
     var grid = document.createElement("div");
@@ -919,149 +1068,449 @@
 
     var thr = (bootstrap && bootstrap.longTextThreshold) || 120;
 
-    leaves.forEach(function (leaf) {
-      var row = document.createElement("div");
-      row.className = "json-leaf-row grid-cell";
-      row.setAttribute("data-json-path", JSON.stringify(leaf.parts));
-      row.setAttribute("data-vtype", leaf.vtype);
-      {
-        var pathDisp = formatPath(leaf.parts);
-        var uiR = findFieldUi(bootstrap, col, leaf.parts);
-        var labForFilter = uiR && uiR.label != null && String(uiR.label).trim() !== "" ? String(uiR.label) : pathDisp;
-        var descJf =
-          uiR && showDescriptionEnabled(uiR) && uiR.description != null ? String(uiR.description) : "";
-        row.setAttribute("data-filter-text", (pathDisp + " " + labForFilter + " " + descJf).toLowerCase());
+    /** Перенумерация индексов в data-json-path у строк массива скаляров после вставки/удаления. */
+    function reindexJsonScalarArrayItems(host) {
+      var bpRaw = host.getAttribute("data-json-base-path");
+      if (!bpRaw) {
+        return;
       }
+      var baseParts;
+      try {
+        baseParts = JSON.parse(bpRaw);
+      } catch (eRe) {
+        return;
+      }
+      var nodes = host.querySelectorAll(".json-scalar-array-item[data-json-path]");
+      var ix;
+      for (ix = 0; ix < nodes.length; ix++) {
+        nodes[ix].setAttribute("data-json-path", JSON.stringify(baseParts.concat(ix)));
+      }
+    }
+
+    function jsonScalarArrayHostAllowsEmpty(host) {
+      return host.getAttribute("data-array-allows-empty") !== "0";
+    }
+
+    function jsonScalarArrayHostMaxItems(host) {
+      var m = host.getAttribute("data-array-max-items");
+      if (m == null || m === "") {
+        return null;
+      }
+      var n = parseInt(m, 10);
+      return isFinite(n) && n > 0 ? n : null;
+    }
+
+    function updateJsonScalarArrayAddButton(host) {
+      var btn = host.querySelector(".js-json-scalar-array-add");
+      if (!btn) {
+        return;
+      }
+      var maxN = jsonScalarArrayHostMaxItems(host);
+      var n = host.querySelectorAll(".json-scalar-array-item[data-json-path]").length;
+      if (maxN != null && n >= maxN) {
+        btn.disabled = true;
+      } else {
+        btn.disabled = false;
+      }
+    }
+
+    /** Тип элемента примитивного массива для атрибута data-vtype (как у обычных листьев). */
+    function vtypeForScalarArrayElement(val) {
+      if (val === null) {
+        return "null";
+      }
+      var t = typeof val;
+      if (t === "number" || t === "boolean" || t === "string") {
+        return t;
+      }
+      return "string";
+    }
+
+    function displayForScalarArrayElement(val, vtype) {
+      if (vtype === "boolean") {
+        return val ? "1" : "";
+      }
+      if (val === null || val === undefined) {
+        return "";
+      }
+      return String(val);
+    }
+
+    /**
+     * Одна группа UI: массив примитивов по json_scalar_array (хост без data-json-path, строки — с индексами).
+     */
+    function appendOneJsonScalarArrayHost(grid, leaf, bootstrapLocal, colLocal, thrLocal) {
+      var basePath = leaf.parts || [];
+      var arrayHint = jsonScalarArrayHintForPath(bootstrapLocal, colLocal, basePath) || {};
+      var maxRaw = arrayHint.array_max_items;
+      var maxN =
+        typeof maxRaw === "number" && maxRaw > 0
+          ? maxRaw
+          : (function () {
+              var p = parseInt(maxRaw, 10);
+              return isFinite(p) && p > 0 ? p : null;
+            })();
+      var allowsEmpty = !(
+        arrayHint.array_allows_empty === false ||
+        arrayHint.array_allows_empty === 0 ||
+        arrayHint.array_allows_empty === "false" ||
+        arrayHint.array_allows_empty === "no"
+      );
+
+      var items = Array.isArray(leaf.arrayItems) ? leaf.arrayItems.slice() : [];
+      if (items.length === 0 && !allowsEmpty) {
+        items.push("");
+      }
+
+      var pathDisp = formatPath(basePath);
+      var uiR = findFieldUi(bootstrapLocal, colLocal, basePath);
+      var labForFilter =
+        uiR && uiR.label != null && String(uiR.label).trim() !== "" ? String(uiR.label) : pathDisp;
+      var descJf =
+        uiR && showDescriptionEnabled(uiR) && uiR.description != null ? String(uiR.description) : "";
+      var filterText = (pathDisp + " " + labForFilter + " " + descJf).toLowerCase();
+
+      var host = document.createElement("div");
+      host.className = "json-leaf-row json-scalar-array-host grid-cell";
+      host.setAttribute("data-json-scalar-array-host", "1");
+      host.setAttribute("data-json-base-path", JSON.stringify(basePath));
+      host.setAttribute("data-vtype", "json-scalar-array");
+      host.setAttribute("data-array-allows-empty", allowsEmpty ? "1" : "0");
+      if (maxN != null) {
+        host.setAttribute("data-array-max-items", String(maxN));
+      }
+      host.setAttribute("data-filter-text", filterText);
 
       var lab = document.createElement("label");
       lab.className = "json-path-label";
-      applyFieldUiLabel(bootstrap, lab, col, leaf.parts, formatPath(leaf.parts));
-      row.appendChild(lab);
+      applyFieldUiLabel(bootstrapLocal, lab, colLocal, basePath, pathDisp);
+      host.appendChild(lab);
 
-      if (leaf.vtype === "empty-array" || leaf.vtype === "empty-object") {
-        var span = document.createElement("span");
-        span.className = "muted";
-        span.textContent = leaf.vtype === "empty-array" ? "(пустой массив)" : "(пустой объект)";
-        row.appendChild(span);
-      } else if (leaf.vtype === "boolean") {
-        var cb = document.createElement("input");
-        cb.type = "checkbox";
-        cb.className = "json-leaf-input";
-        cb.checked = leaf.display === "1" || leaf.display === "true";
-        row.appendChild(cb);
-      } else if (leaf.vtype === "number") {
-        var enumN = findFieldEnum(bootstrap, col, leaf.parts);
-        if (enumN) {
-          row.setAttribute("data-json-enum", "1");
-          var wrapN = document.createElement("div");
-          wrapN.className = "spod-enum-block spod-enum-block--json";
-          var selN = document.createElement("select");
-          selN.className = "spod-enum-select spod-leaf-control";
-          var taN = document.createElement("textarea");
-          taN.className = "spod-enum-custom spod-leaf-control is-hidden";
-          taN.rows = 2;
-          fillSelectOptions(selN, enumN.options, !!enumN.allow_custom, leaf.display);
-          initEnumSelectState(selN, taN, null, !!enumN.allow_custom, leaf.display);
-          wrapN.appendChild(selN);
-          wrapN.appendChild(taN);
-          row.appendChild(wrapN);
-        } else {
+      var body = document.createElement("div");
+      body.className = "json-scalar-array-body";
+      var lines = document.createElement("div");
+      lines.className = "json-scalar-array-lines";
+
+      var taHint = jsonScalarArrayHintForPath(bootstrapLocal, colLocal, basePath);
+
+      function buildItemRow(val, index) {
+        var vt = vtypeForScalarArrayElement(val);
+        var disp = displayForScalarArrayElement(val, vt);
+        var line = document.createElement("div");
+        line.className = "json-scalar-array-line";
+
+        var itemRow = document.createElement("div");
+        itemRow.className = "json-leaf-row json-scalar-array-item grid-cell";
+        itemRow.setAttribute("data-json-path", JSON.stringify(basePath.concat(index)));
+        itemRow.setAttribute("data-vtype", vt);
+        itemRow.setAttribute("data-filter-text", filterText);
+
+        if (vt === "boolean") {
+          var cb = document.createElement("input");
+          cb.type = "checkbox";
+          cb.className = "json-leaf-input";
+          cb.checked = disp === "1" || disp === "true";
+          itemRow.appendChild(cb);
+        } else if (vt === "number") {
           var inpNum = document.createElement("input");
           inpNum.type = "number";
           inpNum.step = "any";
           inpNum.className = "json-leaf-input";
-          inpNum.value = leaf.display;
-          row.appendChild(inpNum);
-        }
-      } else if (leaf.vtype === "null") {
-        var inpNull = document.createElement("input");
-        inpNull.type = "text";
-        inpNull.className = "json-leaf-input";
-        inpNull.placeholder = "null";
-        inpNull.value = "";
-        row.appendChild(inpNull);
-      } else if (leaf.vtype === "string") {
-        var dateHj = findDatePickerHint(bootstrap, col, leaf.parts);
-        if (dateHj) {
-          row.setAttribute("data-json-date", "1");
-          var fmtJ = dateHj.storage_format || "YYYY-MM-DD";
-          var fmtLab = document.createElement("span");
-          fmtLab.className = "muted spod-date-format-hint";
-          fmtLab.textContent = " · " + fmtJ;
-          var topJ = fieldUiLabelTop(lab);
-          if (topJ) {
-            topJ.appendChild(fmtLab);
-          } else {
-            lab.appendChild(fmtLab);
-          }
-          var dispLeaf = leaf.display != null ? String(leaf.display) : "";
-          row.appendChild(buildDatePickerShell(dispLeaf, null, null, true));
+          inpNum.value = disp;
+          itemRow.appendChild(inpNum);
+        } else if (vt === "null") {
+          var inpNull = document.createElement("input");
+          inpNull.type = "text";
+          inpNull.className = "json-leaf-input";
+          inpNull.placeholder = "null";
+          inpNull.value = "";
+          itemRow.appendChild(inpNull);
         } else {
-          var enumRule = findFieldEnum(bootstrap, col, leaf.parts);
-          if (enumRule) {
-            row.setAttribute("data-json-enum", "1");
-            var wrapS = document.createElement("div");
-            wrapS.className = "spod-enum-block spod-enum-block--json";
-            var selS = document.createElement("select");
-            selS.className = "spod-enum-select spod-leaf-control";
-            var taS = document.createElement("textarea");
-            taS.className = "spod-enum-custom spod-leaf-control is-hidden";
-            taS.rows = 3;
-            fillSelectOptions(selS, enumRule.options, !!enumRule.allow_custom, leaf.display);
-            initEnumSelectState(selS, taS, null, !!enumRule.allow_custom, leaf.display);
-            wrapS.appendChild(selS);
-            wrapS.appendChild(taS);
-            row.appendChild(wrapS);
+          var rows = textareaRows(disp, taHint, thrLocal);
+          if (rows > 0) {
+            var taStr = document.createElement("textarea");
+            taStr.className = "json-leaf-input spod-leaf-control";
+            taStr.rows = rows;
+            taStr.value = disp;
+            itemRow.appendChild(taStr);
           } else {
-            var hintT = findTextareaHint(bootstrap, col, leaf.parts);
-            var rows = textareaRows(leaf.display, hintT, thr);
-            if (rows > 0) {
-              var taStr = document.createElement("textarea");
-              taStr.className = "json-leaf-input spod-leaf-control";
-              taStr.rows = rows;
-              taStr.value = leaf.display;
-              row.appendChild(taStr);
+            var inpStr = document.createElement("input");
+            inpStr.type = "text";
+            inpStr.className = "json-leaf-input";
+            inpStr.value = disp;
+            itemRow.appendChild(inpStr);
+          }
+        }
+
+        var rm = document.createElement("button");
+        rm.type = "button";
+        rm.className = "btn btn-ghost btn-sm js-json-scalar-array-remove";
+        rm.textContent = "Удалить";
+        rm.addEventListener("click", function () {
+          var cnt = host.querySelectorAll(".json-scalar-array-item[data-json-path]").length;
+          if (cnt <= 1 && !jsonScalarArrayHostAllowsEmpty(host)) {
+            return;
+          }
+          line.remove();
+          reindexJsonScalarArrayItems(host);
+          updateJsonScalarArrayAddButton(host);
+          document.dispatchEvent(new Event("spod-editor-change"));
+        });
+
+        line.appendChild(itemRow);
+        line.appendChild(rm);
+        return line;
+      }
+
+      var ii;
+      for (ii = 0; ii < items.length; ii++) {
+        lines.appendChild(buildItemRow(items[ii], ii));
+      }
+
+      var addBtn = document.createElement("button");
+      addBtn.type = "button";
+      addBtn.className = "btn btn-ghost btn-sm js-json-scalar-array-add";
+      addBtn.textContent = "Добавить значение";
+      addBtn.addEventListener("click", function () {
+        var cnt0 = host.querySelectorAll(".json-scalar-array-item[data-json-path]").length;
+        var max0 = jsonScalarArrayHostMaxItems(host);
+        if (max0 != null && cnt0 >= max0) {
+          return;
+        }
+        var firstItem = host.querySelector(".json-scalar-array-item[data-json-path]");
+        var sampleVt = (firstItem && firstItem.getAttribute("data-vtype")) || "string";
+        var defaultVal =
+          sampleVt === "number" ? 0 : sampleVt === "boolean" ? false : sampleVt === "null" ? null : "";
+        lines.appendChild(buildItemRow(defaultVal, cnt0));
+        reindexJsonScalarArrayItems(host);
+        updateJsonScalarArrayAddButton(host);
+        document.dispatchEvent(new Event("spod-editor-change"));
+      });
+
+      body.appendChild(lines);
+      body.appendChild(addBtn);
+      host.appendChild(body);
+      grid.appendChild(host);
+      reindexJsonScalarArrayItems(host);
+      updateJsonScalarArrayAddButton(host);
+
+      lines.addEventListener("input", function () {
+        document.dispatchEvent(new Event("spod-editor-change"));
+      });
+      lines.addEventListener("change", function () {
+        document.dispatchEvent(new Event("spod-editor-change"));
+      });
+    }
+
+    /** Сетка листьев: общая отрисовка и пересборка при переходе «Сырой JSON» → «По полям». */
+    function appendJsonLeafRowsToGrid(grid, leaves) {
+      leaves.forEach(function (leaf) {
+        if (leaf.vtype === "json-scalar-array") {
+          appendOneJsonScalarArrayHost(grid, leaf, bootstrap, col, thr);
+          return;
+        }
+        var row = document.createElement("div");
+        row.className = "json-leaf-row grid-cell";
+        row.setAttribute("data-json-path", JSON.stringify(leaf.parts));
+        row.setAttribute("data-vtype", leaf.vtype);
+        if (leaf.fromEmptyArrayPlaceholder) {
+          row.setAttribute("data-spod-empty-array-slot", "1");
+          row.setAttribute(
+            "title",
+            "Массив в данных пустой: введите первый элемент; если оставить поле пустым, при сохранении останется []."
+          );
+        }
+        {
+          var pathDisp = formatPath(leaf.parts);
+          var uiR = findFieldUi(bootstrap, col, leaf.parts);
+          var labForFilter = uiR && uiR.label != null && String(uiR.label).trim() !== "" ? String(uiR.label) : pathDisp;
+          var descJf =
+            uiR && showDescriptionEnabled(uiR) && uiR.description != null ? String(uiR.description) : "";
+          row.setAttribute("data-filter-text", (pathDisp + " " + labForFilter + " " + descJf).toLowerCase());
+        }
+
+        var lab = document.createElement("label");
+        lab.className = "json-path-label";
+        applyFieldUiLabel(bootstrap, lab, col, leaf.parts, formatPath(leaf.parts));
+        row.appendChild(lab);
+
+        if (leaf.vtype === "empty-array" || leaf.vtype === "empty-object") {
+          var span = document.createElement("span");
+          span.className = "muted";
+          span.textContent = leaf.vtype === "empty-array" ? "(пустой массив)" : "(пустой объект)";
+          row.appendChild(span);
+        } else if (leaf.vtype === "boolean") {
+          var cb = document.createElement("input");
+          cb.type = "checkbox";
+          cb.className = "json-leaf-input";
+          cb.checked = leaf.display === "1" || leaf.display === "true";
+          row.appendChild(cb);
+        } else if (leaf.vtype === "number") {
+          var enumN = findFieldEnum(bootstrap, col, leaf.parts);
+          if (enumN) {
+            row.setAttribute("data-json-enum", "1");
+            var wrapN = document.createElement("div");
+            wrapN.className = "spod-enum-block spod-enum-block--json";
+            var selN = document.createElement("select");
+            selN.className = "spod-enum-select spod-leaf-control";
+            var taN = document.createElement("textarea");
+            taN.className = "spod-enum-custom spod-leaf-control is-hidden";
+            taN.rows = 2;
+            fillSelectOptions(selN, enumN.options, !!enumN.allow_custom, leaf.display);
+            initEnumSelectState(selN, taN, null, !!enumN.allow_custom, leaf.display);
+            wrapN.appendChild(selN);
+            wrapN.appendChild(taN);
+            row.appendChild(wrapN);
+          } else {
+            var inpNum = document.createElement("input");
+            inpNum.type = "number";
+            inpNum.step = "any";
+            inpNum.className = "json-leaf-input";
+            inpNum.value = leaf.display;
+            row.appendChild(inpNum);
+          }
+        } else if (leaf.vtype === "null") {
+          var inpNull = document.createElement("input");
+          inpNull.type = "text";
+          inpNull.className = "json-leaf-input";
+          inpNull.placeholder = "null";
+          inpNull.value = "";
+          row.appendChild(inpNull);
+        } else if (leaf.vtype === "string") {
+          var dateHj = findDatePickerHint(bootstrap, col, leaf.parts);
+          if (dateHj) {
+            row.setAttribute("data-json-date", "1");
+            var fmtJ = dateHj.storage_format || "YYYY-MM-DD";
+            var fmtLab = document.createElement("span");
+            fmtLab.className = "muted spod-date-format-hint";
+            fmtLab.textContent = " · " + fmtJ;
+            var topJ = fieldUiLabelTop(lab);
+            if (topJ) {
+              topJ.appendChild(fmtLab);
             } else {
-              var inpStr = document.createElement("input");
-              inpStr.type = "text";
-              inpStr.className = "json-leaf-input";
-              inpStr.value = leaf.display;
-              row.appendChild(inpStr);
+              lab.appendChild(fmtLab);
+            }
+            var dispLeaf = leaf.display != null ? String(leaf.display) : "";
+            row.appendChild(buildDatePickerShell(dispLeaf, null, null, true));
+          } else {
+            var enumRule = findFieldEnum(bootstrap, col, leaf.parts);
+            if (enumRule) {
+              row.setAttribute("data-json-enum", "1");
+              var wrapS = document.createElement("div");
+              wrapS.className = "spod-enum-block spod-enum-block--json";
+              var selS = document.createElement("select");
+              selS.className = "spod-enum-select spod-leaf-control";
+              var taS = document.createElement("textarea");
+              taS.className = "spod-enum-custom spod-leaf-control is-hidden";
+              taS.rows = 3;
+              fillSelectOptions(selS, enumRule.options, !!enumRule.allow_custom, leaf.display);
+              initEnumSelectState(selS, taS, null, !!enumRule.allow_custom, leaf.display);
+              wrapS.appendChild(selS);
+              wrapS.appendChild(taS);
+              row.appendChild(wrapS);
+            } else {
+              var hintT = findTextareaHint(bootstrap, col, leaf.parts);
+              var rows = textareaRows(leaf.display, hintT, thr);
+              if (rows > 0) {
+                var taStr = document.createElement("textarea");
+                taStr.className = "json-leaf-input spod-leaf-control";
+                taStr.rows = rows;
+                taStr.value = leaf.display;
+                row.appendChild(taStr);
+              } else {
+                var inpStr = document.createElement("input");
+                inpStr.type = "text";
+                inpStr.className = "json-leaf-input";
+                inpStr.value = leaf.display;
+                row.appendChild(inpStr);
+              }
             }
           }
         }
-      }
 
-      grid.appendChild(row);
-    });
+        grid.appendChild(row);
+      });
+    }
+
+    appendJsonLeafRowsToGrid(grid, leaves);
 
     fieldsWrap.appendChild(grid);
 
-    taRaw.value =
-      typeof parsed === "object" && parsed !== null
-        ? JSON.stringify(parsed, null, 2)
-        : JSON.stringify(parsed);
-
     wireEnumControls(container);
 
-    container.setAttribute("data-initial-json-norm", normalizeJsonCell(buildJsonFromFields(container)));
+    function syncRawTextareaFromFields() {
+      var built = buildJsonFromFields(container);
+      var t = (built || "").trim();
+      if (t) {
+        try {
+          taRaw.value = JSON.stringify(JSON.parse(built), null, 2);
+        } catch (eSync) {
+          taRaw.value = built;
+        }
+      } else {
+        taRaw.value = "";
+      }
+      container.setAttribute("data-initial-json-norm", normalizeJsonCell(built));
+    }
+
+    syncRawTextareaFromFields();
 
     var filterInp = toolbar.querySelector(".json-filter");
     filterInp.addEventListener("input", function (ev) {
       var q = (ev.target.value || "").trim().toLowerCase();
-      grid.querySelectorAll(".json-leaf-row").forEach(function (r) {
+      /* Только строки верхнего уровня сетки: строки элементов json_scalar_array вложены и не фильтруются отдельно. */
+      fieldsWrap.querySelectorAll(".json-field-grid > .json-leaf-row").forEach(function (r) {
         var t = r.getAttribute("data-filter-text") || "";
         r.style.display = !q || t.indexOf(q) !== -1 ? "" : "none";
       });
     });
 
     toolbar.querySelector(".js-mode-fields").addEventListener("click", function () {
+      var curMode = container.getAttribute("data-edit-mode") || "fields";
+      if (curMode === "fields") {
+        return;
+      }
+      var txt = (taRaw.value || "").trim();
+      var pr = tryParseSpodJsonCell(txt);
+      if (!pr.ok) {
+        alert(
+          "Не удалось разобрать JSON из режима «Сырой JSON». Исправьте текст или оставайтесь в сыром режиме."
+        );
+        return;
+      }
+      var newParsed = pr.parsed === null || pr.parsed === undefined ? {} : pr.parsed;
+      var newRk = rootKindOf(newParsed);
+      if (newRk === "null") {
+        alert("Пустое значение нельзя развернуть по полям — задайте объект или массив во «Сыром JSON».");
+        return;
+      }
+      container.setAttribute("data-root-kind", newRk);
+      if (newRk === "object" && newParsed !== null && !Array.isArray(newParsed)) {
+        newParsed = mergeDeclaredJsonTemplate(JSON.parse(JSON.stringify(newParsed)), col, bootstrap);
+      }
+      var newLeaves = [];
+      flattenLeaves(newParsed, [], newLeaves, bootstrap, col);
+      newLeaves = filterRewardAddDataLeaves(newLeaves, col, bootstrap);
+      fieldsWrap.innerHTML = "";
+      var newGrid = document.createElement("div");
+      newGrid.className = "json-field-grid";
+      if (newLeaves.length === 0) {
+        var hint2 = document.createElement("p");
+        hint2.className = "muted json-empty-hint";
+        hint2.textContent = "Нет вложенных полей — при необходимости откройте «Сырой JSON».";
+        fieldsWrap.appendChild(hint2);
+      }
+      appendJsonLeafRowsToGrid(newGrid, newLeaves);
+      fieldsWrap.appendChild(newGrid);
+      wireEnumControls(container);
       container.setAttribute("data-edit-mode", "fields");
+      syncRawTextareaFromFields();
       fieldsWrap.classList.remove("is-hidden");
       rawWrap.classList.add("is-hidden");
       document.dispatchEvent(new Event("spod-editor-change"));
     });
     toolbar.querySelector(".js-mode-raw").addEventListener("click", function () {
+      syncRawTextareaFromFields();
       container.setAttribute("data-edit-mode", "raw");
       rawWrap.classList.remove("is-hidden");
       fieldsWrap.classList.add("is-hidden");
