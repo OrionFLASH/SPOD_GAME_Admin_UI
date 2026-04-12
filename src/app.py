@@ -16,7 +16,7 @@ from fastapi import Body, FastAPI, HTTPException, Request
 from fastapi.responses import FileResponse, HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from markupsafe import Markup
+from markupsafe import Markup, escape
 
 from src import config_validate, consistency, db, editor_config, export_csv, ingest, relations, sheet_list_display, spod_json
 
@@ -36,6 +36,15 @@ def _json_for_script_tag(obj: Any) -> Markup:
     s = json.dumps(obj, ensure_ascii=False)
     s = s.replace("<", "\\u003c").replace(">", "\\u003e")
     return Markup(s)
+
+
+def _tojson_readable(value: Any, indent: int = 2) -> Markup:
+    """
+    JSON для вывода в HTML (<pre> в блоке «Связи»): кириллица как текст, не escape \\uXXXX.
+    Стандартный фильтр tojson в Jinja2 использует ASCII-экранирование не-ASCII символов.
+    """
+    text = json.dumps(value, ensure_ascii=False, indent=indent)
+    return Markup(escape(text))
 
 
 def _load_config() -> Dict[str, Any]:
@@ -83,6 +92,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(title="SPOD Tournament Admin", lifespan=lifespan)
 app.mount("/static", StaticFiles(directory=str(ROOT / "src" / "static")), name="static")
 templates = Jinja2Templates(directory=str(ROOT / "src" / "templates"))
+templates.env.filters["tojson_readable"] = _tojson_readable
 
 
 def get_conn() -> sqlite3.Connection:
@@ -212,11 +222,13 @@ def row_detail(request: Request, code: str, row_id: int):
         "editorTextareas": editor_config.flatten_editor_textareas(CFG),
         "longTextThreshold": int(CFG.get("editor_long_text_threshold", 120)),
     }
+    sheet_title = str(spec.get("title") or code)
     return templates.TemplateResponse(
         request,
         "row_detail.html",
         {
             "sheet_code": code,
+            "sheet_title": sheet_title,
             "row_id": row_id,
             "row_index": r["row_index"],
             "cells": cells,

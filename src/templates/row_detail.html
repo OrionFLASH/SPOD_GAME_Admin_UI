@@ -1,6 +1,18 @@
 {% extends "base.html" %}
 {% block title %}Строка {{ row_index }} — {{ sheet_code }}{% endblock %}
 {% block content %}
+{# Метаданные страницы для trail_nav.js: цепочка «назад» и переходы по связям. #}
+<div
+  id="row-page-meta"
+  class="is-hidden"
+  aria-hidden="true"
+  data-sheet-code="{{ sheet_code }}"
+  data-row-id="{{ row_id }}"
+  data-row-index="{{ row_index }}"
+  data-sheet-title="{{ sheet_title | e }}"
+  data-trail-current-title="{{ sheet_code }} · строка {{ row_index }}"
+></div>
+<nav id="spod-trail-nav" class="trail-nav panel" aria-label="Цепочка переходов по связям"></nav>
 {# Данные для row_editor.js: плоские поля и разобранный JSON. #}
 <script type="application/json" id="row-editor-bootstrap">{{ editor_bootstrap_json }}</script>
 
@@ -13,8 +25,22 @@
       {% for jb in json_blocks %}
       <a class="edit-nav-sub" href="#sec-json-{{ jb.section_slug }}">↳ {{ jb.column }}</a>
       {% endfor %}
+      {# Связи: в меню видно целевой лист (файл) и подпункты на каждую строку — переход в редактирование с учётом trail_nav.js #}
       {% if rel.links %}
-      <a href="#sec-relations">Связи</a>
+      <div class="edit-nav-group" role="navigation" aria-label="Переходы по связям">
+        <a href="#sec-relations" class="edit-nav-group-title-link">Связи</a>
+        {% for rel_block in rel.links %}
+        {% if rel_block["items"] %}
+        <div class="edit-nav-rel-block">
+          <a class="edit-nav-rel-sheet" href="#rel-card-{{ loop.index0 }}" title="Прокрутить к карточке на странице">{{ rel_block["items"][0].sheet_code }}</a>
+          <div class="edit-nav-rel-block-title">{{ rel_block["title"] }}</div>
+          {% for item in rel_block["items"] %}
+          <a class="edit-nav-sub edit-nav-rel-link spod-rel-nav" href="/sheet/{{ item.sheet_code }}/row/{{ item.row_id }}" title="Редактировать связанную строку">{{ item.preview }}</a>
+          {% endfor %}
+        </div>
+        {% endif %}
+        {% endfor %}
+      </div>
       {% endif %}
     </aside>
 
@@ -48,10 +74,19 @@
         <div class="relations-grid">
           {% for rel_block in rel.links %}
           {% if rel_block["items"] %}
-          <div class="relation-card">
+          <div class="relation-card" id="rel-card-{{ loop.index0 }}">
             <h3 class="muted relation-card-title">{{ rel_block["title"] }}</h3>
+            {% if rel_block["items"]|length > 1 %}
+            <p class="muted relation-multi-hint">Несколько строк: у каждой своя кнопка перехода к редактированию.</p>
+            {% endif %}
             {% for item in rel_block["items"] %}
-            <pre class="link-block">{{ item | tojson(indent=2) }}</pre>
+            <div class="relation-item">
+              <div class="relation-item-head">
+                <span class="relation-item-preview">{{ item.preview }}</span>
+                <a class="btn btn-primary btn-sm spod-rel-nav" href="/sheet/{{ item.sheet_code }}/row/{{ item.row_id }}">Редактировать связь</a>
+              </div>
+              <pre class="link-block relation-item-json">{{ item.cells | tojson_readable }}</pre>
+            </div>
             {% endfor %}
           </div>
           {% endif %}
@@ -69,7 +104,7 @@
   <div class="edit-dock-actions">
     <button type="button" class="btn btn-primary" id="btn-save" disabled>Сохранить в базу</button>
     <button type="button" class="btn btn-ghost" id="btn-cancel" disabled>Отменить правку</button>
-    <a class="btn btn-ghost" href="/sheet/{{ sheet_code }}">Назад к списку</a>
+    <a class="btn btn-ghost spod-trail-clear-to-list" href="/sheet/{{ sheet_code }}">Назад к списку</a>
   </div>
 </div>
 

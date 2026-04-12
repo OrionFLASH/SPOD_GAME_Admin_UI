@@ -5,10 +5,21 @@ from __future__ import annotations
 
 import json
 import sqlite3
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List
+
+# Порядок полей для короткой подписи кнопки «Редактировать» у множественных связей
+_PREVIEW_KEYS = (
+    "TOURNAMENT_CODE",
+    "CONTEST_CODE",
+    "REWARD_CODE",
+    "INDICATOR_CODE",
+    "GROUP_CODE",
+    "FULL_NAME",
+)
 
 
 def _rows(conn: sqlite3.Connection, code: str) -> List[Dict[str, Any]]:
+    """Все актуальные строки листа с разобранным JSON ячеек."""
     cur = conn.execute(
         """
         SELECT dr.id, dr.cells_json
@@ -18,10 +29,29 @@ def _rows(conn: sqlite3.Connection, code: str) -> List[Dict[str, Any]]:
         """,
         (code,),
     )
-    out = []
+    out: List[Dict[str, Any]] = []
     for r in cur.fetchall():
         out.append({"id": int(r["id"]), "cells": json.loads(r["cells_json"])})
     return out
+
+
+def _preview_for_item(cells: Dict[str, str]) -> str:
+    """Короткая подпись строки для списка связей (несколько кнопок)."""
+    for k in _PREVIEW_KEYS:
+        v = (cells.get(k) or "").strip()
+        if v:
+            return (k + "=" + v)[:96]
+    return "строка"
+
+
+def _link_item(sheet_code: str, row_id: int, cells: Dict[str, str]) -> Dict[str, Any]:
+    """Одна связанная строка: куда вести ссылку на редактирование и что показать в JSON."""
+    return {
+        "sheet_code": sheet_code,
+        "row_id": row_id,
+        "cells": cells,
+        "preview": _preview_for_item(cells),
+    }
 
 
 def build_context_for_row(
@@ -29,7 +59,12 @@ def build_context_for_row(
     sheet_code: str,
     cells: Dict[str, str],
 ) -> Dict[str, Any]:
-    """Возвращает словарь с фрагментами связанных сущностей для шаблона."""
+    """
+    Возвращает словарь с фрагментами связанных сущностей для шаблона.
+
+    Каждый элемент `items` — словарь с ключами `sheet_code`, `row_id`, `cells`, `preview`
+    (последний — для подписи кнопки при нескольких связях одного типа).
+    """
     ctx: Dict[str, Any] = {"links": []}
     cc = (cells.get("CONTEST_CODE") or "").strip()
     gc = (cells.get("GROUP_CODE") or "").strip()
@@ -59,79 +94,79 @@ def build_context_for_row(
     return ctx
 
 
-def _find_contest(conn: sqlite3.Connection, contest_code: str) -> List[Dict[str, str]]:
+def _find_contest(conn: sqlite3.Connection, contest_code: str) -> List[Dict[str, Any]]:
     for r in _rows(conn, "CONTEST-DATA"):
         if (r["cells"].get("CONTEST_CODE") or "").strip() == contest_code:
-            return [r["cells"]]
+            return [_link_item("CONTEST-DATA", r["id"], r["cells"])]
     return []
 
 
-def _find_group(conn: sqlite3.Connection, contest_code: str, group_code: str) -> List[Dict[str, str]]:
-    res = []
+def _find_group(conn: sqlite3.Connection, contest_code: str, group_code: str) -> List[Dict[str, Any]]:
+    res: List[Dict[str, Any]] = []
     for r in _rows(conn, "GROUP"):
         c = r["cells"]
         if (c.get("CONTEST_CODE") or "").strip() == contest_code and (c.get("GROUP_CODE") or "").strip() == group_code:
-            res.append(c)
+            res.append(_link_item("GROUP", r["id"], c))
     return res[:5]
 
 
-def _find_reward(conn: sqlite3.Connection, reward_code: str) -> List[Dict[str, str]]:
+def _find_reward(conn: sqlite3.Connection, reward_code: str) -> List[Dict[str, Any]]:
     for r in _rows(conn, "REWARD"):
         if (r["cells"].get("REWARD_CODE") or "").strip() == reward_code:
-            return [r["cells"]]
+            return [_link_item("REWARD", r["id"], r["cells"])]
     return []
 
 
-def _find_reward_links_for_contest(conn: sqlite3.Connection, contest_code: str) -> List[Dict[str, str]]:
-    res = []
+def _find_reward_links_for_contest(conn: sqlite3.Connection, contest_code: str) -> List[Dict[str, Any]]:
+    res: List[Dict[str, Any]] = []
     for r in _rows(conn, "REWARD-LINK"):
         c = r["cells"]
         if (c.get("CONTEST_CODE") or "").strip() == contest_code:
-            res.append(c)
+            res.append(_link_item("REWARD-LINK", r["id"], c))
     return res[:30]
 
 
-def _find_reward_links_for_reward(conn: sqlite3.Connection, reward_code: str) -> List[Dict[str, str]]:
-    res = []
+def _find_reward_links_for_reward(conn: sqlite3.Connection, reward_code: str) -> List[Dict[str, Any]]:
+    res: List[Dict[str, Any]] = []
     for r in _rows(conn, "REWARD-LINK"):
         c = r["cells"]
         if (c.get("REWARD_CODE") or "").strip() == reward_code:
-            res.append(c)
+            res.append(_link_item("REWARD-LINK", r["id"], c))
     return res[:30]
 
 
-def _find_groups_for_contest(conn: sqlite3.Connection, contest_code: str) -> List[Dict[str, str]]:
-    res = []
+def _find_groups_for_contest(conn: sqlite3.Connection, contest_code: str) -> List[Dict[str, Any]]:
+    res: List[Dict[str, Any]] = []
     for r in _rows(conn, "GROUP"):
         c = r["cells"]
         if (c.get("CONTEST_CODE") or "").strip() == contest_code:
-            res.append(c)
+            res.append(_link_item("GROUP", r["id"], c))
     return res[:20]
 
 
-def _find_indicators_for_contest(conn: sqlite3.Connection, contest_code: str) -> List[Dict[str, str]]:
-    res = []
+def _find_indicators_for_contest(conn: sqlite3.Connection, contest_code: str) -> List[Dict[str, Any]]:
+    res: List[Dict[str, Any]] = []
     for r in _rows(conn, "INDICATOR"):
         c = r["cells"]
         if (c.get("CONTEST_CODE") or "").strip() == contest_code:
-            res.append(c)
+            res.append(_link_item("INDICATOR", r["id"], c))
     return res[:20]
 
 
-def _find_schedule_for_contest(conn: sqlite3.Connection, contest_code: str) -> List[Dict[str, str]]:
-    res = []
+def _find_schedule_for_contest(conn: sqlite3.Connection, contest_code: str) -> List[Dict[str, Any]]:
+    res: List[Dict[str, Any]] = []
     for r in _rows(conn, "TOURNAMENT-SCHEDULE"):
         c = r["cells"]
         if (c.get("CONTEST_CODE") or "").strip() == contest_code:
-            res.append(c)
+            res.append(_link_item("TOURNAMENT-SCHEDULE", r["id"], c))
     return res[:15]
 
 
-def _find_schedule_rows(conn: sqlite3.Connection, tournament_code: str) -> List[Dict[str, str]]:
+def _find_schedule_rows(conn: sqlite3.Connection, tournament_code: str) -> List[Dict[str, Any]]:
     """Несколько строк расписания с тем же кодом турнира (если в данных есть дубли)."""
-    res = []
+    res: List[Dict[str, Any]] = []
     for r in _rows(conn, "TOURNAMENT-SCHEDULE"):
         c = r["cells"]
         if (c.get("TOURNAMENT_CODE") or "").strip() == tournament_code:
-            res.append(c)
+            res.append(_link_item("TOURNAMENT-SCHEDULE", r["id"], c))
     return res[:10]
