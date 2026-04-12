@@ -39,7 +39,9 @@ class SmokeTest(unittest.TestCase):
             self.assertIn("CONTEST-DATA", r2.text)
 
     def test_row_detail_and_save_roundtrip(self) -> None:
-        """Карточка строки и сохранение без изменений (тот же JSON ячеек)."""
+        """Карточка строки: без изменений — 400; с изменением — 303 и новая версия строки."""
+        import re  # noqa: PLC0415
+
         from fastapi.testclient import TestClient  # noqa: PLC0415
 
         from src import app as appmod  # noqa: PLC0415
@@ -51,7 +53,8 @@ class SmokeTest(unittest.TestCase):
             conn = sqlite3.connect(str(db_path))
             rid = conn.execute(
                 "SELECT dr.id FROM data_row dr "
-                "JOIN sheet s ON s.id = dr.sheet_id WHERE s.code = ? LIMIT 1",
+                "JOIN sheet s ON s.id = dr.sheet_id "
+                "WHERE s.code = ? AND dr.is_current = 1 LIMIT 1",
                 ("CONTEST-DATA",),
             ).fetchone()[0]
             cells = json.loads(
@@ -60,12 +63,37 @@ class SmokeTest(unittest.TestCase):
             conn.close()
             r = client.get(f"/sheet/CONTEST-DATA/row/{rid}")
             self.assertEqual(r.status_code, 200)
-            r2 = client.post(
+            r_same = client.post(
                 f"/sheet/CONTEST-DATA/row/{rid}/save",
                 json=cells,
                 follow_redirects=False,
             )
-            self.assertEqual(r2.status_code, 303)
+            self.assertEqual(r_same.status_code, 400)
+
+            cells2 = dict(cells)
+            cells2["FULL_NAME"] = (cells2.get("FULL_NAME") or "") + " __smoke_edit__"
+            r2 = client.post(
+                f"/sheet/CONTEST-DATA/row/{rid}/save",
+                json=cells2,
+                follow_redirects=False,
+            )
+            self.assertEqual(r2.status_code, 303, msg=r2.text)
+            loc = r2.headers.get("location") or ""
+            m = re.search(r"/row/(\d+)", loc)
+            self.assertIsNotNone(m, msg="ожидался редирект на /row/<новый_id>")
+            new_id = int(m.group(1))
+            self.assertNotEqual(new_id, rid)
+
+            conn = sqlite3.connect(str(db_path))
+            old_cur = conn.execute(
+                "SELECT is_current FROM data_row WHERE id = ?", (rid,)
+            ).fetchone()[0]
+            new_cur = conn.execute(
+                "SELECT is_current FROM data_row WHERE id = ?", (new_id,)
+            ).fetchone()[0]
+            conn.close()
+            self.assertEqual(old_cur, 0)
+            self.assertEqual(new_cur, 1)
 
 
 if __name__ == "__main__":

@@ -14,7 +14,7 @@ def _rows(conn: sqlite3.Connection, code: str) -> List[Dict[str, Any]]:
         SELECT dr.id, dr.cells_json
         FROM data_row dr
         JOIN sheet s ON s.id = dr.sheet_id
-        WHERE s.code = ?
+        WHERE s.code = ? AND dr.is_current = 1
         """,
         (code,),
     )

@@ -19,8 +19,8 @@ def _cells_rows(conn: sqlite3.Connection, sheet_code: str) -> List[Dict[str, str
         SELECT dr.cells_json
         FROM data_row dr
         JOIN sheet s ON s.id = dr.sheet_id
-        WHERE s.code = ?
-        ORDER BY dr.row_index
+        WHERE s.code = ? AND dr.is_current = 1
+        ORDER BY dr.sort_key, dr.row_index, dr.id
         """,
         (sheet_code,),
     )

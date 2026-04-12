@@ -217,6 +217,10 @@
       fieldsWrap.classList.add("is-hidden");
       rawWrap.classList.remove("is-hidden");
       toolbar.querySelector(".json-filter").style.display = "none";
+      container.setAttribute("data-initial-json-norm", normalizeJsonCell(jc.raw));
+      ta.addEventListener("input", function () {
+        document.dispatchEvent(new Event("spod-editor-change"));
+      });
       return;
     }
 
@@ -228,6 +232,10 @@
       fieldsWrap.innerHTML =
         '<p class="muted">Пустое значение. При необходимости введите JSON во вкладке «Сырой JSON».</p>';
       ta.value = jc.raw || "";
+      container.setAttribute("data-initial-json-norm", normalizeJsonCell(jc.raw));
+      ta.addEventListener("input", function () {
+        document.dispatchEvent(new Event("spod-editor-change"));
+      });
       return;
     }
 
@@ -299,6 +307,8 @@
         ? JSON.stringify(parsed, null, 2)
         : JSON.stringify(parsed);
 
+    container.setAttribute("data-initial-json-norm", normalizeJsonCell(buildJsonFromFields(container)));
+
     const filterInp = toolbar.querySelector(".json-filter");
     filterInp.addEventListener("input", function (ev) {
       const q = (ev.target.value || "").trim().toLowerCase();
@@ -312,11 +322,20 @@
       container.setAttribute("data-edit-mode", "fields");
       fieldsWrap.classList.remove("is-hidden");
       rawWrap.classList.add("is-hidden");
+      document.dispatchEvent(new Event("spod-editor-change"));
     });
     toolbar.querySelector(".js-mode-raw").addEventListener("click", function () {
       container.setAttribute("data-edit-mode", "raw");
       rawWrap.classList.remove("is-hidden");
       fieldsWrap.classList.add("is-hidden");
+      document.dispatchEvent(new Event("spod-editor-change"));
+    });
+
+    container.addEventListener("input", function () {
+      document.dispatchEvent(new Event("spod-editor-change"));
+    });
+    container.addEventListener("change", function () {
+      document.dispatchEvent(new Event("spod-editor-change"));
     });
   }
 
@@ -343,9 +362,16 @@
       inp.id = safeId;
       inp.type = "text";
       inp.setAttribute("data-col", col);
+      inp.setAttribute("data-initial", flat[col] != null ? String(flat[col]) : "");
       inp.value = flat[col] != null ? String(flat[col]) : "";
+      const was = document.createElement("div");
+      was.className = "was-value is-hidden";
       cell.appendChild(lab);
       cell.appendChild(inp);
+      cell.appendChild(was);
+      inp.addEventListener("input", function () {
+        document.dispatchEvent(new Event("spod-editor-change"));
+      });
       grid.appendChild(cell);
     });
 
@@ -375,7 +401,7 @@
   }
 
   function collectPayload(bootstrap) {
-    const o = {};
+    const o = Object.assign({}, bootstrap.fullRow || {});
     document.querySelectorAll("[data-col]").forEach(function (el) {
       o[el.dataset.col] = el.value;
     });
@@ -388,6 +414,113 @@
       o[jc.column] = buildJsonFromFields(box);
     });
     return o;
+  }
+
+  /** Сравнение JSON-ячеек с учётом нормализации пробелов в компактном виде. */
+  function normalizeJsonCell(raw) {
+    const t = (raw != null ? String(raw) : "").trim();
+    if (!t) {
+      return "";
+    }
+    try {
+      return JSON.stringify(JSON.parse(t));
+    } catch (e) {
+      return t;
+    }
+  }
+
+  function canonicalPayload(bootstrap) {
+    const p = collectPayload(bootstrap);
+    const sorted = Object.keys(p)
+      .sort()
+      .map(function (k) {
+        return [k, p[k]];
+      });
+    return JSON.stringify(Object.fromEntries(sorted));
+  }
+
+  function refreshDirtyState(bootstrap) {
+    const dock = document.getElementById("edit-dock");
+    const btnSave = document.getElementById("btn-save");
+    const btnCancel = document.getElementById("btn-cancel");
+    const banner = document.getElementById("edit-dirty-banner");
+    if (!btnSave || typeof bootstrap.__initialCanonical === "undefined") {
+      return;
+    }
+    const cur = canonicalPayload(bootstrap);
+    const dirty = cur !== bootstrap.__initialCanonical;
+    btnSave.disabled = !dirty;
+    if (btnCancel) {
+      btnCancel.disabled = !dirty;
+    }
+    if (dock) {
+      dock.classList.toggle("edit-dock--dirty", dirty);
+    }
+    if (banner) {
+      banner.classList.toggle("is-hidden", !dirty);
+    }
+
+    document.querySelectorAll("[data-col]").forEach(function (inp) {
+      const cell = inp.closest(".scalar-cell");
+      const was = cell && cell.querySelector(".was-value");
+      if (!was) {
+        return;
+      }
+      const init = inp.getAttribute("data-initial") || "";
+      if (inp.value !== init) {
+        was.classList.remove("is-hidden");
+        was.textContent = "Было: " + (init === "" ? "∅" : init);
+        cell.classList.add("scalar-cell--changed");
+      } else {
+        was.classList.add("is-hidden");
+        cell.classList.remove("scalar-cell--changed");
+      }
+    });
+
+    (bootstrap.jsonCols || []).forEach(function (jc) {
+      const box = findJsonBox(jc.column);
+      const wrap = document.getElementById("sec-json-" + (jc.section_slug || jc.column.replace(/[^a-zA-Z0-9_-]/g, "_")));
+      if (!box || !wrap) {
+        return;
+      }
+      const initN = box.getAttribute("data-initial-json-norm") || "";
+      const curN = normalizeJsonCell(buildJsonFromFields(box));
+      if (initN !== curN) {
+        wrap.classList.add("json-column-panel--changed");
+        let hint = box.querySelector(".json-changed-hint");
+        if (!hint) {
+          hint = document.createElement("div");
+          hint.className = "json-changed-hint";
+          hint.innerHTML =
+            '<p class="muted json-changed-title">Колонка изменена (ещё не сохранено в новую версию строки).</p>' +
+            '<div class="was-json-wrap"><span class="was-json-label">Было (в базе):</span><pre class="json-was-pre"></pre></div>';
+          const tb = box.querySelector(".json-column-toolbar");
+          if (tb) {
+            tb.after(hint);
+          } else {
+            box.prepend(hint);
+          }
+        }
+        let prevDisplay = initN === "" ? "∅" : initN;
+        if (initN !== "") {
+          try {
+            prevDisplay = JSON.stringify(JSON.parse(initN), null, 2);
+          } catch (e0) {
+            /* не JSON — показываем как текст */
+          }
+        }
+        const pre = hint.querySelector(".json-was-pre");
+        if (pre) {
+          pre.textContent = prevDisplay;
+        }
+      } else {
+        wrap.classList.remove("json-column-panel--changed");
+        const hint = box.querySelector(".json-changed-hint");
+        if (hint) {
+          hint.remove();
+        }
+      }
+    });
   }
 
   function init() {
@@ -424,6 +557,12 @@
 
     wireNav();
 
+    bootstrap.__initialCanonical = canonicalPayload(bootstrap);
+    document.addEventListener("spod-editor-change", function () {
+      refreshDirtyState(bootstrap);
+    });
+    refreshDirtyState(bootstrap);
+
     const btn = document.getElementById("btn-save");
     if (btn) {
       btn.addEventListener("click", async function () {
@@ -434,7 +573,15 @@
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload),
+          redirect: "manual",
         });
+        if (res.status === 303 || res.status === 302) {
+          const loc = res.headers.get("Location");
+          if (loc) {
+            window.location.href = loc;
+            return;
+          }
+        }
         if (res.ok) {
           window.location.href = "/sheet/" + encodeURIComponent(sc) + "/row/" + rid;
           return;
@@ -450,6 +597,12 @@
           /* ignore */
         }
         alert("Ошибка сохранения: " + res.status + " " + txt.slice(0, 500));
+      });
+    }
+    const btnCancel = document.getElementById("btn-cancel");
+    if (btnCancel) {
+      btnCancel.addEventListener("click", function () {
+        window.location.reload();
       });
     }
   }

@@ -498,14 +498,95 @@ table.data th {
   right: 0;
   z-index: 25;
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: center;
-  gap: 0.65rem;
-  padding: 0.75rem 1.25rem;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.5rem;
+  padding: 0.65rem 1.25rem 0.75rem;
   background: var(--glass);
   backdrop-filter: blur(var(--blur));
   -webkit-backdrop-filter: blur(var(--blur));
   border-top: 1px solid var(--glass-border);
   box-shadow: 0 -6px 24px rgba(31, 56, 88, 0.1);
+}
+
+.edit-dock-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.65rem;
+}
+
+.edit-dock--dirty {
+  border-top-color: rgba(180, 120, 40, 0.55);
+  box-shadow: 0 -6px 28px rgba(180, 120, 40, 0.12);
+}
+
+.edit-dirty-banner {
+  margin: 0 auto;
+  max-width: 52rem;
+  padding: 0.4rem 0.75rem;
+  font-size: 0.88rem;
+  text-align: center;
+  color: rgba(40, 35, 25, 0.92);
+  background: rgba(255, 236, 200, 0.55);
+  border: 1px solid rgba(200, 160, 80, 0.45);
+  border-radius: 10px;
+}
+
+.was-value {
+  margin-top: 0.25rem;
+  font-size: 0.78rem;
+  color: rgba(60, 55, 45, 0.85);
+  word-break: break-word;
+}
+
+.scalar-cell--changed .json-path-label,
+.scalar-cell--changed > label {
+  color: rgba(120, 70, 20, 0.95);
+}
+
+.scalar-cell--changed input[data-col] {
+  border-color: rgba(200, 140, 60, 0.75);
+  background: rgba(255, 250, 235, 0.65);
+}
+
+.json-column-panel--changed {
+  outline: 2px solid rgba(200, 140, 60, 0.45);
+  outline-offset: 2px;
+}
+
+.json-changed-hint {
+  margin: 0.35rem 0 0;
+}
+
+.json-changed-hint .json-changed-title {
+  margin: 0 0 0.35rem;
+}
+
+.was-json-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  margin-top: 0.25rem;
+}
+
+.was-json-label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: rgba(60, 55, 45, 0.88);
+}
+
+.json-was-pre {
+  margin: 0;
+  max-height: 9rem;
+  overflow: auto;
+  padding: 0.45rem 0.55rem;
+  font-size: 0.72rem;
+  line-height: 1.35;
+  background: rgba(255, 255, 255, 0.55);
+  border: 1px solid var(--glass-border);
+  border-radius: 8px;
+  white-space: pre-wrap;
+  word-break: break-word;
 }

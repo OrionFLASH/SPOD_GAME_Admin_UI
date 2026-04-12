@@ -24,6 +24,7 @@
         <p class="muted">id={{ row_id }} · режим консистентности: <strong>{{ mode }}</strong>
           {% if mode == "strict" %} (сохранение отклоняется при ошибках проверок){% endif %}
         </p>
+        <p class="muted">Правки в форме не пишутся в базу сразу: кнопка «Сохранить» создаёт <strong>новую</strong> актуальную версию строки, прежняя остаётся в истории; в списках и выгрузке CSV участвуют только актуальные версии.</p>
         {% if consistency_errors and consistency_errors|length > 0 %}
         <div class="errors">
           <strong>Проблемы консистентности:</strong>
@@ -61,9 +62,15 @@
     </div>
   </div>
 
-<div class="edit-dock">
-  <button type="button" class="btn btn-primary" id="btn-save">Сохранить в базу</button>
-  <a class="btn btn-ghost" href="/sheet/{{ sheet_code }}">Назад к списку</a>
+<div id="edit-dock" class="edit-dock">
+  <div id="edit-dirty-banner" class="edit-dirty-banner is-hidden" role="status">
+    Есть несохранённые изменения. Сохранение записывает новую версию строки; отмена сбрасывает форму к данным из базы.
+  </div>
+  <div class="edit-dock-actions">
+    <button type="button" class="btn btn-primary" id="btn-save" disabled>Сохранить в базу</button>
+    <button type="button" class="btn btn-ghost" id="btn-cancel" disabled>Отменить правку</button>
+    <a class="btn btn-ghost" href="/sheet/{{ sheet_code }}">Назад к списку</a>
+  </div>
 </div>
 
 <script src="/static/row_editor.js" defer></script>

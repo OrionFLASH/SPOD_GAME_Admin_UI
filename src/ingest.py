@@ -73,10 +73,10 @@ def import_all(
             cells = json.dumps(row_dict, ensure_ascii=False)
             cur.execute(
                 """
-                INSERT INTO data_row (sheet_id, row_index, cells_json, consistency_ok, consistency_errors, updated_at)
-                VALUES (?,?,?,?,?,?)
+                INSERT INTO data_row (sheet_id, row_index, sort_key, cells_json, consistency_ok, consistency_errors, updated_at, is_current, replaces_row_id)
+                VALUES (?,?,?,?,?,?,?,?,?)
                 """,
-                (sid, idx, cells, 1, "[]", now),
+                (sid, idx, float(idx), cells, 1, "[]", now, 1, None),
             )
         counts[code] = len(data)
     conn.commit()

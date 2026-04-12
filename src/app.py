@@ -26,6 +26,11 @@ CONN: sqlite3.Connection | None = None
 DB_PATH: Path | None = None
 
 
+def _cells_canonical_json(cells: Dict[str, str]) -> str:
+    """Стабильная строка для сравнения двух наборов ячеек."""
+    return json.dumps(dict(sorted(cells.items())), ensure_ascii=False)
+
+
 def _json_for_script_tag(obj: Any) -> Markup:
     """Сериализация JSON для вставки в <script type=\"application/json\"> без поломки разметки."""
     s = json.dumps(obj, ensure_ascii=False)
@@ -61,6 +66,7 @@ async def lifespan(app: FastAPI):
     DB_PATH = db.get_db_path(ROOT, CFG)
     CONN = db.open_connection(DB_PATH)
     db.init_schema(CONN)
+    db.migrate_data_row_versioning(CONN)
     cur = CONN.execute("SELECT COUNT(*) FROM sheet")
     if cur.fetchone()[0] == 0:
         counts = ingest.import_all(ROOT, CFG, CONN, clear=True)
@@ -89,7 +95,8 @@ def index(request: Request):
     conn = get_conn()
     cur = conn.execute(
         "SELECT s.code, s.title, s.file_name, COUNT(dr.id) AS n FROM sheet s "
-        "LEFT JOIN data_row dr ON dr.sheet_id = s.id GROUP BY s.id ORDER BY s.code"
+        "LEFT JOIN data_row dr ON dr.sheet_id = s.id AND dr.is_current = 1 "
+        "GROUP BY s.id ORDER BY s.code"
     )
     sheets = [dict(r) for r in cur.fetchall()]
     return templates.TemplateResponse(
@@ -109,7 +116,7 @@ def sheet_list(request: Request, code: str, q: str = ""):
     sid = row[0]
     cur = conn.execute(
         "SELECT id, row_index, cells_json, consistency_ok, consistency_errors FROM data_row "
-        "WHERE sheet_id = ? ORDER BY row_index",
+        "WHERE sheet_id = ? AND is_current = 1 ORDER BY sort_key, row_index, id",
         (sid,),
     )
     rows_out: List[Dict[str, Any]] = []
@@ -153,7 +160,7 @@ def row_detail(request: Request, code: str, row_id: int):
         SELECT dr.id, dr.row_index, dr.cells_json, dr.consistency_ok, dr.consistency_errors
         FROM data_row dr
         JOIN sheet s ON s.id = dr.sheet_id
-        WHERE s.code = ? AND dr.id = ?
+        WHERE s.code = ? AND dr.id = ? AND dr.is_current = 1
         """,
         (code, row_id),
     )
@@ -197,6 +204,7 @@ def row_detail(request: Request, code: str, row_id: int):
         "rowId": row_id,
         "flat": {k: cells.get(k, "") for k in flat_columns},
         "jsonCols": json_cols_boot,
+        "fullRow": dict(cells),
     }
     return templates.TemplateResponse(
         request,
@@ -224,32 +232,58 @@ async def row_save(
     row_id: int,
     payload: Dict[str, Any] = Body(...),
 ):
-    """Сохранение: тело запроса — JSON-объект «колонка → строковое значение ячейки»."""
+    """
+    Сохранение новой версии строки: старая помечается is_current=0, вставляется копия с новыми ячейками.
+    При отсутствии изменений — 400. После успеха — редирект на id новой актуальной строки.
+    """
     conn = get_conn()
     cur = conn.execute(
         """
-        SELECT dr.id FROM data_row dr
+        SELECT dr.id, dr.sheet_id, dr.row_index, dr.sort_key, dr.cells_json
+        FROM data_row dr
         JOIN sheet s ON s.id = dr.sheet_id
-        WHERE s.code = ? AND dr.id = ?
+        WHERE s.code = ? AND dr.id = ? AND dr.is_current = 1
         """,
         (code, row_id),
     )
-    if not cur.fetchone():
-        raise HTTPException(404)
+    old = cur.fetchone()
+    if not old:
+        raise HTTPException(404, detail="Строка не найдена или не актуальна (уже заменена).")
+    old_cells: Dict[str, str] = json.loads(old["cells_json"])
     new_cells: Dict[str, str] = {str(k): str(v) if v is not None else "" for k, v in payload.items()}
+    if _cells_canonical_json(old_cells) == _cells_canonical_json(new_cells):
+        raise HTTPException(400, detail="Нет изменений — сохранение не требуется.")
     now = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
     mode = CFG.get("consistency", {}).get("mode", "warn")
 
     try:
         conn.execute("BEGIN")
         conn.execute(
-            "UPDATE data_row SET cells_json = ?, updated_at = ? WHERE id = ?",
-            (json.dumps(new_cells, ensure_ascii=False), now, row_id),
+            "UPDATE data_row SET is_current = 0, updated_at = ? WHERE id = ?",
+            (now, row_id),
         )
+        conn.execute(
+            """
+            INSERT INTO data_row (sheet_id, row_index, sort_key, cells_json, consistency_ok, consistency_errors, updated_at, is_current, replaces_row_id)
+            VALUES (?,?,?,?,?,?,?,?,?)
+            """,
+            (
+                int(old["sheet_id"]),
+                int(old["row_index"]),
+                float(old["sort_key"] if old["sort_key"] is not None else old["row_index"]),
+                json.dumps(new_cells, ensure_ascii=False),
+                1,
+                "[]",
+                now,
+                1,
+                row_id,
+            ),
+        )
+        new_id = int(conn.execute("SELECT last_insert_rowid()").fetchone()[0])
         consistency.run_all_checks(conn, do_commit=False)
         cur_ok = conn.execute(
             "SELECT consistency_ok, consistency_errors FROM data_row WHERE id = ?",
-            (row_id,),
+            (new_id,),
         )
         chk = cur_ok.fetchone()
         if mode == "strict" and chk and int(chk["consistency_ok"]) == 0:
@@ -257,7 +291,7 @@ async def row_save(
             errs = json.loads(chk["consistency_errors"] or "[]")
             raise HTTPException(
                 400,
-                detail="Режим strict: строка не сохранена из‑за ошибок консистентности: " + "; ".join(errs),
+                detail="Режим strict: версия не сохранена из‑за ошибок консистентности: " + "; ".join(errs),
             )
         conn.commit()
     except HTTPException:
@@ -266,7 +300,7 @@ async def row_save(
         conn.rollback()
         raise
 
-    return RedirectResponse(f"/sheet/{code}/row/{row_id}", status_code=303)
+    return RedirectResponse(f"/sheet/{code}/row/{new_id}", status_code=303)
 
 
 @app.post("/admin/reimport")
