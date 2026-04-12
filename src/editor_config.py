@@ -18,6 +18,7 @@ def flatten_field_enums(cfg: Dict[str, Any]) -> List[Dict[str, Any]]:
 
     Новый формат элемента field_enums:
       {"sheet_code": "REWARD", "rules": [{"column": "...", "allow_custom": true, "options": [...]}, ...]}
+    Элемент options может быть строкой или объектом {"label": "подпись в UI", "value": "значение в ячейке CSV"}.
     Устаревший (плоский):
       {"sheet_code": "REWARD", "column": "...", ...}
     """
@@ -45,12 +46,13 @@ def flatten_field_enums(cfg: Dict[str, Any]) -> List[Dict[str, Any]]:
 
 def flatten_editor_textareas(cfg: Dict[str, Any]) -> List[Dict[str, Any]]:
     """
-    Плоский список подсказок по textarea: {sheet_code, column, min_rows?, max_rows?, json_path?}.
+    Плоский список подсказок редактора: {sheet_code, column, min_rows?, max_rows?, json_path?, ...}.
 
-    Новый формат:
-      {"sheet_code": "REWARD", "hints": [{"column": "FULL_NAME", "min_rows": 2, "max_rows": 10}]}
-    Устаревший:
-      {"sheet_code": "REWARD", "column": "FULL_NAME", "min_rows": 2, ...}
+    Дополнительно для дат (см. row_editor.js): input_type date или date_picker true — календарь HTML;
+    storage_format (например YYYY-MM-DD) — подпись в UI, в ячейку пишется строка в формате ISO.
+
+    Новый формат: sheet_code и массив hints с полями column, min_rows, input_type и т.д.
+    Устаревший: один объект на строку с полем column без массива hints.
     """
     raw = cfg.get("editor_textareas")
     if not raw or not isinstance(raw, list):
