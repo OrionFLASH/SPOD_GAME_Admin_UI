@@ -196,6 +196,27 @@ def wizard_delete_draft(draft_uuid: str):
     return JSONResponse({"ok": True})
 
 
+@app.get("/wizard/new-contest/seed-contests")
+def wizard_seed_contests():
+    """JSON: список актуальных конкурсов для режима «копировать существующий» (код, название, коды наград в связях)."""
+    conn = get_conn()
+    return JSONResponse(wizard_contest.list_seed_contests(conn))
+
+
+@app.get("/wizard/new-contest/seed-state")
+def wizard_seed_state(contest_code: str = ""):
+    """
+    JSON: состояние мастера (как в черновике) из актуальных строк БД для указанного CONTEST_CODE.
+    Параметр запроса: contest_code.
+    """
+    conn = get_conn()
+    try:
+        st = wizard_contest.build_seed_state_from_contest(conn, contest_code)
+    except ValueError as e:
+        raise HTTPException(400, detail=str(e)) from e
+    return JSONResponse(st)
+
+
 @app.get("/sheet/{code}", response_class=HTMLResponse)
 def sheet_list(request: Request, code: str, q: str = ""):
     conn = get_conn()

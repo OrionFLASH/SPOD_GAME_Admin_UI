@@ -1,0 +1,5452 @@
+{
+  "source_csv": "IN/SPOD/USER_ROLE (PROM) 13-03 v0.csv",
+  "columns": [
+    "RULE_NUM",
+    "ROLE_CODE",
+    "ROLE_NAME",
+    "PERSON_NUMBER_ARR",
+    "STAGE_ETALONE_CODE_ARR",
+    "POST_ETALONE_CODE_ARR",
+    "DIV_CODE_ARR",
+    "EXCLUDE_DIV_CODE_ARR",
+    "BUSINESS_BLOCK",
+    "UCH_CODE",
+    "ORG_UNIT_CODE",
+    "TB_CODE",
+    "GOSB_CODE"
+  ],
+  "rows": [
+    {
+      "RULE_NUM": "102131001",
+      "ROLE_CODE": "KM_KKSB",
+      "ROLE_NAME": "Клиентский менеджер ККСБ (Аппарат ЦЧБ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20000726,
+        20000727,
+        20000195
+      ],
+      "DIV_CODE_ARR": [
+        10293924
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "KMKKSB",
+      "UCH_CODE": "1",
+      "ORG_UNIT_CODE": "10293924",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "102161001",
+      "ROLE_CODE": "KM_KKSB",
+      "ROLE_NAME": "Клиентский менеджер ККСБ (Аппарат УБ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20000726,
+        20000727,
+        20000195
+      ],
+      "DIV_CODE_ARR": [
+        10293489
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "KMKKSB",
+      "UCH_CODE": "1",
+      "ORG_UNIT_CODE": "10293489",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "102181001",
+      "ROLE_CODE": "KM_KKSB",
+      "ROLE_NAME": "Клиентский менеджер ККСБ (Аппарат ББ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20000726,
+        20000727,
+        20000195
+      ],
+      "DIV_CODE_ARR": [
+        10353225,
+        10353235
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "KMKKSB",
+      "UCH_CODE": "1",
+      "ORG_UNIT_CODE": "10353225",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "102381381",
+      "ROLE_CODE": "KM_KKSB",
+      "ROLE_NAME": "Клиентский менеджер ККСБ (Управление инфраструктуры МБ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20000726,
+        20000727,
+        20000195
+      ],
+      "DIV_CODE_ARR": [
+        10242114
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "KMKKSB",
+      "UCH_CODE": "1",
+      "ORG_UNIT_CODE": "10242114",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "102381382",
+      "ROLE_CODE": "KM_KKSB",
+      "ROLE_NAME": "Клиентский менеджер ККСБ (Управление промышленности МБ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20000726,
+        20000727,
+        20000195
+      ],
+      "DIV_CODE_ARR": [
+        10242078
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "KMKKSB",
+      "UCH_CODE": "1",
+      "ORG_UNIT_CODE": "10242078",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "102381383",
+      "ROLE_CODE": "KM_KKSB",
+      "ROLE_NAME": "Клиентский менеджер ККСБ (Управление сферы недвижимости МБ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20000726,
+        20000727,
+        20000195
+      ],
+      "DIV_CODE_ARR": [
+        10240714
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "KMKKSB",
+      "UCH_CODE": "1",
+      "ORG_UNIT_CODE": "10240714",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "102381384",
+      "ROLE_CODE": "KM_KKSB",
+      "ROLE_NAME": "Клиентский менеджер ККСБ (Управление сферы услуг МБ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20000726,
+        20000727,
+        20000195
+      ],
+      "DIV_CODE_ARR": [
+        10241967
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "KMKKSB",
+      "UCH_CODE": "1",
+      "ORG_UNIT_CODE": "10241967",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "102381385",
+      "ROLE_CODE": "KM_KKSB",
+      "ROLE_NAME": "Клиентский менеджер ККСБ (Управление торговли МБ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20000726,
+        20000727,
+        20000195
+      ],
+      "DIV_CODE_ARR": [
+        10241463
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "KMKKSB",
+      "UCH_CODE": "1",
+      "ORG_UNIT_CODE": "10241463",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "102381386",
+      "ROLE_CODE": "KM_KKSB",
+      "ROLE_NAME": "Клиентский менеджер ККСБ (Управление транспорта МБ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20000726,
+        20000727,
+        20000195
+      ],
+      "DIV_CODE_ARR": [
+        10241962
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "KMKKSB",
+      "UCH_CODE": "1",
+      "ORG_UNIT_CODE": "10241962",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "102401001",
+      "ROLE_CODE": "KM_KKSB",
+      "ROLE_NAME": "Клиентский менеджер ККСБ (Аппарат СРБ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20000726,
+        20000727,
+        20000195
+      ],
+      "DIV_CODE_ARR": [
+        10290247,
+        10358128,
+        10358126,
+        10358127,
+        10358129
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "KMKKSB",
+      "UCH_CODE": "1",
+      "ORG_UNIT_CODE": "10290247",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "102421001",
+      "ROLE_CODE": "KM_KKSB",
+      "ROLE_NAME": "Клиентский менеджер ККСБ (Аппарат ВВБ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20000726,
+        20000727,
+        20000195
+      ],
+      "DIV_CODE_ARR": [
+        10299006
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "KMKKSB",
+      "UCH_CODE": "1",
+      "ORG_UNIT_CODE": "10299006",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "102441001",
+      "ROLE_CODE": "KM_KKSB",
+      "ROLE_NAME": "Клиентский менеджер ККСБ (Аппарат СИБ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20000726,
+        20000727,
+        20000195
+      ],
+      "DIV_CODE_ARR": [
+        10295911
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "KMKKSB",
+      "UCH_CODE": "1",
+      "ORG_UNIT_CODE": "10295911",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "102521001",
+      "ROLE_CODE": "KM_KKSB",
+      "ROLE_NAME": "Клиентский менеджер ККСБ (Аппарат ЮЗБ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20000726,
+        20000727,
+        20000195
+      ],
+      "DIV_CODE_ARR": [
+        10295859
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "KMKKSB",
+      "UCH_CODE": "1",
+      "ORG_UNIT_CODE": "10295859",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "102521002",
+      "ROLE_CODE": "KM_KKSB",
+      "ROLE_NAME": "Клиентский менеджер ККСБ (ГО Крым ЮЗБ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20000726,
+        20000727,
+        20000195
+      ],
+      "DIV_CODE_ARR": [
+        10361334,
+        10361333
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "KMKKSB",
+      "UCH_CODE": "1",
+      "ORG_UNIT_CODE": "10337151",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "102541001",
+      "ROLE_CODE": "KM_KKSB",
+      "ROLE_NAME": "Клиентский менеджер ККСБ (Аппарат ПБ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20000726,
+        20000727,
+        20000195
+      ],
+      "DIV_CODE_ARR": [
+        10295424
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "KMKKSB",
+      "UCH_CODE": "1",
+      "ORG_UNIT_CODE": "10295424",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "102551001",
+      "ROLE_CODE": "KM_KKSB",
+      "ROLE_NAME": "Клиентский менеджер ККСБ (Аппарат СЗБ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20000726,
+        20000727,
+        20000195
+      ],
+      "DIV_CODE_ARR": [
+        10298976,
+        10298978,
+        10372352,
+        10298985,
+        10372354,
+        10372353
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "KMKKSB",
+      "UCH_CODE": "1",
+      "ORG_UNIT_CODE": "10298976",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "102551002",
+      "ROLE_CODE": "KM_KKSB",
+      "ROLE_NAME": "Клиентский менеджер ККСБ (ГО СПБ СЗБ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20000726,
+        20000727,
+        20000195
+      ],
+      "DIV_CODE_ARR": [
+        10295756,
+        10295995,
+        10296614,
+        10372356,
+        10372357,
+        10372358,
+        10372359,
+        10372361,
+        10372362,
+        10372363,
+        10372364
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "KMKKSB",
+      "UCH_CODE": "1",
+      "ORG_UNIT_CODE": "10086553",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "102551003",
+      "ROLE_CODE": "KM_KKSB",
+      "ROLE_NAME": "Клиентский менеджер ККСБ (ГО Ленинградской обл. СЗБ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20000726,
+        20000727,
+        20000195
+      ],
+      "DIV_CODE_ARR": [
+        10296607,
+        10343082,
+        10343083,
+        10372365,
+        10372366,
+        10372367
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "KMKKSB",
+      "UCH_CODE": "1",
+      "ORG_UNIT_CODE": "10086573",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "102701001",
+      "ROLE_CODE": "KM_KKSB",
+      "ROLE_NAME": "Клиентский менеджер ККСБ (Аппарат ДВБ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20000726,
+        20000727,
+        20000195
+      ],
+      "DIV_CODE_ARR": [
+        10296390
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "KMKKSB",
+      "UCH_CODE": "1",
+      "ORG_UNIT_CODE": "10296390",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "102901001",
+      "ROLE_CODE": "KM_KKSB",
+      "ROLE_NAME": "Клиентский менеджер ККСБ (в ГОСБ вне Аппаратов ТБ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20000726,
+        20000727,
+        20000195
+      ],
+      "DIV_CODE_ARR": [
+        10296817,
+        10298931,
+        10296455,
+        10292723,
+        10295737,
+        10324942,
+        10296744,
+        10291622,
+        10296726,
+        10296276,
+        10296736,
+        10326803,
+        10291688,
+        10296497,
+        10295724,
+        10295797,
+        10295306,
+        10295791,
+        10302097,
+        10358175,
+        10302090,
+        10296029,
+        10341283,
+        10341282,
+        10341284,
+        10336710,
+        10336708,
+        10336711,
+        10295917,
+        10309159,
+        10309161,
+        10309160,
+        10343353,
+        10343351,
+        10343352,
+        10300800,
+        10315173,
+        10315171,
+        10349990,
+        10349988,
+        10330409,
+        10352202,
+        10352203,
+        10308062,
+        10291616,
+        10296806,
+        10313546,
+        10313544,
+        10309990,
+        10309989,
+        10309155,
+        10309154,
+        10329098,
+        10329099,
+        10319126,
+        10319127,
+        10308287,
+        10308288,
+        10309952,
+        10334702,
+        10334712,
+        10309951,
+        10309726,
+        10310504,
+        10308421,
+        10308419,
+        10309368,
+        10309367,
+        10309995,
+        10309994,
+        10313570,
+        10313569,
+        10309650,
+        10309651,
+        10313571,
+        10313572,
+        10355637,
+        10355590,
+        10309366,
+        10342925,
+        10308597,
+        10309150,
+        10296496,
+        10356595,
+        10356853,
+        10295862,
+        10309152,
+        10295863,
+        10295864,
+        10295865,
+        10310079,
+        10295866,
+        10296409,
+        10308244,
+        10309158,
+        10295629,
+        10313564,
+        10313562,
+        10309991,
+        10308241,
+        10308320,
+        10308242,
+        10310090,
+        10296816,
+        10309162,
+        10325925,
+        10296026,
+        10296853,
+        10298953,
+        10301256,
+        10310091,
+        10298954,
+        10315159,
+        10370222,
+        10370484,
+        10370483,
+        10363426,
+        10372201,
+        10372202,
+        10372276,
+        10309728,
+        10324478,
+        10372277,
+        10295918,
+        10324477,
+        10309730,
+        10372368,
+        10372370,
+        10372212,
+        10372477,
+        10372478,
+        10370110,
+        10372475,
+        10308644,
+        10372275,
+        10372281,
+        10372282,
+        10309278,
+        10309279,
+        10372203,
+        10372374,
+        10352561,
+        10373116,
+        10298950,
+        10319460,
+        10319462,
+        10296499,
+        10296498,
+        10313526,
+        10309149,
+        10356506,
+        10311055,
+        10332234,
+        10373103,
+        10373102,
+        10373104,
+        10373106,
+        10373107,
+        10373108,
+        10373109,
+        10373111,
+        10373113,
+        10373114,
+        10373115,
+        10373116,
+        10372207,
+        10372208,
+        10372209,
+        10372210,
+        10372211,
+        10372213,
+        10372214,
+        10373105
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "KMKKSB",
+      "UCH_CODE": "1",
+      "ORG_UNIT_CODE": "",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "102901002",
+      "ROLE_CODE": "KM_KKSB",
+      "ROLE_NAME": "Клиентский менеджер ККСБ (Специалист)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20000255
+      ],
+      "DIV_CODE_ARR": [
+        10308421,
+        10313530,
+        10308419
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "KMKKSB",
+      "UCH_CODE": "1",
+      "ORG_UNIT_CODE": "",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "102901003",
+      "ROLE_CODE": "KM_KKSB",
+      "ROLE_NAME": "Клиентский менеджер ККСБ (в ГОСБ вне Аппаратов ТБ) (по ТН)",
+      "PERSON_NUMBER_ARR": "[00682262, 02094104, 00684147, 00687532, 00701809, 01373780, 01324585, 00691228, 00705008]",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20000726,
+        20000727,
+        20000195
+      ],
+      "DIV_CODE_ARR": "",
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "KMKKSB",
+      "UCH_CODE": "1",
+      "ORG_UNIT_CODE": "",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "103130001",
+      "ROLE_CODE": "RUK_KPK_KKSB",
+      "ROLE_NAME": "Руководитель КПК ККСБ (Аппарат ЦЧБ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20000082
+      ],
+      "DIV_CODE_ARR": [
+        10293924
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "KMKKSB",
+      "UCH_CODE": "0",
+      "ORG_UNIT_CODE": "10293924",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "103160001",
+      "ROLE_CODE": "RUK_KPK_KKSB",
+      "ROLE_NAME": "Руководитель КПК ККСБ (Аппарат УБ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20000082
+      ],
+      "DIV_CODE_ARR": [
+        10293489
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "KMKKSB",
+      "UCH_CODE": "0",
+      "ORG_UNIT_CODE": "10293489",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "103180001",
+      "ROLE_CODE": "RUK_KPK_KKSB",
+      "ROLE_NAME": "Руководитель КПК ККСБ (Аппарат ББ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20000082
+      ],
+      "DIV_CODE_ARR": [
+        10353225,
+        10353235
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "KMKKSB",
+      "UCH_CODE": "0",
+      "ORG_UNIT_CODE": "10353225",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "103380381",
+      "ROLE_CODE": "RUK_KPK_KKSB",
+      "ROLE_NAME": "Руководитель КПК ККСБ (Управление инфраструктуры МБ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20000082
+      ],
+      "DIV_CODE_ARR": [
+        10242114
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "KMKKSB",
+      "UCH_CODE": "0",
+      "ORG_UNIT_CODE": "10242114",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "103380382",
+      "ROLE_CODE": "RUK_KPK_KKSB",
+      "ROLE_NAME": "Руководитель КПК ККСБ (Управление промышленности МБ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20000082
+      ],
+      "DIV_CODE_ARR": [
+        10242078
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "KMKKSB",
+      "UCH_CODE": "0",
+      "ORG_UNIT_CODE": "10242078",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "103380383",
+      "ROLE_CODE": "RUK_KPK_KKSB",
+      "ROLE_NAME": "Руководитель КПК ККСБ (Управление сферы недвижимости МБ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20000082,
+        20000108
+      ],
+      "DIV_CODE_ARR": [
+        10240714
+      ],
+      "EXCLUDE_DIV_CODE_ARR": [
+        10323500
+      ],
+      "BUSINESS_BLOCK": "KMKKSB",
+      "UCH_CODE": "0",
+      "ORG_UNIT_CODE": "10240714",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "103380384",
+      "ROLE_CODE": "RUK_KPK_KKSB",
+      "ROLE_NAME": "Руководитель КПК ККСБ (Управление сферы услуг МБ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20000082
+      ],
+      "DIV_CODE_ARR": [
+        10241967
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "KMKKSB",
+      "UCH_CODE": "0",
+      "ORG_UNIT_CODE": "10241967",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "103380385",
+      "ROLE_CODE": "RUK_KPK_KKSB",
+      "ROLE_NAME": "Руководитель КПК ККСБ (Управление торговли МБ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20000082
+      ],
+      "DIV_CODE_ARR": [
+        10241463
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "KMKKSB",
+      "UCH_CODE": "0",
+      "ORG_UNIT_CODE": "10241463",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "103380386",
+      "ROLE_CODE": "RUK_KPK_KKSB",
+      "ROLE_NAME": "Руководитель КПК ККСБ (Управление транспорта МБ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20000082
+      ],
+      "DIV_CODE_ARR": [
+        10241962
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "KMKKSB",
+      "UCH_CODE": "0",
+      "ORG_UNIT_CODE": "10241962",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "103400001",
+      "ROLE_CODE": "RUK_KPK_KKSB",
+      "ROLE_NAME": "Руководитель КПК ККСБ (Аппарат СРБ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20000082
+      ],
+      "DIV_CODE_ARR": [
+        10290247,
+        10358128,
+        10358126,
+        10358127,
+        10358129
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "KMKKSB",
+      "UCH_CODE": "0",
+      "ORG_UNIT_CODE": "10290247",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "103420001",
+      "ROLE_CODE": "RUK_KPK_KKSB",
+      "ROLE_NAME": "Руководитель КПК ККСБ (Аппарат ВВБ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20000082
+      ],
+      "DIV_CODE_ARR": [
+        10299006
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "KMKKSB",
+      "UCH_CODE": "0",
+      "ORG_UNIT_CODE": "10299006",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "103440001",
+      "ROLE_CODE": "RUK_KPK_KKSB",
+      "ROLE_NAME": "Руководитель КПК ККСБ (Аппарат СИБ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20000082
+      ],
+      "DIV_CODE_ARR": [
+        10295911
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "KMKKSB",
+      "UCH_CODE": "0",
+      "ORG_UNIT_CODE": "10295911",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "103520001",
+      "ROLE_CODE": "RUK_KPK_KKSB",
+      "ROLE_NAME": "Руководитель КПК ККСБ (Аппарат ЮЗБ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20000082
+      ],
+      "DIV_CODE_ARR": [
+        10295859
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "KMKKSB",
+      "UCH_CODE": "0",
+      "ORG_UNIT_CODE": "10295859",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "103520002",
+      "ROLE_CODE": "RUK_KPK_KKSB",
+      "ROLE_NAME": "Руководитель КПК ККСБ (ГО Крым ЮЗБ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20000082
+      ],
+      "DIV_CODE_ARR": [
+        10361334,
+        10361333
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "KMKKSB",
+      "UCH_CODE": "0",
+      "ORG_UNIT_CODE": "10337151",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "103540001",
+      "ROLE_CODE": "RUK_KPK_KKSB",
+      "ROLE_NAME": "Руководитель КПК ККСБ (Аппарат ПБ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20000082,
+        20000108
+      ],
+      "DIV_CODE_ARR": [
+        10295424
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "KMKKSB",
+      "UCH_CODE": "0",
+      "ORG_UNIT_CODE": "10295424",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "103550001",
+      "ROLE_CODE": "RUK_KPK_KKSB",
+      "ROLE_NAME": "Руководитель КПК ККСБ (Аппарат СЗБ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20000082
+      ],
+      "DIV_CODE_ARR": [
+        10298976,
+        10298978,
+        10372352,
+        10298985,
+        10372354,
+        10372353
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "KMKKSB",
+      "UCH_CODE": "0",
+      "ORG_UNIT_CODE": "10298976",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "103550002",
+      "ROLE_CODE": "RUK_KPK_KKSB",
+      "ROLE_NAME": "Руководитель КПК ККСБ (ГО СПБ СЗБ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20000082
+      ],
+      "DIV_CODE_ARR": [
+        10295756,
+        10295995,
+        10296614,
+        10372356,
+        10372357,
+        10372358,
+        10372359,
+        10372361,
+        10372362,
+        10372363,
+        10372364
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "KMKKSB",
+      "UCH_CODE": "0",
+      "ORG_UNIT_CODE": "10086553",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "103550003",
+      "ROLE_CODE": "RUK_KPK_KKSB",
+      "ROLE_NAME": "Руководитель КПК ККСБ (ГО Ленинградской обл. СЗБ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20000082
+      ],
+      "DIV_CODE_ARR": [
+        10296607,
+        10343082,
+        10343083,
+        10372365,
+        10372366,
+        10372367
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "KMKKSB",
+      "UCH_CODE": "0",
+      "ORG_UNIT_CODE": "10086573",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "103700001",
+      "ROLE_CODE": "RUK_KPK_KKSB",
+      "ROLE_NAME": "Руководитель КПК ККСБ (Аппарат ДВБ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20000082
+      ],
+      "DIV_CODE_ARR": [
+        10296390
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "KMKKSB",
+      "UCH_CODE": "0",
+      "ORG_UNIT_CODE": "10296390",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "103900001",
+      "ROLE_CODE": "RUK_KPK_KKSB",
+      "ROLE_NAME": "Руководитель КПК ККСБ (в ГОСБ вне Аппаратов ТБ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20000082,
+        20000108,
+        20004560
+      ],
+      "DIV_CODE_ARR": [
+        10296817,
+        10298931,
+        10296455,
+        10292723,
+        10295737,
+        10324942,
+        10296744,
+        10291622,
+        10296726,
+        10296276,
+        10296736,
+        10326803,
+        10291688,
+        10296497,
+        10295724,
+        10295797,
+        10295306,
+        10295791,
+        10302097,
+        10358175,
+        10302090,
+        10296029,
+        10341283,
+        10341282,
+        10341284,
+        10336710,
+        10336708,
+        10336711,
+        10295917,
+        10309159,
+        10309161,
+        10309160,
+        10343353,
+        10343351,
+        10343352,
+        10300800,
+        10315173,
+        10315171,
+        10349990,
+        10349988,
+        10330409,
+        10352202,
+        10352203,
+        10308062,
+        10291616,
+        10296806,
+        10313546,
+        10313544,
+        10309990,
+        10309989,
+        10309155,
+        10309154,
+        10329098,
+        10329099,
+        10319126,
+        10319127,
+        10308287,
+        10308288,
+        10309952,
+        10334702,
+        10334712,
+        10309951,
+        10309726,
+        10310504,
+        10308421,
+        10308419,
+        10309368,
+        10309367,
+        10309995,
+        10309994,
+        10313570,
+        10313569,
+        10309650,
+        10309651,
+        10313571,
+        10313572,
+        10355637,
+        10355590,
+        10309366,
+        10342925,
+        10308597,
+        10309150,
+        10296496,
+        10356595,
+        10356853,
+        10295862,
+        10309152,
+        10295863,
+        10295864,
+        10295865,
+        10310079,
+        10295866,
+        10296409,
+        10308244,
+        10309158,
+        10295629,
+        10313564,
+        10313562,
+        10309991,
+        10308241,
+        10308320,
+        10308242,
+        10310090,
+        10296816,
+        10309162,
+        10325925,
+        10296026,
+        10296853,
+        10298953,
+        10301256,
+        10310091,
+        10298954,
+        10315159,
+        10370222,
+        10370484,
+        10370483,
+        10363426,
+        10372201,
+        10372202,
+        10372276,
+        10309728,
+        10324478,
+        10372277,
+        10295918,
+        10324477,
+        10309730,
+        10372368,
+        10372370,
+        10372212,
+        10372477,
+        10372478,
+        10370110,
+        10372475,
+        10308644,
+        10372275,
+        10372281,
+        10372282,
+        10309278,
+        10309279,
+        10372203,
+        10372374,
+        10352561,
+        10373116,
+        10298950,
+        10319460,
+        10319462,
+        10296499,
+        10296498,
+        10313526,
+        10309149,
+        10356506,
+        10311055,
+        10332234,
+        10373103,
+        10373102,
+        10373104,
+        10373106,
+        10373107,
+        10373108,
+        10373109,
+        10373111,
+        10373113,
+        10373114,
+        10373115,
+        10373116,
+        10372207,
+        10372208,
+        10372209,
+        10372210,
+        10372211,
+        10372213,
+        10372214,
+        10373105
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "KMKKSB",
+      "UCH_CODE": "0",
+      "ORG_UNIT_CODE": "",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "104130001",
+      "ROLE_CODE": "AKM_KKSB",
+      "ROLE_NAME": "Ассистент клиентского менеджера ККСБ (Аппарат ЦЧБ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20000282,
+        20000157
+      ],
+      "DIV_CODE_ARR": [
+        10293924
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "KMKKSB",
+      "UCH_CODE": "0",
+      "ORG_UNIT_CODE": "10293924",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "104160001",
+      "ROLE_CODE": "AKM_KKSB",
+      "ROLE_NAME": "Ассистент клиентского менеджера ККСБ (Аппарат УБ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20000282,
+        20000157
+      ],
+      "DIV_CODE_ARR": [
+        10293489
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "KMKKSB",
+      "UCH_CODE": "0",
+      "ORG_UNIT_CODE": "10293489",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "104180001",
+      "ROLE_CODE": "AKM_KKSB",
+      "ROLE_NAME": "Ассистент клиентского менеджера ККСБ (Аппарат ББ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20000282,
+        20000157
+      ],
+      "DIV_CODE_ARR": [
+        10353225,
+        10353235
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "KMKKSB",
+      "UCH_CODE": "0",
+      "ORG_UNIT_CODE": "10353225",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "104380381",
+      "ROLE_CODE": "AKM_KKSB",
+      "ROLE_NAME": "Ассистент клиентского менеджера ККСБ (Управление инфраструктуры МБ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20000282,
+        20000157
+      ],
+      "DIV_CODE_ARR": [
+        10242114
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "KMKKSB",
+      "UCH_CODE": "0",
+      "ORG_UNIT_CODE": "10242114",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "104380382",
+      "ROLE_CODE": "AKM_KKSB",
+      "ROLE_NAME": "Ассистент клиентского менеджера ККСБ (Управление промышленности МБ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20000282,
+        20000157
+      ],
+      "DIV_CODE_ARR": [
+        10242078
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "KMKKSB",
+      "UCH_CODE": "0",
+      "ORG_UNIT_CODE": "10242078",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "104380383",
+      "ROLE_CODE": "AKM_KKSB",
+      "ROLE_NAME": "Ассистент клиентского менеджера ККСБ (Управление сферы недвижимости МБ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20000282,
+        20000157
+      ],
+      "DIV_CODE_ARR": [
+        10240714
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "KMKKSB",
+      "UCH_CODE": "0",
+      "ORG_UNIT_CODE": "10240714",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "104380384",
+      "ROLE_CODE": "AKM_KKSB",
+      "ROLE_NAME": "Ассистент клиентского менеджера ККСБ (Управление сферы услуг МБ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20000282,
+        20000157
+      ],
+      "DIV_CODE_ARR": [
+        10241967
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "KMKKSB",
+      "UCH_CODE": "0",
+      "ORG_UNIT_CODE": "10241967",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "104380385",
+      "ROLE_CODE": "AKM_KKSB",
+      "ROLE_NAME": "Ассистент клиентского менеджера ККСБ (Управление торговли МБ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20000282,
+        20000157
+      ],
+      "DIV_CODE_ARR": [
+        10241463
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "KMKKSB",
+      "UCH_CODE": "0",
+      "ORG_UNIT_CODE": "10241463",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "104380386",
+      "ROLE_CODE": "AKM_KKSB",
+      "ROLE_NAME": "Ассистент клиентского менеджера ККСБ (Управление транспорта МБ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20000282,
+        20000157
+      ],
+      "DIV_CODE_ARR": [
+        10241962
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "KMKKSB",
+      "UCH_CODE": "0",
+      "ORG_UNIT_CODE": "10241962",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "104400001",
+      "ROLE_CODE": "AKM_KKSB",
+      "ROLE_NAME": "Ассистент клиентского менеджера ККСБ (Аппарат СРБ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20000282,
+        20000157
+      ],
+      "DIV_CODE_ARR": [
+        10290247,
+        10358128,
+        10358126,
+        10358127,
+        10358129
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "KMKKSB",
+      "UCH_CODE": "0",
+      "ORG_UNIT_CODE": "10290247",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "104420001",
+      "ROLE_CODE": "AKM_KKSB",
+      "ROLE_NAME": "Ассистент клиентского менеджера ККСБ (Аппарат ВВБ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20000282,
+        20000157
+      ],
+      "DIV_CODE_ARR": [
+        10299006
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "KMKKSB",
+      "UCH_CODE": "0",
+      "ORG_UNIT_CODE": "10299006",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "104440001",
+      "ROLE_CODE": "AKM_KKSB",
+      "ROLE_NAME": "Ассистент клиентского менеджера ККСБ (Аппарат СИБ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20000282,
+        20000157
+      ],
+      "DIV_CODE_ARR": [
+        10295911
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "KMKKSB",
+      "UCH_CODE": "0",
+      "ORG_UNIT_CODE": "10295911",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "104520001",
+      "ROLE_CODE": "AKM_KKSB",
+      "ROLE_NAME": "Ассистент клиентского менеджера ККСБ (Аппарат ЮЗБ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20000282,
+        20000157
+      ],
+      "DIV_CODE_ARR": [
+        10295859
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "KMKKSB",
+      "UCH_CODE": "0",
+      "ORG_UNIT_CODE": "10295859",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "104520002",
+      "ROLE_CODE": "AKM_KKSB",
+      "ROLE_NAME": "Ассистент клиентского менеджера ККСБ (ГО Крым ЮЗБ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20000282
+      ],
+      "DIV_CODE_ARR": [
+        10361334,
+        10361333
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "KMKKSB",
+      "UCH_CODE": "0",
+      "ORG_UNIT_CODE": "10337151",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "104540001",
+      "ROLE_CODE": "AKM_KKSB",
+      "ROLE_NAME": "Ассистент клиентского менеджера ККСБ (Аппарат ПБ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20000282,
+        20000157
+      ],
+      "DIV_CODE_ARR": [
+        10295424
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "KMKKSB",
+      "UCH_CODE": "0",
+      "ORG_UNIT_CODE": "10295424",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "104550001",
+      "ROLE_CODE": "AKM_KKSB",
+      "ROLE_NAME": "Ассистент клиентского менеджера ККСБ (Аппарат СЗБ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20000282,
+        20000157
+      ],
+      "DIV_CODE_ARR": [
+        10298976,
+        10298978,
+        10372352,
+        10298985,
+        10372354,
+        10372353
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "KMKKSB",
+      "UCH_CODE": "0",
+      "ORG_UNIT_CODE": "10298976",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "104550002",
+      "ROLE_CODE": "AKM_KKSB",
+      "ROLE_NAME": "Ассистент клиентского менеджера ККСБ (ГО СПБ СЗБ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20000282
+      ],
+      "DIV_CODE_ARR": [
+        10295756,
+        10295995,
+        10296614,
+        10372356,
+        10372357,
+        10372358,
+        10372359,
+        10372361,
+        10372362,
+        10372363,
+        10372364
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "KMKKSB",
+      "UCH_CODE": "0",
+      "ORG_UNIT_CODE": "10086553",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "104550003",
+      "ROLE_CODE": "AKM_KKSB",
+      "ROLE_NAME": "Ассистент клиентского менеджера ККСБ (ГО Ленинградской обл. СЗБ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20000282
+      ],
+      "DIV_CODE_ARR": [
+        10296607,
+        10343082,
+        10343083,
+        10372365,
+        10372366,
+        10372367
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "KMKKSB",
+      "UCH_CODE": "0",
+      "ORG_UNIT_CODE": "10086573",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "104700001",
+      "ROLE_CODE": "AKM_KKSB",
+      "ROLE_NAME": "Ассистент клиентского менеджера ККСБ (Аппарат ДВБ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20000282,
+        20000157
+      ],
+      "DIV_CODE_ARR": [
+        10296390
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "KMKKSB",
+      "UCH_CODE": "0",
+      "ORG_UNIT_CODE": "10296390",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "104900001",
+      "ROLE_CODE": "AKM_KKSB",
+      "ROLE_NAME": "Ассистент клиентского менеджера ККСБ (в ГОСБ вне Аппаратов ТБ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20000282
+      ],
+      "DIV_CODE_ARR": [
+        10296817,
+        10298931,
+        10296455,
+        10292723,
+        10295737,
+        10324942,
+        10296744,
+        10291622,
+        10296726,
+        10296276,
+        10296736,
+        10326803,
+        10291688,
+        10296497,
+        10295724,
+        10295797,
+        10295306,
+        10295791,
+        10302097,
+        10358175,
+        10302090,
+        10296029,
+        10341283,
+        10341282,
+        10341284,
+        10336710,
+        10336708,
+        10336711,
+        10295917,
+        10309159,
+        10309161,
+        10309160,
+        10343353,
+        10343351,
+        10343352,
+        10300800,
+        10315173,
+        10315171,
+        10349990,
+        10349988,
+        10330409,
+        10352202,
+        10352203,
+        10308062,
+        10291616,
+        10296806,
+        10313546,
+        10313544,
+        10309990,
+        10309989,
+        10309155,
+        10309154,
+        10329098,
+        10329099,
+        10319126,
+        10319127,
+        10308287,
+        10308288,
+        10309952,
+        10334702,
+        10334712,
+        10309951,
+        10309726,
+        10310504,
+        10308421,
+        10308419,
+        10309368,
+        10309367,
+        10309995,
+        10309994,
+        10313570,
+        10313569,
+        10309650,
+        10309651,
+        10313571,
+        10313572,
+        10355637,
+        10355590,
+        10309366,
+        10342925,
+        10308597,
+        10309150,
+        10296496,
+        10356595,
+        10356853,
+        10295862,
+        10309152,
+        10295863,
+        10295864,
+        10295865,
+        10310079,
+        10295866,
+        10296409,
+        10308244,
+        10309158,
+        10295629,
+        10313564,
+        10313562,
+        10309991,
+        10308241,
+        10308320,
+        10308242,
+        10310090,
+        10296816,
+        10309162,
+        10325925,
+        10296026,
+        10296853,
+        10298953,
+        10301256,
+        10310091,
+        10298954,
+        10315159,
+        10370222,
+        10370484,
+        10370483,
+        10363426,
+        10372201,
+        10372202,
+        10372276,
+        10309728,
+        10324478,
+        10372277,
+        10295918,
+        10324477,
+        10309730,
+        10372368,
+        10372370,
+        10372212,
+        10372477,
+        10372478,
+        10370110,
+        10372475,
+        10308644,
+        10372275,
+        10372281,
+        10372282,
+        10309278,
+        10309279,
+        10372203,
+        10372374,
+        10352561,
+        10373116,
+        10298950,
+        10319460,
+        10319462,
+        10296499,
+        10296498,
+        10313526,
+        10309149,
+        10356506,
+        10311055,
+        10332234,
+        10373103,
+        10373102,
+        10373104,
+        10373106,
+        10373107,
+        10373108,
+        10373109,
+        10373111,
+        10373113,
+        10373114,
+        10373115,
+        10373116,
+        10372207,
+        10372208,
+        10372209,
+        10372210,
+        10372211,
+        10372213,
+        10372214,
+        10373105
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "KMKKSB",
+      "UCH_CODE": "0",
+      "ORG_UNIT_CODE": "",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "105130001",
+      "ROLE_CODE": "KI_KIB",
+      "ROLE_NAME": "Кредитный инспектор (Аппарат ЦЧБ) (по ТН)",
+      "PERSON_NUMBER_ARR": "[00399098]",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": "",
+      "DIV_CODE_ARR": [
+        10038020
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "KMKKSB",
+      "UCH_CODE": "0",
+      "ORG_UNIT_CODE": "10016678",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "105380384",
+      "ROLE_CODE": "KI_KIB",
+      "ROLE_NAME": "Кредитный инспектор (Управление сферы услуг МБ) (по ТН)",
+      "PERSON_NUMBER_ARR": "[01811697]",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": "",
+      "DIV_CODE_ARR": [
+        10241967
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "KMKKSB",
+      "UCH_CODE": "0",
+      "ORG_UNIT_CODE": "10241967",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "105900001",
+      "ROLE_CODE": "KI_KIB",
+      "ROLE_NAME": "Кредитный инспектор (по ТН)",
+      "PERSON_NUMBER_ARR": "[00377803, 01436313, 00390531, 01639579, 00360165, 01476482]",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": "",
+      "DIV_CODE_ARR": "",
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "KMKKSB",
+      "UCH_CODE": "0",
+      "ORG_UNIT_CODE": "",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "106130001",
+      "ROLE_CODE": "RUK_N_UPR_KKSB",
+      "ROLE_NAME": "Начальник управления ККСБ (Аппарат ЦЧБ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20000070
+      ],
+      "DIV_CODE_ARR": [
+        10293924
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "KMKKSB",
+      "UCH_CODE": "0",
+      "ORG_UNIT_CODE": "10293924",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "106160001",
+      "ROLE_CODE": "RUK_N_UPR_KKSB",
+      "ROLE_NAME": "Начальник управления ККСБ (Аппарат УБ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20000070
+      ],
+      "DIV_CODE_ARR": [
+        10293489
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "KMKKSB",
+      "UCH_CODE": "0",
+      "ORG_UNIT_CODE": "10293489",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "106180001",
+      "ROLE_CODE": "RUK_N_UPR_KKSB",
+      "ROLE_NAME": "Начальник управления ККСБ (Аппарат ББ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20000070
+      ],
+      "DIV_CODE_ARR": [
+        10353225,
+        10353235
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "KMKKSB",
+      "UCH_CODE": "0",
+      "ORG_UNIT_CODE": "10353225",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "106380381",
+      "ROLE_CODE": "RUK_N_UPR_KKSB",
+      "ROLE_NAME": "Начальник управления ККСБ (Управление инфраструктуры МБ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20000070
+      ],
+      "DIV_CODE_ARR": [
+        10242114
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "KMKKSB",
+      "UCH_CODE": "0",
+      "ORG_UNIT_CODE": "10242114",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "106380382",
+      "ROLE_CODE": "RUK_N_UPR_KKSB",
+      "ROLE_NAME": "Начальник управления ККСБ (Управление промышленности МБ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20000070
+      ],
+      "DIV_CODE_ARR": [
+        10242078
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "KMKKSB",
+      "UCH_CODE": "0",
+      "ORG_UNIT_CODE": "10242078",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "106380383",
+      "ROLE_CODE": "RUK_N_UPR_KKSB",
+      "ROLE_NAME": "Начальник управления ККСБ (Управление сферы недвижимости МБ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20000070
+      ],
+      "DIV_CODE_ARR": [
+        10240714
+      ],
+      "EXCLUDE_DIV_CODE_ARR": [
+        10323500
+      ],
+      "BUSINESS_BLOCK": "KMKKSB",
+      "UCH_CODE": "0",
+      "ORG_UNIT_CODE": "10240714",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "106380384",
+      "ROLE_CODE": "RUK_N_UPR_KKSB",
+      "ROLE_NAME": "Начальник управления ККСБ (Управление сферы услуг МБ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20000070
+      ],
+      "DIV_CODE_ARR": [
+        10241967
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "KMKKSB",
+      "UCH_CODE": "0",
+      "ORG_UNIT_CODE": "10241967",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "106380385",
+      "ROLE_CODE": "RUK_N_UPR_KKSB",
+      "ROLE_NAME": "Начальник управления ККСБ (Управление торговли МБ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20000070
+      ],
+      "DIV_CODE_ARR": [
+        10241463
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "KMKKSB",
+      "UCH_CODE": "0",
+      "ORG_UNIT_CODE": "10241463",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "106380386",
+      "ROLE_CODE": "RUK_N_UPR_KKSB",
+      "ROLE_NAME": "Начальник управления ККСБ (Управление транспорта МБ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20000070
+      ],
+      "DIV_CODE_ARR": [
+        10241962
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "KMKKSB",
+      "UCH_CODE": "0",
+      "ORG_UNIT_CODE": "10241962",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "106400001",
+      "ROLE_CODE": "RUK_N_UPR_KKSB",
+      "ROLE_NAME": "Начальник управления ККСБ (Аппарат СРБ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20000070
+      ],
+      "DIV_CODE_ARR": [
+        10290247,
+        10358128,
+        10358126,
+        10358127,
+        10358129
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "KMKKSB",
+      "UCH_CODE": "0",
+      "ORG_UNIT_CODE": "10290247",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "106420001",
+      "ROLE_CODE": "RUK_N_UPR_KKSB",
+      "ROLE_NAME": "Начальник управления ККСБ (Аппарат ВВБ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20000070
+      ],
+      "DIV_CODE_ARR": [
+        10299006
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "KMKKSB",
+      "UCH_CODE": "0",
+      "ORG_UNIT_CODE": "10299006",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "106440001",
+      "ROLE_CODE": "RUK_N_UPR_KKSB",
+      "ROLE_NAME": "Начальник управления ККСБ (Аппарат СИБ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20000070
+      ],
+      "DIV_CODE_ARR": [
+        10295911
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "KMKKSB",
+      "UCH_CODE": "0",
+      "ORG_UNIT_CODE": "10295911",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "106520001",
+      "ROLE_CODE": "RUK_N_UPR_KKSB",
+      "ROLE_NAME": "Начальник управления ККСБ (Аппарат ЮЗБ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20000070
+      ],
+      "DIV_CODE_ARR": [
+        10295859
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "KMKKSB",
+      "UCH_CODE": "0",
+      "ORG_UNIT_CODE": "10295859",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "106520002",
+      "ROLE_CODE": "RUK_N_UPR_KKSB",
+      "ROLE_NAME": "Начальник управления ККСБ (ГО Крым ЮЗБ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20000070
+      ],
+      "DIV_CODE_ARR": [
+        10361334,
+        10361333
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "KMKKSB",
+      "UCH_CODE": "0",
+      "ORG_UNIT_CODE": "10337151",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "106540001",
+      "ROLE_CODE": "RUK_N_UPR_KKSB",
+      "ROLE_NAME": "Начальник управления ККСБ (Аппарат ПБ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20000070
+      ],
+      "DIV_CODE_ARR": [
+        10295424
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "KMKKSB",
+      "UCH_CODE": "0",
+      "ORG_UNIT_CODE": "10295424",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "106550001",
+      "ROLE_CODE": "RUK_N_UPR_KKSB",
+      "ROLE_NAME": "Начальник управления ККСБ (Аппарат СЗБ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20000070
+      ],
+      "DIV_CODE_ARR": [
+        10298976,
+        10298978,
+        10372352,
+        10298985,
+        10372354,
+        10372353
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "KMKKSB",
+      "UCH_CODE": "0",
+      "ORG_UNIT_CODE": "10298976",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "106550002",
+      "ROLE_CODE": "RUK_N_UPR_KKSB",
+      "ROLE_NAME": "Начальник управления ККСБ (ГО СПБ СЗБ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20000070
+      ],
+      "DIV_CODE_ARR": [
+        10295756,
+        10295995,
+        10296614,
+        10372356,
+        10372357,
+        10372358,
+        10372359,
+        10372361,
+        10372362,
+        10372363,
+        10372364
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "KMKKSB",
+      "UCH_CODE": "0",
+      "ORG_UNIT_CODE": "10086553",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "106550003",
+      "ROLE_CODE": "RUK_N_UPR_KKSB",
+      "ROLE_NAME": "Начальник управления ККСБ (ГО Ленинградской обл. СЗБ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20000070
+      ],
+      "DIV_CODE_ARR": [
+        10296607,
+        10343082,
+        10343083,
+        10372365,
+        10372366,
+        10372367
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "KMKKSB",
+      "UCH_CODE": "0",
+      "ORG_UNIT_CODE": "10086573",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "106700001",
+      "ROLE_CODE": "RUK_N_UPR_KKSB",
+      "ROLE_NAME": "Начальник управления ККСБ (Аппарат ДВБ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20000070
+      ],
+      "DIV_CODE_ARR": [
+        10296390
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "KMKKSB",
+      "UCH_CODE": "0",
+      "ORG_UNIT_CODE": "10296390",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "106900001",
+      "ROLE_CODE": "RUK_N_UPR_KKSB",
+      "ROLE_NAME": "Начальник управления ККСБ (в ГОСБ вне Аппаратов ТБ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20000070
+      ],
+      "DIV_CODE_ARR": [
+        10296817,
+        10298931,
+        10296455,
+        10292723,
+        10295737,
+        10324942,
+        10296744,
+        10291622,
+        10296726,
+        10296276,
+        10296736,
+        10326803,
+        10291688,
+        10296497,
+        10295724,
+        10295797,
+        10295306,
+        10295791,
+        10302097,
+        10358175,
+        10302090,
+        10296029,
+        10341283,
+        10341282,
+        10341284,
+        10336710,
+        10336708,
+        10336711,
+        10295917,
+        10309159,
+        10309161,
+        10309160,
+        10343353,
+        10343351,
+        10343352,
+        10300800,
+        10315173,
+        10315171,
+        10349990,
+        10349988,
+        10330409,
+        10352202,
+        10352203,
+        10308062,
+        10291616,
+        10296806,
+        10313546,
+        10313544,
+        10309990,
+        10309989,
+        10309155,
+        10309154,
+        10329098,
+        10329099,
+        10319126,
+        10319127,
+        10308287,
+        10308288,
+        10309952,
+        10334702,
+        10334712,
+        10309951,
+        10309726,
+        10310504,
+        10308421,
+        10308419,
+        10309368,
+        10309367,
+        10309995,
+        10309994,
+        10313570,
+        10313569,
+        10309650,
+        10309651,
+        10313571,
+        10313572,
+        10355637,
+        10355590,
+        10309366,
+        10342925,
+        10308597,
+        10309150,
+        10296496,
+        10356595,
+        10356853,
+        10295862,
+        10309152,
+        10295863,
+        10295864,
+        10295865,
+        10310079,
+        10295866,
+        10296409,
+        10308244,
+        10309158,
+        10295629,
+        10313564,
+        10313562,
+        10309991,
+        10308241,
+        10308320,
+        10308242,
+        10310090,
+        10296816,
+        10309162,
+        10325925,
+        10296026,
+        10296853,
+        10298953,
+        10301256,
+        10310091,
+        10298954,
+        10315159,
+        10370222,
+        10370484,
+        10370483,
+        10363426,
+        10372201,
+        10372202,
+        10372276,
+        10309728,
+        10324478,
+        10372277,
+        10295918,
+        10324477,
+        10309730,
+        10372368,
+        10372370,
+        10372212,
+        10372477,
+        10372478,
+        10370110,
+        10372475,
+        10308644,
+        10372275,
+        10372281,
+        10372282,
+        10309278,
+        10309279,
+        10372203,
+        10372374,
+        10352561,
+        10373116,
+        10298950,
+        10319460,
+        10319462,
+        10296499,
+        10296498,
+        10313526,
+        10309149,
+        10356506,
+        10311055,
+        10332234,
+        10373103,
+        10373102,
+        10373104,
+        10373106,
+        10373107,
+        10373108,
+        10373109,
+        10373111,
+        10373113,
+        10373114,
+        10373115,
+        10373116,
+        10372207,
+        10372208,
+        10372209,
+        10372210,
+        10372211,
+        10372213,
+        10372214,
+        10373105
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "KMKKSB",
+      "UCH_CODE": "0",
+      "ORG_UNIT_CODE": "",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "205901001",
+      "ROLE_CODE": "KM_MNS",
+      "ROLE_NAME": "Менеджер по нефинансовым сервисам",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20008479,
+        20008478
+      ],
+      "DIV_CODE_ARR": "",
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "MNS",
+      "UCH_CODE": "1",
+      "ORG_UNIT_CODE": "",
+      "TB_CODE": "",
+      "GOSB_CODE": "0"
+    },
+    {
+      "RULE_NUM": "206900001",
+      "ROLE_CODE": "GMNS",
+      "ROLE_NAME": "Главный менеджер по нефинансовым сервисам",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20008477
+      ],
+      "DIV_CODE_ARR": "",
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "MNS",
+      "UCH_CODE": "0",
+      "ORG_UNIT_CODE": "",
+      "TB_CODE": "",
+      "GOSB_CODE": "0"
+    },
+    {
+      "RULE_NUM": "207900001",
+      "ROLE_CODE": "RUK_MNS",
+      "ROLE_NAME": "Директор управления продаж нефинансовых сервисов",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20000054
+      ],
+      "DIV_CODE_ARR": [
+        10353029,
+        10353608,
+        10353301,
+        10353152,
+        10353040,
+        10353227,
+        10353167,
+        10353555,
+        10352937,
+        10352887,
+        10352657
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "MNS",
+      "UCH_CODE": "0",
+      "ORG_UNIT_CODE": "",
+      "TB_CODE": "",
+      "GOSB_CODE": "0"
+    },
+    {
+      "RULE_NUM": "317381001",
+      "ROLE_CODE": "MR_SERVICE",
+      "ROLE_NAME": "Менеджер по сервису (Аппарат МБ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20009532,
+        20009545,
+        20002904,
+        20003713
+      ],
+      "DIV_CODE_ARR": [
+        10339878
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "SERVICEMEN",
+      "UCH_CODE": "1",
+      "ORG_UNIT_CODE": "10000367",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "317401001",
+      "ROLE_CODE": "MR_SERVICE",
+      "ROLE_NAME": "Менеджер по сервису (Аппарат СРБ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20009532,
+        20009545,
+        20002904,
+        20003713
+      ],
+      "DIV_CODE_ARR": [
+        10237318
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "SERVICEMEN",
+      "UCH_CODE": "1",
+      "ORG_UNIT_CODE": "10290247",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "317901001",
+      "ROLE_CODE": "MR_SERVICE",
+      "ROLE_NAME": "Менеджер по сервису",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20009532,
+        20009545,
+        20002904,
+        20003713
+      ],
+      "DIV_CODE_ARR": [
+        10016678,
+        10016445,
+        10016438,
+        10000367,
+        10016443,
+        10037179,
+        10108866,
+        10101758,
+        10016441,
+        10086568,
+        10016449
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "SERVICEMEN",
+      "UCH_CODE": "1",
+      "ORG_UNIT_CODE": "",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "336900001",
+      "ROLE_CODE": "SERVICEMEN_LOOK",
+      "ROLE_NAME": "Наблюдатель от блока Сервисы",
+      "PERSON_NUMBER_ARR": "[00459480, 01511227]",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": "",
+      "DIV_CODE_ARR": [
+        10235614,
+        10363370
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "SERVICEMEN",
+      "UCH_CODE": "0",
+      "ORG_UNIT_CODE": "",
+      "TB_CODE": "",
+      "GOSB_CODE": "0"
+    },
+    {
+      "RULE_NUM": "339902001",
+      "ROLE_CODE": "RUK_SERVICEMEN_TOP",
+      "ROLE_NAME": "Руководитель ТОП Сервис-менеджер",
+      "PERSON_NUMBER_ARR": "[01729301]",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": "",
+      "DIV_CODE_ARR": [
+        10235614
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "SERVICEMEN",
+      "UCH_CODE": "2",
+      "ORG_UNIT_CODE": "",
+      "TB_CODE": "",
+      "GOSB_CODE": "0"
+    },
+    {
+      "RULE_NUM": "432901001",
+      "ROLE_CODE": "KM_FAKTORING",
+      "ROLE_NAME": "КМ Факторинга",
+      "PERSON_NUMBER_ARR": [
+        1000000483,
+        999036748
+      ],
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": "",
+      "DIV_CODE_ARR": [
+        110000001
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "KMFACTORING",
+      "UCH_CODE": "1",
+      "ORG_UNIT_CODE": "",
+      "TB_CODE": "101",
+      "GOSB_CODE": "0"
+    },
+    {
+      "RULE_NUM": "434900002",
+      "ROLE_CODE": "FAKTORING_LOOK",
+      "ROLE_NAME": "Наблюдатель от Факторинга",
+      "PERSON_NUMBER_ARR": [
+        999012014,
+        1000000202
+      ],
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": "",
+      "DIV_CODE_ARR": [
+        110000001
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "KMFACTORING",
+      "UCH_CODE": "0",
+      "ORG_UNIT_CODE": "",
+      "TB_CODE": "101",
+      "GOSB_CODE": "0"
+    },
+    {
+      "RULE_NUM": "434900001",
+      "ROLE_CODE": "FAKTORING_LOOK",
+      "ROLE_NAME": "Наблюдатель от Факторинга",
+      "PERSON_NUMBER_ARR": "[00035080]",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": "",
+      "DIV_CODE_ARR": [
+        10371811,
+        10373500
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "KMFACTORING",
+      "UCH_CODE": "0",
+      "ORG_UNIT_CODE": "",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "437902002",
+      "ROLE_CODE": "RUK_FAKTORING_TOP",
+      "ROLE_NAME": "Руководитель ТОП Факторинг",
+      "PERSON_NUMBER_ARR": [
+        1000001058,
+        1000001125,
+        999089501,
+        999086770
+      ],
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": "",
+      "DIV_CODE_ARR": [
+        110000001
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "KMFACTORING",
+      "UCH_CODE": "2",
+      "ORG_UNIT_CODE": "",
+      "TB_CODE": "101",
+      "GOSB_CODE": "0"
+    },
+    {
+      "RULE_NUM": "437902001",
+      "ROLE_CODE": "RUK_FAKTORING_TOP",
+      "ROLE_NAME": "Руководитель ТОП Факторинг",
+      "PERSON_NUMBER_ARR": "[00706433, 00932239]",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": "",
+      "DIV_CODE_ARR": "",
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "KMFACTORING",
+      "UCH_CODE": "2",
+      "ORG_UNIT_CODE": "",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "508131001",
+      "ROLE_CODE": "KM_SB1",
+      "ROLE_NAME": "Клиентский менеджер Сбер Первый (ЦЧБ другие ГОСБ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20010577,
+        20006026,
+        20009052,
+        20009051,
+        20012734,
+        20012301,
+        20010601,
+        20010576,
+        20009101,
+        20000627,
+        20015451,
+        20015452,
+        20015453,
+        20014777
+      ],
+      "DIV_CODE_ARR": [
+        10312075,
+        10312077,
+        10312078,
+        10312079,
+        10312080,
+        10312076
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "KMSB1",
+      "UCH_CODE": "1",
+      "ORG_UNIT_CODE": "",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "508161001",
+      "ROLE_CODE": "KM_SB1",
+      "ROLE_NAME": "Клиентский менеджер Сбер Первый (УБ другие ГОСБ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20010577,
+        20006026,
+        20009052,
+        20009051,
+        20012734,
+        20012301,
+        20010601,
+        20010576,
+        20009101,
+        20000627,
+        20015451,
+        20015452,
+        20015453,
+        20014777
+      ],
+      "DIV_CODE_ARR": [
+        10311430,
+        10311431,
+        10311432,
+        10311433,
+        10311434,
+        10311437,
+        10311435
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "KMSB1",
+      "UCH_CODE": "1",
+      "ORG_UNIT_CODE": "",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "508181001",
+      "ROLE_CODE": "KM_SB1",
+      "ROLE_NAME": "Клиентский менеджер Сбер Первый (ББ другие ГОСБ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20010577,
+        20006026,
+        20009052,
+        20009051,
+        20012734,
+        20012301,
+        20010601,
+        20010576,
+        20009101,
+        20000627,
+        20015451,
+        20015452,
+        20015453,
+        20014777
+      ],
+      "DIV_CODE_ARR": [
+        10311425,
+        10311428,
+        10311427,
+        10311426
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "KMSB1",
+      "UCH_CODE": "1",
+      "ORG_UNIT_CODE": "",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "508381001",
+      "ROLE_CODE": "KM_SB1",
+      "ROLE_NAME": "Клиентский менеджер Сбер Первый (МБ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20010577,
+        20006026,
+        20009052,
+        20009051,
+        20012734,
+        20012301,
+        20010601,
+        20010576,
+        20009101,
+        20000627,
+        20015451,
+        20015452,
+        20015453,
+        20014777
+      ],
+      "DIV_CODE_ARR": [
+        10230262
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "KMSB1",
+      "UCH_CODE": "1",
+      "ORG_UNIT_CODE": "10156582",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "508401001",
+      "ROLE_CODE": "KM_SB1",
+      "ROLE_NAME": "Клиентский менеджер Сбер Первый (СРБ Аппарат)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20010577,
+        20006026,
+        20009052,
+        20009051,
+        20012734,
+        20012301,
+        20010601,
+        20010576,
+        20009101,
+        20000627,
+        20015451,
+        20015452,
+        20015453,
+        20014777
+      ],
+      "DIV_CODE_ARR": [
+        10310726
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "KMSB1",
+      "UCH_CODE": "1",
+      "ORG_UNIT_CODE": "10300825",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "508401002",
+      "ROLE_CODE": "KM_SB1",
+      "ROLE_NAME": "Клиентский менеджер Сбер Первый (СРБ Восточное ГОСБ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20010577,
+        20006026,
+        20009052,
+        20009051,
+        20012734,
+        20012301,
+        20010601,
+        20010576,
+        20009101,
+        20000627,
+        20015451,
+        20015452,
+        20015453,
+        20014777
+      ],
+      "DIV_CODE_ARR": [
+        10310728
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "KMSB1",
+      "UCH_CODE": "1",
+      "ORG_UNIT_CODE": "10182580",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "508401003",
+      "ROLE_CODE": "KM_SB1",
+      "ROLE_NAME": "Клиентский менеджер Сбер Первый (СРБ Западное ГОСБ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20010577,
+        20006026,
+        20009052,
+        20009051,
+        20012734,
+        20012301,
+        20010601,
+        20010576,
+        20009101,
+        20000627,
+        20015451,
+        20015452,
+        20015453,
+        20014777
+      ],
+      "DIV_CODE_ARR": [
+        10310729
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "KMSB1",
+      "UCH_CODE": "1",
+      "ORG_UNIT_CODE": "10182582",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "508401004",
+      "ROLE_CODE": "KM_SB1",
+      "ROLE_NAME": "Клиентский менеджер Сбер Первый (СРБ Северное ГОСБ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20010577,
+        20006026,
+        20009052,
+        20009051,
+        20012734,
+        20012301,
+        20010601,
+        20010576,
+        20009101,
+        20000627,
+        20015451,
+        20015452,
+        20015453,
+        20014777
+      ],
+      "DIV_CODE_ARR": [
+        10310734
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "KMSB1",
+      "UCH_CODE": "1",
+      "ORG_UNIT_CODE": "10182583",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "508401005",
+      "ROLE_CODE": "KM_SB1",
+      "ROLE_NAME": "Клиентский менеджер Сбер Первый (СРБ Южное ГОСБ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20010577,
+        20006026,
+        20009052,
+        20009051,
+        20012734,
+        20012301,
+        20010601,
+        20010576,
+        20009101,
+        20000627,
+        20015451,
+        20015452,
+        20015453,
+        20014777
+      ],
+      "DIV_CODE_ARR": [
+        10310738
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "KMSB1",
+      "UCH_CODE": "1",
+      "ORG_UNIT_CODE": "10182581",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "508421001",
+      "ROLE_CODE": "KM_SB1",
+      "ROLE_NAME": "Клиентский менеджер Сбер Первый (ВВБ другие ГОСБ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20010577,
+        20006026,
+        20009052,
+        20009051,
+        20012734,
+        20012301,
+        20010601,
+        20010576,
+        20009101,
+        20000627,
+        20015451,
+        20015452,
+        20015453,
+        20014777
+      ],
+      "DIV_CODE_ARR": [
+        10310562,
+        10310560,
+        10310556,
+        10310558,
+        10310561,
+        10310557,
+        10310559,
+        10310555,
+        10310554
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "KMSB1",
+      "UCH_CODE": "1",
+      "ORG_UNIT_CODE": "",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "508441001",
+      "ROLE_CODE": "KM_SB1",
+      "ROLE_NAME": "Клиентский менеджер Сбер Первый (СИБ другие ГОСБ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20010577,
+        20006026,
+        20009052,
+        20009051,
+        20012734,
+        20012301,
+        20010601,
+        20010576,
+        20009101,
+        20000627,
+        20015451,
+        20015452,
+        20015453,
+        20014777
+      ],
+      "DIV_CODE_ARR": [
+        10311302,
+        10311300,
+        10311301,
+        10310538,
+        10311176,
+        10310537,
+        10311175
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "KMSB1",
+      "UCH_CODE": "1",
+      "ORG_UNIT_CODE": "",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "508521001",
+      "ROLE_CODE": "KM_SB1",
+      "ROLE_NAME": "Клиентский менеджер Сбер Первый (ЮЗБ другие ГОСБ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20010577,
+        20006026,
+        20009052,
+        20009051,
+        20012734,
+        20012301,
+        20010601,
+        20010576,
+        20009101,
+        20000627,
+        20015451,
+        20015452,
+        20015453,
+        20014777
+      ],
+      "DIV_CODE_ARR": [
+        10311928,
+        10311925,
+        10311926,
+        10311932,
+        10311931,
+        10311929,
+        10311930
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "KMSB1",
+      "UCH_CODE": "1",
+      "ORG_UNIT_CODE": "",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "508541001",
+      "ROLE_CODE": "KM_SB1",
+      "ROLE_NAME": "Клиентский менеджер Сбер Первый (ПБ другие ГОСБ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20010577,
+        20006026,
+        20009052,
+        20009051,
+        20012734,
+        20012301,
+        20010601,
+        20010576,
+        20009101,
+        20000627,
+        20015451,
+        20015452,
+        20015453,
+        20014777
+      ],
+      "DIV_CODE_ARR": [
+        10311352,
+        10311356,
+        10311354,
+        10311353,
+        10311357,
+        10311355,
+        10311351
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "KMSB1",
+      "UCH_CODE": "1",
+      "ORG_UNIT_CODE": "",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "508551001",
+      "ROLE_CODE": "KM_SB1",
+      "ROLE_NAME": "Клиентский менеджер Сбер Первый (СЗБ ГО СпБ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20010577,
+        20006026,
+        20009052,
+        20009051,
+        20012734,
+        20012301,
+        20010601,
+        20010576,
+        20009101,
+        20000627,
+        20015451,
+        20015452,
+        20015453,
+        20014777
+      ],
+      "DIV_CODE_ARR": [
+        10311575
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "KMSB1",
+      "UCH_CODE": "1",
+      "ORG_UNIT_CODE": "10086553",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "508551002",
+      "ROLE_CODE": "KM_SB1",
+      "ROLE_NAME": "Клиентский менеджер Сбер Первый (СЗБ другие ГОСБ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20010577,
+        20006026,
+        20009052,
+        20009051,
+        20012734,
+        20012301,
+        20010601,
+        20010576,
+        20009101,
+        20000627,
+        20015451,
+        20015452,
+        20015453,
+        20014777
+      ],
+      "DIV_CODE_ARR": [
+        10311580,
+        10311577,
+        10311578,
+        10311583,
+        10311582,
+        10311576,
+        10311581,
+        10311579
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "KMSB1",
+      "UCH_CODE": "1",
+      "ORG_UNIT_CODE": "",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "508701001",
+      "ROLE_CODE": "KM_SB1",
+      "ROLE_NAME": "Клиентский менеджер Сбер Первый (ДВБ другие ГОСБ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20010577,
+        20006026,
+        20009052,
+        20009051,
+        20012734,
+        20012301,
+        20010601,
+        20010576,
+        20009101,
+        20000627,
+        20015451,
+        20015452,
+        20015453,
+        20014777
+      ],
+      "DIV_CODE_ARR": [
+        10311250,
+        10311275,
+        10311276,
+        10311277,
+        10311278,
+        10311325
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "KMSB1",
+      "UCH_CODE": "1",
+      "ORG_UNIT_CODE": "",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "508901006",
+      "ROLE_CODE": "KM_SB1",
+      "ROLE_NAME": "Клиентский менеджер Сбер Первый (СРБ другие ГОСБ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20010577,
+        20006026,
+        20009052,
+        20009051,
+        20012734,
+        20012301,
+        20010601,
+        20010576,
+        20009101,
+        20000627,
+        20015451,
+        20015452,
+        20015453,
+        20014777
+      ],
+      "DIV_CODE_ARR": [
+        10310730,
+        10310732,
+        10310739,
+        10310727,
+        10310731,
+        10310733,
+        10310735,
+        10310736,
+        10310737
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "KMSB1",
+      "UCH_CODE": "1",
+      "ORG_UNIT_CODE": "",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "609901001",
+      "ROLE_CODE": "INV_MR_SB1",
+      "ROLE_NAME": "Менеджер по инвестиционным и страховым продуктам в СБ1",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20012581,
+        20013283
+      ],
+      "DIV_CODE_ARR": [
+        10343475,
+        10343485,
+        10343451,
+        10343300,
+        10343225,
+        10343187,
+        10343654,
+        10343804,
+        10343877,
+        10343375,
+        10343752,
+        10343762,
+        10343763,
+        10343760,
+        10343404,
+        10343401,
+        10347875,
+        10343651,
+        10347329,
+        10343777,
+        10343778,
+        10343827,
+        10343406,
+        10343376,
+        10343400,
+        10343403,
+        10368507,
+        10368028,
+        10367851,
+        10367832,
+        10368775,
+        10253053,
+        10367826,
+        10368363,
+        10367115,
+        10368506,
+        10368273,
+        10250882,
+        10346765,
+        10346766,
+        10347253,
+        10347257,
+        10347341,
+        10347346,
+        10347328,
+        10347330,
+        10347331,
+        10347259,
+        10347254,
+        10347256,
+        10369079
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "IMUB",
+      "UCH_CODE": "1",
+      "ORG_UNIT_CODE": "",
+      "TB_CODE": "",
+      "GOSB_CODE": "0"
+    },
+    {
+      "RULE_NUM": "710901001",
+      "ROLE_CODE": "RUK_NUB",
+      "ROLE_NAME": "Руководитель направления по развитию продаж в канале СБ1",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20012580
+      ],
+      "DIV_CODE_ARR": [
+        10343475,
+        10343485,
+        10343451,
+        10343300,
+        10343225,
+        10343187,
+        10343654,
+        10343804,
+        10343877,
+        10343375,
+        10343752,
+        10343762,
+        10343763,
+        10343760,
+        10343404,
+        10343401,
+        10347875,
+        10343651,
+        10347329,
+        10343777,
+        10343778,
+        10343827,
+        10343406,
+        10343376,
+        10343400,
+        10343403,
+        10368507,
+        10368028,
+        10367851,
+        10367832,
+        10368775,
+        10253053,
+        10367826,
+        10368363,
+        10367115,
+        10368506,
+        10368273,
+        10250882,
+        10346765,
+        10346766,
+        10347253,
+        10347257,
+        10347341,
+        10347346,
+        10347328,
+        10347330,
+        10347331,
+        10347259,
+        10347254,
+        10347256,
+        10369079
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "RNUB",
+      "UCH_CODE": "1",
+      "ORG_UNIT_CODE": "",
+      "TB_CODE": "",
+      "GOSB_CODE": "0"
+    },
+    {
+      "RULE_NUM": "811131001",
+      "ROLE_CODE": "RUK_SB1",
+      "ROLE_NAME": "Руководитель ВИП ВСП СБ1 (ЦЧБ другие ГОСБ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20000460,
+        20000193,
+        20011553
+      ],
+      "DIV_CODE_ARR": [
+        10312075,
+        10312077,
+        10312078,
+        10312079,
+        10312080,
+        10312076
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "RSB1",
+      "UCH_CODE": "1",
+      "ORG_UNIT_CODE": "",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "811161001",
+      "ROLE_CODE": "RUK_SB1",
+      "ROLE_NAME": "Руководитель ВИП ВСП СБ1 (УБ другие ГОСБ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20000460,
+        20000193,
+        20011553
+      ],
+      "DIV_CODE_ARR": [
+        10311430,
+        10311431,
+        10311432,
+        10311433,
+        10311434,
+        10311437,
+        10311435
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "RSB1",
+      "UCH_CODE": "1",
+      "ORG_UNIT_CODE": "",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "811181001",
+      "ROLE_CODE": "RUK_SB1",
+      "ROLE_NAME": "Руководитель ВИП ВСП СБ1 (ББ другие ГОСБ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20000460,
+        20000193,
+        20011553
+      ],
+      "DIV_CODE_ARR": [
+        10311425,
+        10311428,
+        10311427,
+        10311426
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "RSB1",
+      "UCH_CODE": "1",
+      "ORG_UNIT_CODE": "",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "811381001",
+      "ROLE_CODE": "RUK_SB1",
+      "ROLE_NAME": "Руководитель ВИП ВСП СБ1 (МБ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20000460,
+        20000193,
+        20011553
+      ],
+      "DIV_CODE_ARR": [
+        10230262
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "RSB1",
+      "UCH_CODE": "1",
+      "ORG_UNIT_CODE": "10156582",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "811401001",
+      "ROLE_CODE": "RUK_SB1",
+      "ROLE_NAME": "Руководитель ВИП ВСП СБ1 (СРБ Аппарат)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20000460,
+        20000193,
+        20011553
+      ],
+      "DIV_CODE_ARR": [
+        10310726
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "RSB1",
+      "UCH_CODE": "1",
+      "ORG_UNIT_CODE": "10300825",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "811401002",
+      "ROLE_CODE": "RUK_SB1",
+      "ROLE_NAME": "Руководитель ВИП ВСП СБ1 (СРБ Восточное ГОСБ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20000460,
+        20000193,
+        20011553
+      ],
+      "DIV_CODE_ARR": [
+        10310728
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "RSB1",
+      "UCH_CODE": "1",
+      "ORG_UNIT_CODE": "10182580",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "811401003",
+      "ROLE_CODE": "RUK_SB1",
+      "ROLE_NAME": "Руководитель ВИП ВСП СБ1 (СРБ Западное ГОСБ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20000460,
+        20000193,
+        20011553
+      ],
+      "DIV_CODE_ARR": [
+        10310729
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "RSB1",
+      "UCH_CODE": "1",
+      "ORG_UNIT_CODE": "10182582",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "811401004",
+      "ROLE_CODE": "RUK_SB1",
+      "ROLE_NAME": "Руководитель ВИП ВСП СБ1 (СРБ Северное ГОСБ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20000460,
+        20000193,
+        20011553
+      ],
+      "DIV_CODE_ARR": [
+        10310734
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "RSB1",
+      "UCH_CODE": "1",
+      "ORG_UNIT_CODE": "10182583",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "811401005",
+      "ROLE_CODE": "RUK_SB1",
+      "ROLE_NAME": "Руководитель ВИП ВСП СБ1 (СРБ Южное ГОСБ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20000460,
+        20000193,
+        20011553
+      ],
+      "DIV_CODE_ARR": [
+        10310738
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "RSB1",
+      "UCH_CODE": "1",
+      "ORG_UNIT_CODE": "10182581",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "811401006",
+      "ROLE_CODE": "RUK_SB1",
+      "ROLE_NAME": "Руководитель ВИП ВСП СБ1 (СРБ другие ГОСБ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20000460,
+        20000193,
+        20011553
+      ],
+      "DIV_CODE_ARR": [
+        10310730,
+        10310732,
+        10310739,
+        10310727,
+        10310731,
+        10310733,
+        10310735,
+        10310736,
+        10310737
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "RSB1",
+      "UCH_CODE": "1",
+      "ORG_UNIT_CODE": "",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "811421001",
+      "ROLE_CODE": "RUK_SB1",
+      "ROLE_NAME": "Руководитель ВИП ВСП СБ1 (ВВБ другие ГОСБ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20000460,
+        20000193,
+        20011553
+      ],
+      "DIV_CODE_ARR": [
+        10310562,
+        10310560,
+        10310556,
+        10310558,
+        10310561,
+        10310557,
+        10310559,
+        10310555,
+        10310554
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "RSB1",
+      "UCH_CODE": "1",
+      "ORG_UNIT_CODE": "",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "811441001",
+      "ROLE_CODE": "RUK_SB1",
+      "ROLE_NAME": "Руководитель ВИП ВСП СБ1 (СИБ другие ГОСБ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20000460,
+        20000193,
+        20011553
+      ],
+      "DIV_CODE_ARR": [
+        10311302,
+        10311300,
+        10311301,
+        10310538,
+        10311176,
+        10310537,
+        10311175
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "RSB1",
+      "UCH_CODE": "1",
+      "ORG_UNIT_CODE": "",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "811521001",
+      "ROLE_CODE": "RUK_SB1",
+      "ROLE_NAME": "Руководитель ВИП ВСП СБ1 (ЮЗБ другие ГОСБ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20000460,
+        20000193,
+        20011553
+      ],
+      "DIV_CODE_ARR": [
+        10311928,
+        10311925,
+        10311926,
+        10311932,
+        10311931,
+        10311929,
+        10311930
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "RSB1",
+      "UCH_CODE": "1",
+      "ORG_UNIT_CODE": "",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "811541001",
+      "ROLE_CODE": "RUK_SB1",
+      "ROLE_NAME": "Руководитель ВИП ВСП СБ1 (ПБ другие ГОСБ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20000460,
+        20000193,
+        20011553
+      ],
+      "DIV_CODE_ARR": [
+        10311352,
+        10311356,
+        10311354,
+        10311353,
+        10311357,
+        10311355,
+        10311351
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "RSB1",
+      "UCH_CODE": "1",
+      "ORG_UNIT_CODE": "",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "811551001",
+      "ROLE_CODE": "RUK_SB1",
+      "ROLE_NAME": "Руководитель ВИП ВСП СБ1 (СЗБ ГО СпБ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20000460,
+        20000193,
+        20011553
+      ],
+      "DIV_CODE_ARR": [
+        10311575
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "RSB1",
+      "UCH_CODE": "1",
+      "ORG_UNIT_CODE": "10086553",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "811551002",
+      "ROLE_CODE": "RUK_SB1",
+      "ROLE_NAME": "Руководитель ВИП ВСП СБ1 (СЗБ другие ГОСБ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20000460,
+        20000193,
+        20011553
+      ],
+      "DIV_CODE_ARR": [
+        10311580,
+        10311577,
+        10311578,
+        10311583,
+        10311582,
+        10311576,
+        10311581,
+        10311579
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "RSB1",
+      "UCH_CODE": "1",
+      "ORG_UNIT_CODE": "",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "811701001",
+      "ROLE_CODE": "RUK_SB1",
+      "ROLE_NAME": "Руководитель ВИП ВСП СБ1 (ДВБ другие ГОСБ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20000460,
+        20000193,
+        20011553
+      ],
+      "DIV_CODE_ARR": [
+        10311250,
+        10311275,
+        10311276,
+        10311277,
+        10311278,
+        10311325
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "RSB1",
+      "UCH_CODE": "1",
+      "ORG_UNIT_CODE": "",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "901993001",
+      "ROLE_CODE": "GAME_ADMIN",
+      "ROLE_NAME": "Администратор ФП Геймификация",
+      "PERSON_NUMBER_ARR": "[00673892, 01340230]",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": "",
+      "DIV_CODE_ARR": [
+        10294215
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "KMKKSB",
+      "UCH_CODE": "3",
+      "ORG_UNIT_CODE": "10000360",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "912130001",
+      "ROLE_CODE": "RUK_SB1_LOOK",
+      "ROLE_NAME": "Зам.Руководителя ВИП ВСП СБ1 (ЦЧБ другие ГОСБ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20000435
+      ],
+      "DIV_CODE_ARR": [
+        10312075,
+        10312077,
+        10312078,
+        10312079,
+        10312080,
+        10312076
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "RSB1",
+      "UCH_CODE": "0",
+      "ORG_UNIT_CODE": "",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "912160001",
+      "ROLE_CODE": "RUK_SB1_LOOK",
+      "ROLE_NAME": "Зам.Руководителя ВИП ВСП СБ1 (УБ другие ГОСБ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20000435
+      ],
+      "DIV_CODE_ARR": [
+        10311430,
+        10311431,
+        10311432,
+        10311433,
+        10311434,
+        10311437,
+        10311435
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "RSB1",
+      "UCH_CODE": "0",
+      "ORG_UNIT_CODE": "",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "912180001",
+      "ROLE_CODE": "RUK_SB1_LOOK",
+      "ROLE_NAME": "Зам.Руководителя ВИП ВСП СБ1 (ББ другие ГОСБ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20000435
+      ],
+      "DIV_CODE_ARR": [
+        10311425,
+        10311428,
+        10311427,
+        10311426
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "RSB1",
+      "UCH_CODE": "0",
+      "ORG_UNIT_CODE": "",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "912380001",
+      "ROLE_CODE": "RUK_SB1_LOOK",
+      "ROLE_NAME": "Зам.Руководителя ВИП ВСП СБ1 (МБ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20000435
+      ],
+      "DIV_CODE_ARR": [
+        10230262
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "RSB1",
+      "UCH_CODE": "0",
+      "ORG_UNIT_CODE": "10156582",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "912400001",
+      "ROLE_CODE": "RUK_SB1_LOOK",
+      "ROLE_NAME": "Зам.Руководителя ВИП ВСП СБ1 (СРБ Аппарат)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20000435
+      ],
+      "DIV_CODE_ARR": [
+        10310726
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "RSB1",
+      "UCH_CODE": "0",
+      "ORG_UNIT_CODE": "10300825",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "912400002",
+      "ROLE_CODE": "RUK_SB1_LOOK",
+      "ROLE_NAME": "Зам.Руководителя ВИП ВСП СБ1 (СРБ Восточное ГОСБ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20000435
+      ],
+      "DIV_CODE_ARR": [
+        10310728
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "RSB1",
+      "UCH_CODE": "0",
+      "ORG_UNIT_CODE": "10182580",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "912400003",
+      "ROLE_CODE": "RUK_SB1_LOOK",
+      "ROLE_NAME": "Зам.Руководителя ВИП ВСП СБ1 (СРБ Западное ГОСБ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20000435
+      ],
+      "DIV_CODE_ARR": [
+        10310729
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "RSB1",
+      "UCH_CODE": "0",
+      "ORG_UNIT_CODE": "10182582",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "912400004",
+      "ROLE_CODE": "RUK_SB1_LOOK",
+      "ROLE_NAME": "Зам.Руководителя ВИП ВСП СБ1 (СРБ Северное ГОСБ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20000435
+      ],
+      "DIV_CODE_ARR": [
+        10310734
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "RSB1",
+      "UCH_CODE": "0",
+      "ORG_UNIT_CODE": "10182583",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "912400005",
+      "ROLE_CODE": "RUK_SB1_LOOK",
+      "ROLE_NAME": "Зам.Руководителя ВИП ВСП СБ1 (СРБ Южное ГОСБ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20000435
+      ],
+      "DIV_CODE_ARR": [
+        10310738
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "RSB1",
+      "UCH_CODE": "0",
+      "ORG_UNIT_CODE": "10182581",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "912400006",
+      "ROLE_CODE": "RUK_SB1_LOOK",
+      "ROLE_NAME": "Зам.Руководителя ВИП ВСП СБ1 (СРБ другие ГОСБ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20000435
+      ],
+      "DIV_CODE_ARR": [
+        10310730,
+        10310732,
+        10310739,
+        10310727,
+        10310731,
+        10310733,
+        10310735,
+        10310736,
+        10310737
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "RSB1",
+      "UCH_CODE": "0",
+      "ORG_UNIT_CODE": "",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "912420001",
+      "ROLE_CODE": "RUK_SB1_LOOK",
+      "ROLE_NAME": "Зам.Руководителя ВИП ВСП СБ1 (ВВБ другие ГОСБ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20000435
+      ],
+      "DIV_CODE_ARR": [
+        10310562,
+        10310560,
+        10310556,
+        10310558,
+        10310561,
+        10310557,
+        10310559,
+        10310555,
+        10310554
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "RSB1",
+      "UCH_CODE": "0",
+      "ORG_UNIT_CODE": "",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "912440001",
+      "ROLE_CODE": "RUK_SB1_LOOK",
+      "ROLE_NAME": "Зам.Руководителя ВИП ВСП СБ1 (СИБ другие ГОСБ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20000435
+      ],
+      "DIV_CODE_ARR": [
+        10311302,
+        10311300,
+        10311301,
+        10310538,
+        10311176,
+        10310537,
+        10311175
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "RSB1",
+      "UCH_CODE": "0",
+      "ORG_UNIT_CODE": "",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "912520001",
+      "ROLE_CODE": "RUK_SB1_LOOK",
+      "ROLE_NAME": "Зам.Руководителя ВИП ВСП СБ1 (ЮЗБ другие ГОСБ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20000435
+      ],
+      "DIV_CODE_ARR": [
+        10311928,
+        10311925,
+        10311926,
+        10311932,
+        10311931,
+        10311929,
+        10311930
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "RSB1",
+      "UCH_CODE": "0",
+      "ORG_UNIT_CODE": "",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "912540001",
+      "ROLE_CODE": "RUK_SB1_LOOK",
+      "ROLE_NAME": "Зам.Руководителя ВИП ВСП СБ1 (ПБ другие ГОСБ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20000435
+      ],
+      "DIV_CODE_ARR": [
+        10311352,
+        10311356,
+        10311354,
+        10311353,
+        10311357,
+        10311355,
+        10311351
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "RSB1",
+      "UCH_CODE": "0",
+      "ORG_UNIT_CODE": "",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "912550001",
+      "ROLE_CODE": "RUK_SB1_LOOK",
+      "ROLE_NAME": "Зам.Руководителя ВИП ВСП СБ1 (СЗБ ГО СпБ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20000435
+      ],
+      "DIV_CODE_ARR": [
+        10311575
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "RSB1",
+      "UCH_CODE": "0",
+      "ORG_UNIT_CODE": "10086553",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "912550002",
+      "ROLE_CODE": "RUK_SB1_LOOK",
+      "ROLE_NAME": "Зам.Руководителя ВИП ВСП СБ1 (СЗБ другие ГОСБ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20000435
+      ],
+      "DIV_CODE_ARR": [
+        10311580,
+        10311577,
+        10311578,
+        10311583,
+        10311582,
+        10311576,
+        10311581,
+        10311579
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "RSB1",
+      "UCH_CODE": "0",
+      "ORG_UNIT_CODE": "",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "912700001",
+      "ROLE_CODE": "RUK_SB1_LOOK",
+      "ROLE_NAME": "Зам.Руководителя ВИП ВСП СБ1 (ДВБ другие ГОСБ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20000435
+      ],
+      "DIV_CODE_ARR": [
+        10311250,
+        10311275,
+        10311276,
+        10311277,
+        10311278,
+        10311325
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "RSB1",
+      "UCH_CODE": "0",
+      "ORG_UNIT_CODE": "",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "913900001",
+      "ROLE_CODE": "TB_B2C_LOOK",
+      "ROLE_NAME": "От блока Розница в ТБ (наблюдатель)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20005201,
+        20000106,
+        20001828,
+        20000054,
+        20003328
+      ],
+      "DIV_CODE_ARR": [
+        10300638,
+        10300456,
+        10299247,
+        10290604,
+        10300945,
+        10299238,
+        10300583,
+        10290022,
+        10237984,
+        10300868,
+        10300472
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "KMSB1",
+      "UCH_CODE": "0",
+      "ORG_UNIT_CODE": "",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "914130001",
+      "ROLE_CODE": "OTHER_B2C_LOOK",
+      "ROLE_NAME": "Наблюдатель от блока Розница  (ЮЗБ другие ГОСБ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20000295,
+        20003328,
+        20006776,
+        20002967
+      ],
+      "DIV_CODE_ARR": [
+        10311928,
+        10311925,
+        10311926,
+        10311932,
+        10311931,
+        10311929,
+        10311930
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "KMSB1",
+      "UCH_CODE": "0",
+      "ORG_UNIT_CODE": "",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "914160001",
+      "ROLE_CODE": "OTHER_B2C_LOOK",
+      "ROLE_NAME": "Наблюдатель от блока Розница  (ДВБ другие ГОСБ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20000295,
+        20003328,
+        20006776,
+        20002967
+      ],
+      "DIV_CODE_ARR": [
+        10311250,
+        10311275,
+        10311276,
+        10311277,
+        10311278,
+        10311325
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "KMSB1",
+      "UCH_CODE": "0",
+      "ORG_UNIT_CODE": "",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "914180001",
+      "ROLE_CODE": "OTHER_B2C_LOOK",
+      "ROLE_NAME": "Наблюдатель от блока Розница  (ПБ другие ГОСБ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20000295,
+        20003328,
+        20006776,
+        20002967
+      ],
+      "DIV_CODE_ARR": [
+        10311352,
+        10311356,
+        10311354,
+        10311353,
+        10311357,
+        10311355,
+        10311351
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "KMSB1",
+      "UCH_CODE": "0",
+      "ORG_UNIT_CODE": "",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "914380001",
+      "ROLE_CODE": "OTHER_B2C_LOOK",
+      "ROLE_NAME": "Наблюдатель от блока Розница  (СРБ Аппарат)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20000295,
+        20003328,
+        20006776,
+        20002967
+      ],
+      "DIV_CODE_ARR": [
+        10310726
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "KMSB1",
+      "UCH_CODE": "0",
+      "ORG_UNIT_CODE": "10300825",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "914400001",
+      "ROLE_CODE": "OTHER_B2C_LOOK",
+      "ROLE_NAME": "Наблюдатель от блока Розница  (СРБ Восточное ГОСБ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20000295,
+        20003328,
+        20006776,
+        20002967
+      ],
+      "DIV_CODE_ARR": [
+        10310728
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "KMSB1",
+      "UCH_CODE": "0",
+      "ORG_UNIT_CODE": "10182580",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "914400002",
+      "ROLE_CODE": "OTHER_B2C_LOOK",
+      "ROLE_NAME": "Наблюдатель от блока Розница  (СРБ Западное ГОСБ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20000295,
+        20003328,
+        20006776,
+        20002967
+      ],
+      "DIV_CODE_ARR": [
+        10310729
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "KMSB1",
+      "UCH_CODE": "0",
+      "ORG_UNIT_CODE": "10182582",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "914400003",
+      "ROLE_CODE": "OTHER_B2C_LOOK",
+      "ROLE_NAME": "Наблюдатель от блока Розница  (СРБ Северное ГОСБ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20000295,
+        20003328,
+        20006776,
+        20002967
+      ],
+      "DIV_CODE_ARR": [
+        10310734
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "KMSB1",
+      "UCH_CODE": "0",
+      "ORG_UNIT_CODE": "10182583",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "914400004",
+      "ROLE_CODE": "OTHER_B2C_LOOK",
+      "ROLE_NAME": "Наблюдатель от блока Розница  (СРБ Южное ГОСБ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20000295,
+        20003328,
+        20006776,
+        20002967
+      ],
+      "DIV_CODE_ARR": [
+        10310738
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "KMSB1",
+      "UCH_CODE": "0",
+      "ORG_UNIT_CODE": "10182581",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "914400005",
+      "ROLE_CODE": "OTHER_B2C_LOOK",
+      "ROLE_NAME": "Наблюдатель от блока Розница  (СРБ другие ГОСБ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20000295,
+        20003328,
+        20006776,
+        20002967
+      ],
+      "DIV_CODE_ARR": [
+        10310730,
+        10310732,
+        10310739,
+        10310727,
+        10310731,
+        10310733,
+        10310735,
+        10310736,
+        10310737
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "KMSB1",
+      "UCH_CODE": "0",
+      "ORG_UNIT_CODE": "",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "914400006",
+      "ROLE_CODE": "OTHER_B2C_LOOK",
+      "ROLE_NAME": "Наблюдатель от блока Розница  (ББ другие ГОСБ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20000295,
+        20003328,
+        20006776,
+        20002967
+      ],
+      "DIV_CODE_ARR": [
+        10311425,
+        10311428,
+        10311427,
+        10311426
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "KMSB1",
+      "UCH_CODE": "0",
+      "ORG_UNIT_CODE": "",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "914420001",
+      "ROLE_CODE": "OTHER_B2C_LOOK",
+      "ROLE_NAME": "Наблюдатель от блока Розница  (ЦЧБ другие ГОСБ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20000295,
+        20003328,
+        20006776,
+        20002967
+      ],
+      "DIV_CODE_ARR": [
+        10312075,
+        10312077,
+        10312078,
+        10312079,
+        10312080,
+        10312076
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "KMSB1",
+      "UCH_CODE": "0",
+      "ORG_UNIT_CODE": "",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "914440001",
+      "ROLE_CODE": "OTHER_B2C_LOOK",
+      "ROLE_NAME": "Наблюдатель от блока Розница  (ВВБ другие ГОСБ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20000295,
+        20003328,
+        20006776,
+        20002967
+      ],
+      "DIV_CODE_ARR": [
+        10310562,
+        10310560,
+        10310556,
+        10310558,
+        10310561,
+        10310557,
+        10310559,
+        10310555,
+        10310554
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "KMSB1",
+      "UCH_CODE": "0",
+      "ORG_UNIT_CODE": "",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "914520001",
+      "ROLE_CODE": "OTHER_B2C_LOOK",
+      "ROLE_NAME": "Наблюдатель от блока Розница  (СЗБ ГО СпБ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20000295,
+        20003328,
+        20006776,
+        20002967
+      ],
+      "DIV_CODE_ARR": [
+        10311575
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "KMSB1",
+      "UCH_CODE": "0",
+      "ORG_UNIT_CODE": "10086553",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "914540001",
+      "ROLE_CODE": "OTHER_B2C_LOOK",
+      "ROLE_NAME": "Наблюдатель от блока Розница  (УБ другие ГОСБ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20000295,
+        20003328,
+        20006776,
+        20002967
+      ],
+      "DIV_CODE_ARR": [
+        10311430,
+        10311431,
+        10311432,
+        10311433,
+        10311434,
+        10311437,
+        10311435
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "KMSB1",
+      "UCH_CODE": "0",
+      "ORG_UNIT_CODE": "",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "914550001",
+      "ROLE_CODE": "OTHER_B2C_LOOK",
+      "ROLE_NAME": "Наблюдатель от блока Розница  (СЗБ другие ГОСБ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20000295,
+        20003328,
+        20006776,
+        20002967
+      ],
+      "DIV_CODE_ARR": [
+        10311580,
+        10311577,
+        10311578,
+        10311583,
+        10311582,
+        10311576,
+        10311581,
+        10311579
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "KMSB1",
+      "UCH_CODE": "0",
+      "ORG_UNIT_CODE": "",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "914700001",
+      "ROLE_CODE": "OTHER_B2C_LOOK",
+      "ROLE_NAME": "Наблюдатель от блока Розница  (СИБ другие ГОСБ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20000295,
+        20003328,
+        20006776,
+        20002967
+      ],
+      "DIV_CODE_ARR": [
+        10311302,
+        10311300,
+        10311301,
+        10310538,
+        10311176,
+        10310537,
+        10311175
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "KMSB1",
+      "UCH_CODE": "0",
+      "ORG_UNIT_CODE": "",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "914900001",
+      "ROLE_CODE": "OTHER_B2C_LOOK",
+      "ROLE_NAME": "Наблюдатель от блока Розница (по ТН)",
+      "PERSON_NUMBER_ARR": "[00964794, 02159541, 02159584, 02164804, 00402780]",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": "",
+      "DIV_CODE_ARR": "",
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "RSB1",
+      "UCH_CODE": "0",
+      "ORG_UNIT_CODE": "",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "914900002",
+      "ROLE_CODE": "OTHER_B2C_LOOK",
+      "ROLE_NAME": "Наблюдатель от блока Розница  (МБ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20000295,
+        20003328,
+        20006776,
+        20002967
+      ],
+      "DIV_CODE_ARR": [
+        10230262
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "KMSB1",
+      "UCH_CODE": "0",
+      "ORG_UNIT_CODE": "10156582",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "915902001",
+      "ROLE_CODE": "CA_B2C_TOP",
+      "ROLE_NAME": "Сотрудники ЦА B2C Розница (ТОП)",
+      "PERSON_NUMBER_ARR": "[01343404, 01815602]",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": "",
+      "DIV_CODE_ARR": "",
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "KMSB1",
+      "UCH_CODE": "2",
+      "ORG_UNIT_CODE": "",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "915902002",
+      "ROLE_CODE": "CA_B2C_TOP",
+      "ROLE_NAME": "Сотрудники ЦА B2C Транзакт (ТОП)",
+      "PERSON_NUMBER_ARR": "[01335082]",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": "",
+      "DIV_CODE_ARR": "",
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "KMKKSB",
+      "UCH_CODE": "2",
+      "ORG_UNIT_CODE": "",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "916990001",
+      "ROLE_CODE": "CA_B2C",
+      "ROLE_NAME": "Сотрудники ЦА B2C Розница",
+      "PERSON_NUMBER_ARR": "[00860322, 01783787, 01811892, 01991929, 01501054, 01737337, 00360691]",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": "",
+      "DIV_CODE_ARR": [
+        10338964
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "KMSB1",
+      "UCH_CODE": "0",
+      "ORG_UNIT_CODE": "10000360",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "918382381",
+      "ROLE_CODE": "ZAM_UPR_GOSB_KIB",
+      "ROLE_NAME": "Директор управления ГОСБ КИБ (Управление инфраструктуры МБ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": [
+        34635056
+      ],
+      "POST_ETALONE_CODE_ARR": [
+        20000054
+      ],
+      "DIV_CODE_ARR": [
+        10242114
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "KMKKSB",
+      "UCH_CODE": "2",
+      "ORG_UNIT_CODE": "10242114",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "918382382",
+      "ROLE_CODE": "ZAM_UPR_GOSB_KIB",
+      "ROLE_NAME": "Директор управления ГОСБ КИБ (Управление промышленности МБ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": [
+        34635738
+      ],
+      "POST_ETALONE_CODE_ARR": [
+        20000054
+      ],
+      "DIV_CODE_ARR": [
+        10242078
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "KMKKSB",
+      "UCH_CODE": "2",
+      "ORG_UNIT_CODE": "10242078",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "918382383",
+      "ROLE_CODE": "ZAM_UPR_GOSB_KIB",
+      "ROLE_NAME": "Директор управления ГОСБ КИБ (Управление сферы недвижимости МБ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": [
+        34635433
+      ],
+      "POST_ETALONE_CODE_ARR": [
+        20000054
+      ],
+      "DIV_CODE_ARR": [
+        10240714
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "KMKKSB",
+      "UCH_CODE": "2",
+      "ORG_UNIT_CODE": "10240714",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "918382384",
+      "ROLE_CODE": "ZAM_UPR_GOSB_KIB",
+      "ROLE_NAME": "Директор управления ГОСБ КИБ (Управление сферы услуг МБ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": [
+        34635686
+      ],
+      "POST_ETALONE_CODE_ARR": [
+        20000054
+      ],
+      "DIV_CODE_ARR": [
+        10241967
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "KMKKSB",
+      "UCH_CODE": "2",
+      "ORG_UNIT_CODE": "10241967",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "918382385",
+      "ROLE_CODE": "ZAM_UPR_GOSB_KIB",
+      "ROLE_NAME": "Директор управления ГОСБ КИБ (Управление торговли МБ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": [
+        34635667
+      ],
+      "POST_ETALONE_CODE_ARR": [
+        20000054
+      ],
+      "DIV_CODE_ARR": [
+        10241463
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "KMKKSB",
+      "UCH_CODE": "2",
+      "ORG_UNIT_CODE": "10241463",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "918382386",
+      "ROLE_CODE": "ZAM_UPR_GOSB_KIB",
+      "ROLE_NAME": "Директор управления ГОСБ КИБ (Управление транспорта МБ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": [
+        34635682
+      ],
+      "POST_ETALONE_CODE_ARR": [
+        20000054
+      ],
+      "DIV_CODE_ARR": [
+        10241962
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "KMKKSB",
+      "UCH_CODE": "2",
+      "ORG_UNIT_CODE": "10241962",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "918902001",
+      "ROLE_CODE": "ZAM_UPR_GOSB_KIB",
+      "ROLE_NAME": "Заместитель управляющего ГОСБ КИБ",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": [
+        35245001,
+        34453507,
+        34453514,
+        35243617,
+        35243622,
+        35244632,
+        35244627,
+        33622228,
+        35244638,
+        35244635,
+        33763354,
+        34238032,
+        35244355,
+        35140717,
+        34237575,
+        35244359,
+        32518258,
+        35244358,
+        31850274,
+        35244553,
+        32532637,
+        35263869,
+        32494382,
+        32544141,
+        32582575,
+        35244225,
+        35457582,
+        34228638,
+        35244229,
+        34227762,
+        34850999,
+        34850994,
+        34227292,
+        34227305,
+        35244407,
+        34254474,
+        35244411,
+        34250691,
+        35244413,
+        35243966,
+        34564634,
+        34564637,
+        34263140,
+        34264732,
+        35243758,
+        34564631,
+        34838994,
+        34564630,
+        34264429,
+        34263142,
+        34838987,
+        34263149,
+        34839032,
+        35236446,
+        35042937,
+        35236440,
+        35236432,
+        35255706,
+        35047163,
+        35116306,
+        34614214,
+        34613436,
+        34213687,
+        34610923,
+        34216396,
+        34214975,
+        34102864,
+        35440425,
+        33201185,
+        35175323,
+        35175186,
+        35236396,
+        35244925,
+        35244757,
+        35244760,
+        35244929,
+        35236392
+      ],
+      "POST_ETALONE_CODE_ARR": [
+        20000456
+      ],
+      "DIV_CODE_ARR": "",
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "KMKKSB",
+      "UCH_CODE": "2",
+      "ORG_UNIT_CODE": "",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "919900001",
+      "ROLE_CODE": "MP_TB_KKSB",
+      "ROLE_NAME": "Менеджер проекта ТБ",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20000326,
+        20000156,
+        20006376
+      ],
+      "DIV_CODE_ARR": [
+        10293924,
+        10293489,
+        10353225,
+        10301726,
+        10290247,
+        10299006,
+        10295911,
+        10295859,
+        10295424,
+        10298976,
+        10296390
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "KMKKSB",
+      "UCH_CODE": "0",
+      "ORG_UNIT_CODE": "",
+      "TB_CODE": "",
+      "GOSB_CODE": "0"
+    },
+    {
+      "RULE_NUM": "919902001",
+      "ROLE_CODE": "ZAM_UPR_GOSB_OTHER",
+      "ROLE_NAME": "Заместитель управляющего ГОСБ (другие блоки)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20000456
+      ],
+      "DIV_CODE_ARR": "",
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "KMKKSB",
+      "UCH_CODE": "2",
+      "ORG_UNIT_CODE": "",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "920900001",
+      "ROLE_CODE": "DTAAS_CSM",
+      "ROLE_NAME": "Руководитель проектов по цифровому развитию клиентов",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20013927
+      ],
+      "DIV_CODE_ARR": [
+        10352936,
+        10352944,
+        10353231,
+        10353559,
+        10352776,
+        10353025,
+        10353475,
+        10353163,
+        10352883,
+        10353047,
+        10352656
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "MNS",
+      "UCH_CODE": "1",
+      "ORG_UNIT_CODE": "",
+      "TB_CODE": "",
+      "GOSB_CODE": "0"
+    },
+    {
+      "RULE_NUM": "921900001",
+      "ROLE_CODE": "RUK_DTAAS_CSM",
+      "ROLE_NAME": "Руководитель DTaaS в ТБ",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20000054,
+        20013926
+      ],
+      "DIV_CODE_ARR": [
+        10352936,
+        10352944,
+        10353231,
+        10353559,
+        10352776,
+        10353025,
+        10353475,
+        10353163,
+        10352883,
+        10353047,
+        10352656
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "MNS",
+      "UCH_CODE": "0",
+      "ORG_UNIT_CODE": "",
+      "TB_CODE": "",
+      "GOSB_CODE": "0"
+    },
+    {
+      "RULE_NUM": "922902001",
+      "ROLE_CODE": "UPR_GOSB",
+      "ROLE_NAME": "Управляющий ГОСБ",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20000468,
+        20000017
+      ],
+      "DIV_CODE_ARR": "",
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "KMKKSB",
+      "UCH_CODE": "2",
+      "ORG_UNIT_CODE": "",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "923902001",
+      "ROLE_CODE": "RUK_CPKK",
+      "ROLE_NAME": "Руководство ЦПКК",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20003301,
+        20004105
+      ],
+      "DIV_CODE_ARR": [
+        10293924,
+        10293489,
+        10353225,
+        10290247,
+        10299006,
+        10295911,
+        10295859,
+        10295424,
+        10298976,
+        10296390,
+        10267682
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "KMKKSB",
+      "UCH_CODE": "2",
+      "ORG_UNIT_CODE": "",
+      "TB_CODE": "",
+      "GOSB_CODE": "0"
+    },
+    {
+      "RULE_NUM": "924902001",
+      "ROLE_CODE": "PRED_TB",
+      "ROLE_NAME": "Председатель ТБ",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20000012,
+        20000013
+      ],
+      "DIV_CODE_ARR": [
+        10162480,
+        10189534,
+        10167595,
+        10158108,
+        10178650,
+        10189671,
+        10189453,
+        10177884,
+        10189369,
+        10174916,
+        10178847
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "KMKKSB",
+      "UCH_CODE": "2",
+      "ORG_UNIT_CODE": "",
+      "TB_CODE": "",
+      "GOSB_CODE": "0"
+    },
+    {
+      "RULE_NUM": "925902001",
+      "ROLE_CODE": "ZAM_PRED_TB_KIB",
+      "ROLE_NAME": "Заместитель председателя ТБ (КИБ)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": [
+        35243612,
+        35244584,
+        35245003,
+        35241422,
+        35243754,
+        35244656,
+        35484769,
+        35244931,
+        35240388,
+        35236045,
+        35244402
+      ],
+      "POST_ETALONE_CODE_ARR": [
+        20000454,
+        20000015
+      ],
+      "DIV_CODE_ARR": [
+        10162480,
+        10189534,
+        10167595,
+        10158108,
+        10178650,
+        10189671,
+        10189453,
+        10177884,
+        10189369,
+        10174916,
+        10178847
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "KMKKSB",
+      "UCH_CODE": "2",
+      "ORG_UNIT_CODE": "",
+      "TB_CODE": "",
+      "GOSB_CODE": "0"
+    },
+    {
+      "RULE_NUM": "926992001",
+      "ROLE_CODE": "SB_TOP",
+      "ROLE_NAME": "Руководство Сбербанк (по должности)",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": [
+        20000007,
+        20000008,
+        20008702,
+        20012703,
+        20000010,
+        20007930,
+        20000009,
+        20006426,
+        20011126,
+        20000952,
+        20004056,
+        20014077,
+        20010076,
+        20011752,
+        20014076,
+        20011676,
+        20014426
+      ],
+      "DIV_CODE_ARR": [
+        10001214
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "KMKKSB",
+      "UCH_CODE": "2",
+      "ORG_UNIT_CODE": "10000360",
+      "TB_CODE": "",
+      "GOSB_CODE": "0"
+    },
+    {
+      "RULE_NUM": "926992002",
+      "ROLE_CODE": "SB_TOP",
+      "ROLE_NAME": "Руководство Сбербанк (по ТН)",
+      "PERSON_NUMBER_ARR": "[00956864, 00031436]",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": "",
+      "DIV_CODE_ARR": "",
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "KMKKSB",
+      "UCH_CODE": "2",
+      "ORG_UNIT_CODE": "10000360",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "927992002",
+      "ROLE_CODE": "KIB_TOP",
+      "ROLE_NAME": "Руководство КИБ",
+      "PERSON_NUMBER_ARR": "[01700680]",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": "",
+      "DIV_CODE_ARR": [
+        10292585
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "KMKKSB",
+      "UCH_CODE": "2",
+      "ORG_UNIT_CODE": "10000360",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "928992003",
+      "ROLE_CODE": "DRKB_CA_TOP",
+      "ROLE_NAME": "Сотрудник ДРКБ ЦА (ТОП)",
+      "PERSON_NUMBER_ARR": "[00013701, 01839748]",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": "",
+      "DIV_CODE_ARR": [
+        10294215
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "KMKKSB",
+      "UCH_CODE": "2",
+      "ORG_UNIT_CODE": "10000360",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "929990004",
+      "ROLE_CODE": "DRKB_CA",
+      "ROLE_NAME": "Сотрудник ДРКБ ЦА",
+      "PERSON_NUMBER_ARR": "",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": "",
+      "DIV_CODE_ARR": [
+        10294215
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "KMKKSB",
+      "UCH_CODE": "0",
+      "ORG_UNIT_CODE": "10000360",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "930990001",
+      "ROLE_CODE": "CA_OTHER",
+      "ROLE_NAME": "Сотрудники ЦА",
+      "PERSON_NUMBER_ARR": "[01810861, 01724398, 00442417, 01809912, 00642554]",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": "",
+      "DIV_CODE_ARR": [
+        10000360
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "KMKKSB",
+      "UCH_CODE": "0",
+      "ORG_UNIT_CODE": "10000360",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "931900001",
+      "ROLE_CODE": "OTHER_NOT_UCH",
+      "ROLE_NAME": "Точечные добавления не участников по табельным",
+      "PERSON_NUMBER_ARR": "[01363292, 01862827, 01552023, 00011297, 00332420, 01543299, 00461998, 01590955, 00873796, 00399098, 00884940, 00390031, 00025355, 01759223, 00124904]",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": "",
+      "DIV_CODE_ARR": "",
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "KMKKSB",
+      "UCH_CODE": "0",
+      "ORG_UNIT_CODE": "",
+      "TB_CODE": "",
+      "GOSB_CODE": ""
+    },
+    {
+      "RULE_NUM": "940902001",
+      "ROLE_CODE": "ZAM_PRED_TB_RB_SP",
+      "ROLE_NAME": "Заместитель председателя ТБ (РБ и СП) (по ТН)",
+      "PERSON_NUMBER_ARR": "[01669912, 01715569, 00284871, 01082511, 00340417, 01665393, 00354252, 00297138, 01040092, 01235690, 00043992]",
+      "STAGE_ETALONE_CODE_ARR": "",
+      "POST_ETALONE_CODE_ARR": "",
+      "DIV_CODE_ARR": [
+        10189534,
+        10177884,
+        10189671,
+        10162480,
+        10167595,
+        10189369,
+        10178847,
+        10158108,
+        10178650,
+        10189453,
+        10174916
+      ],
+      "EXCLUDE_DIV_CODE_ARR": "",
+      "BUSINESS_BLOCK": "RSB1",
+      "UCH_CODE": "2",
+      "ORG_UNIT_CODE": "",
+      "TB_CODE": "",
+      "GOSB_CODE": "0"
+    }
+  ]
+}

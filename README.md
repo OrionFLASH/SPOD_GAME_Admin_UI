@@ -45,7 +45,7 @@
 - **Остановка сервера из UI:** `src/server_stop.py` + маршрут `POST /admin/stop` — после ответа браузеру планируется `SIGTERM` дочерним процессам текущего PID (если есть), затем процессу панели; на POSIX через ~2.5 с при необходимости повторно отправляется `SIGKILL` самому процессу. **Без пароля:** рассчитано на локальный `127.0.0.1`; не выставляйте панель в открытую сеть без прокси с авторизацией.
 - **Экспорт:** `src/export_csv.py` — восстановление CSV по заголовкам из первой строки данных листа.
 - **Мастер «Создать конкурс»:** кнопка на главной → `GET /wizard/new-contest` (`wizard_new_contest.html`, `wizard_contest.js`); подключается **`row_editor.js`** для общего UI JSON-колонок (`window.SpodJsonEditor`) и бейджей ограничений (`window.SpodFieldUiSignals`). Порядок шагов: CONTEST-DATA → … → предпросмотр; **`POST /wizard/new-contest/commit`** — вставка строк в таблицы листов `spod_sheet_*`; ответ **303** с `Location` на карточку конкурса; на клиенте переход отложен (`setTimeout` + `location.assign`), чтобы не ловить ложный **AbortError** у `fetch`; ошибки разбираются из `response.text()` (JSON с `detail` или текст). **Коды:** `REWARD_CODE` в шаге REWARD-LINK — префикс `r_<CONTEST_CODE>` и поле суффикса (при нескольких связях суффикс обязателен и уникален); `TOURNAMENT_CODE` — префикс `t_<CONTEST_CODE>_` и **ровно четыре цифры**; проверки дублируются в `wizard_contest.validate_payload`. **Черновик:** `wizard_draft`, `PUT`/`GET`/`DELETE` draft API; при commit передаётся `draft_uuid` — черновик удаляется в транзакции. **Уход:** модалка и `beforeunload` при несохранённом относительно сервера состоянии.
-- **Редактор строки (клиент):** `row_editor.js` — карточка строки из `#row-editor-bootstrap`; плоские поля и JSON-колонки с режимами **«По полям»** / **«Сырой JSON»**; пустой JSON и `{}` дополняются шаблоном из `field_enums` и обязательных `json_path` в `editor_field_ui` (`mergeDeclaredJsonTemplate`); `field_enums` — select и «Задать своё…»; `editor_textareas` — высота textarea и **поля дат** (в т.ч. с `json_path` внутри JSON-колонки); порог длинного текста; ограничения полей — бейджи **«Обязательно»** / **«Не пусто»**; экспорт **`SpodJsonEditor`** / **`SpodFieldUiSignals`** для мастера. **Защита ухода (`installLeaveGuard`):** перехват ссылок, модалка, `beforeunload`; флаг `leaveGuardSuspended`; `spod_edit_trail`; стили `.spod-leave-modal-overlay` в `app.css`.
+- **Редактор строки (клиент):** `row_editor.js` — карточка строки из `#row-editor-bootstrap`; плоские поля и JSON-колонки с режимами **«По полям»** / **«Сырой JSON»**; пустой JSON и `{}` дополняются шаблоном из `field_enums` и обязательных `json_path` в `editor_field_ui` (`mergeDeclaredJsonTemplate`); `field_enums` — select и «Задать своё…»; `editor_textareas` — высота textarea и **поля дат** (в т.ч. с `json_path` внутри JSON-колонки); порог длинного текста; ограничения полей — бейджи **«Обязательно»** / **«Не пусто»**; экспорт **`SpodJsonEditor`** / **`SpodFieldUiSignals`** для мастера. Для **`REWARD` / `REWARD_ADD_DATA`** по значению **`REWARD_TYPE`** (из плоских полей или `flat` в мастере) в режиме «По полям» показываются только ключи, допустимые для типа по каталогу `Docs/JSON/SPOD_INPUT_DATA_CATALOG.md`; непустые «чужие» ключи из данных остаются видимыми; в шаблон не подставляются пути, не допускаемые для выбранного типа. **Защита ухода (`installLeaveGuard`):** перехват ссылок, модалка, `beforeunload`; флаг `leaveGuardSuspended`; `spod_edit_trail`; стили `.spod-leave-modal-overlay` в `app.css`.
 
 Точка входа: `main.py` или **`run.sh`** поднимают Uvicorn на `host`/`port` из конфига (по умолчанию `http://127.0.0.1:8765/`).
 
@@ -63,6 +63,7 @@
 | `OUT/DB/` | SQLite |
 | `OUT/export/` | Файлы экспорта CSV |
 | `log/` | Логи приложения |
+| `Docs/JSON/` | Справочник структуры входных JSON (`SPOD_INPUT_DATA_CATALOG.md`), примеры выгрузок, краткий `README.md` |
 | `src/app.py` | Маршруты FastAPI (в т.ч. мастер конкурса) |
 | `src/wizard_contest.py` | Схема мастера для UI, проверка тела запроса, атомарная вставка строк |
 | `src/templates/wizard_new_contest.html` | Страница мастера «Создать конкурс» |
@@ -99,7 +100,7 @@
 | `server.host`, `server.port` | Адрес HTTP |
 | `logging.level`, `logging.base_name` | Уровень и префикс имени файла лога |
 | `consistency.mode` | `warn` — сохранять и помечать ошибки; `strict` — откат при ошибках на сохраняемой строке; `soft` зарезервировано как синоним мягкого поведения |
-| `database_model` | Справка: `sheet`, префикс таблиц `spod_sheet_*`, логика связей и ограничения FK между листами |
+| `database_model` | Справка: `sheet`, префикс таблиц `spod_sheet_*`, ограничения FK между листами; массив **`logical_relationships_ru`** — зафиксированная логика связей сущностей (дублирует доменную модель для людей и для согласования с `consistency.py`) |
 | `sheet_bindings[]` | Для каждого листа: `code`, `title`, `csv_file` — должно совпадать с `sheets` (проверка при старте) |
 | `editor_long_text_threshold` | Минимальная длина строки (символы), после которой в JSON-редакторе показывается textarea вместо однострочного поля |
 | `field_enums[]` | Блоки по листу: `sheet_code` + массив `rules` (`column`, `options`, `allow_custom`, опционально `json_path`). Для **ограниченного набора** строк (справочники, коды перечислений). Свободные даты в формате ISO задаются через **`editor_textareas`** с типом даты, а не длинным списком дат в `options`. |
@@ -113,6 +114,23 @@
 
 **Пример:** после правок JSON перезапуск не обязателен; смена `config.json` требует перезапуска. При смене имени CSV обновите и `sheets[].file`, и `sheet_bindings[].csv_file`.
 
+### 4.1. Логическая модель связей между листами
+
+Полный текст в **`config.json` → `database_model.logical_relationships_ru`**. Кратко:
+
+| Откуда | Куда | Ключ | Кардинальность | Смысл |
+|--------|------|------|------------------|--------|
+| **CONTEST-DATA** | — | `CONTEST_CODE` | уникален среди актуальных строк | Справочник конкурсов |
+| **GROUP** | CONTEST-DATA | `CONTEST_CODE` | **N:1** | Одному конкурсу — много групп |
+| **REWARD-LINK** | CONTEST-DATA | `CONTEST_CODE` | **N:1** | Одному конкурсу — много связей |
+| **REWARD-LINK** | GROUP | `(CONTEST_CODE, GROUP_CODE)` | **N:1** | Пара должна существовать в GROUP |
+| **REWARD-LINK** | **REWARD** | `REWARD_CODE` | **N:1** | Много строк связи могут ссылаться на **одну** строку награды с тем же кодом (в быту говорят «награда одна — ссылок много»; не путать с дублированием строк в REWARD) |
+| **REWARD** | CONTEST-DATA | транзитивно через REWARD-LINK | согласование | Все `REWARD-LINK` с данным `REWARD_CODE` должны иметь **один и тот же** `CONTEST_CODE`; иначе награда «приписана» к разным конкурсам |
+| **INDICATOR** | CONTEST-DATA | `CONTEST_CODE` | **N:1** | Одному конкурсу — много показателей |
+| **TOURNAMENT-SCHEDULE** | CONTEST-DATA | `CONTEST_CODE` | **N:1** | Одному конкурсу — много строк расписания |
+
+Проверки: `consistency.py` — ссылки на существующие коды, уникальность `CONTEST_CODE` / `REWARD_CODE` в справочниках, отсутствие «висячих» наград без `REWARD-LINK`, запрет разных `CONTEST_CODE` для одного `REWARD_CODE` в связях.
+
 ---
 
 ## 5. Основные функции модулей
@@ -125,7 +143,7 @@
 | `ingest.import_all` | Полный импорт листов, опционально с очисткой |
 | `spod_json.try_parse_cell` | Разбор ячейки как JSON после нормализации SPOD |
 | `spod_json.format_json_for_edit` | Красивый JSON для textarea |
-| `consistency.run_all_checks` | Пересчёт `consistency_ok` / `consistency_errors` для всех актуальных строк во всех `spod_sheet_*`; параметр `do_commit=False` для транзакции сохранения |
+| `consistency.run_all_checks` | Пересчёт флагов для всех актуальных строк: ссылки между листами, уникальность `CONTEST_CODE` / `REWARD_CODE`, транзитивное согласование REWARD—конкурс через REWARD-LINK; `do_commit=False` внутри транзакции сохранения |
 | `export_csv.export_sheet_to_csv` | Запись CSV в `OUT/export/` |
 | `relations.build_context_for_row` | Словарь блоков «Связи» для шаблона |
 | `relations._link_item`, `_preview_for_item` | Одна связанная строка: `sheet_code`, `row_id`, `cells`, короткая подпись `preview` для UI |
@@ -376,6 +394,8 @@ python main.py
 | 0.2.4 | Мастер: таблица `wizard_draft` (EDIT), автосохранение при «Далее»/«Назад» и кнопка «Временное сохранение», API черновиков, `?draft=uuid`, защита ухода с модалкой; `draft_uuid` в commit; общий `spod_date_picker.js`; раздел README **6b** и расширенные таблицы маршрутов и модулей. |
 | 0.2.5 | Мастер подключает `row_editor.js` (`SpodJsonEditor`, `SpodFieldUiSignals`); префиксы `REWARD_CODE` / формат `TOURNAMENT_CODE` и проверки в `validate_payload`; отложенный переход после успешного commit; разбор ошибок из текста ответа; даты в конфиге через `editor_textareas` с `json_path` (не списки дат в `field_enums`); ответы commit **400**/**500** с JSON `detail`. |
 | 0.2.6 | Хранение данных: вместо одной `data_row`/`cells_json` — отдельная таблица SQLite на каждый лист с колонками CSV, TEXT с полным JSON по `json_columns` и денормализацией в `j__*`; реестр `sheet.headers_json`; миграция удаления `data_row`; индексы по ключам связей; обновлены `ingest`, `app`, `consistency`, `relations`, `export_csv`, мастер. |
+| 0.2.7 | Зафиксирована логическая модель связей в `database_model.logical_relationships_ru` и README **раздел 4.1**; усилен `consistency.py`: уникальность справочников CONTEST/REWARD, награда без REWARD-LINK, один CONTEST_CODE на REWARD_CODE в связях. |
+| 0.2.8 | Редактор и мастер: для `REWARD_ADD_DATA` учитывается `REWARD_TYPE` — фильтрация полей и шаблона по матрице каталога `Docs/JSON/SPOD_INPUT_DATA_CATALOG.md` (`row_editor.js`, `wizard_contest.js`). |
 
 ---
 

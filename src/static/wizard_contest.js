@@ -28,6 +28,8 @@
   var leaveOverlay = null;
   var leaveDialog = null;
   var draftSaveInFlight = false;
+  /** Обработчики кнопок мастера вешаются один раз (после выхода из стартового экрана). */
+  var bindingsInstalled = false;
 
   function $(id) {
     return document.getElementById(id);
@@ -639,7 +641,11 @@
           fieldEnums: schema.fieldEnums,
           editorTextareas: schema.editorTextareas || [],
           longTextThreshold: schema.longTextThreshold || 120,
+          flat: {},
         };
+        if (sheetCode === "REWARD") {
+          pseudoBoot.flat.REWARD_TYPE = cells.REWARD_TYPE != null ? String(cells.REWARD_TYPE) : "";
+        }
         var jcBoot = {
           column: jc,
           section_slug: String(jc).replace(/[^a-zA-Z0-9_-]/g, "_"),
@@ -685,6 +691,36 @@
       }
     });
     return Object.keys(u).sort();
+  }
+
+  /** Массив rewards в порядке uniqRewardCodesFromLinks, подбирая ячейки из старых строк. */
+  function syncRewardsFromLinks() {
+    var codes = uniqRewardCodesFromLinks();
+    var nr = [];
+    codes.forEach(function (rc) {
+      var found = null;
+      (state.rewards || []).forEach(function (rw) {
+        if (String((rw.cells || {}).REWARD_CODE || "").trim() === rc) {
+          found = rw;
+        }
+      });
+      nr.push(found || { cells: { REWARD_CODE: rc } });
+    });
+    state.rewards = nr;
+  }
+
+  /** После удаления группы убираем связи с несуществующим GROUP_CODE и подравниваем награды. */
+  function syncRewardLinksAfterGroupChange() {
+    var ug = {};
+    uniqGroupCodes().forEach(function (g) {
+      ug[g] = true;
+    });
+    state.reward_links = (state.reward_links || []).filter(function (ln) {
+      var g = String((ln.cells || {}).GROUP_CODE || "").trim();
+      return ug[g];
+    });
+    state.linkCount = Math.max(state.reward_links.length, 1);
+    syncRewardsFromLinks();
   }
 
   function newDraftUuid() {
@@ -752,6 +788,20 @@
     n.classList.toggle("wiz-draft-note--err", !!isErr);
   }
 
+  function showCommitFlash(text) {
+    var el = $("wiz-commit-flash");
+    if (!el) {
+      return;
+    }
+    el.textContent = text || "";
+    el.classList.toggle("is-hidden", !text);
+  }
+
+  /**
+   * Сохранение черновика в wizard_draft.
+   * @param {function(boolean)|null} doneFn — вызывается с true при успехе, с false при ошибке (в т.ч. сеть / не-JSON ответ).
+   * @param {boolean} silent — не показывать зелёное «сохранено» (для шагов Далее/Назад); ошибки всё равно видны через showErr при вызове из goNext/goBack.
+   */
   function persistDraft(doneFn, silent) {
     if (!draftUuid) {
       draftUuid = newDraftUuid();
@@ -774,25 +824,38 @@
     })
       .then(function (r) {
         if (!r.ok) {
-          return r.json().then(function (j) {
-            throw new Error((j && j.detail) || r.statusText);
+          return r.text().then(function (txt) {
+            var detail = r.statusText || "Ошибка " + r.status;
+            try {
+              var j = txt ? JSON.parse(txt) : {};
+              if (j && j.detail !== undefined) {
+                detail = typeof j.detail === "string" ? j.detail : JSON.stringify(j.detail);
+              }
+            } catch (e1) {
+              if (txt) {
+                detail = txt.slice(0, 400);
+              }
+            }
+            throw new Error(detail);
           });
         }
         markSavedSnapshot();
         if (!silent) {
-          showDraftNote("Черновик сохранён в базу (EDIT).", false);
+          showDraftNote("Черновик сохранён в базу (статус EDIT).", false);
           window.setTimeout(function () {
             showDraftNote("", false);
-          }, 2500);
+          }, 2800);
         }
         if (doneFn) {
           doneFn(true);
         }
       })
-      .catch(function () {
+      .catch(function (err) {
+        var msg = (err && err.message) || "Не удалось сохранить черновик.";
         if (!silent) {
-          showDraftNote("Не удалось сохранить черновик.", true);
+          showDraftNote(msg, true);
         }
+        showErr(msg);
         if (doneFn) {
           doneFn(false);
         }
@@ -860,10 +923,11 @@
     });
     leaveDialog.querySelector(".wiz-leave-save").addEventListener("click", function () {
       persistDraft(function (ok) {
-        if (ok) {
-          leaveGuardSuspended = true;
-          executePendingLeave();
+        if (!ok) {
+          return;
         }
+        leaveGuardSuspended = true;
+        executePendingLeave();
       }, true);
     });
   }
@@ -1109,9 +1173,26 @@
       (state.groups || []).forEach(function (g, ix) {
         var sec = document.createElement("section");
         sec.className = "panel wiz-subpanel";
+        var headRow = document.createElement("div");
+        headRow.className = "wiz-subpanel-head";
         var h = document.createElement("h3");
         h.textContent = "Группа " + (ix + 1);
-        sec.appendChild(h);
+        headRow.appendChild(h);
+        if ((state.groups || []).length > 1) {
+          var delG = document.createElement("button");
+          delG.type = "button";
+          delG.className = "btn btn-ghost btn-sm";
+          delG.textContent = "Удалить строку";
+          delG.setAttribute("aria-label", "Удалить группу " + (ix + 1));
+          delG.addEventListener("click", function () {
+            state.groups.splice(ix, 1);
+            state.groupCount = Math.max(1, state.groups.length);
+            syncRewardLinksAfterGroupChange();
+            render();
+          });
+          headRow.appendChild(delG);
+        }
+        sec.appendChild(headRow);
         sec.appendChild(renderSheetForm("GROUP", g.cells || {}, { CONTEST_CODE: contestCode() }));
         box.appendChild(sec);
       });
@@ -1167,9 +1248,27 @@
       (state.reward_links || []).forEach(function (ln, ix) {
         var sec = document.createElement("section");
         sec.className = "panel wiz-subpanel";
+        var headL = document.createElement("div");
+        headL.className = "wiz-subpanel-head";
         var h = document.createElement("h3");
         h.textContent = "Связь " + (ix + 1);
-        sec.appendChild(h);
+        headL.appendChild(h);
+        var minL = Math.max(1, ug.length);
+        if ((state.reward_links || []).length > minL) {
+          var delL = document.createElement("button");
+          delL.type = "button";
+          delL.className = "btn btn-ghost btn-sm";
+          delL.textContent = "Удалить строку";
+          delL.setAttribute("aria-label", "Удалить связь " + (ix + 1));
+          delL.addEventListener("click", function () {
+            state.reward_links.splice(ix, 1);
+            state.linkCount = Math.max(state.reward_links.length, minL);
+            syncRewardsFromLinks();
+            render();
+          });
+          headL.appendChild(delL);
+        }
+        sec.appendChild(headL);
         sec.appendChild(
           renderSheetForm(
             "REWARD-LINK",
@@ -1247,9 +1346,24 @@
       (state.indicators || []).forEach(function (ind, ix) {
         var sec = document.createElement("section");
         sec.className = "panel wiz-subpanel";
+        var headI = document.createElement("div");
+        headI.className = "wiz-subpanel-head";
         var h = document.createElement("h3");
         h.textContent = "Показатель " + (ix + 1);
-        sec.appendChild(h);
+        headI.appendChild(h);
+        if ((state.indicators || []).length > 1) {
+          var delI = document.createElement("button");
+          delI.type = "button";
+          delI.className = "btn btn-ghost btn-sm";
+          delI.textContent = "Удалить строку";
+          delI.addEventListener("click", function () {
+            state.indicators.splice(ix, 1);
+            state.indicatorCount = Math.max(1, state.indicators.length);
+            render();
+          });
+          headI.appendChild(delI);
+        }
+        sec.appendChild(headI);
         sec.appendChild(renderSheetForm("INDICATOR", ind.cells || {}, { CONTEST_CODE: contestCode() }));
         box4.appendChild(sec);
       });
@@ -1288,9 +1402,24 @@
       (state.schedules || []).forEach(function (sc, ix) {
         var sec = document.createElement("section");
         sec.className = "panel wiz-subpanel";
+        var headS = document.createElement("div");
+        headS.className = "wiz-subpanel-head";
         var h = document.createElement("h3");
         h.textContent = "Расписание " + (ix + 1);
-        sec.appendChild(h);
+        headS.appendChild(h);
+        if ((state.schedules || []).length > 1) {
+          var delS = document.createElement("button");
+          delS.type = "button";
+          delS.className = "btn btn-ghost btn-sm";
+          delS.textContent = "Удалить строку";
+          delS.addEventListener("click", function () {
+            state.schedules.splice(ix, 1);
+            state.scheduleCount = Math.max(1, state.schedules.length);
+            render();
+          });
+          headS.appendChild(delS);
+        }
+        sec.appendChild(headS);
         sec.appendChild(
           renderSheetForm(
             "TOURNAMENT-SCHEDULE",
@@ -1504,7 +1633,13 @@
 
   function goNext() {
     readStepIntoState();
-    persistDraft(function () {
+    persistDraft(function (ok) {
+      if (!ok) {
+        showErr(
+          "Черновик не записан на сервер (сеть или ответ API). Повторите «Далее» или нажмите «Временное сохранение»."
+        );
+        return;
+      }
       var err = validateCurrent();
       if (err.length) {
         showErr(err.join("\n"));
@@ -1520,7 +1655,14 @@
 
   function goBack() {
     readStepIntoState();
-    persistDraft(function () {
+    persistDraft(function (ok) {
+      if (!ok) {
+        showErr(
+          "Черновик не записан на сервер. Назад без сохранения шага нельзя — проверьте сеть или «Временное сохранение»."
+        );
+        return;
+      }
+      showErr("");
       if (state.stepIndex > 0) {
         state.stepIndex--;
         render();
@@ -1550,10 +1692,13 @@
           leaveGuardSuspended = true;
           var loc = r.headers.get("Location");
           if (loc) {
+            showErr("");
+            showDraftNote("", false);
+            showCommitFlash("Конкурс записан в базу. Переход к карточке конкурса…");
             /* Сразу после 303 браузер может прервать fetch (AbortError) — откладываем переход. */
             setTimeout(function () {
               window.location.assign(loc);
-            }, 0);
+            }, 500);
           } else {
             showErr("Редирект " + r.status + " без заголовка Location.");
           }
@@ -1580,6 +1725,10 @@
   }
 
   function bind() {
+    if (bindingsInstalled) {
+      return;
+    }
+    bindingsInstalled = true;
     var nx = $("wiz-btn-next");
     var bk = $("wiz-btn-back");
     var cn = $("wiz-btn-cancel");
@@ -1615,6 +1764,213 @@
     }
   }
 
+  function openMainWizardFlow() {
+    var ag = $("wiz-after-gate");
+    var sg = $("wiz-start-gate");
+    if (ag) {
+      ag.classList.remove("is-hidden");
+    }
+    if (sg) {
+      sg.classList.add("is-hidden");
+    }
+  }
+
+  function resetWizardStateEmpty() {
+    state.stepIndex = 0;
+    state.contest = { cells: {} };
+    state.groups = [];
+    state.reward_links = [];
+    state.rewards = [];
+    state.indicators = [];
+    state.schedules = [];
+    state.groupCount = 1;
+    state.linkCount = 1;
+    state.indicatorCount = 1;
+    state.scheduleCount = 1;
+  }
+
+  /** Стартовый экран: черновики EDIT, с нуля, копия из БД. */
+  function renderStartGate(draftRows, seedContests) {
+    var body = $("wiz-gate-body");
+    if (!body) {
+      return;
+    }
+    body.innerHTML = "";
+    var intro = document.createElement("p");
+    intro.className = "muted wiz-gate-intro";
+    intro.textContent =
+      "Черновики в базе имеют статус EDIT. Можно продолжить редактирование, начать пустую форму или подгрузить копию существующего конкурса (поля заполнятся из БД — затем задайте новые коды).";
+    body.appendChild(intro);
+
+    if (draftRows && draftRows.length) {
+      var hD = document.createElement("h3");
+      hD.textContent = "Продолжить черновик";
+      body.appendChild(hD);
+      draftRows.forEach(function (row) {
+        var line = document.createElement("div");
+        line.className = "wiz-draft-row wiz-gate-draft-row";
+        var code = row.contest_code_preview || "— код не указан —";
+        var when = row.updated_at || "";
+        var sid = row.draft_uuid || "";
+        line.innerHTML =
+          "<span class=\"wiz-draft-meta\">" +
+          escapeHtml(code) +
+          " · шаг " +
+          (parseInt(row.step_index, 10) + 1) +
+          " · " +
+          escapeHtml(when) +
+          "</span>";
+        var btnOpen = document.createElement("button");
+        btnOpen.type = "button";
+        btnOpen.className = "btn btn-primary btn-sm";
+        btnOpen.textContent = "Продолжить";
+        btnOpen.addEventListener("click", function () {
+          window.location.href = "/wizard/new-contest?draft=" + encodeURIComponent(sid);
+        });
+        var btnDel = document.createElement("button");
+        btnDel.type = "button";
+        btnDel.className = "btn btn-ghost btn-sm";
+        btnDel.textContent = "Удалить";
+        btnDel.addEventListener("click", function () {
+          if (!confirm("Удалить этот черновик из базы?")) {
+            return;
+          }
+          fetch("/wizard/new-contest/draft/" + encodeURIComponent(sid), { method: "DELETE" })
+            .then(function () {
+              return fetch("/wizard/new-contest/drafts");
+            })
+            .then(function (r) {
+              return r.json();
+            })
+            .then(function (nr) {
+              return fetch("/wizard/new-contest/seed-contests")
+                .then(function (rs) {
+                  return rs.ok ? rs.json() : [];
+                })
+                .then(function (seeds) {
+                  renderStartGate(nr, seeds);
+                });
+            });
+        });
+        line.appendChild(btnOpen);
+        line.appendChild(btnDel);
+        body.appendChild(line);
+      });
+    }
+
+    var hNew = document.createElement("h3");
+    hNew.textContent = "Новый конкурс";
+    body.appendChild(hNew);
+    var bScratch = document.createElement("button");
+    bScratch.type = "button";
+    bScratch.className = "btn btn-primary";
+    bScratch.textContent = "Создать с нуля (пустые поля)";
+    bScratch.addEventListener("click", function () {
+      draftUuid = newDraftUuid();
+      lastSavedDraftJson = null;
+      resetWizardStateEmpty();
+      openMainWizardFlow();
+      afterSchemaReady();
+      fetch("/wizard/new-contest/drafts")
+        .then(function (r) {
+          return r.json();
+        })
+        .then(function (rows) {
+          renderDraftPanel(rows);
+        });
+    });
+    body.appendChild(bScratch);
+
+    if (seedContests && seedContests.length) {
+      var hC = document.createElement("h3");
+      hC.textContent = "Копировать существующий конкурс из базы";
+      body.appendChild(hC);
+      var pC = document.createElement("p");
+      pC.className = "muted";
+      pC.textContent =
+        "В мастер подставятся строки CONTEST-DATA, GROUP, REWARD-LINK, REWARD, INDICATOR, TOURNAMENT-SCHEDULE для выбранного CONTEST_CODE. Замените коды на новые перед подтверждением.";
+      body.appendChild(pC);
+      var sel = document.createElement("select");
+      sel.className = "wiz-gate-select";
+      sel.id = "wiz-gate-seed-select";
+      var o0 = document.createElement("option");
+      o0.value = "";
+      o0.textContent = "— выберите CONTEST_CODE —";
+      sel.appendChild(o0);
+      seedContests.forEach(function (sc) {
+        var opt = document.createElement("option");
+        opt.value = sc.contest_code || "";
+        var fn = (sc.full_name || "").slice(0, 72);
+        var rcn = (sc.reward_codes && sc.reward_codes.length) || 0;
+        opt.textContent = (sc.contest_code || "") + " — " + fn + " (наград в связях: " + rcn + ")";
+        opt.title = (sc.reward_codes || []).join(", ");
+        sel.appendChild(opt);
+      });
+      body.appendChild(sel);
+      var bCopy = document.createElement("button");
+      bCopy.type = "button";
+      bCopy.className = "btn btn-secondary wiz-gate-copy-btn";
+      bCopy.textContent = "Загрузить копию в мастер";
+      bCopy.addEventListener("click", function () {
+        var code = String(sel.value || "").trim();
+        if (!code) {
+          alert("Выберите конкурс в списке.");
+          return;
+        }
+        fetch("/wizard/new-contest/seed-state?contest_code=" + encodeURIComponent(code))
+          .then(function (r) {
+            if (!r.ok) {
+              return r.text().then(function (txt) {
+                var detail = r.statusText;
+                try {
+                  var j = txt ? JSON.parse(txt) : {};
+                  if (j && j.detail) {
+                    detail = typeof j.detail === "string" ? j.detail : JSON.stringify(j.detail);
+                  }
+                } catch (e2) {
+                  if (txt) {
+                    detail = txt.slice(0, 400);
+                  }
+                }
+                throw new Error(detail);
+              });
+            }
+            return r.json();
+          })
+          .then(function (st) {
+            applyStateFromDraft(st);
+            lastSavedDraftJson = null;
+            draftUuid = newDraftUuid();
+            openMainWizardFlow();
+            afterSchemaReady();
+            showErr("");
+            showDraftNote(
+              "Загружена копия конкурса «" +
+                code +
+                "». Задайте новые CONTEST_CODE и связанные коды (GROUP, REWARD, TOURNAMENT и т.д.), затем сохраните черновик или создайте запись.",
+              false
+            );
+            fetch("/wizard/new-contest/drafts")
+              .then(function (r) {
+                return r.json();
+              })
+              .then(function (rows) {
+                renderDraftPanel(rows);
+              });
+          })
+          .catch(function (e) {
+            alert((e && e.message) || "Ошибка загрузки копии");
+          });
+      });
+      body.appendChild(bCopy);
+    }
+  }
+
+  function afterSchemaReady() {
+    bind();
+    render();
+  }
+
   function init() {
     var el = $("wizard-schema-json");
     if (!el) {
@@ -1629,11 +1985,8 @@
     installWizardLeaveGuard();
     var params = new URLSearchParams(window.location.search || "");
     var draftParam = params.get("draft");
-    function afterSchemaReady() {
-      bind();
-      render();
-    }
     if (draftParam) {
+      openMainWizardFlow();
       draftUuid = draftParam;
       fetch("/wizard/new-contest/draft/" + encodeURIComponent(draftParam))
         .then(function (r) {
@@ -1654,30 +2007,36 @@
         .catch(function () {
           draftUuid = newDraftUuid();
           lastSavedDraftJson = null;
-          fetch("/wizard/new-contest/drafts")
-            .then(function (r2) {
+          Promise.all([
+            fetch("/wizard/new-contest/drafts").then(function (r2) {
               return r2.json();
-            })
-            .then(function (rows) {
-              renderDraftPanel(rows);
-            })
-            .finally(function () {
-              afterSchemaReady();
-            });
+            }),
+            fetch("/wizard/new-contest/seed-contests")
+              .then(function (rs) {
+                return rs.ok ? rs.json() : [];
+              })
+              .catch(function () {
+                return [];
+              }),
+          ]).then(function (pair) {
+            renderStartGate(pair[0], pair[1]);
+          });
         });
     } else {
-      draftUuid = newDraftUuid();
-      lastSavedDraftJson = null;
-      fetch("/wizard/new-contest/drafts")
-        .then(function (r) {
+      Promise.all([
+        fetch("/wizard/new-contest/drafts").then(function (r) {
           return r.json();
-        })
-        .then(function (rows) {
-          renderDraftPanel(rows);
-        })
-        .finally(function () {
-          afterSchemaReady();
-        });
+        }),
+        fetch("/wizard/new-contest/seed-contests")
+          .then(function (rs) {
+            return rs.ok ? rs.json() : [];
+          })
+          .catch(function () {
+            return [];
+          }),
+      ]).then(function (pair) {
+        renderStartGate(pair[0], pair[1]);
+      });
     }
   }
 

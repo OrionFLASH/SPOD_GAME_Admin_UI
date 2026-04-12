@@ -13,7 +13,7 @@ import logging
 import re
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, List, Set, Tuple
 
 from src import consistency, editor_config, ingest, sheet_storage
 
@@ -159,6 +159,122 @@ def _insert_row(root: Path, conn: Any, cfg: Dict[str, Any], sheet_code: str, cel
         now,
         replaces_row_id=None,
     )
+
+
+def _current_rows_cells(conn: Any, sheet_code: str) -> List[Dict[str, str]]:
+    """Актуальные строки листа: список словарей ячеек (порядок как в БД)."""
+    t = sheet_storage.physical_table_name(sheet_code)
+    headers = sheet_storage.headers_for_sheet(conn, sheet_code)
+    if not headers:
+        return []
+    cur = conn.execute(
+        f"""
+        SELECT * FROM {sheet_storage.quote_ident(t)}
+        WHERE is_current = 1
+        ORDER BY sort_key, row_index, id
+        """
+    )
+    out: List[Dict[str, str]] = []
+    for r in cur.fetchall():
+        out.append(sheet_storage.row_to_cells(r, headers))
+    return out
+
+
+def list_seed_contests(conn: Any) -> List[Dict[str, Any]]:
+    """
+    Список конкурсов из БД для режима «копировать существующий»: код, название, коды наград из REWARD-LINK.
+    """
+    by_contest: Dict[str, Set[str]] = {}
+    for cn in _current_rows_cells(conn, "REWARD-LINK"):
+        cc = (cn.get("CONTEST_CODE") or "").strip()
+        rc = (cn.get("REWARD_CODE") or "").strip()
+        if cc and rc:
+            by_contest.setdefault(cc, set()).add(rc)
+    out: List[Dict[str, Any]] = []
+    for cells in _current_rows_cells(conn, "CONTEST-DATA"):
+        cc = (cells.get("CONTEST_CODE") or "").strip()
+        if not cc:
+            continue
+        rcs = sorted(by_contest.get(cc, set()))
+        out.append(
+            {
+                "contest_code": cc,
+                "full_name": (cells.get("FULL_NAME") or "").strip(),
+                "reward_codes": rcs,
+            }
+        )
+    out.sort(key=lambda x: str(x.get("contest_code") or ""))
+    return out
+
+
+def build_seed_state_from_contest(conn: Any, contest_code: str) -> Dict[str, Any]:
+    """
+    Собирает объект state мастера из актуальных строк БД для указанного CONTEST_CODE.
+    Клиент подставляет новые коды вручную; здесь — полная копия полей как в источнике.
+    """
+    cc_key = (contest_code or "").strip()
+    if not cc_key:
+        raise ValueError("Не указан код конкурса (contest_code).")
+    contest_cells: Dict[str, str] | None = None
+    for cells in _current_rows_cells(conn, "CONTEST-DATA"):
+        if (cells.get("CONTEST_CODE") or "").strip() == cc_key:
+            contest_cells = dict(cells)
+            break
+    if contest_cells is None:
+        raise ValueError(f"Конкурс «{cc_key}» не найден среди актуальных строк CONTEST-DATA.")
+
+    groups: List[Dict[str, Any]] = []
+    for cells in _current_rows_cells(conn, "GROUP"):
+        if (cells.get("CONTEST_CODE") or "").strip() == cc_key:
+            groups.append({"cells": dict(cells)})
+
+    reward_links: List[Dict[str, Any]] = []
+    for cells in _current_rows_cells(conn, "REWARD-LINK"):
+        if (cells.get("CONTEST_CODE") or "").strip() == cc_key:
+            reward_links.append({"cells": dict(cells)})
+
+    uniq_rc = sorted(
+        {
+            (ln["cells"].get("REWARD_CODE") or "").strip()
+            for ln in reward_links
+            if (ln["cells"].get("REWARD_CODE") or "").strip()
+        }
+    )
+    rewards: List[Dict[str, Any]] = []
+    for rc in uniq_rc:
+        row_cells: Dict[str, str] | None = None
+        for cells in _current_rows_cells(conn, "REWARD"):
+            if (cells.get("REWARD_CODE") or "").strip() == rc:
+                row_cells = dict(cells)
+                break
+        if row_cells is not None:
+            rewards.append({"cells": row_cells})
+        else:
+            rewards.append({"cells": {"REWARD_CODE": rc}})
+
+    indicators: List[Dict[str, Any]] = []
+    for cells in _current_rows_cells(conn, "INDICATOR"):
+        if (cells.get("CONTEST_CODE") or "").strip() == cc_key:
+            indicators.append({"cells": dict(cells)})
+
+    schedules: List[Dict[str, Any]] = []
+    for cells in _current_rows_cells(conn, "TOURNAMENT-SCHEDULE"):
+        if (cells.get("CONTEST_CODE") or "").strip() == cc_key:
+            schedules.append({"cells": dict(cells)})
+
+    return {
+        "stepIndex": 0,
+        "contest": {"cells": contest_cells},
+        "groups": groups,
+        "reward_links": reward_links,
+        "rewards": rewards,
+        "indicators": indicators,
+        "schedules": schedules,
+        "groupCount": max(1, len(groups)),
+        "linkCount": max(1, len(reward_links)),
+        "indicatorCount": max(1, len(indicators)),
+        "scheduleCount": max(1, len(schedules)),
+    }
 
 
 def validate_payload(payload: Dict[str, Any]) -> List[str]:

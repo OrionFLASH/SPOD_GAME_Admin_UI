@@ -1,5 +1,6 @@
 /**
  * Редактор строки: сетка плоских полей, развёртка JSON в параметры, сборка при сохранении.
+ * Для листа REWARD и колонки REWARD_ADD_DATA список полей и шаблон зависят от REWARD_TYPE (см. каталог JSON).
  * Пустой объект JSON дополняется шаблоном из field_enums и обязательных json_path в editor_field_ui;
  * экспорт window.SpodJsonEditor — тот же UI в мастере создания конкурса.
  * Списки допустимых значений и «Задать своё» задаются в config.json (field_enums по листам);
@@ -12,6 +13,134 @@
 
   /** Внутреннее значение select для режима произвольного ввода (см. allow_custom). */
   var CUSTOM_SENTINEL = "__SPOD_CUSTOM__";
+
+  /**
+   * Матрица «ключ верхнего уровня в REWARD_ADD_DATA → допустимые значения REWARD_TYPE».
+   * Источник: Docs/JSON/SPOD_INPUT_DATA_CATALOG.md, раздел «2. Матрица: поле ↔ REWARD_TYPE».
+   * Ключи, отсутствующие в объекте, считаются не описанными в каталоге: такие поля не скрываем.
+   */
+  var REWARD_ADD_DATA_ROOT_KEYS_BY_TYPE = {
+    bookingRequired: ["ITEM"],
+    businessBlock: ["BADGE", "ITEM"],
+    commingSoon: ["ITEM"],
+    deliveryRequired: ["ITEM"],
+    feature: ["BADGE", "ITEM", "LABEL", "CRYSTAL"],
+    fileName: ["BADGE", "ITEM", "LABEL", "CRYSTAL"],
+    getCondition: ["ITEM"],
+    hidden: ["BADGE", "ITEM", "LABEL", "CRYSTAL"],
+    hiddenRewardList: ["BADGE", "ITEM"],
+    ignoreConditions: ["ITEM"],
+    isGrouping: ["ITEM"],
+    isGroupingName: ["ITEM"],
+    isGroupingTitle: ["ITEM"],
+    isGroupingTultip: ["ITEM"],
+    itemAmount: ["ITEM"],
+    itemFeature: ["ITEM"],
+    itemGroupAmount: ["ITEM"],
+    itemLimitCount: ["ITEM"],
+    itemLimitPeriod: ["ITEM"],
+    itemMinShow: ["ITEM"],
+    helpCodeList: ["BADGE"],
+    masterBadge: ["BADGE"],
+    newsType: ["BADGE"],
+    nftFlg: ["BADGE", "ITEM", "LABEL", "CRYSTAL"],
+    outstanding: ["BADGE", "ITEM", "LABEL", "CRYSTAL"],
+    parentRewardCode: ["BADGE", "LABEL"],
+    persomanNumberVisible: ["ITEM"],
+    preferences: ["BADGE"],
+    priority: ["BADGE"],
+    recommendationLevel: ["BADGE"],
+    refreshOldNews: ["BADGE", "ITEM", "LABEL"],
+    rewardAgainGlobal: ["BADGE", "ITEM", "LABEL", "CRYSTAL"],
+    rewardAgainTournament: ["BADGE", "ITEM", "LABEL", "CRYSTAL"],
+    rewardRule: ["BADGE", "ITEM", "LABEL", "CRYSTAL"],
+    seasonItem: ["BADGE", "ITEM"],
+    singleNews: ["BADGE", "ITEM", "LABEL", "CRYSTAL"],
+    tagColor: ["LABEL"],
+    tagEndDT: ["LABEL"],
+    teamNews: ["BADGE", "ITEM", "LABEL", "CRYSTAL"],
+    tournamentTeam: ["BADGE"],
+    winCriterion: ["BADGE"],
+  };
+
+  /** Первый строковой сегмент пути (ключ объекта); индексы массива пропускаем до первого ключа. */
+  function firstStringJsonPathSegment(parts) {
+    if (!parts || !parts.length) {
+      return null;
+    }
+    var i;
+    for (i = 0; i < parts.length; i++) {
+      if (typeof parts[i] === "string") {
+        return parts[i];
+      }
+    }
+    return null;
+  }
+
+  /** Текущий REWARD_TYPE из bootstrap (плоская ячейка или fullRow для мастера). */
+  function rewardTypeFromBootstrap(bootstrap) {
+    if (!bootstrap) {
+      return "";
+    }
+    var f = (bootstrap.flat && bootstrap.flat.REWARD_TYPE) || "";
+    if (!String(f).trim() && bootstrap.fullRow) {
+      f = bootstrap.fullRow.REWARD_TYPE || "";
+    }
+    return String(f != null ? f : "").trim();
+  }
+
+  /** Разрешён ли путь для типа награды (только лист REWARD, колонка REWARD_ADD_DATA). */
+  function rewardAddDataPathAllowedForType(parts, rewardType) {
+    if (!rewardType) {
+      return true;
+    }
+    var top = firstStringJsonPathSegment(parts);
+    if (!top) {
+      return true;
+    }
+    var allowed = REWARD_ADD_DATA_ROOT_KEYS_BY_TYPE[top];
+    if (!allowed) {
+      return true;
+    }
+    return allowed.indexOf(rewardType) !== -1;
+  }
+
+  /** Есть ли у листа непустое значение (чтобы показать поле, не предусмотренное для типа). */
+  function rewardAddDataLeafHasMeaningfulValue(leaf) {
+    if (leaf.vtype === "empty-array" || leaf.vtype === "empty-object") {
+      return false;
+    }
+    if (leaf.vtype === "null") {
+      return false;
+    }
+    if (leaf.vtype === "string") {
+      return String(leaf.display != null ? leaf.display : "").trim() !== "";
+    }
+    if (leaf.vtype === "number" || leaf.vtype === "boolean") {
+      return true;
+    }
+    return true;
+  }
+
+  /**
+   * Оставляет в списке листьев только те, что относятся к текущему REWARD_TYPE,
+   * плюс «лишние» ключи каталога с непустыми данными и любые неизвестные ключи верхнего уровня.
+   */
+  function filterRewardAddDataLeaves(leaves, column, bootstrap) {
+    if (bootstrap.sheetCode !== "REWARD" || column !== "REWARD_ADD_DATA") {
+      return leaves;
+    }
+    var rt = rewardTypeFromBootstrap(bootstrap);
+    if (!rt) {
+      return leaves;
+    }
+    return leaves.filter(function (leaf) {
+      if (rewardAddDataPathAllowedForType(leaf.parts, rt)) {
+        return true;
+      }
+      return rewardAddDataLeafHasMeaningfulValue(leaf);
+    });
+  }
 
   function formatPath(parts) {
     var s = "";
@@ -567,6 +696,13 @@
     });
     for (ii = 0; ii < paths.length; ii++) {
       var parts = paths[ii];
+      /* Не создаём из шаблона поля JSON, которые для данного REWARD_TYPE в каталоге не допускаются. */
+      if (sc === "REWARD" && column === "REWARD_ADD_DATA") {
+        var rt0 = rewardTypeFromBootstrap(bootstrap);
+        if (rt0 && !rewardAddDataPathAllowedForType(parts, rt0)) {
+          continue;
+        }
+      }
       if (getDeepValue(out, parts) !== undefined) {
         continue;
       }
@@ -769,6 +905,7 @@
 
     var leaves = [];
     flattenLeaves(parsed, [], leaves);
+    leaves = filterRewardAddDataLeaves(leaves, col, bootstrap);
 
     var grid = document.createElement("div");
     grid.className = "json-field-grid";

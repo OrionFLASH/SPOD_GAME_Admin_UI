@@ -11,7 +11,17 @@
     "comment_ru": "Схема SQLite задаётся в коде (src/db.py, src/sheet_storage.py). У каждого листа из sheets[] — своя таблица spod_sheet_<КОД> (дефисы в коде заменены на подчёркивание): колонки CSV как отдельные TEXT, JSON-колонки как TEXT с полным JSON, плюс денормализованные листья j__<JSON_колонка>__<путь>. Служебные поля: id, sheet_id, row_index, sort_key, consistency_*, updated_at, is_current, replaces_row_id. Логические связи между листами (CONTEST_CODE, REWARD_CODE и т.д.) индексируются для запросов; классические FOREIGN KEY между листами не используются из‑за версионирования строк (несколько версий с одним бизнес-ключом).",
     "registry_table": "sheet",
     "per_sheet_tables_prefix": "spod_sheet_",
-    "relationship_ru": "sheet.id → sheet_id в таблице листа; целостность ссылок между листами проверяет consistency.py."
+    "relationship_ru": "sheet.id → sheet_id в таблице листа; целостность ссылок между листами проверяет consistency.py.",
+    "logical_relationships_ru": [
+      "CONTEST-DATA — справочник конкурсов: среди актуальных строк (is_current=1) значение CONTEST_CODE считается уникальным идентификатором сущности конкурса.",
+      "GROUP → CONTEST-DATA: связь по CONTEST_CODE, кардинальность 1:N — одному коду конкурса соответствует несколько строк групп.",
+      "REWARD-LINK → CONTEST-DATA: по CONTEST_CODE, 1:N — одному конкурсу соответствует много строк связей (конкурс—группа—награда).",
+      "REWARD-LINK → GROUP: пара (CONTEST_CODE, GROUP_CODE) должна существовать в GROUP.",
+      "REWARD-LINK → REWARD: по REWARD_CODE каждая строка связи ссылается на ровно одну строку справочника REWARD с тем же кодом (со стороны связи «много ссылок → одна награда», N:1).",
+      "REWARD ↔ CONTEST-DATA: не прямое поле в CSV, а транзитивно через REWARD-LINK — все строки REWARD-LINK с данным REWARD_CODE должны относиться к одному и тому же CONTEST_CODE; иначе данные противоречивы.",
+      "INDICATOR → CONTEST-DATA: по CONTEST_CODE, 1:N — одному конкурсу много показателей.",
+      "TOURNAMENT-SCHEDULE → CONTEST-DATA: по CONTEST_CODE, 1:N — одному конкурсу много строк расписания."
+    ]
   },
   "sheet_bindings": [
     {
@@ -432,7 +442,8 @@
           ],
           "allow_custom": false,
           "options": [
-            "N"
+            "N",
+            "Y"
           ]
         },
         {
@@ -1140,12 +1151,26 @@
           ],
           "allow_custom": false,
           "options": [
+            "",
+            "NON",
             "SEASON_2024",
             "SEASON_2025_1",
             "SEASON_2025_2",
+            "SEASON_2026_1",
+            "SEASON_2026_2",
+            "SEASON_f_2025",
+            "SEASON_f_2026",
+            "SEASON_imub_2025",
+            "SEASON_kmsb1_2025",
             "SEASON_m_2024",
             "SEASON_m_2025_1",
-            "SEASON_m_2025_2"
+            "SEASON_m_2025_2",
+            "SEASON_m_2026_1",
+            "SEASON_m_2026_2",
+            "SEASON_rnub_2025",
+            "SEASON_rsb1_2025",
+            "SEASON_s_2024",
+            "SEASON_s_2025"
           ]
         },
         {
@@ -1335,6 +1360,7 @@
             "SEASON_2025_1",
             "SEASON_2025_2",
             "SEASON_2026_1",
+            "SEASON_2026_2",
             "SEASON_f_2025",
             "SEASON_f_2026",
             "SEASON_imub_2025",
@@ -1342,6 +1368,8 @@
             "SEASON_m_2024",
             "SEASON_m_2025_1",
             "SEASON_m_2025_2",
+            "SEASON_m_2026_1",
+            "SEASON_m_2026_2",
             "SEASON_rnub_2025",
             "SEASON_rsb1_2025",
             "SEASON_s_2024",
