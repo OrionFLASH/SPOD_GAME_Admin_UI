@@ -1,6 +1,7 @@
 /**
  * Редактор строки: сетка плоских полей, развёртка JSON в параметры, сборка при сохранении.
- * Для листа REWARD и колонки REWARD_ADD_DATA список полей и шаблон зависят от REWARD_TYPE (см. каталог JSON).
+ * Для листа REWARD и колонки REWARD_ADD_DATA список полей и шаблон зависят от REWARD_TYPE (см. каталог JSON):
+ * тип выбран — только поля для этого типа; тип пуст — пересечение полей по всем типам из матрицы; смена типа пересобирает JSON-блок.
  * Пустой объект JSON дополняется шаблоном из field_enums и обязательных json_path в editor_field_ui;
  * экспорт window.SpodJsonEditor — тот же UI в мастере создания конкурса.
  * Списки допустимых значений и «Задать своё» задаются в config.json (field_enums по листам);
@@ -106,6 +107,46 @@
     return allowed.indexOf(rewardType) !== -1;
   }
 
+  /** Все значения REWARD_TYPE, встречающиеся в матрице каталога (для пересечения при пустом типе). */
+  function allRewardTypesInCatalogMatrix() {
+    var u = Object.create(null);
+    var k;
+    for (k in REWARD_ADD_DATA_ROOT_KEYS_BY_TYPE) {
+      if (!Object.prototype.hasOwnProperty.call(REWARD_ADD_DATA_ROOT_KEYS_BY_TYPE, k)) {
+        continue;
+      }
+      var arr = REWARD_ADD_DATA_ROOT_KEYS_BY_TYPE[k];
+      var i;
+      for (i = 0; i < arr.length; i++) {
+        u[arr[i]] = true;
+      }
+    }
+    return Object.keys(u);
+  }
+
+  /**
+   * Ключ верхнего уровня из каталога допустим для каждого типа из матрицы (пересечение).
+   * Если REWARD_TYPE не выбран — в UI показываем только такие поля.
+   */
+  function rewardAddDataPathAllowedForAllCatalogTypes(parts) {
+    var top = firstStringJsonPathSegment(parts);
+    if (!top) {
+      return true;
+    }
+    var allowed = REWARD_ADD_DATA_ROOT_KEYS_BY_TYPE[top];
+    if (!allowed || !allowed.length) {
+      return true;
+    }
+    var allT = allRewardTypesInCatalogMatrix();
+    var j;
+    for (j = 0; j < allT.length; j++) {
+      if (allowed.indexOf(allT[j]) === -1) {
+        return false;
+      }
+    }
+    return true;
+  }
+
   /** Есть ли у листа непустое значение (чтобы показать поле, не предусмотренное для типа). */
   function rewardAddDataLeafHasMeaningfulValue(leaf) {
     if (leaf.vtype === "json-scalar-array") {
@@ -134,22 +175,31 @@
   }
 
   /**
-   * Оставляет в списке листьев только те, что относятся к текущему REWARD_TYPE,
-   * плюс «лишние» ключи каталога с непустыми данными и любые неизвестные ключи верхнего уровня.
+   * Оставляет листья REWARD_ADD_DATA:
+   * — выбран REWARD_TYPE — только ключи из каталога, разрешённые для этого типа (без «чужих» с данными);
+   * — тип не выбран — ключи из каталога только из пересечения всех типов; вне каталога — если есть смысл в данных.
    */
   function filterRewardAddDataLeaves(leaves, column, bootstrap) {
     if (bootstrap.sheetCode !== "REWARD" || column !== "REWARD_ADD_DATA") {
       return leaves;
     }
     var rt = rewardTypeFromBootstrap(bootstrap);
-    if (!rt) {
-      return leaves;
-    }
     return leaves.filter(function (leaf) {
-      if (rewardAddDataPathAllowedForType(leaf.parts, rt)) {
-        return true;
+      var top = firstStringJsonPathSegment(leaf.parts);
+      var inCatalog =
+        top && Object.prototype.hasOwnProperty.call(REWARD_ADD_DATA_ROOT_KEYS_BY_TYPE, top);
+
+      if (!rt) {
+        if (!inCatalog) {
+          return rewardAddDataLeafHasMeaningfulValue(leaf);
+        }
+        return rewardAddDataPathAllowedForAllCatalogTypes(leaf.parts);
       }
-      return rewardAddDataLeafHasMeaningfulValue(leaf);
+
+      if (inCatalog) {
+        return rewardAddDataPathAllowedForType(leaf.parts, rt);
+      }
+      return rewardAddDataPathAllowedForType(leaf.parts, rt) || rewardAddDataLeafHasMeaningfulValue(leaf);
     });
   }
 
@@ -191,26 +241,42 @@
 
   /**
    * Правило перечисления: без ключа json_path — только плоские колонки;
-   * с ключом json_path (включая []) — соответствие пути внутри JSON-колонки.
+   * с ключом json_path — точное совпадение пути внутри JSON-колонки;
+   * если последний сегмент пути — индекс массива (число), дополнительно ищется правило
+   * для пути без этого индекса (список допустимых значений для каждого элемента массива,
+   * в т.ч. внутри json_scalar_array).
    */
   function findFieldEnum(bootstrap, column, jsonParts) {
     var list = bootstrap.fieldEnums || [];
     var sc = bootstrap.sheetCode;
     var jParts = jsonParts === undefined ? null : jsonParts;
-    for (var i = 0; i < list.length; i++) {
-      var r = list[i];
-      if (r.sheet_code !== sc || r.column !== column) {
-        continue;
-      }
-      if (!ruleHasJsonPath(r)) {
-        if (jParts === null) {
+
+    function matchInList(partsToTry) {
+      var i = 0;
+      for (i = 0; i < list.length; i++) {
+        var r = list[i];
+        if (r.sheet_code !== sc || r.column !== column) {
+          continue;
+        }
+        if (!ruleHasJsonPath(r)) {
+          if (partsToTry === null) {
+            return r;
+          }
+        } else if (partsMatchJsonPath(partsToTry || [], r.json_path)) {
           return r;
         }
-      } else if (partsMatchJsonPath(jParts || [], r.json_path)) {
-        return r;
       }
+      return null;
     }
-    return null;
+
+    var hit = matchInList(jParts);
+    if (hit || jParts === null) {
+      return hit;
+    }
+    if (jParts.length >= 2 && typeof jParts[jParts.length - 1] === "number") {
+      hit = matchInList(jParts.slice(0, -1));
+    }
+    return hit || null;
   }
 
   /** Подсказка по min_rows/max_rows для textarea (плоское поле или путь в JSON). Записи-календарь пропускаются. */
@@ -598,6 +664,10 @@
   /** Подписка на select/textarea в блоке перечисления (плоские поля и JSON). */
   function wireEnumControls(root) {
     root.querySelectorAll(".spod-enum-block").forEach(function (blk) {
+      if (blk.getAttribute("data-spod-enum-wired") === "1") {
+        return;
+      }
+      blk.setAttribute("data-spod-enum-wired", "1");
       var sel = blk.querySelector(".spod-enum-select");
       var ta = blk.querySelector(".spod-enum-custom");
       var hidden = blk.querySelector("input[type='hidden'][data-col]");
@@ -764,6 +834,7 @@
    * Дополняет объект корня JSON объявленными в конфиге путями (без перезаписи уже заданных ключей):
    * — все json_path из field_enums для этой колонки (первое допустимое значение);
    * — json_path из editor_field_ui с required: true (если нет enum — пустая строка, setDeep создаст вложенность).
+   * Пути — корни json_scalar_array из editor_textareas не дополняются из field_enums (перечисление задаётся по элементам).
    * Длинные пути обрабатываются раньше коротких, чтобы массивы/объекты создавались корректно.
    */
   function mergeDeclaredJsonTemplate(parsed, column, bootstrap) {
@@ -808,8 +879,15 @@
         if (rt0 && !rewardAddDataPathAllowedForType(parts, rt0)) {
           continue;
         }
+        if (!rt0 && !rewardAddDataPathAllowedForAllCatalogTypes(parts)) {
+          continue;
+        }
       }
       if (jsonPathIsIndexedUnderScalarArrayRoot(bootstrap, column, parts)) {
+        continue;
+      }
+      /* Корень json_scalar_array: enum с json_path на массив задаёт варианты по элементам, не значение всего ключа. */
+      if (jsonScalarArrayHintForPath(bootstrap, column, parts)) {
         continue;
       }
       if (getDeepValue(out, parts) !== undefined) {
@@ -985,8 +1063,61 @@
     return JSON.stringify(root);
   }
 
+  /**
+   * Подставить в bootstrap.flat актуальный REWARD_TYPE из формы карточки строки (плоская сетка).
+   */
+  function syncRewardTypeFromDomToBootstrap(bootstrap) {
+    if (!bootstrap || bootstrap.sheetCode !== "REWARD") {
+      return;
+    }
+    bootstrap.flat = bootstrap.flat || {};
+    var h = document.querySelector('#flat-field-grid input[data-col="REWARD_TYPE"]');
+    if (h) {
+      bootstrap.flat.REWARD_TYPE = String(h.value || "").trim();
+    }
+  }
+
+  /**
+   * Пересобрать UI колонки REWARD_ADD_DATA после смены REWARD_TYPE (мастер или карточка строки).
+   */
+  function refreshRewardAddDataJsonUi(bootstrap, container) {
+    if (!bootstrap || bootstrap.sheetCode !== "REWARD" || !container || !container.getAttribute) {
+      return;
+    }
+    var col = container.getAttribute("data-json-column") || "REWARD_ADD_DATA";
+    if (col !== "REWARD_ADD_DATA") {
+      return;
+    }
+    var raw = buildJsonFromFields(container);
+    var pr = tryParseSpodJsonCell(raw);
+    var parsed = pr.parsed === null || pr.parsed === undefined ? {} : pr.parsed;
+    var rk = rootKindOf(parsed);
+    var jcNew = {
+      column: col,
+      section_slug: String(col).replace(/[^a-zA-Z0-9_-]/g, "_"),
+      raw: raw,
+      ok: pr.ok,
+      parsed: parsed,
+    };
+    if (!jcNew.ok) {
+      renderJsonColumn(container, jcNew, bootstrap);
+      wireEnumControls(container);
+      return;
+    }
+    if (rk === "object" && parsed !== null && !Array.isArray(parsed)) {
+      jcNew.parsed = mergeDeclaredJsonTemplate(JSON.parse(JSON.stringify(parsed)), col, bootstrap);
+    } else {
+      jcNew.parsed = parsed;
+    }
+    renderJsonColumn(container, jcNew, bootstrap);
+    wireEnumControls(container);
+  }
+
   function renderJsonColumn(container, jc, bootstrap) {
     var col = jc.column;
+    while (container.firstChild) {
+      container.removeChild(container.firstChild);
+    }
     container.setAttribute("data-json-column", col);
     container.setAttribute("data-edit-mode", "fields");
 
@@ -1139,7 +1270,7 @@
     /**
      * Одна группа UI: массив примитивов по json_scalar_array (хост без data-json-path, строки — с индексами).
      */
-    function appendOneJsonScalarArrayHost(grid, leaf, bootstrapLocal, colLocal, thrLocal) {
+    function appendOneJsonScalarArrayHost(grid, leaf, bootstrapLocal, colLocal, thrLocal, jsonColumnEl) {
       var basePath = leaf.parts || [];
       var arrayHint = jsonScalarArrayHintForPath(bootstrapLocal, colLocal, basePath) || {};
       var maxRaw = arrayHint.array_max_items;
@@ -1196,12 +1327,13 @@
       function buildItemRow(val, index) {
         var vt = vtypeForScalarArrayElement(val);
         var disp = displayForScalarArrayElement(val, vt);
+        var pathPartsItem = basePath.concat(index);
         var line = document.createElement("div");
         line.className = "json-scalar-array-line";
 
         var itemRow = document.createElement("div");
         itemRow.className = "json-leaf-row json-scalar-array-item grid-cell";
-        itemRow.setAttribute("data-json-path", JSON.stringify(basePath.concat(index)));
+        itemRow.setAttribute("data-json-path", JSON.stringify(pathPartsItem));
         itemRow.setAttribute("data-vtype", vt);
         itemRow.setAttribute("data-filter-text", filterText);
 
@@ -1212,12 +1344,29 @@
           cb.checked = disp === "1" || disp === "true";
           itemRow.appendChild(cb);
         } else if (vt === "number") {
-          var inpNum = document.createElement("input");
-          inpNum.type = "number";
-          inpNum.step = "any";
-          inpNum.className = "json-leaf-input";
-          inpNum.value = disp;
-          itemRow.appendChild(inpNum);
+          var enumN = findFieldEnum(bootstrapLocal, colLocal, pathPartsItem);
+          if (enumN) {
+            itemRow.setAttribute("data-json-enum", "1");
+            var wrapN = document.createElement("div");
+            wrapN.className = "spod-enum-block spod-enum-block--json";
+            var selN = document.createElement("select");
+            selN.className = "spod-enum-select spod-leaf-control";
+            var taN = document.createElement("textarea");
+            taN.className = "spod-enum-custom spod-leaf-control is-hidden";
+            taN.rows = 2;
+            fillSelectOptions(selN, enumN.options, !!enumN.allow_custom, disp);
+            initEnumSelectState(selN, taN, null, !!enumN.allow_custom, disp);
+            wrapN.appendChild(selN);
+            wrapN.appendChild(taN);
+            itemRow.appendChild(wrapN);
+          } else {
+            var inpNum = document.createElement("input");
+            inpNum.type = "number";
+            inpNum.step = "any";
+            inpNum.className = "json-leaf-input";
+            inpNum.value = disp;
+            itemRow.appendChild(inpNum);
+          }
         } else if (vt === "null") {
           var inpNull = document.createElement("input");
           inpNull.type = "text";
@@ -1226,19 +1375,47 @@
           inpNull.value = "";
           itemRow.appendChild(inpNull);
         } else {
-          var rows = textareaRows(disp, taHint, thrLocal);
-          if (rows > 0) {
-            var taStr = document.createElement("textarea");
-            taStr.className = "json-leaf-input spod-leaf-control";
-            taStr.rows = rows;
-            taStr.value = disp;
-            itemRow.appendChild(taStr);
+          var dateHItem = findDatePickerHint(bootstrapLocal, colLocal, pathPartsItem);
+          if (dateHItem) {
+            itemRow.setAttribute("data-json-date", "1");
+            var fmtItem = dateHItem.storage_format || "YYYY-MM-DD";
+            var fmtLabItem = document.createElement("span");
+            fmtLabItem.className = "muted spod-date-format-hint";
+            fmtLabItem.textContent = " · " + fmtItem;
+            itemRow.appendChild(fmtLabItem);
+            itemRow.appendChild(buildDatePickerShell(disp, null, null, true));
           } else {
-            var inpStr = document.createElement("input");
-            inpStr.type = "text";
-            inpStr.className = "json-leaf-input";
-            inpStr.value = disp;
-            itemRow.appendChild(inpStr);
+            var enumRule = findFieldEnum(bootstrapLocal, colLocal, pathPartsItem);
+            if (enumRule) {
+              itemRow.setAttribute("data-json-enum", "1");
+              var wrapS = document.createElement("div");
+              wrapS.className = "spod-enum-block spod-enum-block--json";
+              var selS = document.createElement("select");
+              selS.className = "spod-enum-select spod-leaf-control";
+              var taS = document.createElement("textarea");
+              taS.className = "spod-enum-custom spod-leaf-control is-hidden";
+              taS.rows = 3;
+              fillSelectOptions(selS, enumRule.options, !!enumRule.allow_custom, disp);
+              initEnumSelectState(selS, taS, null, !!enumRule.allow_custom, disp);
+              wrapS.appendChild(selS);
+              wrapS.appendChild(taS);
+              itemRow.appendChild(wrapS);
+            } else {
+              var rows = textareaRows(disp, taHint, thrLocal);
+              if (rows > 0) {
+                var taStr = document.createElement("textarea");
+                taStr.className = "json-leaf-input spod-leaf-control";
+                taStr.rows = rows;
+                taStr.value = disp;
+                itemRow.appendChild(taStr);
+              } else {
+                var inpStr = document.createElement("input");
+                inpStr.type = "text";
+                inpStr.className = "json-leaf-input";
+                inpStr.value = disp;
+                itemRow.appendChild(inpStr);
+              }
+            }
           }
         }
 
@@ -1284,6 +1461,9 @@
         lines.appendChild(buildItemRow(defaultVal, cnt0));
         reindexJsonScalarArrayItems(host);
         updateJsonScalarArrayAddButton(host);
+        if (jsonColumnEl) {
+          wireEnumControls(jsonColumnEl);
+        }
         document.dispatchEvent(new Event("spod-editor-change"));
       });
 
@@ -1303,10 +1483,10 @@
     }
 
     /** Сетка листьев: общая отрисовка и пересборка при переходе «Сырой JSON» → «По полям». */
-    function appendJsonLeafRowsToGrid(grid, leaves) {
+    function appendJsonLeafRowsToGrid(grid, leaves, jsonColumnEl) {
       leaves.forEach(function (leaf) {
         if (leaf.vtype === "json-scalar-array") {
-          appendOneJsonScalarArrayHost(grid, leaf, bootstrap, col, thr);
+          appendOneJsonScalarArrayHost(grid, leaf, bootstrap, col, thr, jsonColumnEl);
           return;
         }
         var row = document.createElement("div");
@@ -1432,7 +1612,7 @@
       });
     }
 
-    appendJsonLeafRowsToGrid(grid, leaves);
+    appendJsonLeafRowsToGrid(grid, leaves, container);
 
     fieldsWrap.appendChild(grid);
 
@@ -1500,7 +1680,7 @@
         hint2.textContent = "Нет вложенных полей — при необходимости откройте «Сырой JSON».";
         fieldsWrap.appendChild(hint2);
       }
-      appendJsonLeafRowsToGrid(newGrid, newLeaves);
+      appendJsonLeafRowsToGrid(newGrid, newLeaves, container);
       fieldsWrap.appendChild(newGrid);
       wireEnumControls(container);
       container.setAttribute("data-edit-mode", "fields");
@@ -2143,6 +2323,20 @@
 
     renderFlatSection(bootstrap);
 
+    if (bootstrap.sheetCode === "REWARD") {
+      var flatMountRt = document.getElementById("flat-field-grid");
+      if (flatMountRt) {
+        var onRewardTypeDomChange = function () {
+          syncRewardTypeFromDomToBootstrap(bootstrap);
+          var jb = findJsonBox("REWARD_ADD_DATA");
+          if (jb) {
+            refreshRewardAddDataJsonUi(bootstrap, jb);
+          }
+        };
+        flatMountRt.addEventListener("change", onRewardTypeDomChange);
+      }
+    }
+
     var jsonRoot = document.getElementById("json-columns-mount");
     if (jsonRoot) {
       (bootstrap.jsonCols || []).forEach(function (jc) {
@@ -2230,6 +2424,7 @@
     normalizeJsonCell: normalizeJsonCell,
     mergeDeclaredJsonTemplate: mergeDeclaredJsonTemplate,
     tryParseSpodJsonCell: tryParseSpodJsonCell,
+    refreshRewardAddDataJsonUi: refreshRewardAddDataJsonUi,
   };
 
   /** Общие бейджи ограничений для мастера (те же правила, что в applyFieldUiLabel). */

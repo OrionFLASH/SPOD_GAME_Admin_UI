@@ -592,6 +592,42 @@
     return row;
   }
 
+  /**
+   * При смене REWARD_TYPE в мастере пересобираем REWARD_ADD_DATA с учётом матрицы каталога
+   * (тот же фильтр, что в row_editor.js).
+   */
+  function wireWizardRewardTypeToAddData(grid, mount) {
+    var api = window.SpodJsonEditor;
+    if (!api || typeof api.refreshRewardAddDataJsonUi !== "function") {
+      return;
+    }
+    function currentRewardTypeFromGrid() {
+      var hid = grid.querySelector('input[type="hidden"][data-wiz-col="REWARD_TYPE"]');
+      return hid ? String(hid.value || "").trim() : "";
+    }
+    function rebuildAddData() {
+      var pseudoBoot = {
+        sheetCode: "REWARD",
+        fieldUi: schema.fieldUi,
+        fieldEnums: schema.fieldEnums,
+        editorTextareas: schema.editorTextareas || [],
+        longTextThreshold: schema.longTextThreshold || 120,
+        flat: { REWARD_TYPE: currentRewardTypeFromGrid() },
+      };
+      api.refreshRewardAddDataJsonUi(pseudoBoot, mount);
+    }
+    var hidRt = grid.querySelector('input[type="hidden"][data-wiz-col="REWARD_TYPE"]');
+    var selRt = hidRt && hidRt.parentElement ? hidRt.parentElement.querySelector("select.spod-enum-select") : null;
+    if (selRt) {
+      selRt.addEventListener("change", function () {
+        window.setTimeout(rebuildAddData, 0);
+      });
+    }
+    if (hidRt) {
+      hidRt.addEventListener("change", rebuildAddData);
+    }
+  }
+
   function renderSheetForm(sheetCode, cells, locked, wizMeta) {
     var sh = schema.sheets[sheetCode];
     var meta = wizMeta || {};
@@ -661,6 +697,9 @@
           parsed: parsedJc,
         };
         editorApi.renderJsonColumn(mount, jcBoot, pseudoBoot);
+        if (sheetCode === "REWARD" && jc === "REWARD_ADD_DATA") {
+          wireWizardRewardTypeToAddData(grid, mount);
+        }
       } else {
         var ta = document.createElement("textarea");
         ta.className = "spod-leaf-control wiz-json-ta";

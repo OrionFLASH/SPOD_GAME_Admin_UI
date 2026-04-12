@@ -20,6 +20,8 @@ def flatten_field_enums(cfg: Dict[str, Any]) -> List[Dict[str, Any]]:
     Новый формат элемента field_enums:
       {"sheet_code": "REWARD", "rules": [{"column": "...", "allow_custom": true, "options": [...]}, ...]}
     Элемент options может быть строкой или объектом {"label": "подпись в UI", "value": "значение в ячейке CSV"}.
+    Для пути вида ["ключ", 0], ["ключ", 1], … в JSON-колонке правило с json_path ["ключ"] (без индекса)
+    применяется к каждому элементу массива (select на каждую строку, в т.ч. внутри json_scalar_array).
     Устаревший (плоский):
       {"sheet_code": "REWARD", "column": "...", ...}
     """

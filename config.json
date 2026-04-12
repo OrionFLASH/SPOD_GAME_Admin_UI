@@ -692,6 +692,51 @@
             "7",
             "8"
           ]
+        },
+        {
+          "column": "CONTEST_FEATURE",
+          "json_path": [
+            "businessBlock"
+          ],
+          "allow_custom": false,
+          "options": [
+            {
+              "label": "(пусто)",
+              "value": ""
+            },
+            {
+              "label": "KMKKSB",
+              "value": "KMKKSB"
+            },
+            {
+              "label": "MNS",
+              "value": "MNS"
+            },
+            {
+              "label": "KMSB1",
+              "value": "KMSB1"
+            },
+            {
+              "label": "SERVICEMEN",
+              "value": "SERVICEMEN"
+            },
+            {
+              "label": "KMFACTORING",
+              "value": "KMFACTORING"
+            },
+            {
+              "label": "IMUB",
+              "value": "IMUB"
+            },
+            {
+              "label": "RNUB",
+              "value": "RNUB"
+            },
+            {
+              "label": "RSB1",
+              "value": "RSB1"
+            }
+          ]
         }
       ]
     },
