@@ -18,7 +18,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from markupsafe import Markup
 
-from src import consistency, db, export_csv, ingest, relations, sheet_list_display, spod_json
+from src import config_validate, consistency, db, editor_config, export_csv, ingest, relations, sheet_list_display, spod_json
 
 ROOT = Path(__file__).resolve().parent.parent
 CFG: Dict[str, Any] = {}
@@ -63,6 +63,8 @@ async def lifespan(app: FastAPI):
     global CFG, CONN, DB_PATH
     CFG = _load_config()
     _setup_logging()
+    for msg in config_validate.validate_sheet_bindings(CFG):
+        logging.warning("%s", msg)
     DB_PATH = db.get_db_path(ROOT, CFG)
     CONN = db.open_connection(DB_PATH)
     db.init_schema(CONN)
@@ -199,12 +201,16 @@ def row_detail(request: Request, code: str, row_id: int):
                 "parsed": parsed_cell,
             }
         )
+    # Параметры UI редактора: списки значений и подсказки по высоте textarea (см. config.json).
     editor_bootstrap = {
         "sheetCode": code,
         "rowId": row_id,
         "flat": {k: cells.get(k, "") for k in flat_columns},
         "jsonCols": json_cols_boot,
         "fullRow": dict(cells),
+        "fieldEnums": editor_config.flatten_field_enums(CFG),
+        "editorTextareas": editor_config.flatten_editor_textareas(CFG),
+        "longTextThreshold": int(CFG.get("editor_long_text_threshold", 120)),
     }
     return templates.TemplateResponse(
         request,

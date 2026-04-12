@@ -7,6 +7,44 @@
   "database": {
     "filename": "tournament_admin.sqlite"
   },
+  "database_model": {
+    "comment_ru": "Схема SQLite задаётся в коде (src/db.py, init_schema), не в этом файле. Все листы используют одну таблицу строк; заголовки CSV не создают отдельных колонок — каждая строка листа хранится как JSON в cells_json.",
+    "registry_table": "sheet",
+    "all_sheets_data_table": "data_row",
+    "relationship_ru": "data_row.sheet_id ссылается на sheet.id; логический «лист» — строка в sheet с полем code (как в sheets[].code)."
+  },
+  "sheet_bindings": [
+    {
+      "code": "CONTEST-DATA",
+      "title": "Конкурсы",
+      "csv_file": "CONTEST (PROM) 09-04 v1.csv"
+    },
+    {
+      "code": "GROUP",
+      "title": "Группы / уровни",
+      "csv_file": "GROUP (PROM) 09-04 v1.csv"
+    },
+    {
+      "code": "INDICATOR",
+      "title": "Показатели",
+      "csv_file": "INDICATOR (PROM) 09-04 v1.csv"
+    },
+    {
+      "code": "REWARD",
+      "title": "Награды",
+      "csv_file": "REWARD (PROM) 09-04 v1.csv"
+    },
+    {
+      "code": "REWARD-LINK",
+      "title": "Связи конкурс — группа — награда",
+      "csv_file": "REWARD-LINK (PROM) 09-04 v1.csv"
+    },
+    {
+      "code": "TOURNAMENT-SCHEDULE",
+      "title": "Расписание турниров",
+      "csv_file": "SCHEDULE (PROM) 09-04 v1.csv"
+    }
+  ],
   "server": {
     "host": "127.0.0.1",
     "port": 8765
@@ -19,12 +57,1183 @@
     "mode": "warn",
     "comment": "strict — не сохранять при ошибках; warn — сохранять с флагом; soft — только подсветка"
   },
+  "editor_long_text_threshold": 140,
+  "editor_textareas": [
+    {
+      "sheet_code": "CONTEST-DATA",
+      "hints": [
+        {
+          "column": "CONTEST_DESCRIPTION",
+          "min_rows": 6,
+          "max_rows": 18
+        },
+        {
+          "column": "FULL_NAME",
+          "min_rows": 2,
+          "max_rows": 8
+        }
+      ]
+    },
+    {
+      "sheet_code": "REWARD",
+      "hints": [
+        {
+          "column": "REWARD_DESCRIPTION",
+          "min_rows": 6,
+          "max_rows": 20
+        },
+        {
+          "column": "FULL_NAME",
+          "min_rows": 2,
+          "max_rows": 10
+        }
+      ]
+    },
+    {
+      "sheet_code": "INDICATOR",
+      "hints": [
+        {
+          "column": "FULL_NAME",
+          "min_rows": 2,
+          "max_rows": 8
+        }
+      ]
+    }
+  ],
+  "field_enums": [
+    {
+      "sheet_code": "CONTEST-DATA",
+      "rules": [
+        {
+          "column": "BUSINESS_STATUS",
+          "allow_custom": false,
+          "options": [
+            "АКТИВНЫЙ",
+            "АРХИВНЫЙ"
+          ]
+        },
+        {
+          "column": "CONTEST_TYPE",
+          "allow_custom": true,
+          "options": [
+            "ИНДИВИДУАЛЬНЫЙ",
+            "ИНДИВИДУАЛЬНЫЙ НАКОПИТЕЛЬНЫЙ",
+            "ТУРНИРНЫЙ"
+          ]
+        },
+        {
+          "column": "CREATE_DT",
+          "allow_custom": true,
+          "options": [
+            "2023-01-01",
+            "2023-07-01",
+            "2025-01-01",
+            "2026-01-01"
+          ]
+        },
+        {
+          "column": "CLOSE_DT",
+          "allow_custom": true,
+          "options": [
+            "2025-06-30",
+            "2025-12-31",
+            "2026-12-31",
+            "4000-01-01"
+          ]
+        },
+        {
+          "column": "FACTOR_MARK_TYPE",
+          "allow_custom": false,
+          "options": [
+            "CRITERION",
+            "RATING_MAX",
+            "RATING_MIN"
+          ]
+        },
+        {
+          "column": "CONTEST_INDICATOR_METHOD",
+          "allow_custom": false,
+          "options": [
+            "INTEGRAL",
+            "RELATION"
+          ]
+        },
+        {
+          "column": "CONTEST_FACTOR_METHOD",
+          "allow_custom": true,
+          "options": [
+            "FACT",
+            "FACT0-FACT1",
+            "FACT0-RUN_RATE1_DOWN",
+            "RUN_RATE"
+          ]
+        },
+        {
+          "column": "PLAN_METHOD_CODE",
+          "allow_custom": false,
+          "options": [
+            "PRESET_VALUE",
+            "DEPENDS_PREVIOUS_PERIOD"
+          ]
+        },
+        {
+          "column": "PLAN_MOD_METOD",
+          "allow_custom": true,
+          "options": [
+            "",
+            "MULTIPLIER"
+          ]
+        },
+        {
+          "column": "FACTOR_MATCH",
+          "allow_custom": false,
+          "options": [
+            "=",
+            ">=",
+            ">"
+          ]
+        },
+        {
+          "column": "TARGET_TYPE",
+          "allow_custom": false,
+          "options": [
+            "ПРОМ",
+            "ТЕСТ"
+          ]
+        },
+        {
+          "column": "SOURCE_UPD_FREQUENCY",
+          "allow_custom": true,
+          "options": [
+            "1",
+            "7",
+            "10"
+          ]
+        },
+        {
+          "column": "CALC_TYPE",
+          "allow_custom": false,
+          "options": [
+            "0",
+            "1"
+          ]
+        },
+        {
+          "column": "CONTEST_SUBJECT",
+          "allow_custom": true,
+          "options": [
+            "EMPLOYEE"
+          ]
+        },
+        {
+          "column": "FACT_POST_PROCESSING",
+          "allow_custom": true,
+          "options": [
+            "",
+            "PERCENTILE",
+            "PERCENTILE_UP",
+            "SPECIAL_INDICATOR_1"
+          ]
+        },
+        {
+          "column": "PRODUCT_GROUP",
+          "allow_custom": true,
+          "options": [
+            "DTaaS",
+            "ВЭД, нац рынки, хедж",
+            "Гарантии",
+            "ДГР кредитные продукты",
+            "ЕФС",
+            "Команда",
+            "Кредиты",
+            "Лизинг",
+            "Пассивы, РКО",
+            "Продукты УБ в канале СБ1",
+            "Системные",
+            "Статусные",
+            "Страхование",
+            "ТФиДО",
+            "Факторинг",
+            "ФОТ",
+            "Эквайринг",
+            "Экосистема",
+            "Эффективность",
+            "Спец проекты"
+          ]
+        },
+        {
+          "column": "CONTEST_FEATURE",
+          "json_path": [
+            "vid"
+          ],
+          "allow_custom": false,
+          "options": [
+            "ПРОМ",
+            "ТЕСТ"
+          ]
+        },
+        {
+          "column": "CONTEST_FEATURE",
+          "json_path": [
+            "momentRewarding"
+          ],
+          "allow_custom": false,
+          "options": [
+            "AFTER",
+            "DURIN"
+          ]
+        },
+        {
+          "column": "CONTEST_FEATURE",
+          "json_path": [
+            "masking"
+          ],
+          "allow_custom": false,
+          "options": [
+            "N"
+          ]
+        },
+        {
+          "column": "CONTEST_FEATURE",
+          "json_path": [
+            "capacity"
+          ],
+          "allow_custom": true,
+          "options": [
+            "",
+            "MILLIONS",
+            "THOUSANDS"
+          ]
+        },
+        {
+          "column": "CONTEST_FEATURE",
+          "json_path": [
+            "typeRewarding"
+          ],
+          "allow_custom": false,
+          "options": [
+            "all",
+            "one"
+          ]
+        },
+        {
+          "column": "CONTEST_FEATURE",
+          "json_path": [
+            "tournamentStartMailing"
+          ],
+          "allow_custom": false,
+          "options": [
+            "N",
+            "Y"
+          ]
+        },
+        {
+          "column": "CONTEST_FEATURE",
+          "json_path": [
+            "tournamentEndMailing"
+          ],
+          "allow_custom": false,
+          "options": [
+            "N",
+            "Y"
+          ]
+        },
+        {
+          "column": "CONTEST_FEATURE",
+          "json_path": [
+            "tournamentLikeMailing"
+          ],
+          "allow_custom": false,
+          "options": [
+            "N",
+            "Y"
+          ]
+        },
+        {
+          "column": "CONTEST_FEATURE",
+          "json_path": [
+            "tournamentRewardingMailing"
+          ],
+          "allow_custom": false,
+          "options": [
+            "N",
+            "Y"
+          ]
+        },
+        {
+          "column": "CONTEST_FEATURE",
+          "json_path": [
+            "tournamentTeam"
+          ],
+          "allow_custom": false,
+          "options": [
+            "N",
+            "Y"
+          ]
+        },
+        {
+          "column": "CONTEST_FEATURE",
+          "json_path": [
+            "avatarShow"
+          ],
+          "allow_custom": false,
+          "options": [
+            "Y"
+          ]
+        },
+        {
+          "column": "CONTEST_FEATURE",
+          "json_path": [
+            "minNumber"
+          ],
+          "allow_custom": true,
+          "options": [
+            "0",
+            "1",
+            "2",
+            "3"
+          ]
+        },
+        {
+          "column": "CONTEST_FEATURE",
+          "json_path": [
+            "accuracy"
+          ],
+          "allow_custom": true,
+          "options": [
+            "0",
+            "1",
+            "2",
+            "3",
+            "5",
+            "8"
+          ]
+        }
+      ]
+    },
+    {
+      "sheet_code": "GROUP",
+      "rules": [
+        {
+          "column": "GROUP_CODE",
+          "allow_custom": false,
+          "options": [
+            "BANK",
+            "GOSB",
+            "GROUPING",
+            "TB"
+          ]
+        },
+        {
+          "column": "GROUP_VALUE",
+          "allow_custom": true,
+          "options": [
+            "*",
+            "[13]",
+            "[16]",
+            "[18]",
+            "[38]",
+            "[40]",
+            "[42]",
+            "[44]",
+            "[52]",
+            "[54]",
+            "[55]",
+            "[70]"
+          ]
+        },
+        {
+          "column": "GET_CALC_METHOD",
+          "allow_custom": false,
+          "options": [
+            "1",
+            "2",
+            "3"
+          ]
+        },
+        {
+          "column": "GET_CALC_CRITERION",
+          "allow_custom": true,
+          "options": [
+            "",
+            "0",
+            "0.00000",
+            "0.01000",
+            "1",
+            "10",
+            "15",
+            "2",
+            "20",
+            "3",
+            "4",
+            "5",
+            "8"
+          ]
+        },
+        {
+          "column": "ADD_CALC_CRITERION",
+          "allow_custom": true,
+          "options": [
+            "",
+            "0",
+            "0.00000",
+            "0.07000",
+            "0.10000",
+            "0.15000",
+            "0.20000",
+            "1",
+            "10",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6"
+          ]
+        },
+        {
+          "column": "ADD_CALC_CRITERION_2",
+          "allow_custom": true,
+          "options": [
+            "",
+            "0",
+            "0.00000",
+            "0.10000",
+            "1",
+            "10",
+            "2",
+            "3",
+            "4",
+            "5"
+          ]
+        },
+        {
+          "column": "BASE_CALC_CODE",
+          "allow_custom": true,
+          "options": [
+            "",
+            "BANK",
+            "GOSB",
+            "GROUPING",
+            "TB"
+          ]
+        }
+      ]
+    },
+    {
+      "sheet_code": "REWARD-LINK",
+      "rules": [
+        {
+          "column": "GROUP_CODE",
+          "allow_custom": false,
+          "options": [
+            "BANK",
+            "GOSB",
+            "GROUPING",
+            "TB"
+          ]
+        }
+      ]
+    },
+    {
+      "sheet_code": "INDICATOR",
+      "rules": [
+        {
+          "column": "INDICATOR_CALC_TYPE",
+          "allow_custom": false,
+          "options": [
+            "1"
+          ]
+        },
+        {
+          "column": "INDICATOR_ADD_CALC_TYPE",
+          "allow_custom": true,
+          "options": [
+            "",
+            "DIVIDER",
+            "NUMERATOR"
+          ]
+        },
+        {
+          "column": "INDICATOR_AGG_FUNCTION",
+          "allow_custom": true,
+          "options": [
+            "",
+            "COUNT_DISTINCT",
+            "COUNT_DISTINCT_CUSTOMER",
+            "COUNT_DISTINCT_DEAL",
+            "MAX",
+            "SUM"
+          ]
+        },
+        {
+          "column": "INDICATOR_WEIGHT",
+          "allow_custom": true,
+          "options": [
+            "",
+            "-1",
+            "1",
+            "1000"
+          ]
+        },
+        {
+          "column": "INDICATOR_MARK_TYPE",
+          "allow_custom": false,
+          "options": [
+            "CRITERION",
+            "GAIN",
+            "RATING"
+          ]
+        },
+        {
+          "column": "INDICATOR_MATCH",
+          "allow_custom": true,
+          "options": [
+            "=",
+            ">=",
+            "MAX",
+            "MIN",
+            "X2",
+            "X3",
+            "X4"
+          ]
+        },
+        {
+          "column": "INDICATOR_VALUE",
+          "allow_custom": true,
+          "options": [
+            "",
+            "0",
+            "1",
+            "10",
+            "100",
+            "100000",
+            "10000000",
+            "12000000",
+            "2",
+            "3",
+            "3000000",
+            "4",
+            "5",
+            "50",
+            "500000",
+            "5000000",
+            "500000000",
+            "6",
+            "7000000",
+            "8"
+          ]
+        },
+        {
+          "column": "CALC_TYPE",
+          "allow_custom": false,
+          "options": [
+            "0",
+            "1",
+            "2",
+            "3"
+          ]
+        },
+        {
+          "column": "FULL_NAME",
+          "allow_custom": true,
+          "options": [
+            "CC360_CLIENT_VOLUM_FOT_M",
+            "CC360_NKD_DETAIL_CHKD",
+            "COMPASARS_KKP_ID",
+            "EFFICIENCYARSKKSB_EFF",
+            "EFFICIENCYARSKKSB_OD_YEAR_GROWTH",
+            "EFFICIENCYARSKKSB_OD_YEAR_TEMP",
+            "FUNNELARS_ACTIVE_CUSTOMER_ID",
+            "FUNNELARS_ACTIVE_DEAL_ID",
+            "FUNNELARS_ACTIVE_DEAL_MARGIN",
+            "INCOME",
+            "INSURANCEMIS_BANK_COMMISION",
+            "PFIMIS_CUSTOMER_ID",
+            "PPO_ALL",
+            "PPO_IN",
+            "PULMIS_AGRMNT_AMT_RUB",
+            "PULMIS_BALANCE_OUT_RUB",
+            "PULMIS_SDO_IN_RUB",
+            "TRUSTLEVELCC360_LEVEL0_COUNT",
+            "TRUSTLEVELCC360_LEVEL3_COUNT",
+            "TRUSTLEVELCC360_LEVEL4_COUNT",
+            "TRUSTLEVELCC360_LEVEL5_COUNT",
+            "TRUSTLEVELCC360_STAR_COUNT",
+            "TRUSTLEVELCC360_STAR_START_COUNT",
+            "WAIT",
+            "WD"
+          ]
+        },
+        {
+          "column": "CONTESTANT_SELECTION",
+          "json_path": [],
+          "allow_custom": false,
+          "options": [
+            "0",
+            "1"
+          ]
+        }
+      ]
+    },
+    {
+      "sheet_code": "REWARD",
+      "rules": [
+        {
+          "column": "REWARD_TYPE",
+          "allow_custom": false,
+          "options": [
+            "BADGE",
+            "CRYSTAL",
+            "ITEM",
+            "LABEL"
+          ]
+        },
+        {
+          "column": "REWARD_CONDITION",
+          "allow_custom": false,
+          "options": [
+            "1",
+            "2"
+          ]
+        },
+        {
+          "column": "REWARD_COST",
+          "allow_custom": true,
+          "options": [
+            "0",
+            "1",
+            "10",
+            "11",
+            "12",
+            "14",
+            "15",
+            "17",
+            "19",
+            "2",
+            "20",
+            "3",
+            "30",
+            "4",
+            "40",
+            "5",
+            "50",
+            "6",
+            "60",
+            "7",
+            "8"
+          ]
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": [
+            "nftFlg"
+          ],
+          "allow_custom": false,
+          "options": [
+            "N",
+            "Y"
+          ]
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": [
+            "outstanding"
+          ],
+          "allow_custom": false,
+          "options": [
+            "N",
+            "Y"
+          ]
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": [
+            "hidden"
+          ],
+          "allow_custom": false,
+          "options": [
+            "N",
+            "Y"
+          ]
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": [
+            "hiddenRewardList"
+          ],
+          "allow_custom": false,
+          "options": [
+            "N",
+            "Y"
+          ]
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": [
+            "masterBadge"
+          ],
+          "allow_custom": false,
+          "options": [
+            "N",
+            "Y"
+          ]
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": [
+            "bookingRequired"
+          ],
+          "allow_custom": false,
+          "options": [
+            "Y"
+          ]
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": [
+            "deliveryRequired"
+          ],
+          "allow_custom": false,
+          "options": [
+            "Y"
+          ]
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": [
+            "commingSoon"
+          ],
+          "allow_custom": false,
+          "options": [
+            "N"
+          ]
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": [
+            "refreshOldNews"
+          ],
+          "allow_custom": false,
+          "options": [
+            "N",
+            "Y"
+          ]
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": [
+            "rewardAgainGlobal"
+          ],
+          "allow_custom": false,
+          "options": [
+            "N",
+            "Y"
+          ]
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": [
+            "rewardAgainTournament"
+          ],
+          "allow_custom": true,
+          "options": [
+            "N"
+          ]
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": [
+            "isGrouping"
+          ],
+          "allow_custom": false,
+          "options": [
+            "N",
+            "Y"
+          ]
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": [
+            "newsType"
+          ],
+          "allow_custom": false,
+          "options": [
+            "AIPROMPT",
+            "TEMPLATE"
+          ]
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": [
+            "priority"
+          ],
+          "allow_custom": false,
+          "options": [
+            "1",
+            "2",
+            "3"
+          ]
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": [
+            "recommendationLevel"
+          ],
+          "allow_custom": false,
+          "options": [
+            "BANK",
+            "GOSB",
+            "NON",
+            "TB"
+          ]
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": [
+            "itemLimitPeriod"
+          ],
+          "allow_custom": false,
+          "options": [
+            "once"
+          ]
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": [
+            "itemLimitCount"
+          ],
+          "allow_custom": false,
+          "options": [
+            "1"
+          ]
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": [
+            "itemMinShow"
+          ],
+          "allow_custom": true,
+          "options": [
+            "1",
+            "10",
+            "2",
+            "3",
+            "4",
+            "5"
+          ]
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": [
+            "tournamentTeam"
+          ],
+          "allow_custom": false,
+          "options": [
+            "Y"
+          ]
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": [
+            "businessBlock",
+            0
+          ],
+          "allow_custom": true,
+          "options": [
+            "IMUB",
+            "KMFACTORING",
+            "KMKKSB",
+            "KMSB1",
+            "MNS",
+            "RNUB",
+            "RSB1",
+            "SERVICEMEN"
+          ]
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": [
+            "getCondition",
+            "employeeRating",
+            "seasonCode"
+          ],
+          "allow_custom": true,
+          "options": [
+            "SEASON_2024",
+            "SEASON_2025_1",
+            "SEASON_2025_2",
+            "SEASON_m_2024",
+            "SEASON_m_2025_1",
+            "SEASON_m_2025_2"
+          ]
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": [
+            "getCondition",
+            "employeeRating",
+            "minRatingBANK"
+          ],
+          "allow_custom": true,
+          "options": [
+            "",
+            "1",
+            "10",
+            "100",
+            "15",
+            "2",
+            "25",
+            "3",
+            "30",
+            "35",
+            "4",
+            "40",
+            "5",
+            "50"
+          ]
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": [
+            "getCondition",
+            "employeeRating",
+            "minRatingTB"
+          ],
+          "allow_custom": true,
+          "options": [
+            "",
+            "1",
+            "2",
+            "3",
+            "5"
+          ]
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": [
+            "getCondition",
+            "employeeRating",
+            "minRatingGOSB"
+          ],
+          "allow_custom": true,
+          "options": [
+            "",
+            "1"
+          ]
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": [
+            "getCondition",
+            "employeeRating",
+            "minCrystalEarnedTotal"
+          ],
+          "allow_custom": true,
+          "options": [
+            "",
+            "10",
+            "3"
+          ]
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": [
+            "helpCodeList",
+            0
+          ],
+          "allow_custom": true,
+          "options": [
+            "AST_1",
+            "NFT_1"
+          ]
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": [
+            "tagColor"
+          ],
+          "allow_custom": true,
+          "options": [
+            "green-70",
+            "light-blue-80",
+            "orange-80",
+            "pink-80",
+            "purple-80"
+          ]
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": [
+            "tagEndDT"
+          ],
+          "allow_custom": true,
+          "options": [
+            "2024-12-31",
+            "2026-06-30",
+            "4000-01-01"
+          ]
+        }
+      ]
+    },
+    {
+      "sheet_code": "TOURNAMENT-SCHEDULE",
+      "rules": [
+        {
+          "column": "TOURNAMENT_STATUS",
+          "allow_custom": false,
+          "options": [
+            "АКТИВНЫЙ",
+            "ЗАВЕРШЕН",
+            "ОТМЕНЕН",
+            "ПОДВЕДЕНИЕ ИТОГОВ",
+            "УДАЛЕН"
+          ]
+        },
+        {
+          "column": "CRITERION_MARK_TYPE",
+          "allow_custom": true,
+          "options": [
+            "",
+            ">",
+            ">="
+          ]
+        },
+        {
+          "column": "CRITERION_MARK_VALUE",
+          "allow_custom": true,
+          "options": [
+            "",
+            "0",
+            "50000"
+          ]
+        },
+        {
+          "column": "CALC_TYPE",
+          "allow_custom": false,
+          "options": [
+            "0",
+            "1"
+          ]
+        },
+        {
+          "column": "PERIOD_TYPE",
+          "allow_custom": true,
+          "options": [
+            "1 полугодие",
+            "март-июль",
+            "произвольный",
+            "турнир 1 квартала",
+            "турнир 1 полугодия",
+            "турнир 2 квартала",
+            "турнир 2 месяца",
+            "турнир 2 недели",
+            "турнир 2 полугодия",
+            "турнир 3 квартала",
+            "турнир 3 месяца",
+            "турнир 3 недели",
+            "турнир 4 квартала",
+            "турнир 4 месяца",
+            "турнир апреля",
+            "турнир августа",
+            "турнир года",
+            "турнир декабря",
+            "турнир июля",
+            "турнир июня",
+            "турнир квартала",
+            "турнир мая",
+            "турнир марта",
+            "турнир месяца",
+            "турнир ноября",
+            "турнир октября",
+            "турнир сентября",
+            "турнир февраля",
+            "турнир января"
+          ]
+        },
+        {
+          "column": "PLAN_PERIOD_START_DT",
+          "allow_custom": true,
+          "options": [
+            "",
+            "2023-06-01",
+            "2023-07-01",
+            "2023-08-01",
+            "2023-09-01",
+            "2023-10-01",
+            "2023-11-01",
+            "2023-12-01",
+            "2024-01-01",
+            "2024-02-01",
+            "2024-03-01",
+            "2024-04-01",
+            "2024-05-01",
+            "2024-06-01",
+            "2024-07-01",
+            "2024-08-01",
+            "2024-09-01",
+            "2024-10-01"
+          ]
+        },
+        {
+          "column": "PLAN_PERIOD_END_DT",
+          "allow_custom": true,
+          "options": [
+            "",
+            "2023-06-30",
+            "2023-07-31",
+            "2023-08-31",
+            "2023-09-30",
+            "2023-10-31",
+            "2023-11-30",
+            "2023-12-31",
+            "2024-02-29",
+            "2024-03-31",
+            "2024-04-30",
+            "2024-05-31",
+            "2024-06-30",
+            "2024-07-31",
+            "2024-08-31",
+            "2024-09-30",
+            "2024-10-31"
+          ]
+        },
+        {
+          "column": "TARGET_TYPE",
+          "json_path": [
+            "seasonCode"
+          ],
+          "allow_custom": true,
+          "options": [
+            "",
+            "NON",
+            "SEASON_2024",
+            "SEASON_2025_1",
+            "SEASON_2025_2",
+            "SEASON_2026_1",
+            "SEASON_f_2025",
+            "SEASON_f_2026",
+            "SEASON_imub_2025",
+            "SEASON_kmsb1_2025",
+            "SEASON_m_2024",
+            "SEASON_m_2025_1",
+            "SEASON_m_2025_2",
+            "SEASON_rnub_2025",
+            "SEASON_rsb1_2025",
+            "SEASON_s_2024",
+            "SEASON_s_2025"
+          ]
+        }
+      ]
+    }
+  ],
   "sheets": [
     {
       "code": "CONTEST-DATA",
       "title": "Конкурсы",
       "file": "CONTEST (PROM) 09-04 v1.csv",
-      "json_columns": ["CONTEST_FEATURE"],
+      "json_columns": [
+        "CONTEST_FEATURE"
+      ],
       "primary_key_column": "CONTEST_CODE"
     },
     {
@@ -38,14 +1247,20 @@
       "code": "INDICATOR",
       "title": "Показатели",
       "file": "INDICATOR (PROM) 09-04 v1.csv",
-      "json_columns": ["INDICATOR_OBJECT", "INDICATOR_FILTER", "CONTESTANT_SELECTION"],
+      "json_columns": [
+        "INDICATOR_OBJECT",
+        "INDICATOR_FILTER",
+        "CONTESTANT_SELECTION"
+      ],
       "primary_key_column": "INDICATOR_CODE"
     },
     {
       "code": "REWARD",
       "title": "Награды",
       "file": "REWARD (PROM) 09-04 v1.csv",
-      "json_columns": ["REWARD_ADD_DATA"],
+      "json_columns": [
+        "REWARD_ADD_DATA"
+      ],
       "primary_key_column": "REWARD_CODE"
     },
     {
@@ -59,7 +1274,11 @@
       "code": "TOURNAMENT-SCHEDULE",
       "title": "Расписание турниров",
       "file": "SCHEDULE (PROM) 09-04 v1.csv",
-      "json_columns": ["FILTER_PERIOD_ARR", "TARGET_TYPE", "TRN_INDICATOR_FILTER"],
+      "json_columns": [
+        "FILTER_PERIOD_ARR",
+        "TARGET_TYPE",
+        "TRN_INDICATOR_FILTER"
+      ],
       "primary_key_column": "TOURNAMENT_CODE"
     }
   ]

@@ -17,7 +17,12 @@ def get_db_path(root: Path, cfg: Dict[str, Any]) -> Path:
 
 
 def init_schema(conn: sqlite3.Connection) -> None:
-    """Создаёт таблицы при первом запуске (актуальная схема с версионированием строк)."""
+    """
+    Создаёт таблицы при первом запуске (актуальная схема с версионированием строк).
+
+    Имена таблиц и DDL зашиты здесь: модель «реестр листов + общая таблица строк» не
+    зависит от заголовков CSV и не читается из config.json (см. database_model в конфиге).
+    """
     conn.executescript(
         """
         CREATE TABLE IF NOT EXISTS sheet (
