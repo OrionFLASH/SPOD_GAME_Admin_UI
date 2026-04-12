@@ -1224,14 +1224,54 @@
     return o;
   }
 
+  /**
+   * Нормализация строки JSON в нотации SPOD (тройные кавычки в CSV), как в `src/spod_json.py`.
+   * Используется мастером и `normalizeJsonCell`, чтобы разбирать те же ячейки, что и сервер.
+   */
+  function normalizeSpodJsonString(s) {
+    return String(s || "")
+      .trim()
+      .replace(/"""/g, '"');
+  }
+
+  /**
+   * Разбор ячейки как JSON после нормализации SPOD; сигнатура удобна для мастера (`ok` + `parsed`).
+   */
+  function tryParseSpodJsonCell(raw) {
+    var t = String(raw != null ? raw : "").trim();
+    if (!t || t === "-" || t === "None" || t.toLowerCase() === "null") {
+      return { ok: true, parsed: null };
+    }
+    try {
+      return { ok: true, parsed: JSON.parse(t) };
+    } catch (e0) {
+      /* далее — как try_parse_cell после normalize_spod_json_string и regex в Python */
+    }
+    try {
+      var fixed = normalizeSpodJsonString(t);
+      fixed = fixed.replace(/"{2,}([^"\s]+)"{2,}/g, '"$1"');
+      fixed = fixed.replace(/"{2,}([^"\s]+)"{2,}\s*:/g, '"$1":');
+      return { ok: true, parsed: JSON.parse(fixed) };
+    } catch (e1) {
+      return { ok: false, parsed: null, error: String((e1 && e1.message) || e1) };
+    }
+  }
+
   /** Сравнение JSON-ячеек с учётом нормализации пробелов в компактном виде. */
   function normalizeJsonCell(raw) {
     var t = (raw != null ? String(raw) : "").trim();
     if (!t) {
       return "";
     }
+    var pr = tryParseSpodJsonCell(raw);
+    if (!pr.ok) {
+      return t;
+    }
+    if (pr.parsed === null || pr.parsed === undefined) {
+      return "";
+    }
     try {
-      return JSON.stringify(JSON.parse(t));
+      return JSON.stringify(pr.parsed);
     } catch (e) {
       return t;
     }
@@ -1740,6 +1780,7 @@
     buildJsonFromFields: buildJsonFromFields,
     normalizeJsonCell: normalizeJsonCell,
     mergeDeclaredJsonTemplate: mergeDeclaredJsonTemplate,
+    tryParseSpodJsonCell: tryParseSpodJsonCell,
   };
 
   /** Общие бейджи ограничений для мастера (те же правила, что в applyFieldUiLabel). */

@@ -627,13 +627,20 @@
         mount.className = "wiz-json-editor-mount json-column-card";
         row.appendChild(mount);
         var parsedJc;
-        var jcOk = true;
-        try {
-          var tr = rawJson.trim();
-          parsedJc = tr ? JSON.parse(tr) : {};
-        } catch (eParse) {
-          jcOk = false;
-          parsedJc = null;
+        var jcOk;
+        if (typeof editorApi.tryParseSpodJsonCell === "function") {
+          var pr = editorApi.tryParseSpodJsonCell(rawJson);
+          jcOk = pr.ok;
+          parsedJc = !jcOk ? null : pr.parsed === null || pr.parsed === undefined ? {} : pr.parsed;
+        } else {
+          jcOk = true;
+          try {
+            var tr0 = rawJson.trim();
+            parsedJc = tr0 ? JSON.parse(tr0) : {};
+          } catch (eParse) {
+            jcOk = false;
+            parsedJc = null;
+          }
         }
         var pseudoBoot = {
           sheetCode: sheetCode,

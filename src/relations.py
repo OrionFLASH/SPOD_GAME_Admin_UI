@@ -39,11 +39,16 @@ def _rows(conn: sqlite3.Connection, code: str) -> List[Dict[str, Any]]:
 
 
 def _preview_for_item(cells: Dict[str, str]) -> str:
-    """Короткая подпись строки для списка связей (несколько кнопок)."""
+    """
+    Короткая подпись строки для бокового меню «Связи» и карточек (несколько ссылок).
+    В UI выводится только значение с префиксом «: » (без имени поля и «=»).
+    """
     for k in _PREVIEW_KEYS:
         v = (cells.get(k) or "").strip()
         if v:
-            return (k + "=" + v)[:96]
+            # Формат «: значение» по соглашению с макетом бокового меню.
+            text = ": " + v
+            return text[:96] if len(text) > 96 else text
     return "строка"
 
 

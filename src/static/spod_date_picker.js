@@ -97,7 +97,8 @@
         yearInputEl.value = String(viewY);
         return;
       }
-      y = Math.max(1000, Math.min(3999, y));
+      /* До 4000 включительно — в данных встречается «бессрочная» дата 4000-01-01. */
+      y = Math.max(1000, Math.min(4000, y));
       viewY = y;
       clampDraftDay();
       renderCalendar();
@@ -200,7 +201,7 @@
       yearInputEl.type = "number";
       yearInputEl.className = "spod-date-year-input";
       yearInputEl.min = "1000";
-      yearInputEl.max = "3999";
+      yearInputEl.max = "4000";
       yearInputEl.step = "1";
       yearInputEl.title = "Год (можно ввести с клавиатуры)";
       yearInputEl.setAttribute("aria-label", "Год");
@@ -240,12 +241,12 @@
       head.appendChild(yearHint);
 
       bPrevY.addEventListener("click", function () {
-        viewY -= 1;
+        viewY = Math.max(1000, viewY - 1);
         clampDraftDay();
         renderCalendar();
       });
       bNextY.addEventListener("click", function () {
-        viewY += 1;
+        viewY = Math.min(4000, viewY + 1);
         clampDraftDay();
         renderCalendar();
       });
@@ -255,6 +256,7 @@
           viewM = 11;
           viewY -= 1;
         }
+        viewY = Math.max(1000, viewY);
         clampDraftDay();
         renderCalendar();
       });
@@ -264,6 +266,7 @@
           viewM = 0;
           viewY += 1;
         }
+        viewY = Math.min(4000, viewY);
         clampDraftDay();
         renderCalendar();
       });
@@ -292,6 +295,15 @@
         mkBtn("Конец", "btn btn-secondary btn-sm", function () {
           draft = { y: viewY, m: 12, d: 31 };
           viewM = 11;
+          hideMonthDropdown();
+          renderCalendar();
+        })
+      );
+      quickBar.appendChild(
+        mkBtn("4000-01-01", "btn btn-secondary btn-sm", function () {
+          draft = { y: 4000, m: 1, d: 1 };
+          viewY = 4000;
+          viewM = 0;
           hideMonthDropdown();
           renderCalendar();
         })
@@ -362,7 +374,7 @@
       yearHint.textContent =
         "«Начало» и «Конец» — 1 января и 31 декабря года " +
         viewY +
-        ". Год можно ввести в поле справа от названия месяца.";
+        ". «4000-01-01» — условная дата «без срока» (как в выгрузках). Год можно ввести в поле справа от названия месяца (1000–4000).";
       gridEl.innerHTML = "";
       var weekHead = document.createElement("div");
       weekHead.className = "spod-date-cal-week spod-date-cal-week--head";
