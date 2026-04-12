@@ -54,6 +54,27 @@ body {
   text-decoration: underline;
 }
 
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.topbar-tag {
+  font-size: 0.82rem;
+}
+
+.topbar-stop-form {
+  margin: 0;
+}
+
+.stop-ack-body {
+  margin: 0;
+  min-height: 100vh;
+}
+
 .wrap {
   max-width: 1180px;
   margin: 0 auto;

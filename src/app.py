@@ -18,7 +18,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from markupsafe import Markup, escape
 
-from src import config_validate, consistency, db, editor_config, export_csv, ingest, relations, sheet_list_display, spod_json
+from src import config_validate, consistency, db, editor_config, export_csv, ingest, relations, server_stop, sheet_list_display, spod_json
 
 ROOT = Path(__file__).resolve().parent.parent
 CFG: Dict[str, Any] = {}
@@ -328,6 +328,26 @@ def admin_reimport():
     consistency.run_all_checks(conn)
     logging.info("Переимпорт: %s", counts)
     return RedirectResponse("/", status_code=303)
+
+
+@app.post("/admin/stop", response_class=HTMLResponse)
+def admin_stop() -> HTMLResponse:
+    """
+    Остановка процесса Uvicorn/панели: завершение дочерних PID (если есть), затем SIGTERM себе.
+    Вызывается кнопкой «Остановить» в шапке; ответ отдаётся до фактического kill.
+    """
+    logging.warning("Запрошена остановка сервера: POST /admin/stop")
+    server_stop.schedule_local_shutdown()
+    body = (
+        "<!DOCTYPE html><html lang=\"ru\"><head><meta charset=\"utf-8\"/>"
+        "<title>Остановка</title><link rel=\"stylesheet\" href=\"/static/app.css\"/></head>"
+        "<body class=stop-ack-body><div class=wrap><section class=panel>"
+        "<h1>Сервер останавливается</h1>"
+        "<p>Процесс панели завершается; дочерние процессы (если были) получают SIGTERM.</p>"
+        "<p class=muted>Окно браузера можно закрыть.</p>"
+        "</section></div></body></html>"
+    )
+    return HTMLResponse(body, status_code=200)
 
 
 @app.get("/sheet/{code}/export.csv")

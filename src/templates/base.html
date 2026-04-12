@@ -9,8 +9,24 @@
 <body>
   <header class="topbar">
     <div><a href="/" class="spod-trail-clear-root">← Панель турниров</a></div>
-    <div class="muted">SPOD · локально</div>
+    <div class="topbar-right">
+      <span class="muted topbar-tag">SPOD · локально</span>
+      <form class="topbar-stop-form" method="post" action="/admin/stop" id="form-stop-server">
+        <button type="submit" class="btn btn-danger btn-sm" id="btn-stop-server" title="Завершить процесс панели (Uvicorn) и дочерние процессы при наличии">Остановить</button>
+      </form>
+    </div>
   </header>
+  <script>
+    (function () {
+      var f = document.getElementById("form-stop-server");
+      if (!f) return;
+      f.addEventListener("submit", function (e) {
+        if (!confirm("Остановить сервер панели? Браузер потеряет соединение с http://127.0.0.1:8765/")) {
+          e.preventDefault();
+        }
+      });
+    })();
+  </script>
   <div class="wrap">
     {% block content %}{% endblock %}
   </div>

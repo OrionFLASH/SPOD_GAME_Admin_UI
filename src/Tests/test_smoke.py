@@ -8,6 +8,7 @@ import sqlite3
 import sys
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
@@ -94,6 +95,22 @@ class SmokeTest(unittest.TestCase):
             conn.close()
             self.assertEqual(old_cur, 0)
             self.assertEqual(new_cur, 1)
+
+    @patch("src.app.server_stop.schedule_local_shutdown")
+    def test_admin_stop_does_not_kill_process(self, mock_sched: object) -> None:
+        """POST /admin/stop отдаёт ответ; реальное завершение процесса не вызывается (мок)."""
+        from fastapi.testclient import TestClient  # noqa: PLC0415
+
+        from src import app as appmod  # noqa: PLC0415
+
+        db_path = ROOT / "OUT" / "DB" / "tournament_admin.sqlite"
+        if db_path.is_file():
+            db_path.unlink()
+        with TestClient(appmod.app) as client:
+            r = client.post("/admin/stop")
+            self.assertEqual(r.status_code, 200)
+            self.assertIn("останавливается", r.text.lower())
+            mock_sched.assert_called_once()
 
 
 if __name__ == "__main__":
