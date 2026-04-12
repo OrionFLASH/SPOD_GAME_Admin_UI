@@ -3,9 +3,10 @@
 
 from __future__ import annotations
 
-import json
 import sqlite3
 from typing import Any, Dict, List
+
+from src import sheet_storage
 
 # Порядок полей для короткой подписи кнопки «Редактировать» у множественных связей
 _PREVIEW_KEYS = (
@@ -19,19 +20,21 @@ _PREVIEW_KEYS = (
 
 
 def _rows(conn: sqlite3.Connection, code: str) -> List[Dict[str, Any]]:
-    """Все актуальные строки листа с разобранным JSON ячеек."""
+    """Все актуальные строки листа с разобранными ячейками."""
+    t = sheet_storage.physical_table_name(code)
+    headers = sheet_storage.headers_for_sheet(conn, code)
+    if not headers:
+        return []
     cur = conn.execute(
+        f"""
+        SELECT * FROM {sheet_storage.quote_ident(t)}
+        WHERE is_current = 1
+        ORDER BY sort_key, row_index, id
         """
-        SELECT dr.id, dr.cells_json
-        FROM data_row dr
-        JOIN sheet s ON s.id = dr.sheet_id
-        WHERE s.code = ? AND dr.is_current = 1
-        """,
-        (code,),
     )
     out: List[Dict[str, Any]] = []
     for r in cur.fetchall():
-        out.append({"id": int(r["id"]), "cells": json.loads(r["cells_json"])})
+        out.append({"id": int(r["id"]), "cells": sheet_storage.row_to_cells(r, headers)})
     return out
 
 

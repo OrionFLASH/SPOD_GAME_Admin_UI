@@ -18,7 +18,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from markupsafe import Markup, escape
 
-from src import config_validate, consistency, db, editor_config, export_csv, ingest, relations, server_stop, sheet_list_display, spod_json, wizard_contest
+from src import config_validate, consistency, db, editor_config, export_csv, ingest, relations, server_stop, sheet_list_display, sheet_storage, spod_json, wizard_contest
 
 ROOT = Path(__file__).resolve().parent.parent
 CFG: Dict[str, Any] = {}
@@ -77,8 +77,10 @@ async def lifespan(app: FastAPI):
     DB_PATH = db.get_db_path(ROOT, CFG)
     CONN = db.open_connection(DB_PATH)
     db.init_schema(CONN)
-    db.migrate_data_row_versioning(CONN)
+    db.migrate_sheet_add_headers_json(CONN)
+    db.migrate_legacy_data_row_removed(CONN)
     db.ensure_wizard_draft_table(CONN)
+    sheet_storage.rebuild_all_sheet_tables_from_config(CONN, ROOT, CFG)
     cur = CONN.execute("SELECT COUNT(*) FROM sheet")
     if cur.fetchone()[0] == 0:
         counts = ingest.import_all(ROOT, CFG, CONN, clear=True)
@@ -106,12 +108,18 @@ def get_conn() -> sqlite3.Connection:
 def index(request: Request):
     """Главная: карточки листов."""
     conn = get_conn()
-    cur = conn.execute(
-        "SELECT s.code, s.title, s.file_name, COUNT(dr.id) AS n FROM sheet s "
-        "LEFT JOIN data_row dr ON dr.sheet_id = s.id AND dr.is_current = 1 "
-        "GROUP BY s.id ORDER BY s.code"
-    )
-    sheets = [dict(r) for r in cur.fetchall()]
+    cur = conn.execute("SELECT id, code, title, file_name FROM sheet ORDER BY code")
+    sheets = []
+    for r in cur.fetchall():
+        t = sheet_storage.physical_table_name(str(r["code"]))
+        n = conn.execute(
+            f"SELECT COUNT(*) AS c FROM {sheet_storage.quote_ident(t)} "
+            "WHERE sheet_id = ? AND is_current = 1",
+            (int(r["id"]),),
+        ).fetchone()["c"]
+        sheets.append(
+            {"code": r["code"], "title": r["title"], "file_name": r["file_name"], "n": int(n)}
+        )
     return templates.TemplateResponse(
         request,
         "index.html",
@@ -138,7 +146,7 @@ async def wizard_new_contest_commit(payload: Dict[str, Any] = Body(...)):
     """Атомарная вставка строк мастера и проверка консистентности."""
     conn = get_conn()
     try:
-        res = wizard_contest.commit_wizard(conn, CFG, payload)
+        res = wizard_contest.commit_wizard(ROOT, conn, CFG, payload)
     except ValueError as e:
         raise HTTPException(400, detail=str(e)) from e
     except Exception as e:
@@ -196,17 +204,28 @@ def sheet_list(request: Request, code: str, q: str = ""):
     if not row:
         raise HTTPException(404, "Неизвестный лист")
     sid = row[0]
+    t = sheet_storage.physical_table_name(code)
     cur = conn.execute(
-        "SELECT id, row_index, cells_json, consistency_ok, consistency_errors FROM data_row "
-        "WHERE sheet_id = ? AND is_current = 1 ORDER BY sort_key, row_index, id",
+        f"""
+        SELECT id, row_index, consistency_ok, consistency_errors
+        FROM {sheet_storage.quote_ident(t)}
+        WHERE sheet_id = ? AND is_current = 1
+        ORDER BY sort_key, row_index, id
+        """,
         (sid,),
     )
+    headers = sheet_storage.headers_for_sheet(conn, code)
     rows_out: List[Dict[str, Any]] = []
     spec = next((s for s in CFG["sheets"] if s["code"] == code), None)
     ql = q.strip().lower() if q else ""
     lu = sheet_list_display.build_lookup_tables(conn)
     for r in cur.fetchall():
-        cells = json.loads(r["cells_json"])
+        cur2 = conn.execute(
+            f"SELECT * FROM {sheet_storage.quote_ident(t)} WHERE id = ?",
+            (int(r["id"]),),
+        )
+        full = cur2.fetchone()
+        cells = sheet_storage.row_to_cells(full, headers) if full else {}
         disp = sheet_list_display.display_for_sheet_row(code, cells, lu)
         blob = sheet_list_display.search_blob(cells, disp)
         if ql and ql not in blob:
@@ -237,10 +256,11 @@ def sheet_list(request: Request, code: str, q: str = ""):
 @app.get("/sheet/{code}/row/{row_id}", response_class=HTMLResponse)
 def row_detail(request: Request, code: str, row_id: int):
     conn = get_conn()
+    t = sheet_storage.physical_table_name(code)
     cur = conn.execute(
-        """
-        SELECT dr.id, dr.row_index, dr.cells_json, dr.consistency_ok, dr.consistency_errors
-        FROM data_row dr
+        f"""
+        SELECT dr.id, dr.row_index, dr.consistency_ok, dr.consistency_errors
+        FROM {sheet_storage.quote_ident(t)} dr
         JOIN sheet s ON s.id = dr.sheet_id
         WHERE s.code = ? AND dr.id = ? AND dr.is_current = 1
         """,
@@ -249,7 +269,9 @@ def row_detail(request: Request, code: str, row_id: int):
     r = cur.fetchone()
     if not r:
         raise HTTPException(404, "Строка не найдена")
-    cells: Dict[str, str] = json.loads(r["cells_json"])
+    cells = sheet_storage.fetch_row_cells(conn, CFG, code, row_id)
+    if cells is None:
+        raise HTTPException(404, "Строка не найдена")
     spec = next((s for s in CFG["sheets"] if s["code"] == code), {})
     json_cols = spec.get("json_columns") or []
     json_blocks = []
@@ -326,19 +348,11 @@ async def row_save(
     При отсутствии изменений — 400. После успеха — редирект на id новой актуальной строки.
     """
     conn = get_conn()
-    cur = conn.execute(
-        """
-        SELECT dr.id, dr.sheet_id, dr.row_index, dr.sort_key, dr.cells_json
-        FROM data_row dr
-        JOIN sheet s ON s.id = dr.sheet_id
-        WHERE s.code = ? AND dr.id = ? AND dr.is_current = 1
-        """,
-        (code, row_id),
-    )
-    old = cur.fetchone()
+    old = sheet_storage.fetch_row_for_update(conn, code, row_id)
     if not old:
         raise HTTPException(404, detail="Строка не найдена или не актуальна (уже заменена).")
-    old_cells: Dict[str, str] = json.loads(old["cells_json"])
+    headers = sheet_storage.headers_for_sheet(conn, code)
+    old_cells = sheet_storage.row_to_cells(old, headers)
     new_cells: Dict[str, str] = {str(k): str(v) if v is not None else "" for k, v in payload.items()}
     if _cells_canonical_json(old_cells) == _cells_canonical_json(new_cells):
         raise HTTPException(400, detail="Нет изменений — сохранение не требуется.")
@@ -347,31 +361,23 @@ async def row_save(
 
     try:
         conn.execute("BEGIN")
-        conn.execute(
-            "UPDATE data_row SET is_current = 0, updated_at = ? WHERE id = ?",
-            (now, row_id),
+        sheet_storage.mark_row_not_current(conn, code, row_id, now)
+        new_id = sheet_storage.insert_data_row(
+            conn,
+            ROOT,
+            CFG,
+            code,
+            int(old["sheet_id"]),
+            int(old["row_index"]),
+            float(old["sort_key"] if old["sort_key"] is not None else old["row_index"]),
+            new_cells,
+            now,
+            replaces_row_id=row_id,
         )
-        conn.execute(
-            """
-            INSERT INTO data_row (sheet_id, row_index, sort_key, cells_json, consistency_ok, consistency_errors, updated_at, is_current, replaces_row_id)
-            VALUES (?,?,?,?,?,?,?,?,?)
-            """,
-            (
-                int(old["sheet_id"]),
-                int(old["row_index"]),
-                float(old["sort_key"] if old["sort_key"] is not None else old["row_index"]),
-                json.dumps(new_cells, ensure_ascii=False),
-                1,
-                "[]",
-                now,
-                1,
-                row_id,
-            ),
-        )
-        new_id = int(conn.execute("SELECT last_insert_rowid()").fetchone()[0])
         consistency.run_all_checks(conn, do_commit=False)
+        t = sheet_storage.physical_table_name(code)
         cur_ok = conn.execute(
-            "SELECT consistency_ok, consistency_errors FROM data_row WHERE id = ?",
+            f"SELECT consistency_ok, consistency_errors FROM {sheet_storage.quote_ident(t)} WHERE id = ?",
             (new_id,),
         )
         chk = cur_ok.fetchone()

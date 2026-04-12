@@ -3,7 +3,7 @@
 Мастер «Создать конкурс»: схема шагов для UI и атомарная вставка строк в SQLite.
 
 Порядок вставки: CONTEST-DATA → GROUP → REWARD-LINK → REWARD → INDICATOR → TOURNAMENT-SCHEDULE,
-затем пересчёт консистентности. Черновик шага хранится в таблице wizard_draft (статус EDIT) до финального commit.
+затем пересчёт консистентности. Черновик шага хранится в таблице wizard_draft (статус EDIT) до финального commit; строки листов пишутся в spod_sheet_* через sheet_storage.
 """
 
 from __future__ import annotations
@@ -15,7 +15,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Tuple
 
-from src import consistency, editor_config, ingest
+from src import consistency, editor_config, ingest, sheet_storage
 
 # Порядок шагов мастера (коды листов из config.json).
 WIZARD_SHEET_ORDER: Tuple[str, ...] = (
@@ -136,34 +136,29 @@ def build_schema(root: Path, cfg: Dict[str, Any]) -> Dict[str, Any]:
     }
 
 
-def _next_row_index(conn: Any, sheet_id: int) -> int:
-    cur = conn.execute(
-        "SELECT COALESCE(MAX(row_index), -1) AS m FROM data_row WHERE sheet_id = ?",
-        (sheet_id,),
-    )
-    m = cur.fetchone()
-    return int(m["m"]) + 1 if m else 0
+def _next_row_index(conn: Any, sheet_code: str, sheet_id: int) -> int:
+    return sheet_storage.next_row_index(conn, sheet_id, sheet_code)
 
 
-def _insert_row(conn: Any, sheet_code: str, cells: Dict[str, Any], now: str) -> int:
+def _insert_row(root: Path, conn: Any, cfg: Dict[str, Any], sheet_code: str, cells: Dict[str, Any], now: str) -> int:
     cur = conn.execute("SELECT id FROM sheet WHERE code = ?", (sheet_code,))
     r = cur.fetchone()
     if not r:
         raise ValueError(f"Неизвестный лист: {sheet_code}")
     sid = int(r["id"])
-    idx = _next_row_index(conn, sid)
-    cells_json = json.dumps(
-        {str(k): "" if v is None else str(v) for k, v in cells.items()},
-        ensure_ascii=False,
+    idx = _next_row_index(conn, sheet_code, sid)
+    return sheet_storage.insert_data_row(
+        conn,
+        root,
+        cfg,
+        sheet_code,
+        sid,
+        idx,
+        float(idx),
+        cells,
+        now,
+        replaces_row_id=None,
     )
-    conn.execute(
-        """
-        INSERT INTO data_row (sheet_id, row_index, sort_key, cells_json, consistency_ok, consistency_errors, updated_at, is_current, replaces_row_id)
-        VALUES (?,?,?,?,?,?,?,?,?)
-        """,
-        (sid, idx, float(idx), cells_json, 1, "[]", now, 1, None),
-    )
-    return int(conn.execute("SELECT last_insert_rowid()").fetchone()[0])
 
 
 def validate_payload(payload: Dict[str, Any]) -> List[str]:
@@ -270,7 +265,7 @@ def validate_payload(payload: Dict[str, Any]) -> List[str]:
     return errs
 
 
-def commit_wizard(conn: Any, cfg: Dict[str, Any], payload: Dict[str, Any]) -> Dict[str, Any]:
+def commit_wizard(root: Path, conn: Any, cfg: Dict[str, Any], payload: Dict[str, Any]) -> Dict[str, Any]:
     """
     Вставляет все строки в одной транзакции, затем consistency.run_all_checks.
     Возвращает { "ok": True, "contest_row_id": n } или бросает при ошибке БД.
@@ -281,34 +276,45 @@ def commit_wizard(conn: Any, cfg: Dict[str, Any], payload: Dict[str, Any]) -> Di
     now = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
     mode = str((cfg.get("consistency") or {}).get("mode", "warn"))
     contest_cells = dict((payload.get("contest") or {}).get("cells") or {})
-    inserted_ids: List[int] = []
+    inserted: List[Tuple[str, int]] = []
     try:
         conn.execute("BEGIN")
-        inserted_ids.append(_insert_row(conn, "CONTEST-DATA", contest_cells, now))
-        contest_id = inserted_ids[0]
+        inserted.append(("CONTEST-DATA", _insert_row(root, conn, cfg, "CONTEST-DATA", contest_cells, now)))
+        contest_id = inserted[0][1]
         for g in payload.get("groups") or []:
-            inserted_ids.append(_insert_row(conn, "GROUP", dict((g or {}).get("cells") or {}), now))
+            inserted.append(("GROUP", _insert_row(root, conn, cfg, "GROUP", dict((g or {}).get("cells") or {}), now)))
         for ln in payload.get("reward_links") or []:
-            inserted_ids.append(_insert_row(conn, "REWARD-LINK", dict((ln or {}).get("cells") or {}), now))
+            inserted.append(
+                ("REWARD-LINK", _insert_row(root, conn, cfg, "REWARD-LINK", dict((ln or {}).get("cells") or {}), now))
+            )
         for rw in payload.get("rewards") or []:
-            inserted_ids.append(_insert_row(conn, "REWARD", dict((rw or {}).get("cells") or {}), now))
+            inserted.append(("REWARD", _insert_row(root, conn, cfg, "REWARD", dict((rw or {}).get("cells") or {}), now)))
         for ind in payload.get("indicators") or []:
-            inserted_ids.append(_insert_row(conn, "INDICATOR", dict((ind or {}).get("cells") or {}), now))
+            inserted.append(
+                ("INDICATOR", _insert_row(root, conn, cfg, "INDICATOR", dict((ind or {}).get("cells") or {}), now))
+            )
         for sc in payload.get("schedules") or []:
-            inserted_ids.append(_insert_row(conn, "TOURNAMENT-SCHEDULE", dict((sc or {}).get("cells") or {}), now))
+            inserted.append(
+                (
+                    "TOURNAMENT-SCHEDULE",
+                    _insert_row(root, conn, cfg, "TOURNAMENT-SCHEDULE", dict((sc or {}).get("cells") or {}), now),
+                )
+            )
         consistency.run_all_checks(conn, do_commit=False)
         if mode == "strict":
-            ph = ",".join("?" * len(inserted_ids))
-            cur = conn.execute(
-                f"SELECT id, consistency_ok, consistency_errors FROM data_row WHERE id IN ({ph})",
-                inserted_ids,
-            )
-            for row in cur.fetchall():
-                if int(row["consistency_ok"]) == 0:
+            for sheet_code, nid in inserted:
+                t = sheet_storage.physical_table_name(sheet_code)
+                cur = conn.execute(
+                    f"SELECT id, consistency_ok, consistency_errors FROM {sheet_storage.quote_ident(t)} WHERE id = ?",
+                    (nid,),
+                )
+                row = cur.fetchone()
+                if row and int(row["consistency_ok"]) == 0:
                     conn.rollback()
                     msg = json.loads(row["consistency_errors"] or "[]")
                     raise ValueError(
-                        "Режим strict: ошибки консистентности после вставки (id=%s): " % row["id"]
+                        "Режим strict: ошибки консистентности после вставки (%s id=%s): "
+                        % (sheet_code, row["id"])
                         + "; ".join(str(x) for x in msg)
                     )
         draft_uid = str(payload.get("draft_uuid") or "").strip()

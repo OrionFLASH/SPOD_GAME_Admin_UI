@@ -8,10 +8,10 @@
     "filename": "tournament_admin.sqlite"
   },
   "database_model": {
-    "comment_ru": "Схема SQLite задаётся в коде (src/db.py, init_schema), не в этом файле. Все листы используют одну таблицу строк; заголовки CSV не создают отдельных колонок — каждая строка листа хранится как JSON в cells_json.",
+    "comment_ru": "Схема SQLite задаётся в коде (src/db.py, src/sheet_storage.py). У каждого листа из sheets[] — своя таблица spod_sheet_<КОД> (дефисы в коде заменены на подчёркивание): колонки CSV как отдельные TEXT, JSON-колонки как TEXT с полным JSON, плюс денормализованные листья j__<JSON_колонка>__<путь>. Служебные поля: id, sheet_id, row_index, sort_key, consistency_*, updated_at, is_current, replaces_row_id. Логические связи между листами (CONTEST_CODE, REWARD_CODE и т.д.) индексируются для запросов; классические FOREIGN KEY между листами не используются из‑за версионирования строк (несколько версий с одним бизнес-ключом).",
     "registry_table": "sheet",
-    "all_sheets_data_table": "data_row",
-    "relationship_ru": "data_row.sheet_id ссылается на sheet.id; логический «лист» — строка в sheet с полем code (как в sheets[].code)."
+    "per_sheet_tables_prefix": "spod_sheet_",
+    "relationship_ru": "sheet.id → sheet_id в таблице листа; целостность ссылок между листами проверяет consistency.py."
   },
   "sheet_bindings": [
     {

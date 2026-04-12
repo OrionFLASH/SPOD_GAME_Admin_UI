@@ -7,26 +7,27 @@
 from __future__ import annotations
 
 import json
-import sqlite3
-from collections import defaultdict
-from typing import Any, DefaultDict, Dict, List
+from typing import Any, Dict, List
+
+from src import sheet_storage
 
 
 def _cells_rows(conn: sqlite3.Connection, sheet_code: str) -> List[Dict[str, str]]:
     """Все строки листа как словари ячеек."""
+    t = sheet_storage.physical_table_name(sheet_code)
+    headers = sheet_storage.headers_for_sheet(conn, sheet_code)
+    if not headers:
+        return []
     cur = conn.execute(
+        f"""
+        SELECT * FROM {sheet_storage.quote_ident(t)}
+        WHERE is_current = 1
+        ORDER BY sort_key, row_index, id
         """
-        SELECT dr.cells_json
-        FROM data_row dr
-        JOIN sheet s ON s.id = dr.sheet_id
-        WHERE s.code = ? AND dr.is_current = 1
-        ORDER BY dr.sort_key, dr.row_index, dr.id
-        """,
-        (sheet_code,),
     )
     out: List[Dict[str, str]] = []
     for r in cur.fetchall():
-        out.append(json.loads(r["cells_json"]))
+        out.append(sheet_storage.row_to_cells(r, headers))
     return out
 
 
@@ -49,18 +50,18 @@ def build_lookup_tables(conn: sqlite3.Connection) -> Dict[str, Any]:
         if rc:
             reward_full[rc] = (c.get("FULL_NAME") or "").strip()
 
-    tournaments_for_contest: DefaultDict[str, List[Dict[str, str]]] = defaultdict(list)
+    tournaments_for_contest: Dict[str, List[Dict[str, str]]] = {}
     for c in _cells_rows(conn, "TOURNAMENT-SCHEDULE"):
         tc = (c.get("TOURNAMENT_CODE") or "").strip()
         cc = (c.get("CONTEST_CODE") or "").strip()
         pt = (c.get("PERIOD_TYPE") or "").strip()
         if cc and tc:
-            tournaments_for_contest[cc].append({"TOURNAMENT_CODE": tc, "PERIOD_TYPE": pt})
+            tournaments_for_contest.setdefault(cc, []).append({"TOURNAMENT_CODE": tc, "PERIOD_TYPE": pt})
 
     return {
         "contest_full": contest_full,
         "reward_full": reward_full,
-        "tournaments_for_contest": dict(tournaments_for_contest),
+        "tournaments_for_contest": tournaments_for_contest,
     }
 
 

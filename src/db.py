@@ -3,7 +3,6 @@
 
 from __future__ import annotations
 
-import json
 import sqlite3
 from pathlib import Path
 from typing import Any, Dict
@@ -18,10 +17,10 @@ def get_db_path(root: Path, cfg: Dict[str, Any]) -> Path:
 
 def init_schema(conn: sqlite3.Connection) -> None:
     """
-    Создаёт таблицы при первом запуске (актуальная схема с версионированием строк).
+    Создаёт таблицы при первом запуске.
 
-    Имена таблиц и DDL зашиты здесь: модель «реестр листов + общая таблица строк» не
-    зависит от заголовков CSV и не читается из config.json (см. database_model в конфиге).
+    Данные листов хранятся в отдельных таблицах spod_sheet_* (см. sheet_storage.py),
+    реестр листов — sheet; устаревшая общая таблица data_row не используется.
     """
     conn.executescript(
         """
@@ -30,22 +29,9 @@ def init_schema(conn: sqlite3.Connection) -> None:
             code TEXT NOT NULL UNIQUE,
             title TEXT,
             file_name TEXT NOT NULL,
-            imported_at TEXT NOT NULL
+            imported_at TEXT NOT NULL,
+            headers_json TEXT NOT NULL DEFAULT '[]'
         );
-        CREATE TABLE IF NOT EXISTS data_row (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            sheet_id INTEGER NOT NULL REFERENCES sheet(id) ON DELETE CASCADE,
-            row_index INTEGER NOT NULL,
-            sort_key REAL NOT NULL,
-            cells_json TEXT NOT NULL,
-            consistency_ok INTEGER NOT NULL DEFAULT 1,
-            consistency_errors TEXT NOT NULL DEFAULT '[]',
-            updated_at TEXT,
-            is_current INTEGER NOT NULL DEFAULT 1,
-            replaces_row_id INTEGER
-        );
-        CREATE INDEX IF NOT EXISTS idx_data_row_sheet ON data_row(sheet_id);
-        CREATE INDEX IF NOT EXISTS idx_data_row_current ON data_row(sheet_id, is_current);
         """
     )
     conn.commit()
@@ -53,7 +39,7 @@ def init_schema(conn: sqlite3.Connection) -> None:
 
 def ensure_wizard_draft_table(conn: sqlite3.Connection) -> None:
     """
-    Черновики мастера «Создать конкурс»: статус EDIT, JSON состояния, без вставки в sheet/data_row.
+    Черновики мастера «Создать конкурс»: статус EDIT, JSON состояния, без вставки в строки листов.
     """
     conn.executescript(
         """
@@ -72,46 +58,31 @@ def ensure_wizard_draft_table(conn: sqlite3.Connection) -> None:
     conn.commit()
 
 
-def migrate_data_row_versioning(conn: sqlite3.Connection) -> None:
+def migrate_legacy_data_row_removed(conn: sqlite3.Connection) -> None:
     """
-    Перенос старой схемы (без is_current / sort_key) на новую.
-    Сохраняет id строк для стабильности ссылок.
+    Совместимость: если осталась старая таблица data_row — удаляем и очищаем реестр.
+    Полная логика в sheet_storage.migrate_legacy_data_row.
     """
-    cur = conn.execute("PRAGMA table_info(data_row)")
+    from src import sheet_storage  # noqa: PLC0415 — избежать циклического импорта на уровне модуля
+
+    sheet_storage.migrate_legacy_data_row(conn)
+
+
+def migrate_sheet_add_headers_json(conn: sqlite3.Connection) -> None:
+    """Добавляет колонку headers_json в sheet для БД, созданных до её появления."""
+    cur = conn.execute("PRAGMA table_info(sheet)")
     names = [r[1] for r in cur.fetchall()]
-    if not names:
-        return
-    if "is_current" in names:
-        return
-    conn.executescript(
-        """
-        BEGIN;
-        CREATE TABLE data_row_new (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            sheet_id INTEGER NOT NULL REFERENCES sheet(id) ON DELETE CASCADE,
-            row_index INTEGER NOT NULL,
-            sort_key REAL NOT NULL,
-            cells_json TEXT NOT NULL,
-            consistency_ok INTEGER NOT NULL DEFAULT 1,
-            consistency_errors TEXT NOT NULL DEFAULT '[]',
-            updated_at TEXT,
-            is_current INTEGER NOT NULL DEFAULT 1,
-            replaces_row_id INTEGER
-        );
-        INSERT INTO data_row_new (id, sheet_id, row_index, sort_key, cells_json, consistency_ok, consistency_errors, updated_at, is_current, replaces_row_id)
-        SELECT id, sheet_id, row_index, row_index, cells_json, consistency_ok, consistency_errors, updated_at, 1, NULL FROM data_row;
-        DROP TABLE data_row;
-        ALTER TABLE data_row_new RENAME TO data_row;
-        CREATE INDEX IF NOT EXISTS idx_data_row_sheet ON data_row(sheet_id);
-        CREATE INDEX IF NOT EXISTS idx_data_row_current ON data_row(sheet_id, is_current);
-        COMMIT;
-        """
-    )
-    conn.commit()
+    if names and "headers_json" not in names:
+        conn.execute("ALTER TABLE sheet ADD COLUMN headers_json TEXT NOT NULL DEFAULT '[]'")
+        conn.commit()
 
 
 def open_connection(db_path: Path) -> sqlite3.Connection:
-    """Подключение с row_factory для удобства шаблонов."""
+    """Подключение с row_factory для удобства шаблонов; включает внешние ключи для SQLite."""
     conn = sqlite3.connect(str(db_path), check_same_thread=False)
     conn.row_factory = sqlite3.Row
+    try:
+        conn.execute("PRAGMA foreign_keys = ON")
+    except sqlite3.Error:
+        pass
     return conn

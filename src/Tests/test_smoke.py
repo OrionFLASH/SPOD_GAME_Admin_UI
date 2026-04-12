@@ -54,21 +54,30 @@ class SmokeTest(unittest.TestCase):
         from fastapi.testclient import TestClient  # noqa: PLC0415
 
         from src import app as appmod  # noqa: PLC0415
+        from src import sheet_storage  # noqa: PLC0415
 
         db_path = ROOT / "OUT" / "DB" / "tournament_admin.sqlite"
         if db_path.is_file():
             db_path.unlink()
         with TestClient(appmod.app) as client:
             conn = sqlite3.connect(str(db_path))
+            conn.row_factory = sqlite3.Row
+            tbl = sheet_storage.physical_table_name("CONTEST-DATA")
             rid = conn.execute(
-                "SELECT dr.id FROM data_row dr "
+                f"SELECT dr.id FROM {sheet_storage.quote_ident(tbl)} dr "
                 "JOIN sheet s ON s.id = dr.sheet_id "
                 "WHERE s.code = ? AND dr.is_current = 1 LIMIT 1",
                 ("CONTEST-DATA",),
             ).fetchone()[0]
-            cells = json.loads(
-                conn.execute("SELECT cells_json FROM data_row WHERE id = ?", (rid,)).fetchone()[0]
+            headers = json.loads(
+                conn.execute("SELECT headers_json FROM sheet WHERE code = ?", ("CONTEST-DATA",)).fetchone()[0]
             )
+            cells: dict[str, str] = {}
+            for h in headers:
+                cells[h] = conn.execute(
+                    f"SELECT {sheet_storage.quote_ident(h)} FROM {sheet_storage.quote_ident(tbl)} WHERE id = ?",
+                    (rid,),
+                ).fetchone()[0] or ""
             conn.close()
             r = client.get(f"/sheet/CONTEST-DATA/row/{rid}")
             self.assertEqual(r.status_code, 200)
@@ -96,10 +105,10 @@ class SmokeTest(unittest.TestCase):
 
             conn = sqlite3.connect(str(db_path))
             old_cur = conn.execute(
-                "SELECT is_current FROM data_row WHERE id = ?", (rid,)
+                f"SELECT is_current FROM {sheet_storage.quote_ident(tbl)} WHERE id = ?", (rid,)
             ).fetchone()[0]
             new_cur = conn.execute(
-                "SELECT is_current FROM data_row WHERE id = ?", (new_id,)
+                f"SELECT is_current FROM {sheet_storage.quote_ident(tbl)} WHERE id = ?", (new_id,)
             ).fetchone()[0]
             conn.close()
             self.assertEqual(old_cur, 0)

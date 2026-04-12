@@ -36,15 +36,15 @@
 - **Конфигурация:** `config.json` — пути, порт, список листов `sheets` (импорт и UI), справочник соответствий `sheet_bindings` (код листа ↔ название ↔ CSV), пояснение модели БД `database_model`, перечисления для редактора `field_enums` (по листам с массивом `rules`), подсказки высоты textarea `editor_textareas` (по листам с массивом `hints`), порог длинного текста `editor_long_text_threshold`, режим консистентности.
 - **Развёртка настроек редактора:** `src/editor_config.py` — превращает сгруппированные `field_enums` / `editor_textareas` / `editor_field_ui` в плоские списки для `row_editor.js`.
 - **Проверка конфига:** `src/config_validate.py` — при старте сравнивает `sheet_bindings` с `sheets` (код и имя файла) и пишет предупреждения в лог при расхождении.
-- **БД:** файл `OUT/DB/tournament_admin.sqlite`, таблицы `sheet` и `data_row` (см. модуль `src/db.py`). Схема DDL задаётся только в коде, не в JSON. У строки `data_row` есть поля версионирования: `is_current` (1 — актуальная версия для списка и экспорта), `replaces_row_id` (связь с предыдущей версией), `sort_key`. При сохранении правок **не перезаписывается** существующая строка: у прежней версии выставляется `is_current=0`, вставляется новая строка с тем же `row_index` и обновлённым `cells_json`. Повторное сохранение без изменений отклоняется (HTTP 400). Дополнительно таблица **`wizard_draft`** (`db.ensure_wizard_draft_table`) хранит незавершённые мастера создания конкурса (см. раздел **6b**); она **не** связана с `sheet`/`data_row` и не участвует в импорте CSV.
-- **Импорт:** `src/ingest.py` читает CSV построчно в словарь «заголовок → строка», сериализует в `cells_json`.
+- **БД:** файл `OUT/DB/tournament_admin.sqlite`; реестр листов **`sheet`** (в т.ч. `headers_json` — порядок колонок CSV); для каждого листа — отдельная таблица **`spod_sheet_<КОД>`** (`src/sheet_storage.py`, `src/db.py`): колонки как в CSV, JSON-колонки как TEXT с полным JSON, плюс денормализованные листья **`j__<имя_JSON_колонки>__<путь>`** для SQL-запросов по отдельным полям. Версионирование: `is_current`, `replaces_row_id`, `sort_key`, `row_index`, `sheet_id` — как раньше по смыслу, но на физической таблице листа. Повторное сохранение без изменений — HTTP 400. **`wizard_draft`** не участвует в импорте CSV. При обнаружении устаревшей таблицы **`data_row`** она удаляется, данные листов нужно снова загрузить импортом (автоматически при пустом `sheet`).
+- **Импорт:** `src/ingest.py` читает CSV, создаёт/пересоздаёт таблицу листа и вставляет строки с денормализацией JSON.
 - **JSON SPOD:** `src/spod_json.py` — нормализация тройных кавычек и попытка `json.loads` для отображения в редакторе.
 - **Проверки:** `src/consistency.py` — множества кодов конкурсов/наград, пары `(CONTEST_CODE, GROUP_CODE)`, ссылки REWARD-LINK, INDICATOR, TOURNAMENT-SCHEDULE.
 - **Связи на карточке строки:** `src/relations.py` — выборки связанных фрагментов по кодам; в шаблоне — ссылки на `/sheet/{code}/row/{id}` с подписью `preview`, якоря `rel-card-*` для прокрутки к карточке.
 - **Навигация по связям и возврат:** `src/static/trail_nav.js` — при переходе по связи в `sessionStorage` сохраняется цепочка страниц; со списка листа в строку добавляется `?from_list=1` (после загрузки параметр убирается из адреса), чтобы первым шагом «назад» был список этого листа; панель над формой: крошки, «Шаг назад», «К списку листа», «На главную»; сброс цепочки при открытии `/` и при ссылке «Панель турниров».
 - **Остановка сервера из UI:** `src/server_stop.py` + маршрут `POST /admin/stop` — после ответа браузеру планируется `SIGTERM` дочерним процессам текущего PID (если есть), затем процессу панели; на POSIX через ~2.5 с при необходимости повторно отправляется `SIGKILL` самому процессу. **Без пароля:** рассчитано на локальный `127.0.0.1`; не выставляйте панель в открытую сеть без прокси с авторизацией.
 - **Экспорт:** `src/export_csv.py` — восстановление CSV по заголовкам из первой строки данных листа.
-- **Мастер «Создать конкурс»:** кнопка на главной → `GET /wizard/new-contest` (`wizard_new_contest.html`, `wizard_contest.js`); подключается **`row_editor.js`** для общего UI JSON-колонок (`window.SpodJsonEditor`) и бейджей ограничений (`window.SpodFieldUiSignals`). Порядок шагов: CONTEST-DATA → … → предпросмотр; **`POST /wizard/new-contest/commit`** — вставка строк в `data_row`; ответ **303** с `Location` на карточку конкурса; на клиенте переход отложен (`setTimeout` + `location.assign`), чтобы не ловить ложный **AbortError** у `fetch`; ошибки разбираются из `response.text()` (JSON с `detail` или текст). **Коды:** `REWARD_CODE` в шаге REWARD-LINK — префикс `r_<CONTEST_CODE>` и поле суффикса (при нескольких связях суффикс обязателен и уникален); `TOURNAMENT_CODE` — префикс `t_<CONTEST_CODE>_` и **ровно четыре цифры**; проверки дублируются в `wizard_contest.validate_payload`. **Черновик:** `wizard_draft`, `PUT`/`GET`/`DELETE` draft API; при commit передаётся `draft_uuid` — черновик удаляется в транзакции. **Уход:** модалка и `beforeunload` при несохранённом относительно сервера состоянии.
+- **Мастер «Создать конкурс»:** кнопка на главной → `GET /wizard/new-contest` (`wizard_new_contest.html`, `wizard_contest.js`); подключается **`row_editor.js`** для общего UI JSON-колонок (`window.SpodJsonEditor`) и бейджей ограничений (`window.SpodFieldUiSignals`). Порядок шагов: CONTEST-DATA → … → предпросмотр; **`POST /wizard/new-contest/commit`** — вставка строк в таблицы листов `spod_sheet_*`; ответ **303** с `Location` на карточку конкурса; на клиенте переход отложен (`setTimeout` + `location.assign`), чтобы не ловить ложный **AbortError** у `fetch`; ошибки разбираются из `response.text()` (JSON с `detail` или текст). **Коды:** `REWARD_CODE` в шаге REWARD-LINK — префикс `r_<CONTEST_CODE>` и поле суффикса (при нескольких связях суффикс обязателен и уникален); `TOURNAMENT_CODE` — префикс `t_<CONTEST_CODE>_` и **ровно четыре цифры**; проверки дублируются в `wizard_contest.validate_payload`. **Черновик:** `wizard_draft`, `PUT`/`GET`/`DELETE` draft API; при commit передаётся `draft_uuid` — черновик удаляется в транзакции. **Уход:** модалка и `beforeunload` при несохранённом относительно сервера состоянии.
 - **Редактор строки (клиент):** `row_editor.js` — карточка строки из `#row-editor-bootstrap`; плоские поля и JSON-колонки с режимами **«По полям»** / **«Сырой JSON»**; пустой JSON и `{}` дополняются шаблоном из `field_enums` и обязательных `json_path` в `editor_field_ui` (`mergeDeclaredJsonTemplate`); `field_enums` — select и «Задать своё…»; `editor_textareas` — высота textarea и **поля дат** (в т.ч. с `json_path` внутри JSON-колонки); порог длинного текста; ограничения полей — бейджи **«Обязательно»** / **«Не пусто»**; экспорт **`SpodJsonEditor`** / **`SpodFieldUiSignals`** для мастера. **Защита ухода (`installLeaveGuard`):** перехват ссылок, модалка, `beforeunload`; флаг `leaveGuardSuspended`; `spod_edit_trail`; стили `.spod-leave-modal-overlay` в `app.css`.
 
 Точка входа: `main.py` или **`run.sh`** поднимают Uvicorn на `host`/`port` из конфига (по умолчанию `http://127.0.0.1:8765/`).
@@ -67,7 +67,8 @@
 | `src/wizard_contest.py` | Схема мастера для UI, проверка тела запроса, атомарная вставка строк |
 | `src/templates/wizard_new_contest.html` | Страница мастера «Создать конкурс» |
 | `src/static/wizard_contest.js` | Мастер: шаги, валидация, черновик (`PUT`), список/`?draft=`, защита ухода, `commit` с `draft_uuid` |
-| `src/db.py` | Схема и путь к БД (`init_schema`, `ensure_wizard_draft_table` для черновиков мастера) |
+| `src/db.py` | Схема и путь к БД (`init_schema`, миграции, `ensure_wizard_draft_table` для черновиков мастера) |
+| `src/sheet_storage.py` | Имена таблиц листов, DDL, денормализация JSON в колонки `j__*`, вставка/чтение версий строк |
 | `src/editor_config.py` | Развёртка `field_enums`, `editor_textareas` и `editor_field_ui` для bootstrap редактора |
 | `src/config_validate.py` | Согласованность `sheet_bindings` и `sheets` |
 | `src/ingest.py` | Импорт CSV |
@@ -98,7 +99,7 @@
 | `server.host`, `server.port` | Адрес HTTP |
 | `logging.level`, `logging.base_name` | Уровень и префикс имени файла лога |
 | `consistency.mode` | `warn` — сохранять и помечать ошибки; `strict` — откат при ошибках на сохраняемой строке; `soft` зарезервировано как синоним мягкого поведения |
-| `database_model` | Справка: где лежат данные (`sheet`, `data_row`), что DDL в коде, а не в JSON |
+| `database_model` | Справка: `sheet`, префикс таблиц `spod_sheet_*`, логика связей и ограничения FK между листами |
 | `sheet_bindings[]` | Для каждого листа: `code`, `title`, `csv_file` — должно совпадать с `sheets` (проверка при старте) |
 | `editor_long_text_threshold` | Минимальная длина строки (символы), после которой в JSON-редакторе показывается textarea вместо однострочного поля |
 | `field_enums[]` | Блоки по листу: `sheet_code` + массив `rules` (`column`, `options`, `allow_custom`, опционально `json_path`). Для **ограниченного набора** строк (справочники, коды перечислений). Свободные даты в формате ISO задаются через **`editor_textareas`** с типом даты, а не длинным списком дат в `options`. |
@@ -119,11 +120,12 @@
 | Модуль / функция | Назначение |
 |------------------|------------|
 | `main.main()` | Чтение порта из конфига, запуск Uvicorn |
-| `db.get_db_path`, `db.open_connection`, `db.init_schema` | Путь к файлу БД, подключение, создание таблиц |
+| `db.get_db_path`, `db.open_connection`, `db.init_schema` | Путь к файлу БД, подключение, создание таблиц реестра и миграции |
+| `sheet_storage.*` | Таблицы по листам, индексы по ключам связей, сборка строк для INSERT из ячеек CSV + `j__*` |
 | `ingest.import_all` | Полный импорт листов, опционально с очисткой |
 | `spod_json.try_parse_cell` | Разбор ячейки как JSON после нормализации SPOD |
 | `spod_json.format_json_for_edit` | Красивый JSON для textarea |
-| `consistency.run_all_checks` | Пересчёт `consistency_ok` / `consistency_errors` для всех строк; параметр `do_commit=False` для транзакции сохранения |
+| `consistency.run_all_checks` | Пересчёт `consistency_ok` / `consistency_errors` для всех актуальных строк во всех `spod_sheet_*`; параметр `do_commit=False` для транзакции сохранения |
 | `export_csv.export_sheet_to_csv` | Запись CSV в `OUT/export/` |
 | `relations.build_context_for_row` | Словарь блоков «Связи» для шаблона |
 | `relations._link_item`, `_preview_for_item` | Одна связанная строка: `sheet_code`, `row_id`, `cells`, короткая подпись `preview` для UI |
@@ -142,7 +144,7 @@
 | `editor_config.flatten_field_enums`, `flatten_editor_textareas`, `flatten_editor_field_ui` | Подготовка списков для клиента из сгруппированного JSON |
 | `config_validate.validate_sheet_bindings` | Предупреждения в лог при несовпадении `sheet_bindings` и `sheets` |
 | `app._json_for_script_tag` | Безопасная вставка JSON внутрь `<script type="application/json">` |
-| `app.row_save` | POST JSON тела «колонка → значение»; при отличии от текущих ячеек — новая строка `data_row`, редирект на её URL; при отсутствии изменений — 400 |
+| `app.row_save` | POST JSON тела «колонка → значение»; при отличии — новая версия в таблице листа (`is_current`, `replaces_row_id`), редирект на новый `id`; при отсутствии изменений — 400 |
 | `app.admin_reimport` | Повторный импорт из `IN/SPOD` |
 | `app.sheet_export_csv` | Скачивание CSV |
 
@@ -191,7 +193,7 @@ curl -X PUT "http://127.0.0.1:8765/wizard/new-contest/draft" \
 
 ### 6b.1. Назначение и порядок шагов
 
-Мастер ведёт пользователя по цепочке без записи в `data_row` до последнего шага. После подтверждения на экране предпросмотра сервер выполняет `wizard_contest.commit_wizard`: вставка CONTEST-DATA, GROUP, REWARD-LINK, REWARD, INDICATOR, TOURNAMENT-SCHEDULE, затем `consistency.run_all_checks`; в режиме `strict` при ошибке на одной из вставленных строк выполняется откат транзакции.
+Мастер ведёт пользователя по цепочке без записи в таблицы листов до последнего шага. После подтверждения на экране предпросмотра сервер выполняет `wizard_contest.commit_wizard`: вставка строк в `spod_sheet_*` (CONTEST-DATA, GROUP, …), затем `consistency.run_all_checks`; в режиме `strict` при ошибке на одной из вставленных строк выполняется откат транзакции.
 
 | Шаг (индекс) | Содержание |
 |----------------|------------|
@@ -259,7 +261,7 @@ curl -X PUT "http://127.0.0.1:8765/wizard/new-contest/draft" \
 
 ### 6b.6. Защита ухода со страницы мастера
 
-Аналогично идее `installLeaveGuard` у карточки строки, но привязана к **черновику в `wizard_draft`**, а не к сохранению `data_row`:
+Аналогично идее `installLeaveGuard` у карточки строки, но привязана к **черновику в `wizard_draft`**, а не к сохранению строк листа:
 
 | Ситуация | Поведение |
 |----------|-----------|
@@ -345,6 +347,8 @@ python main.py
 
 Откройте в браузере адрес из консоли (по умолчанию `http://127.0.0.1:8765/`).
 
+**Старт приложения и БД:** при поднятии FastAPI выполняются `init_schema`, при необходимости добавление `sheet.headers_json`, миграция удаления устаревшей `data_row`, создание/синхронизация таблиц `spod_sheet_*` с текущими CSV (`sheet_storage.rebuild_all_sheet_tables_from_config`). Если таблица `sheet` пуста — автоматический полный импорт из `IN/SPOD` и пересчёт консистентности.
+
 Проверки: `python -m unittest discover -s src/Tests -p "test_*.py"`
 
 **Остановка сервера:** кнопка **«Остановить»** в шапке (POST `/admin/stop`) или в терминале **Ctrl+C**; либо `lsof -i :8765` и `kill <PID>`.
@@ -371,6 +375,7 @@ python main.py
 | 0.2.3 | Мастер «Создать конкурс» (`/wizard/new-contest`), поля `required` / `allows_empty` в `editor_field_ui` и в генераторе по CSV; **бейджи** «Обязательно» / «Не пусто» у подписей полей и валидация шагов мастера; `wizard_contest.py`, `wizard_contest.js`, кнопка на главной. |
 | 0.2.4 | Мастер: таблица `wizard_draft` (EDIT), автосохранение при «Далее»/«Назад» и кнопка «Временное сохранение», API черновиков, `?draft=uuid`, защита ухода с модалкой; `draft_uuid` в commit; общий `spod_date_picker.js`; раздел README **6b** и расширенные таблицы маршрутов и модулей. |
 | 0.2.5 | Мастер подключает `row_editor.js` (`SpodJsonEditor`, `SpodFieldUiSignals`); префиксы `REWARD_CODE` / формат `TOURNAMENT_CODE` и проверки в `validate_payload`; отложенный переход после успешного commit; разбор ошибок из текста ответа; даты в конфиге через `editor_textareas` с `json_path` (не списки дат в `field_enums`); ответы commit **400**/**500** с JSON `detail`. |
+| 0.2.6 | Хранение данных: вместо одной `data_row`/`cells_json` — отдельная таблица SQLite на каждый лист с колонками CSV, TEXT с полным JSON по `json_columns` и денормализацией в `j__*`; реестр `sheet.headers_json`; миграция удаления `data_row`; индексы по ключам связей; обновлены `ingest`, `app`, `consistency`, `relations`, `export_csv`, мастер. |
 
 ---
 

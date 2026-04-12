@@ -10,6 +10,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List
 
+from src import sheet_storage
+
 
 def _read_csv_rows(path: Path, delimiter: str = ";") -> tuple[list[str], list[dict[str, str]]]:
     """Читает UTF-8 CSV; все значения — строки."""
@@ -39,8 +41,8 @@ def import_all(
     clear: bool = True,
 ) -> Dict[str, int]:
     """
-    Импортирует все листы из config.
-    При clear=True очищает sheet/data_row перед загрузкой.
+    Импортирует все листы из config в физические таблицы spod_sheet_*.
+    При clear=True очищает sheet и все таблицы листов перед загрузкой.
     Возвращает счётчики по коду листа.
     """
     now = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
@@ -48,13 +50,13 @@ def import_all(
     counts: Dict[str, int] = {}
 
     if clear:
-        conn.execute("DELETE FROM data_row")
+        sheet_storage.drop_all_physical_tables(conn)
         conn.execute("DELETE FROM sheet")
         conn.commit()
 
     cur = conn.cursor()
     for spec in cfg["sheets"]:
-        code = spec["code"]
+        code = str(spec["code"])
         fn = spec["file"]
         path = in_dir / fn
         if not path.is_file():
@@ -64,19 +66,29 @@ def import_all(
         if not headers:
             counts[code] = 0
             continue
+        json_cols = list(spec.get("json_columns") or [])
+        flat_keys = sheet_storage.collect_flat_keys_from_rows(data, json_cols)
+        desired = sheet_storage.desired_physical_columns(headers, json_cols, flat_keys)
+        sheet_storage.drop_physical_table(conn, code)
+        sheet_storage.create_physical_table(conn, code, desired)
+
         cur.execute(
-            "INSERT INTO sheet (code, title, file_name, imported_at) VALUES (?,?,?,?)",
-            (code, spec.get("title") or code, fn, now),
+            "INSERT INTO sheet (code, title, file_name, imported_at, headers_json) VALUES (?,?,?,?,?)",
+            (code, spec.get("title") or code, fn, now, json.dumps(headers, ensure_ascii=False)),
         )
         sid = int(cur.execute("SELECT last_insert_rowid()").fetchone()[0])
         for idx, row_dict in enumerate(data):
-            cells = json.dumps(row_dict, ensure_ascii=False)
-            cur.execute(
-                """
-                INSERT INTO data_row (sheet_id, row_index, sort_key, cells_json, consistency_ok, consistency_errors, updated_at, is_current, replaces_row_id)
-                VALUES (?,?,?,?,?,?,?,?,?)
-                """,
-                (sid, idx, float(idx), cells, 1, "[]", now, 1, None),
+            sheet_storage.insert_data_row(
+                conn,
+                root,
+                cfg,
+                code,
+                sid,
+                idx,
+                float(idx),
+                row_dict,
+                now,
+                replaces_row_id=None,
             )
         counts[code] = len(data)
     conn.commit()

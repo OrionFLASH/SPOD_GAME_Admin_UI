@@ -7,24 +7,27 @@ from __future__ import annotations
 
 import json
 import sqlite3
-from collections import defaultdict
-from typing import Any, DefaultDict, Dict, List, Set, Tuple
+from typing import Any, Dict, List, Set, Tuple
+
+from src import sheet_storage
 
 
 def _load_sheet_cells(conn: sqlite3.Connection, code: str) -> List[Dict[str, Any]]:
+    """Все актуальные строки листа с разобранными ячейками (как раньше из cells_json)."""
+    t = sheet_storage.physical_table_name(code)
+    headers = sheet_storage.headers_for_sheet(conn, code)
+    if not headers:
+        return []
     cur = conn.execute(
+        f"""
+        SELECT * FROM {sheet_storage.quote_ident(t)}
+        WHERE is_current = 1
+        ORDER BY sort_key, row_index, id
         """
-        SELECT dr.id, dr.row_index, dr.cells_json
-        FROM data_row dr
-        JOIN sheet s ON s.id = dr.sheet_id
-        WHERE s.code = ? AND dr.is_current = 1
-        ORDER BY dr.sort_key, dr.row_index, dr.id
-        """,
-        (code,),
     )
     out: List[Dict[str, Any]] = []
     for r in cur.fetchall():
-        cells = json.loads(r["cells_json"])
+        cells = sheet_storage.row_to_cells(r, headers)
         out.append({"id": int(r["id"]), "row_index": int(r["row_index"]), "cells": cells})
     return out
 
@@ -60,13 +63,6 @@ def run_all_checks(conn: sqlite3.Connection, *, do_commit: bool = True) -> None:
         if c and g:
             group_keys.add((c, g))
 
-    indicators_by_contest: DefaultDict[str, List[str]] = defaultdict(list)
-    for row in by_code.get("INDICATOR", []):
-        c = (row["cells"].get("CONTEST_CODE") or "").strip()
-        ic = (row["cells"].get("INDICATOR_CODE") or "").strip()
-        if c:
-            indicators_by_contest[c].append(ic)
-
     def errs_for_row(sheet_code: str, cells: Dict[str, str]) -> List[str]:
         e: List[str] = []
         if sheet_code == "REWARD-LINK":
@@ -98,13 +94,6 @@ def run_all_checks(conn: sqlite3.Connection, *, do_commit: bool = True) -> None:
         for row in rows:
             errs = errs_for_row(sheet_code, row["cells"])
             ok = 1 if not errs else 0
-            cur2.execute(
-                """
-                UPDATE data_row
-                SET consistency_ok = ?, consistency_errors = ?
-                WHERE id = ?
-                """,
-                (ok, json.dumps(errs, ensure_ascii=False), row["id"]),
-            )
+            sheet_storage.update_consistency_for_row(conn, sheet_code, row["id"], ok, json.dumps(errs, ensure_ascii=False))
     if do_commit:
         conn.commit()
