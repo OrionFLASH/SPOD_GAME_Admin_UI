@@ -1,10 +1,14 @@
-# SPOD Tournament Admin
+# SPOD Game Admin UI (панель турниров и конкурсов)
 
 Локальная панель администратора для просмотра и правки выгрузок турниров SPOD (CSV с разделителем `;`), с хранением в SQLite и упрощёнными проверками связей между листами. Запуск одной командой `python main.py` (встроенный Uvicorn), без Docker и отдельных сервисов.
 
-**Расположение в репозитории:** каталог `SPOD_PROM/spod_tournament_admin/` — **часть того же Git-репозитория**, что и основной проект SPOD. Код основной программы из этого подкаталога не импортируется: у панели свой `requirements.txt`, своё виртуальное окружение и свои пути (`IN/`, `OUT/`, `log/` относительно папки панели).
+**Репозиторий:** [SPOD_GAME_Admin_UI](https://github.com/OrionFLASH/SPOD_GAME_Admin_UI) — код панели в **корне** этого каталога (ранее каталог `spod_tournament_admin/` в репозитории SPOD_PROM). История коммитов, относящаяся к панели, перенесена из старого репозитория командой `git subtree split -P spod_tournament_admin` (сообщения и содержимое коммитов сохранены).
 
-**Общий `.gitignore`** лежит в корне `SPOD_PROM`; для входных CSV панели в репозитории добавлено исключение `!spod_tournament_admin/IN/**/*.csv`. Сгенерированные данные (`OUT/`, логи, `.venv`) по-прежнему не коммитятся.
+**Локальная разработка:** откройте в Cursor корень этого репозитория (`SPOD_GAME_Admin_UI`), чтобы подсказки и поиск кода относились только к панели. История чатов Cursor, созданных в workspace `SPOD_PROM`, в Git не переносится — при необходимости откройте старый проект для справки.
+
+**Пути:** `IN/`, `OUT/`, `log/` — относительно корня этого репозитория. Свой `requirements.txt` и виртуальное окружение `.venv/` в корне.
+
+**`.gitignore`:** в репозитории не коммитятся `OUT/`, логи, `.venv/`; входные CSV в `IN/**/*.csv` **разрешены** к коммиту (см. исключение в `.gitignore`).
 
 ---
 
@@ -167,10 +171,9 @@ curl -X POST "http://127.0.0.1:8765/sheet/CONTEST-DATA/row/1/save" \
 
 ## 7. Запуск
 
-Из корня репозитория SPOD_PROM:
+Из корня **этого** репозитория:
 
 ```bash
-cd spod_tournament_admin
 python3 -m venv .venv
 source .venv/bin/activate   # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
@@ -178,12 +181,12 @@ python main.py
 # или: ./run.sh
 ```
 
-**Важно:** зависимости панели (`uvicorn`, `fastapi`, …) ставятся **только** из `spod_tournament_admin/requirements.txt` в **это** виртуальное окружение (`.venv` внутри папки панели). Запуск через интерпретатор из `SPOD_PROM/venv` без `pip install -r requirements.txt` в этой папке даст ошибку `ModuleNotFoundError: uvicorn`.
+**Важно:** зависимости (`uvicorn`, `fastapi`, …) ставятся **только** из `requirements.txt` в **это** виртуальное окружение (`.venv` в корне репозитория). Запуск через «чужой» Python без `pip install -r requirements.txt` даст ошибку `ModuleNotFoundError: uvicorn`.
 
-**Если в IDE выбран Python из корня репозитория** (`SPOD_PROM/venv/bin/python`), не запускайте `main.py` этим интерпретатором. Варианты:
+**Если в IDE выбран Python не из `.venv` этой панели** (например, из другого проекта), не запускайте `main.py` этим интерпретатором. Варианты:
 
-- в терминале после `cd spod_tournament_admin`: **`./run.sh`** — всегда вызывает `.venv/bin/python main.py`;
-- либо в Cursor: **Python: Select Interpreter** → указать `spod_tournament_admin/.venv/bin/python`, затем **Run** на `main.py`.
+- в терминале из корня репозитория: **`./run.sh`** — вызывает `.venv/bin/python main.py`;
+- либо в Cursor: **Python: Select Interpreter** → указать `.venv/bin/python`, затем **Run** на `main.py`.
 
 Откройте в браузере адрес из консоли (по умолчанию `http://127.0.0.1:8765/`).
 
@@ -207,6 +210,7 @@ python main.py
 | 0.1.7 | Блок «Связи»: у каждой строки — переход к редактированию (`sheet_code`, `row_id` в `relations.py`); при нескольких связях — отдельная кнопка на каждую с подписью `preview`. Цепочка возврата: `trail_nav.js` + `?from_list=1` со списка листа; крошки, «Шаг назад», «К списку листа», «На главная». |
 | 0.1.8 | То же в боковом меню «Разделы»: группа «Связи» — код целевого листа (якорь к карточке), под каждой группой подпункты `preview` с классом `spod-rel-nav` для перехода в редактирование нужной строки. |
 | 0.1.9 | Кнопка «Остановить» в шапке (`base.html`) на всех страницах: POST `/admin/stop`, модуль `server_stop.py` — завершение дочерних процессов (POSIX) и процесса панели. |
+| 0.2.0 | Репозиторий вынесен из `SPOD_PROM`: корень [SPOD_GAME_Admin_UI](https://github.com/OrionFLASH/SPOD_GAME_Admin_UI), история git сохранена (`subtree split`), обновлены README и `.gitignore`. |
 
 ---
 
