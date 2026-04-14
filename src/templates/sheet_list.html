@@ -27,7 +27,7 @@
   {% elif sheet_code == "TOURNAMENT-SCHEDULE" %}
   <p class="muted">Код листа: <strong>{{ sheet_code }}</strong> · «Период» — <code>PERIOD_TYPE</code>; название конкурса — <code>FULL_NAME</code> из CONTEST-DATA; «Сезон» — <code>seasonCode</code> из JSON <code>TARGET_TYPE</code>. В «Связях»: код конкурса и награды (REWARD_CODE + GROUP_CODE) по REWARD-LINK. Фильтр по сезону — множественный выбор.</p>
   {% elif sheet_code == "CONTEST-DATA" %}
-  <p class="muted">Код листа: <strong>{{ sheet_code }}</strong> · колонка «Код конкурса» — <code>CONTEST_CODE</code> (в выгрузке максимум 17 символов); «Наименование конкурса» — <code>FULL_NAME</code>. «Связи» — турниры и награды по коду конкурса; колонка вынесена вправо (после консистентности).</p>
+  <p class="muted">Код листа: <strong>{{ sheet_code }}</strong> · колонка «Код конкурса» — <code>CONTEST_CODE</code> (в выгрузке максимум 17 символов); «Наименование конкурса» — <code>FULL_NAME</code>. «Связи» — турниры и награды по коду конкурса; «Консистентность» — в конце строки перед кнопкой «Просмотр».</p>
   {% else %}
   <p class="muted">Код листа: <strong>{{ sheet_code }}</strong> · в таблице: ключ, название из строки или связей, подтянутые турниры/конкурсы где применимо.</p>
   {% endif %}
@@ -130,14 +130,13 @@
           {% elif sheet_code == "CONTEST-DATA" %}
           <th class="col-contest-code">Код конкурса</th>
           <th class="col-contest-name">Наименование конкурса</th>
+          <th class="col-contest-relations">Связи</th>
+          <th class="col-flag">Консистентность</th>
           {% else %}
           <th>Ключ</th>
           <th>Название / описание</th>
           {% endif %}
-          {% if sheet_code == "CONTEST-DATA" %}
-          <th class="col-flag">Консистентность</th>
-          <th class="col-contest-relations">Связи</th>
-          {% elif sheet_code != "REWARD-LINK" %}
+          {% if sheet_code != "CONTEST-DATA" and sheet_code != "REWARD-LINK" %}
           <th>Связи</th>
           {% endif %}
           {% if sheet_code != "CONTEST-DATA" %}
@@ -174,11 +173,7 @@
           {% elif sheet_code == "CONTEST-DATA" %}
           <td class="cell-mono col-contest-code">{{ r.preview }}</td>
           <td class="cell-wrap col-contest-name">{{ r.title_line }}</td>
-          {% else %}
-          <td class="cell-mono">{{ r.preview }}</td>
-          <td class="cell-wrap">{{ r.title_line }}</td>
-          {% endif %}
-          {% if sheet_code == "CONTEST-DATA" %}
+          <td class="cell-wrap cell-muted cell-relations-pre col-contest-relations">{{ r.relations_line }}</td>
           <td class="col-flag">
             {% if r.ok %}
             <span class="badge badge-ok">OK</span>
@@ -186,8 +181,11 @@
             <span class="badge badge-bad">Проблемы</span>
             {% endif %}
           </td>
-          <td class="cell-wrap cell-muted cell-relations-pre col-contest-relations">{{ r.relations_line }}</td>
-          {% elif sheet_code != "REWARD-LINK" %}
+          {% else %}
+          <td class="cell-mono">{{ r.preview }}</td>
+          <td class="cell-wrap">{{ r.title_line }}</td>
+          {% endif %}
+          {% if sheet_code != "CONTEST-DATA" and sheet_code != "REWARD-LINK" %}
           <td class="cell-wrap cell-muted cell-relations-pre">{{ r.relations_line }}</td>
           {% endif %}
           {% if sheet_code != "CONTEST-DATA" %}

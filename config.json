@@ -1706,7 +1706,7 @@
         },
         {
           "column": "BUSINESS_STATUS",
-          "label": "BUSINESS_STATUS",
+          "label": "Статус конкурса",
           "description": "BUSINESS_STATUS",
           "show_description": false,
           "required": true,
@@ -1850,7 +1850,7 @@
         },
         {
           "column": "BUSINESS_BLOCK",
-          "label": "BUSINESS_BLOCK",
+          "label": "Бизнес-блок",
           "description": "BUSINESS_BLOCK",
           "show_description": false,
           "required": true,
@@ -1912,8 +1912,8 @@
               "json_path": [
                 "capacity"
               ],
-              "label": "capacity",
-              "description": "capacity",
+              "label": "Округление",
+              "description": "Округление значения в карточке турнира",
               "show_description": false,
               "required": false,
               "allows_empty": true
@@ -1998,8 +1998,8 @@
               "json_path": [
                 "gosbHidden"
               ],
-              "label": "gosbHidden",
-              "description": "gosbHidden",
+              "label": "Скрыть в ГОСБ",
+              "description": "Видят все ГОСБ кроме указанных",
               "show_description": false,
               "required": false,
               "allows_empty": true
@@ -2008,8 +2008,8 @@
               "json_path": [
                 "gosbVisible"
               ],
-              "label": "gosbVisible",
-              "description": "gosbVisible",
+              "label": "Показать в ГОСБ",
+              "description": "Видят только указанные ГОСБ",
               "show_description": false,
               "required": false,
               "allows_empty": true
@@ -2050,8 +2050,8 @@
               "json_path": [
                 "minNumber"
               ],
-              "label": "minNumber",
-              "description": "minNumber",
+              "label": "Минимум участников",
+              "description": "Минимальное количество участников для формирования победителей",
               "show_description": false,
               "required": false,
               "allows_empty": true
@@ -2060,9 +2060,9 @@
               "json_path": [
                 "momentRewarding"
               ],
-              "label": "momentRewarding",
-              "description": "momentRewarding",
-              "show_description": false,
+              "label": "Момент награждения",
+              "description": "DURIN - во время турнира; AFTER - по окончании турнира",
+              "show_description": true,
               "required": false,
               "allows_empty": true
             },
@@ -2070,8 +2070,8 @@
               "json_path": [
                 "persomanNumberHidden"
               ],
-              "label": "persomanNumberHidden",
-              "description": "persomanNumberHidden",
+              "label": "Скрыть от участников",
+              "description": "Видят все участники кроме указанных табельных номеров",
               "show_description": false,
               "required": false,
               "allows_empty": true
@@ -2080,8 +2080,8 @@
               "json_path": [
                 "persomanNumberVisible"
               ],
-              "label": "persomanNumberVisible",
-              "description": "persomanNumberVisible",
+              "label": "Показать участникам",
+              "description": "Видят только указанные табельные номера",
               "show_description": false,
               "required": false,
               "allows_empty": true

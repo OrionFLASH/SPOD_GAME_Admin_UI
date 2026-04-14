@@ -215,10 +215,17 @@ table.data td {
   white-space: nowrap;
 }
 
-/* Список листа CONTEST-DATA («Конкурсы»): фиксированная ширина колонки кода по максимуму CONTEST_CODE в выгрузке IN/SPOD (17 символов) — 19ch; наименование широкое; «Связи» после «Консистентность». */
+/* Список листа CONTEST-DATA («Конкурсы»): код фиксированной ширины (до 17 символов в выгрузке — 19ch); наименование; «Связи» с переносом длинного текста; «Консистентность» в конце строки (перед «Просмотр»). */
 .data-list-contests {
   table-layout: fixed;
   width: 100%;
+}
+
+/* В fixed-таблице без min-width: 0 ячейки не сжимаются — длинный текст наезжает на соседние колонки. */
+.data-list-contests th,
+.data-list-contests td {
+  min-width: 0;
+  vertical-align: top;
 }
 
 .data-list-contests .col-contest-code {
@@ -226,7 +233,8 @@ table.data td {
   min-width: 19ch;
   max-width: 19ch;
   white-space: nowrap;
-  overflow: visible;
+  overflow: hidden;
+  text-overflow: ellipsis;
   word-break: normal;
 }
 
@@ -235,17 +243,29 @@ table.data td {
 }
 
 .data-list-contests .col-contest-name {
-  width: 58%;
-  min-width: 22rem;
+  width: 32%;
+  min-width: 10rem;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .data-list-contests .col-contest-relations {
-  width: 18%;
-  min-width: 10rem;
+  width: auto;
+  min-width: 12rem;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+/* Для конкурсов связи без pre-line — перенос по ширине колонки (длинные строки без пробелов тоже ломаем). */
+.data-list-contests td.col-contest-relations.cell-relations-pre {
+  white-space: normal;
 }
 
 .data-list-contests .col-flag {
   width: 8.5rem;
+  min-width: 8.5rem;
+  max-width: 9rem;
+  white-space: nowrap;
 }
 
 /* На широком списке не ограничиваем текстовые и «связи» колонки узкими rem — таблица заполняет ширину */

@@ -66,9 +66,29 @@ def _group_link_preview(cells: Dict[str, str]) -> str:
     return text[:120] if len(text) > 120 else text
 
 
+def _reward_link_preview(cells: Dict[str, str]) -> str:
+    """
+    Подпись ссылки на строку REWARD-LINK в боковом меню «Связи»: «GROUP_CODE : REWARD_CODE».
+    Общий _preview_for_item не подходит: там раньше по порядку попадает CONTEST_CODE и в подписи
+    оказывается только код конкурса вместо пары группа — награда.
+    """
+    gc = (cells.get("GROUP_CODE") or "").strip()
+    rc = (cells.get("REWARD_CODE") or "").strip()
+    label = f"{gc} : {rc}" if (gc or rc) else ""
+    if not label:
+        label = "—"
+    text = ": " + label
+    return text[:120] if len(text) > 120 else text
+
+
 def _link_item(sheet_code: str, row_id: int, cells: Dict[str, str]) -> Dict[str, Any]:
     """Одна связанная строка: куда вести ссылку на редактирование и что показать в JSON."""
-    prev = _group_link_preview(cells) if sheet_code == "GROUP" else _preview_for_item(cells)
+    if sheet_code == "GROUP":
+        prev = _group_link_preview(cells)
+    elif sheet_code == "REWARD-LINK":
+        prev = _reward_link_preview(cells)
+    else:
+        prev = _preview_for_item(cells)
     return {
         "sheet_code": sheet_code,
         "row_id": row_id,
