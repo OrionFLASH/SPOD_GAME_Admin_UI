@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{# Миниатюрные кнопки «все / снять» над мультиселектом: зелёная галочка, красный крест. #}
+{# Кнопки «все / снять» слева от блока чекбоксов; чекбоксы в flex-wrap — в ряд до края окна, затем перенос. #}
 {% macro sheet_list_filter_icon_toolbar(filter_key) %}
         <div class="sheet-list-filter-iconbar" role="group" aria-label="Быстрый выбор фильтра">
           <button type="button" class="sheet-list-filter-iconbtn sheet-list-filter-iconbtn--all" data-sheet-list-select="{{ filter_key }}" title="Отметить все" aria-label="Отметить все">
@@ -14,6 +14,24 @@
           </button>
         </div>
 {% endmacro %}
+{# Множественный фильтр: подпись, строка [иконки | чипы checkboxes], подсказка. Имя поля в query — param_name (несколько значений). #}
+{% macro sheet_list_filter_checkbox_row(label, param_name, options, selected_list, filter_key, aria_label, hint) %}
+      <div class="sheet-list-filter-block">
+        <span class="reward-filter-caption">{{ label }}</span>
+        <div class="sheet-list-filter-row">
+          {{ sheet_list_filter_icon_toolbar(filter_key) }}
+          <div class="sheet-list-filter-chips-wrap" data-sheet-list-filter-target="{{ filter_key }}" role="group" aria-label="{{ aria_label }}">
+            {% for o in options %}
+            <label class="sheet-list-filter-chip">
+              <input type="checkbox" name="{{ param_name }}" value="{{ o.value }}" {% if o.value in selected_list %}checked{% endif %} />
+              <span class="sheet-list-filter-chip-text">{{ o.label }}</span>
+            </label>
+            {% endfor %}
+          </div>
+        </div>
+        <p class="muted sheet-list-filter-hint">{{ hint }}</p>
+      </div>
+{% endmacro %}
 {% block title %}{{ sheet_title }} — строки{% endblock %}
 {% block content %}
 <section class="panel">
@@ -27,47 +45,48 @@
   {% elif sheet_code == "TOURNAMENT-SCHEDULE" %}
   <p class="muted">Код листа: <strong>{{ sheet_code }}</strong> · «Период» — <code>PERIOD_TYPE</code>; название конкурса — <code>FULL_NAME</code> из CONTEST-DATA; «Сезон» — <code>seasonCode</code> из JSON <code>TARGET_TYPE</code>. В «Связях»: код конкурса и награды (REWARD_CODE + GROUP_CODE) по REWARD-LINK. Фильтр по сезону — множественный выбор.</p>
   {% elif sheet_code == "CONTEST-DATA" %}
-  <p class="muted">Код листа: <strong>{{ sheet_code }}</strong> · колонка «Код конкурса» — <code>CONTEST_CODE</code> (в выгрузке максимум 17 символов); «Наименование конкурса» — <code>FULL_NAME</code>. «Связи» — турниры и награды по коду конкурса; «Консистентность» — в конце строки перед кнопкой «Просмотр».</p>
+  <p class="muted">Код листа: <strong>{{ sheet_code }}</strong> · «Код конкурса» — <code>CONTEST_CODE</code>; «Наименование» — <code>FULL_NAME</code>; «Тип конкурса» — <code>CONTEST_TYPE</code>. Фильтр по типу — множественный выбор (как на листах REWARD / расписание). Турниры и награды по конкурсу доступны через поиск по строке. «Консистентность» — перед «Просмотр».</p>
   {% elif sheet_code == "GROUP" %}
   <p class="muted">Код листа: <strong>{{ sheet_code }}</strong> · одна строка на конкурс: <code>CONTEST_CODE</code>; «Название конкурса» — <code>FULL_NAME</code> из CONTEST-DATA. «Связи» — все уровни GROUP (<code>GROUP_CODE : GROUP_VALUE</code>) для этого конкурса. «Просмотр» — карточка со всеми уровнями.</p>
   {% else %}
   <p class="muted">Код листа: <strong>{{ sheet_code }}</strong> · в таблице: ключ, название из строки или связей, подтянутые турниры/конкурсы где применимо.</p>
   {% endif %}
-  {% if sheet_code == "REWARD" or sheet_code == "REWARD-LINK" or sheet_code == "TOURNAMENT-SCHEDULE" %}
+  {% if sheet_code == "REWARD" or sheet_code == "REWARD-LINK" or sheet_code == "TOURNAMENT-SCHEDULE" or sheet_code == "CONTEST-DATA" %}
   {# Класс search не используем: у него flex-row без column, из‑за этого поиск оказывался справа от фильтра (в т.ч. расписание). #}
   <form class="sheet-list-form-reward" method="get" action="/sheet/{{ sheet_code }}">
     <div class="sheet-list-filters">
+      {% if sheet_code == "CONTEST-DATA" %}
+      {{ sheet_list_filter_checkbox_row(
+        "Тип конкурса (CONTEST_TYPE)",
+        "contest_type",
+        contest_type_options,
+        contest_type_selected_list,
+        "contest_type",
+        "Фильтр по типу конкурса",
+        "Отметьте один или несколько типов. Без отметок показываются все конкурсы."
+      ) }}
+      {% endif %}
       {% if sheet_code == "REWARD" or sheet_code == "REWARD-LINK" %}
-      {% set rtw = reward_type_options|length %}
-      {% set rtw_size = [[rtw, 12]|min, 1]|max %}
-      <div class="sheet-list-filter-block">
-        <span class="reward-filter-caption">REWARD_TYPE</span>
-        <div class="sheet-list-filter-select-wrap">
-          {{ sheet_list_filter_icon_toolbar("reward_type") }}
-        <select id="sheet-list-filter-reward-type" name="reward_type" multiple class="sheet-list-filter-multi" size="{{ rtw_size }}" aria-label="Фильтр по типу награды (несколько значений)" onchange="this.form.submit()">
-          {% for o in reward_type_options %}
-          <option value="{{ o.value }}" {% if o.value in reward_type_selected_list %}selected{% endif %}>{{ o.label }}</option>
-          {% endfor %}
-        </select>
-        </div>
-        <p class="muted sheet-list-filter-hint">Несколько типов: Ctrl (Windows) или ⌘ (macOS) + клик. Без выбранных — все типы.</p>
-      </div>
+      {{ sheet_list_filter_checkbox_row(
+        "REWARD_TYPE",
+        "reward_type",
+        reward_type_options,
+        reward_type_selected_list,
+        "reward_type",
+        "Фильтр по типу награды",
+        "Отметьте один или несколько типов. Без отметок — все типы наград."
+      ) }}
       {% endif %}
       {% if sheet_code == "TOURNAMENT-SCHEDULE" %}
-      {% set sn = season_options|length %}
-      {% set sn_size = [[sn, 12]|min, 1]|max %}
-      <div class="sheet-list-filter-block">
-        <span class="reward-filter-caption">Сезон (seasonCode)</span>
-        <div class="sheet-list-filter-select-wrap">
-          {{ sheet_list_filter_icon_toolbar("season") }}
-        <select id="sheet-list-filter-season" name="season" multiple class="sheet-list-filter-multi" size="{{ sn_size }}" aria-label="Фильтр по сезону из TARGET_TYPE" onchange="this.form.submit()">
-          {% for o in season_options %}
-          <option value="{{ o.value }}" {% if o.value in season_selected_list %}selected{% endif %}>{{ o.label }}</option>
-          {% endfor %}
-        </select>
-        </div>
-        <p class="muted sheet-list-filter-hint">Несколько сезонов: Ctrl / ⌘ + клик. Без выбранных — все сезоны.</p>
-      </div>
+      {{ sheet_list_filter_checkbox_row(
+        "Сезон (seasonCode)",
+        "season",
+        season_options,
+        season_selected_list,
+        "season",
+        "Фильтр по сезону из TARGET_TYPE",
+        "Отметьте один или несколько сезонов. Без отметок — все сезоны."
+      ) }}
       {% endif %}
     </div>
     <div class="search-row-inline sheet-list-search-full">
@@ -77,22 +96,36 @@
   </form>
   <script>
   (function () {
+    function sheetListFilterBoxByKey(key) {
+      return document.querySelector('[data-sheet-list-filter-target="' + key + '"]');
+    }
     document.querySelectorAll("[data-sheet-list-select]").forEach(function (btn) {
       btn.addEventListener("click", function () {
         var key = btn.getAttribute("data-sheet-list-select");
-        var sel = key === "season" ? document.getElementById("sheet-list-filter-season") : document.getElementById("sheet-list-filter-reward-type");
-        if (!sel) return;
-        Array.prototype.forEach.call(sel.options, function (opt) { opt.selected = true; });
-        sel.form.submit();
+        var box = sheetListFilterBoxByKey(key);
+        if (!box) return;
+        var form = box.closest("form");
+        if (!form) return;
+        box.querySelectorAll('input[type="checkbox"]').forEach(function (cb) { cb.checked = true; });
+        form.submit();
       });
     });
     document.querySelectorAll("[data-sheet-list-clear]").forEach(function (btn) {
       btn.addEventListener("click", function () {
         var key = btn.getAttribute("data-sheet-list-clear");
-        var sel = key === "season" ? document.getElementById("sheet-list-filter-season") : document.getElementById("sheet-list-filter-reward-type");
-        if (!sel) return;
-        Array.prototype.forEach.call(sel.options, function (opt) { opt.selected = false; });
-        sel.form.submit();
+        var box = sheetListFilterBoxByKey(key);
+        if (!box) return;
+        var form = box.closest("form");
+        if (!form) return;
+        box.querySelectorAll('input[type="checkbox"]').forEach(function (cb) { cb.checked = false; });
+        form.submit();
+      });
+    });
+    document.querySelectorAll("form.sheet-list-form-reward").forEach(function (form) {
+      form.addEventListener("change", function (e) {
+        var t = e.target;
+        if (!t || !t.matches || !t.matches('.sheet-list-filter-chips-wrap input[type="checkbox"]')) return;
+        form.submit();
       });
     });
   })();
@@ -104,7 +137,7 @@
   </form>
   {% endif %}
   <div class="table-scroll">
-    <table class="data data-list-wide{% if sheet_code == 'CONTEST-DATA' or sheet_code == 'GROUP' %} data-list-contests{% elif sheet_code == 'REWARD-LINK' %} data-list-reward-link{% endif %}">
+    <table class="data data-list-wide{% if sheet_code == 'CONTEST-DATA' %} data-list-contests data-list-contests--contest-data{% elif sheet_code == 'GROUP' %} data-list-contests{% elif sheet_code == 'REWARD-LINK' %} data-list-reward-link{% endif %}">
       <thead>
         <tr>
           <th class="col-idx">#</th>
@@ -131,7 +164,7 @@
           {% elif sheet_code == "CONTEST-DATA" %}
           <th class="col-contest-code">Код конкурса</th>
           <th class="col-contest-name">Наименование конкурса</th>
-          <th class="col-contest-relations">Связи</th>
+          <th class="col-contest-type">Тип конкурса</th>
           <th class="col-flag">Консистентность</th>
           {% elif sheet_code == "GROUP" %}
           <th class="col-contest-code">Код конкурса</th>
@@ -178,7 +211,7 @@
           {% elif sheet_code == "CONTEST-DATA" %}
           <td class="cell-mono col-contest-code">{{ r.preview }}</td>
           <td class="cell-wrap col-contest-name">{{ r.title_line }}</td>
-          <td class="cell-wrap cell-muted cell-relations-pre col-contest-relations">{{ r.relations_line }}</td>
+          <td class="cell-wrap col-contest-type">{{ r.contest_type_col }}</td>
           <td class="col-flag">
             {% if r.ok %}
             <span class="badge badge-ok">OK</span>

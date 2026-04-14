@@ -400,7 +400,9 @@
           "options": [
             "=",
             ">=",
-            ">"
+            ">",
+            "<",
+            "<="
           ]
         },
         {
@@ -553,8 +555,14 @@
           ],
           "allow_custom": false,
           "options": [
-            "AFTER",
-            "DURIN"
+            {
+              "label": "Вручаем по завершению турнира",
+              "value": "AFTER"
+            },
+            {
+              "label": "Вручаем сразу",
+              "value": "DURIN"
+            }
           ]
         },
         {
@@ -564,8 +572,8 @@
           ],
           "allow_custom": false,
           "options": [
-            "N",
-            "Y"
+            { "label": "Нет", "value": "N" },
+            { "label": "Да", "value": "Y" }
           ]
         },
         {
@@ -575,9 +583,18 @@
           ],
           "allow_custom": false,
           "options": [
-            "",
-            "MILLIONS",
-            "THOUSANDS"
+            {
+              "label": "(пусто)",
+              "value": ""
+            },
+            {
+              "label": "В миллионах",
+              "value": "MILLIONS"
+            },
+            {
+              "label": "В тысячах",
+              "value": "THOUSANDS"
+            }
           ]
         },
         {
@@ -598,8 +615,8 @@
           ],
           "allow_custom": false,
           "options": [
-            "N",
-            "Y"
+            { "label": "Нет", "value": "N" },
+            { "label": "Да", "value": "Y" }
           ]
         },
         {
@@ -609,8 +626,8 @@
           ],
           "allow_custom": false,
           "options": [
-            "N",
-            "Y"
+            { "label": "Нет", "value": "N" },
+            { "label": "Да", "value": "Y" }
           ]
         },
         {
@@ -620,8 +637,8 @@
           ],
           "allow_custom": false,
           "options": [
-            "N",
-            "Y"
+            { "label": "Нет", "value": "N" },
+            { "label": "Да", "value": "Y" }
           ]
         },
         {
@@ -631,8 +648,8 @@
           ],
           "allow_custom": false,
           "options": [
-            "N",
-            "Y"
+            { "label": "Нет", "value": "N" },
+            { "label": "Да", "value": "Y" }
           ]
         },
         {
@@ -642,8 +659,8 @@
           ],
           "allow_custom": false,
           "options": [
-            "N",
-            "Y"
+            { "label": "Нет", "value": "N" },
+            { "label": "Да", "value": "Y" }
           ]
         },
         {
@@ -653,8 +670,8 @@
           ],
           "allow_custom": false,
           "options": [
-            "Y",
-            "N"
+            { "label": "Да", "value": "Y" },
+            { "label": "Нет", "value": "N" }
           ]
         },
         {
@@ -731,6 +748,21 @@
               "value": "RSB1"
             }
           ]
+        },
+        {
+          "column": "CALC_TYPE",
+          "comment": "В БД — 0 или 1: подписи в UI, значения при сохранении как у businessBlock.",
+          "allow_custom": false,
+          "options": [
+            {
+              "label": "Ручной расчет",
+              "value": "1"
+            },
+            {
+              "label": "Промышленный расчет",
+              "value": "0"
+            }
+          ]
         }
       ]
     },
@@ -741,57 +773,100 @@
           "column": "GROUP_CODE",
           "allow_custom": false,
           "options": [
-            "BANK",
-            "GOSB",
-            "GROUPING",
-            "TB"
+            {
+              "label": "Страна",
+              "value": "BANK"
+            },
+            {
+              "label": "ГОСБ",
+              "value": "GOSB"
+            },
+            {
+              "label": "Группа",
+              "value": "GROUPING"
+            },
+            {
+              "label": "Тер.банк",
+              "value": "TB"
+            }
           ]
         },
         {
           "column": "GROUP_VALUE",
+          "comment": "Подписи в UI: объекты { label, value }; сейчас label = value, позже можно задать человекочитаемые label.",
           "allow_custom": false,
           "options": [
-            "*",
-            "[13]",
-            "[16]",
-            "[18]",
-            "[38]",
-            "[40]",
-            "[42]",
-            "[44]",
-            "[52]",
-            "[54]",
-            "[55]",
-            "[70]"
+            { "label": "Все", "value": "*" },
+            { "label": "[13]", "value": "[13]" },
+            { "label": "[16]", "value": "[16]" },
+            { "label": "[18]", "value": "[18]" },
+            { "label": "МБ", "value": "[38]" },
+            { "label": "СРБ", "value": "[40]" },
+            { "label": "[42]", "value": "[42]" },
+            { "label": "[44]", "value": "[44]" },
+            { "label": "[52]", "value": "[52]" },
+            { "label": "[54]", "value": "[54]" },
+            { "label": "[55]", "value": "[55]" },
+            { "label": "[70]", "value": "[70]" }
           ]
         },
         {
           "column": "GET_CALC_METHOD",
           "allow_custom": false,
           "options": [
-            "1",
-            "2",
-            "3"
+            {
+              "label": "Процент от участников",
+              "value": "1"
+            },
+            {
+              "label": "TOP-X от участников",
+              "value": "2"
+            },
+            {
+              "label": "По критерию",
+              "value": "3"
+            }
           ]
         },
         {
           "column": "BASE_CALC_CODE",
           "allow_custom": false,
           "options": [
-            "",
-            "BANK",
-            "GOSB",
-            "GROUPING",
-            "TB"
+            {
+              "label": "(пусто)",
+              "value": ""
+            },
+            {
+              "label": "Страна",
+              "value": "BANK"
+            },
+            {
+              "label": "ГОСБ",
+              "value": "GOSB"
+            },
+            {
+              "label": "Группа",
+              "value": "GROUPING"
+            },
+            {
+              "label": "Тер.банк",
+              "value": "TB"
+            }
           ]
         },
         {
           "column": "CALC_TYPE",
-          "comment": "В выгрузке только 0 или 1 — выбор из двух значений, без произвольного ввода.",
+          "comment": "В БД — 0 или 1; в форме — подписи «Ручной расчет» / «Промышленный расчет».",
           "allow_custom": false,
           "options": [
-            "0",
-            "1"
+            {
+              "label": "Ручной расчет",
+              "value": "1"
+            },
+            {
+              "label": "Промышленный расчет",
+              "value": "0"
+            }
           ]
         }
       ]
@@ -803,10 +878,22 @@
           "column": "GROUP_CODE",
           "allow_custom": false,
           "options": [
-            "BANK",
-            "GOSB",
-            "GROUPING",
-            "TB"
+            {
+              "label": "Страна",
+              "value": "BANK"
+            },
+            {
+              "label": "ГОСБ",
+              "value": "GOSB"
+            },
+            {
+              "label": "Группа",
+              "value": "GROUPING"
+            },
+            {
+              "label": "Тер.банк",
+              "value": "TB"
+            }
           ]
         }
       ]
@@ -932,17 +1019,29 @@
           "json_path": [],
           "allow_custom": false,
           "options": [
-            "0",
-            "1"
+            {
+              "label": "ВКО на дату операции",
+              "value": "0"
+            },
+            {
+              "label": "ВКО на конец турнира",
+              "value": "1"
+            }
           ]
         },
         {
           "column": "CALC_TYPE",
-          "comment": "Только 0 или 1 (как CONTEST-DATA). Значения 3 в CSV/БД заменены на 1.",
+          "comment": "Только 0 или 1 в БД; подписи как у конкурса. Значения 3 в CSV/БД заменены на 1.",
           "allow_custom": false,
           "options": [
-            "0",
-            "1"
+            {
+              "label": "Ручной расчет",
+              "value": "1"
+            },
+            {
+              "label": "Промышленный расчет",
+              "value": "0"
+            }
           ]
         }
       ]
@@ -1002,8 +1101,8 @@
           ],
           "allow_custom": false,
           "options": [
-            "N",
-            "Y"
+            { "label": "Нет", "value": "N" },
+            { "label": "Да", "value": "Y" }
           ]
         },
         {
@@ -1013,8 +1112,8 @@
           ],
           "allow_custom": false,
           "options": [
-            "N",
-            "Y"
+            { "label": "Нет", "value": "N" },
+            { "label": "Да", "value": "Y" }
           ]
         },
         {
@@ -1024,8 +1123,8 @@
           ],
           "allow_custom": false,
           "options": [
-            "N",
-            "Y"
+            { "label": "Нет", "value": "N" },
+            { "label": "Да", "value": "Y" }
           ]
         },
         {
@@ -1035,8 +1134,8 @@
           ],
           "allow_custom": false,
           "options": [
-            "N",
-            "Y"
+            { "label": "Нет", "value": "N" },
+            { "label": "Да", "value": "Y" }
           ]
         },
         {
@@ -1046,8 +1145,8 @@
           ],
           "allow_custom": false,
           "options": [
-            "N",
-            "Y"
+            { "label": "Нет", "value": "N" },
+            { "label": "Да", "value": "Y" }
           ]
         },
         {
@@ -1057,8 +1156,8 @@
           ],
           "allow_custom": false,
           "options": [
-            "Y",
-            "N"
+            { "label": "Да", "value": "Y" },
+            { "label": "Нет", "value": "N" }
           ]
         },
         {
@@ -1068,8 +1167,8 @@
           ],
           "allow_custom": false,
           "options": [
-            "Y",
-            "N"
+            { "label": "Да", "value": "Y" },
+            { "label": "Нет", "value": "N" }
           ]
         },
         {
@@ -1089,8 +1188,8 @@
           ],
           "allow_custom": false,
           "options": [
-            "N",
-            "Y"
+            { "label": "Нет", "value": "N" },
+            { "label": "Да", "value": "Y" }
           ]
         },
         {
@@ -1100,8 +1199,8 @@
           ],
           "allow_custom": false,
           "options": [
-            "N",
-            "Y"
+            { "label": "Нет", "value": "N" },
+            { "label": "Да", "value": "Y" }
           ]
         },
         {
@@ -1111,8 +1210,8 @@
           ],
           "allow_custom": false,
           "options": [
-            "N",
-            "Y"
+            { "label": "Нет", "value": "N" },
+            { "label": "Да", "value": "Y" }
           ]
         },
         {
@@ -1122,8 +1221,8 @@
           ],
           "allow_custom": false,
           "options": [
-            "N",
-            "Y"
+            { "label": "Нет", "value": "N" },
+            { "label": "Да", "value": "Y" }
           ]
         },
         {
@@ -1204,8 +1303,8 @@
           ],
           "allow_custom": false,
           "options": [
-            "Y",
-            "N"
+            { "label": "Да", "value": "Y" },
+            { "label": "Нет", "value": "N" }
           ]
         },
         {
@@ -1216,14 +1315,42 @@
           ],
           "allow_custom": false,
           "options": [
-            "IMUB",
-            "KMFACTORING",
-            "KMKKSB",
-            "KMSB1",
-            "MNS",
-            "RNUB",
-            "RSB1",
-            "SERVICEMEN"
+            {
+              "label": "(пусто)",
+              "value": ""
+            },
+            {
+              "label": "Клиентский менеджер",
+              "value": "KMKKSB"
+            },
+            {
+              "label": "Цифровой менеджер",
+              "value": "MNS"
+            },
+            {
+              "label": "KMSB1",
+              "value": "KMSB1"
+            },
+            {
+              "label": "SERVICEMEN",
+              "value": "SERVICEMEN"
+            },
+            {
+              "label": "Менеджер факторинга",
+              "value": "KMFACTORING"
+            },
+            {
+              "label": "IMUB",
+              "value": "IMUB"
+            },
+            {
+              "label": "RNUB",
+              "value": "RNUB"
+            },
+            {
+              "label": "RSB1",
+              "value": "RSB1"
+            }
           ]
         },
         {
@@ -1454,11 +1581,17 @@
         },
         {
           "column": "CALC_TYPE",
-          "comment": "В выгрузке только 0 или 1 — выбор из двух значений, без произвольного ввода.",
+          "comment": "В БД — 0 или 1; в форме — подписи «Ручной расчет» / «Промышленный расчет».",
           "allow_custom": false,
           "options": [
-            "0",
-            "1"
+            {
+              "label": "Ручной расчет",
+              "value": "1"
+            },
+            {
+              "label": "Промышленный расчет",
+              "value": "0"
+            }
           ]
         }
       ]
@@ -1826,7 +1959,7 @@
         {
           "column": "CALC_TYPE",
           "label": "Тип расчета",
-          "description": "Тип расчета: 1 - расчет ручной, 0 - расчет автоматический",
+          "description": "В списке: «Ручной расчет» → в ячейку 1, «Промышленный расчет» → 0.",
           "show_description": true,
           "required": true,
           "allows_empty": false
@@ -1983,7 +2116,7 @@
               ],
               "label": "Скрыть в ГОСБ",
               "description": "Видят все ГОСБ кроме указанных",
-              "show_description": false,
+              "show_description": true,
               "required": false,
               "allows_empty": true
             },
@@ -1993,7 +2126,7 @@
               ],
               "label": "Показать в ГОСБ",
               "description": "Видят только указанные ГОСБ",
-              "show_description": false,
+              "show_description": true,
               "required": false,
               "allows_empty": true
             },
@@ -2055,7 +2188,7 @@
               ],
               "label": "Скрыть от участников",
               "description": "Видят все участники кроме указанных табельных номеров",
-              "show_description": false,
+              "show_description": true,
               "required": false,
               "allows_empty": true
             },
@@ -2065,7 +2198,7 @@
               ],
               "label": "Показать участникам",
               "description": "Видят только указанные табельные номера",
-              "show_description": false,
+              "show_description": true,
               "required": false,
               "allows_empty": true
             },
@@ -2204,9 +2337,9 @@
               "json_path": [
                 "tbHidden"
               ],
-              "label": "tbHidden",
-              "description": "tbHidden",
-              "show_description": false,
+              "label": "Скрыть в ТБ",
+              "description": "Видят все ТБ кроме указанных",
+              "show_description": true,
               "required": false,
               "allows_empty": true
             },
@@ -2214,9 +2347,9 @@
               "json_path": [
                 "tbVisible"
               ],
-              "label": "tbVisible",
-              "description": "tbVisible",
-              "show_description": false,
+              "label": "Показать в ТБ",
+              "description": "Видят только указанные ТБ",
+              "show_description": true,
               "required": false,
               "allows_empty": true
             },
@@ -2511,15 +2644,15 @@
         {
           "column": "CALC_TYPE",
           "label": "Тип расчета",
-          "description": "Тип расчета: 1 - расчет ручной, 0 - расчет автоматический",
+          "description": "В списке: «Ручной расчет» → 1, «Промышленный расчет» → 0.",
           "show_description": true,
           "required": true,
           "allows_empty": false
         },
         {
           "column": "N",
-          "label": "N",
-          "description": "N",
+          "label": "Уникальный номер",
+          "description": "Технический уникальный идентификатор строки",
           "show_description": false,
           "required": true,
           "allows_empty": false
@@ -3853,7 +3986,7 @@
         {
           "column": "CALC_TYPE",
           "label": "Тип расчета",
-          "description": "Тип расчета: 1 - расчет ручной, 0 - расчет автоматический",
+          "description": "В списке: «Ручной расчет» → 1, «Промышленный расчет» → 0.",
           "show_description": true,
           "required": true,
           "allows_empty": false

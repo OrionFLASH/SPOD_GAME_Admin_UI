@@ -282,11 +282,19 @@ def sheet_list(request: Request, code: str, q: str = ""):
     reward_type_selected_list: List[str] = []
     season_options: List[Dict[str, str]] = []
     season_selected_list: List[str] = []
+    contest_type_options: List[Dict[str, str]] = []
+    contest_type_selected_list: List[str] = []
     if code in ("REWARD", "REWARD-LINK"):
         reward_type_options = sheet_list_display.reward_type_filter_options(CFG, for_multiselect_list=True)
         rt_allowed = {str(o.get("value", "")) for o in reward_type_options if str(o.get("value", "")).strip()}
         reward_type_selected_list = [
             x.strip() for x in request.query_params.getlist("reward_type") if x.strip() in rt_allowed
+        ]
+    if code == "CONTEST-DATA":
+        contest_type_options = sheet_list_display.contest_type_filter_options(CFG, for_multiselect_list=True)
+        ct_allowed = {str(o.get("value", "")) for o in contest_type_options if str(o.get("value", "")).strip()}
+        contest_type_selected_list = [
+            x.strip() for x in request.query_params.getlist("contest_type") if x.strip() in ct_allowed
         ]
     if code == "TOURNAMENT-SCHEDULE":
         season_options = sheet_list_display.season_filter_options(lu)
@@ -354,6 +362,9 @@ def sheet_list(request: Request, code: str, q: str = ""):
                 rt_link = (lu.get("reward_type_by_reward") or {}).get(rc_f, "")
                 if rt_link not in reward_type_selected_list:
                     continue
+            if code == "CONTEST-DATA" and contest_type_selected_list:
+                if (cells.get("CONTEST_TYPE") or "").strip() not in contest_type_selected_list:
+                    continue
             disp = sheet_list_display.display_for_sheet_row(code, cells, lu)
             blob = sheet_list_display.search_blob(cells, disp)
             if ql and ql not in blob:
@@ -385,6 +396,8 @@ def sheet_list(request: Request, code: str, q: str = ""):
                 row_out["schedule_period_col"] = disp.get("schedule_period_col", "")
                 row_out["schedule_contest_name_col"] = disp.get("schedule_contest_name_col", "")
                 row_out["schedule_season_col"] = disp.get("schedule_season_col", "")
+            if code == "CONTEST-DATA":
+                row_out["contest_type_col"] = disp.get("contest_type_col", "")
             rows_out.append(row_out)
     return templates.TemplateResponse(
         request,
@@ -398,6 +411,8 @@ def sheet_list(request: Request, code: str, q: str = ""):
             "reward_type_selected_list": reward_type_selected_list,
             "season_options": season_options,
             "season_selected_list": season_selected_list,
+            "contest_type_options": contest_type_options,
+            "contest_type_selected_list": contest_type_selected_list,
         },
     )
 

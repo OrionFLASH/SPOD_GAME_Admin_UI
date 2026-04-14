@@ -3,6 +3,9 @@
 Дополнительные поля для таблицы списка строк: названия из связанных листов SQLite.
 Индексы строятся один раз на запрос страницы списка.
 
+Лист CONTEST-DATA (список «Конкурсы»): код конкурса, наименование, тип конкурса (CONTEST_TYPE); колонка «Связи» не показывается
+(текст турниров/наград остаётся в search_blob для поиска); фильтр по CONTEST_TYPE — множественный выбор как на других листах.
+
 Лист INDICATOR: отдельная разметка в шаблоне — CONTEST_CODE, название конкурса из CONTEST-DATA,
 INDICATOR_ADD_CALC_TYPE, INDICATOR_CODE; в «Связи» — REWARD-LINK по группам и турниры TOURNAMENT-SCHEDULE.
 
@@ -251,12 +254,18 @@ def display_for_sheet_row(sheet_code: str, cells: Dict[str, str], lu: Dict[str, 
     relations = ""
 
     if sheet_code == "CONTEST-DATA":
-        # primary_key (preview в списке) — CONTEST_CODE; в типовой выгрузке PROM длина кода до 17 символов (см. ширину колонки в sheet_list + app.css).
+        # primary_key (preview в списке) — CONTEST_CODE; relations_line остаётся для search_blob (колонка «Связи» в таблице не показывается).
         cc = (cells.get("CONTEST_CODE") or "").strip()
         pk = cc
         title = (cells.get("FULL_NAME") or "").strip()
+        contest_type = (cells.get("CONTEST_TYPE") or "").strip()
         relations = _contest_data_relations_line(cc, lu)
-        return {"primary_key": pk, "title_line": title, "relations_line": relations}
+        return {
+            "primary_key": pk,
+            "title_line": title,
+            "relations_line": relations,
+            "contest_type_col": contest_type,
+        }
 
     if sheet_code == "GROUP":
         cc = (cells.get("CONTEST_CODE") or "").strip()
@@ -380,7 +389,7 @@ def reward_type_filter_options(cfg: Dict[str, Any], *, for_multiselect_list: boo
     Варианты фильтра по REWARD_TYPE из field_enums (лист REWARD).
     Используется в списках REWARD и REWARD-LINK.
     При for_multiselect_list=False — первый пункт «ВСЕ» (одиночный селект, пустое значение = без фильтра).
-    При for_multiselect_list=True — только реальные типы (множественный выбор: пустой список = без фильтра).
+    При for_multiselect_list=True — только реальные типы для чекбоксов фильтра (пустой набор отмеченных = без фильтра).
     """
     from src import editor_config
 
@@ -401,6 +410,43 @@ def reward_type_filter_options(cfg: Dict[str, Any], *, for_multiselect_list: boo
     seen: set = set() if for_multiselect_list else {""}
     for rule in editor_config.flatten_field_enums(cfg):
         if rule.get("sheet_code") != "REWARD" or rule.get("column") != "REWARD_TYPE":
+            continue
+        if rule.get("json_path"):
+            continue
+        for o in rule.get("options") or []:
+            v = _opt_value(o)
+            if not v or v in seen:
+                continue
+            seen.add(v)
+            out.append({"label": _opt_label(o, v), "value": v})
+    return out
+
+
+def contest_type_filter_options(cfg: Dict[str, Any], *, for_multiselect_list: bool = False) -> List[Dict[str, str]]:
+    """
+    Варианты фильтра по CONTEST_TYPE из field_enums (лист CONTEST-DATA).
+    Семантика как у reward_type_filter_options: при for_multiselect_list=True — список {label, value}
+    для чекбоксов-чипов в sheet_list.html (без пункта «ВСЕ»).
+    """
+    from src import editor_config
+
+    def _opt_value(o: Any) -> str:
+        if isinstance(o, dict):
+            v = o.get("value")
+            return str(v).strip() if v is not None else ""
+        return str(o).strip() if o is not None else ""
+
+    def _opt_label(o: Any, val: str) -> str:
+        if isinstance(o, dict) and o.get("label") is not None:
+            return str(o.get("label")).strip() or val
+        return val
+
+    out: List[Dict[str, str]] = []
+    if not for_multiselect_list:
+        out.append({"label": "ВСЕ", "value": ""})
+    seen: set = set() if for_multiselect_list else {""}
+    for rule in editor_config.flatten_field_enums(cfg):
+        if rule.get("sheet_code") != "CONTEST-DATA" or rule.get("column") != "CONTEST_TYPE":
             continue
         if rule.get("json_path"):
             continue
@@ -468,6 +514,7 @@ def search_blob(cells: Dict[str, str], disp: Dict[str, str]) -> str:
             "schedule_period_col",
             "schedule_contest_name_col",
             "schedule_season_col",
+            "contest_type_col",
         )
     )
     return " ".join(parts).lower()

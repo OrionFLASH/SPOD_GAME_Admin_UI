@@ -215,7 +215,7 @@ table.data td {
   white-space: nowrap;
 }
 
-/* Список листа CONTEST-DATA («Конкурсы»): код фиксированной ширины (до 17 символов в выгрузке — 19ch); наименование; «Связи» с переносом длинного текста; «Консистентность» в конце строки (перед «Просмотр»). */
+/* Список листов CONTEST-DATA / GROUP: table-layout fixed. CONTEST-DATA — модификатор --contest-data (без колонки «Связи», шире код, тип конкурса). GROUP — колонка «Связи» с переносом. */
 .data-list-contests {
   table-layout: fixed;
   width: 100%;
@@ -266,6 +266,33 @@ table.data td {
   min-width: 8.5rem;
   max-width: 9rem;
   white-space: nowrap;
+}
+
+/* CONTEST-DATA: колонка «Связи» убрана — больше места под код и название; код с переносом вместо узкого ellipsis. */
+.data-list-contests--contest-data .col-contest-code {
+  width: 34%;
+  min-width: 22ch;
+  max-width: none;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.data-list-contests--contest-data .cell-mono.col-contest-code {
+  max-width: none;
+}
+
+.data-list-contests--contest-data .col-contest-name {
+  width: 38%;
+  min-width: 11rem;
+}
+
+.data-list-contests--contest-data .col-contest-type {
+  width: auto;
+  min-width: 12rem;
+  max-width: 30%;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 /* Список REWARD-LINK: узкие колонки кодов, широкие — названия награды и конкурса (таблица с table-layout: fixed). */
@@ -449,13 +476,14 @@ table.data th {
   margin-bottom: 0;
 }
 
-/* Блок одного множественного фильтра: подпись, над списком — мини-кнопки справа, затем select */
+/* Блок множественного фильтра: подпись; строка [мини-кнопки слева | чипы]; подсказка. Чипы — flex-wrap до края панели. */
 .sheet-list-form-reward .sheet-list-filter-block {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
+  align-items: stretch;
   gap: 0.35rem;
-  max-width: 28rem;
+  width: 100%;
+  max-width: 100%;
 }
 
 .sheet-list-form-reward .reward-filter-caption {
@@ -464,23 +492,78 @@ table.data th {
   color: var(--muted);
 }
 
-/* Обёртка: ширина как у списка; иконки — в ряд у правого края над полем выбора */
-.sheet-list-form-reward .sheet-list-filter-select-wrap {
+/* Одна строка: иконки слева, по вертикали по центру относительно блока чипов; чипы растягиваются и переносятся. */
+.sheet-list-form-reward .sheet-list-filter-row {
   display: flex;
-  flex-direction: column;
-  align-items: stretch;
-  gap: 0.28rem;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.5rem;
   width: 100%;
-  max-width: 22rem;
+  min-width: 0;
 }
 
 .sheet-list-form-reward .sheet-list-filter-iconbar {
   display: flex;
   flex-direction: row;
-  justify-content: flex-end;
+  flex-shrink: 0;
   align-items: center;
+  justify-content: center;
   gap: 0.3rem;
-  width: 100%;
+  width: auto;
+}
+
+/* Область чекбоксов: минимальная ширина по содержимому, растёт на всю оставшуюся ширину; перенос вариантов на следующую строку. */
+.sheet-list-form-reward .sheet-list-filter-chips-wrap {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  align-content: flex-start;
+  gap: 0.35rem 0.55rem;
+  padding: 0.38rem 0.6rem;
+  border-radius: 10px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.sheet-list-form-reward .sheet-list-filter-chip {
+  display: inline-flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.32rem;
+  margin: 0;
+  padding: 0.2rem 0.48rem;
+  border-radius: 8px;
+  cursor: pointer;
+  user-select: none;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  background: rgba(255, 255, 255, 0.75);
+  transition: background 0.12s ease, border-color 0.12s ease;
+}
+
+.sheet-list-form-reward .sheet-list-filter-chip:hover {
+  background: rgba(0, 0, 0, 0.04);
+}
+
+.sheet-list-form-reward .sheet-list-filter-chip input[type="checkbox"]:checked + .sheet-list-filter-chip-text {
+  font-weight: 600;
+  color: #1d4ed8;
+}
+
+.sheet-list-form-reward .sheet-list-filter-chip input[type="checkbox"] {
+  margin: 0;
+  flex-shrink: 0;
+  width: 0.95rem;
+  height: 0.95rem;
+  cursor: pointer;
+}
+
+.sheet-list-form-reward .sheet-list-filter-chip-text {
+  font-size: 0.82rem;
+  line-height: 1.25;
+  white-space: nowrap;
 }
 
 .sheet-list-form-reward .sheet-list-filter-iconbtn {
@@ -531,24 +614,11 @@ table.data th {
   border-color: rgba(220, 38, 38, 0.65);
 }
 
-.sheet-list-form-reward select.sheet-list-filter-multi {
-  display: block;
-  width: 100%;
-  min-width: 10rem;
-  padding: 0.35rem 0.5rem;
-  border-radius: 10px;
-  border: 1px solid rgba(0, 0, 0, 0.1);
-  background: rgba(255, 255, 255, 0.92);
-  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.04);
-}
-
-/* size в шаблоне = число опций — без лишней пустой строки внизу listbox */
-
 .sheet-list-form-reward .sheet-list-filter-hint {
   margin: 0;
   font-size: 0.78rem;
   line-height: 1.35;
-  max-width: 28rem;
+  max-width: 100%;
 }
 
 .data-list-wide .cell-relations-pre {
