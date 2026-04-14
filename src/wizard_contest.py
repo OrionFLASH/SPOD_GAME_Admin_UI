@@ -288,7 +288,8 @@ def validate_payload(payload: Dict[str, Any]) -> List[str]:
     groups = payload.get("groups") or []
     if not isinstance(groups, list) or len(groups) < 1:
         errs.append("Нужна хотя бы одна строка GROUP.")
-    g_codes: List[str] = []
+    # Различные строки GROUP в смысле пары (GROUP_CODE, GROUP_VALUE) при том же конкурсе — как в consistency по тройке с CONTEST.
+    group_pairs_seen: Set[Tuple[str, str]] = set()
     for i, g in enumerate(groups):
         cells = (g or {}).get("cells") or {}
         if str(cells.get("CONTEST_CODE") or "").strip() != cc:
@@ -296,14 +297,20 @@ def validate_payload(payload: Dict[str, Any]) -> List[str]:
         gco = str(cells.get("GROUP_CODE") or "").strip()
         if not gco:
             errs.append(f"GROUP строка {i + 1}: пустой GROUP_CODE.")
-        g_codes.append(gco)
-    uniq_groups = sorted(set(g_codes))
+        gvo = str(cells.get("GROUP_VALUE") or "").strip()
+        gpair = (gco, gvo)
+        if gpair in group_pairs_seen:
+            errs.append(
+                f"GROUP строка {i + 1}: дубль пары (GROUP_CODE, GROUP_VALUE)=({gco!r},{gvo!r}) при том же конкурсе."
+            )
+        group_pairs_seen.add(gpair)
+    uniq_group_pairs_n = len(group_pairs_seen)
     links = payload.get("reward_links") or []
     if not isinstance(links, list):
         errs.append("Некорректный формат reward_links.")
-    elif len(links) < len(uniq_groups):
+    elif len(links) < uniq_group_pairs_n:
         errs.append(
-            f"REWARD-LINK: строк должно быть не меньше числа различных GROUP_CODE ({len(uniq_groups)}), сейчас {len(links)}."
+            f"REWARD-LINK: строк должно быть не меньше числа различных пар (GROUP_CODE, GROUP_VALUE) в GROUP ({uniq_group_pairs_n}), сейчас {len(links)}."
         )
     reward_codes: List[str] = []
     for i, ln in enumerate(links if isinstance(links, list) else []):

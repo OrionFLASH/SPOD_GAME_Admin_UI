@@ -124,6 +124,10 @@ def flatten_editor_field_ui(cfg: Dict[str, Any]) -> List[Dict[str, Any]]:
     Формат в config.json — как у field_enums: блоки {\"sheet_code\", \"rules\": [ {...}, ... ] }.
     Поле json_path (массив строк и/или чисел) — для листьев внутри JSON-колонки; без json_path — плоская колонка листа.
 
+    Сокращённая запись для одной JSON-колонки с множеством путей: одно правило
+    {\"column\": \"CONTEST_FEATURE\", \"paths\": [ {\"json_path\": [...], \"label\": ...}, ... ] } —
+    при развёртке каждый элемент paths становится отдельной записью с тем же sheet_code и column.
+
     - label: подпись в форме; если пусто — на клиенте подставляется имя колонки или путь.
     - description: поясняющий текст под подписью поля в UI, если show_description истинно.
     - show_description: если истинно — description показывается сразу под названием (не во всплывающей подсказке).
@@ -142,10 +146,24 @@ def flatten_editor_field_ui(cfg: Dict[str, Any]) -> List[Dict[str, Any]]:
             continue
         if "rules" in block:
             for rule in block.get("rules") or []:
-                if isinstance(rule, dict):
-                    merged: Dict[str, Any] = dict(rule)
-                    merged["sheet_code"] = sc
-                    out.append(merged)
+                if not isinstance(rule, dict):
+                    continue
+                # Вложенные правила по json_path под одним column (см. docstring).
+                if rule.get("paths") is not None and rule.get("column"):
+                    col = str(rule["column"])
+                    base = {k: v for k, v in rule.items() if k not in ("paths", "column")}
+                    for sub in rule.get("paths") or []:
+                        if not isinstance(sub, dict):
+                            continue
+                        merged = dict(base)
+                        merged.update(sub)
+                        merged["sheet_code"] = sc
+                        merged["column"] = col
+                        out.append(merged)
+                    continue
+                merged = dict(rule)
+                merged["sheet_code"] = sc
+                out.append(merged)
             continue
         if "column" in block:
             out.append(dict(block))

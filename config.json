@@ -14,9 +14,9 @@
     "relationship_ru": "sheet.id → sheet_id в таблице листа; целостность ссылок между листами проверяет consistency.py.",
     "logical_relationships_ru": [
       "CONTEST-DATA — справочник конкурсов: среди актуальных строк (is_current=1) значение CONTEST_CODE считается уникальным идентификатором сущности конкурса.",
-      "GROUP → CONTEST-DATA: связь по CONTEST_CODE, кардинальность 1:N — одному коду конкурса соответствует несколько строк групп.",
+      "GROUP → CONTEST-DATA: связь по CONTEST_CODE, 1:N; уникальность строки GROUP — тройка (CONTEST_CODE, GROUP_CODE, GROUP_VALUE).",
       "REWARD-LINK → CONTEST-DATA: по CONTEST_CODE, 1:N — одному конкурсу соответствует много строк связей (конкурс—группа—награда).",
-      "REWARD-LINK → GROUP: пара (CONTEST_CODE, GROUP_CODE) должна существовать в GROUP.",
+      "REWARD-LINK → GROUP: для пары (CONTEST_CODE, GROUP_CODE) в выгрузке должна существовать хотя бы одна строка GROUP с теми же полями; различение нескольких строк с одним GROUP_CODE — по GROUP_VALUE.",
       "REWARD-LINK → REWARD: по REWARD_CODE каждая строка связи ссылается на ровно одну строку справочника REWARD с тем же кодом (со стороны связи «много ссылок → одна награда», N:1).",
       "REWARD ↔ CONTEST-DATA: не прямое поле в CSV, а транзитивно через REWARD-LINK — все строки REWARD-LINK с данным REWARD_CODE должны относиться к одному и тому же CONTEST_CODE; иначе данные противоречивы.",
       "INDICATOR → CONTEST-DATA: по CONTEST_CODE, 1:N — одному конкурсу много показателей.",
@@ -162,9 +162,9 @@
           "json_path": [
             "businessBlock"
           ],
-          "json_scalar_array": true,
+          "json_scalar_array": false,
           "min_rows": 2,
-          "max_rows": 8
+          "max_rows": 3
         }
       ]
     },
@@ -699,11 +699,11 @@
               "value": ""
             },
             {
-              "label": "KMKKSB",
+              "label": "Клиентский менеджер",
               "value": "KMKKSB"
             },
             {
-              "label": "MNS",
+              "label": "Цифровой менеджер",
               "value": "MNS"
             },
             {
@@ -715,7 +715,7 @@
               "value": "SERVICEMEN"
             },
             {
-              "label": "KMFACTORING",
+              "label": "Менеджер факторинга",
               "value": "KMFACTORING"
             },
             {
@@ -775,25 +775,6 @@
           ]
         },
         {
-          "column": "GET_CALC_CRITERION",
-          "allow_custom": true,
-          "options": [
-            "",
-            "0",
-            "0.00000",
-            "0.01000",
-            "1",
-            "10",
-            "15",
-            "2",
-            "20",
-            "3",
-            "4",
-            "5",
-            "8"
-          ]
-        },
-        {
           "column": "BASE_CALC_CODE",
           "allow_custom": false,
           "options": [
@@ -802,6 +783,15 @@
             "GOSB",
             "GROUPING",
             "TB"
+          ]
+        },
+        {
+          "column": "CALC_TYPE",
+          "comment": "В выгрузке только 0 или 1 — выбор из двух значений, без произвольного ввода.",
+          "allow_custom": false,
+          "options": [
+            "0",
+            "1"
           ]
         }
       ]
@@ -976,6 +966,15 @@
         {
           "column": "CONTESTANT_SELECTION",
           "json_path": [],
+          "allow_custom": false,
+          "options": [
+            "0",
+            "1"
+          ]
+        },
+        {
+          "column": "CALC_TYPE",
+          "comment": "Только 0 или 1 (как CONTEST-DATA). Значения 3 в CSV/БД заменены на 1.",
           "allow_custom": false,
           "options": [
             "0",
@@ -1488,6 +1487,15 @@
             "SEASON_s_2024",
             "SEASON_s_2025"
           ]
+        },
+        {
+          "column": "CALC_TYPE",
+          "comment": "В выгрузке только 0 или 1 — выбор из двух значений, без произвольного ввода.",
+          "allow_custom": false,
+          "options": [
+            "0",
+            "1"
+          ]
         }
       ]
     }
@@ -1550,79 +1558,112 @@
   ],
   "editor_field_numeric": [
     {
-      "sheet_code": "CONTEST-DATA",
-      "rules": [
-        {
-          "column": "CALC_TYPE",
-          "format": "integer",
-          "min": 0,
-          "max": 1
-        }
-      ]
-    },
-    {
-      "sheet_code": "INDICATOR",
-      "rules": [
-        {
-          "column": "CALC_TYPE",
-          "format": "integer",
-          "min": 0,
-          "max": 3
-        }
-      ]
-    },
-    {
-      "sheet_code": "TOURNAMENT-SCHEDULE",
-      "rules": [
-        {
-          "column": "CALC_TYPE",
-          "format": "integer",
-          "min": 0,
-          "max": 1
-        }
-      ]
-    },
-    {
       "sheet_code": "GROUP",
       "rules": [
         {
-          "comment": "Условие по GET_CALC_METHOD (в выгрузке режим 2/3; в ТЗ фигурирует GET_CALC_CRITERION).",
+          "comment": "GET_CALC_CRITERION: по GET_CALC_METHOD 1/2 — число; при методе 3 поле должно быть пустым (empty_only).",
+          "column": "GET_CALC_CRITERION",
+          "conditional_formats": [
+            {
+              "when": {
+                "column": "GET_CALC_METHOD",
+                "equals": "1"
+              },
+              "format": "decimal",
+              "min": 0,
+              "max": 1,
+              "decimal_places": 5
+            },
+            {
+              "when": {
+                "column": "GET_CALC_METHOD",
+                "equals": "2"
+              },
+              "format": "integer",
+              "min": 0,
+              "max": 50
+            },
+            {
+              "when": {
+                "column": "GET_CALC_METHOD",
+                "equals": "3"
+              },
+              "format": "empty_only"
+            }
+          ],
+          "default_format": {
+            "format": "empty_only"
+          }
+        },
+        {
+          "comment": "ADD_CALC_CRITERION: метод 1 — дробь 0–1; метод 2 — целое 0–50; метод 3 — только пусто (empty_only).",
           "column": "ADD_CALC_CRITERION",
           "conditional_formats": [
             {
-              "when": { "column": "GET_CALC_METHOD", "equals": "2" },
+              "when": {
+                "column": "GET_CALC_METHOD",
+                "equals": "1"
+              },
+              "format": "decimal",
+              "min": 0,
+              "max": 1,
+              "decimal_places": 5
+            },
+            {
+              "when": {
+                "column": "GET_CALC_METHOD",
+                "equals": "2"
+              },
               "format": "integer",
               "min": 0,
               "max": 50
             },
             {
-              "when": { "column": "GET_CALC_METHOD", "equals": "3" },
-              "format": "decimal",
-              "min": 0,
-              "max": 1,
-              "decimal_places": 5
+              "when": {
+                "column": "GET_CALC_METHOD",
+                "equals": "3"
+              },
+              "format": "empty_only"
             }
           ],
-          "default_format": { "format": "empty_only" }
+          "default_format": {
+            "format": "empty_only"
+          }
         },
         {
+          "comment": "ADD_CALC_CRITERION_2: те же ветки, что у ADD_CALC_CRITERION (метод 3 — empty_only).",
           "column": "ADD_CALC_CRITERION_2",
           "conditional_formats": [
             {
-              "when": { "column": "GET_CALC_METHOD", "equals": "2" },
+              "when": {
+                "column": "GET_CALC_METHOD",
+                "equals": "1"
+              },
+              "format": "decimal",
+              "min": 0,
+              "max": 1,
+              "decimal_places": 5
+            },
+            {
+              "when": {
+                "column": "GET_CALC_METHOD",
+                "equals": "2"
+              },
               "format": "integer",
               "min": 0,
               "max": 50
             },
             {
-              "when": { "column": "GET_CALC_METHOD", "equals": "3" },
-              "format": "decimal",
-              "min": 0,
-              "max": 1,
-              "decimal_places": 5
+              "when": {
+                "column": "GET_CALC_METHOD",
+                "equals": "3"
+              },
+              "format": "empty_only"
             }
           ],
-          "default_format": { "format": "empty_only" }
+          "default_format": {
+            "format": "empty_only"
+          }
         }
       ]
     }
@@ -1633,16 +1674,16 @@
       "rules": [
         {
           "column": "CONTEST_CODE",
-          "label": "CONTEST_CODE",
-          "description": "CONTEST_CODE",
-          "show_description": false,
+          "label": "Код конкурса",
+          "description": "Уникальный код конкурса",
+          "show_description": true,
           "required": true,
           "allows_empty": false
         },
         {
           "column": "FULL_NAME",
-          "label": "FULL_NAME",
-          "description": "FULL_NAME",
+          "label": "Наименование конкурса",
+          "description": "Короткое наименование конкурса",
           "show_description": false,
           "required": true,
           "allows_empty": false
@@ -1673,15 +1714,15 @@
         },
         {
           "column": "CONTEST_TYPE",
-          "label": "CONTEST_TYPE",
-          "description": "CONTEST_TYPE",
-          "show_description": false,
+          "label": "Тип конкурса",
+          "description": "Индивидуальный/турнирный",
+          "show_description": true,
           "required": true,
           "allows_empty": false
         },
         {
           "column": "CONTEST_DESCRIPTION",
-          "label": "CONTEST_DESCRIPTION",
+          "label": "Подробное описание конкурса",
           "description": "CONTEST_DESCRIPTION",
           "show_description": false,
           "required": true,
@@ -1801,9 +1842,9 @@
         },
         {
           "column": "CALC_TYPE",
-          "label": "CALC_TYPE",
-          "description": "CALC_TYPE",
-          "show_description": false,
+          "label": "Тип расчета",
+          "description": "Тип расчета: 1 - расчет ручной, 0 - расчет автоматический",
+          "show_description": true,
           "required": true,
           "allows_empty": false
         },
@@ -1825,544 +1866,502 @@
         },
         {
           "column": "CONTEST_FEATURE",
-          "json_path": [
-            "accuracy"
-          ],
-          "label": "accuracy",
-          "description": "accuracy",
-          "show_description": false,
-          "required": false,
-          "allows_empty": true
-        },
-        {
-          "column": "CONTEST_FEATURE",
-          "json_path": [
-            "avatarShow"
-          ],
-          "label": "avatarShow",
-          "description": "avatarShow",
-          "show_description": false,
-          "required": false,
-          "allows_empty": true
-        },
-        {
-          "column": "CONTEST_FEATURE",
-          "json_path": [
-            "businessBlock"
-          ],
-          "label": "businessBlock",
-          "description": "businessBlock",
-          "show_description": false,
-          "required": false,
-          "allows_empty": true
-        },
-        {
-          "column": "CONTEST_FEATURE",
-          "json_path": [
-            "businessBlock",
-            0
-          ],
-          "label": "businessBlock[0]",
-          "description": "businessBlock[0]",
-          "show_description": false,
-          "required": false,
-          "allows_empty": true
-        },
-        {
-          "column": "CONTEST_FEATURE",
-          "json_path": [
-            "capacity"
-          ],
-          "label": "capacity",
-          "description": "capacity",
-          "show_description": false,
-          "required": false,
-          "allows_empty": true
-        },
-        {
-          "column": "CONTEST_FEATURE",
-          "json_path": [
-            "feature"
-          ],
-          "label": "feature",
-          "description": "feature",
-          "show_description": false,
-          "required": false,
-          "allows_empty": true
-        },
-        {
-          "column": "CONTEST_FEATURE",
-          "json_path": [
-            "feature",
-            0
-          ],
-          "label": "feature[0]",
-          "description": "feature[0]",
-          "show_description": false,
-          "required": false,
-          "allows_empty": true
-        },
-        {
-          "column": "CONTEST_FEATURE",
-          "json_path": [
-            "feature",
-            1
-          ],
-          "label": "feature[1]",
-          "description": "feature[1]",
-          "show_description": false,
-          "required": false,
-          "allows_empty": true
-        },
-        {
-          "column": "CONTEST_FEATURE",
-          "json_path": [
-            "feature",
-            2
-          ],
-          "label": "feature[2]",
-          "description": "feature[2]",
-          "show_description": false,
-          "required": false,
-          "allows_empty": true
-        },
-        {
-          "column": "CONTEST_FEATURE",
-          "json_path": [
-            "feature",
-            3
-          ],
-          "label": "feature[3]",
-          "description": "feature[3]",
-          "show_description": false,
-          "required": false,
-          "allows_empty": true
-        },
-        {
-          "column": "CONTEST_FEATURE",
-          "json_path": [
-            "feature",
-            4
-          ],
-          "label": "feature[4]",
-          "description": "feature[4]",
-          "show_description": false,
-          "required": false,
-          "allows_empty": true
-        },
-        {
-          "column": "CONTEST_FEATURE",
-          "json_path": [
-            "feature",
-            5
-          ],
-          "label": "feature[5]",
-          "description": "feature[5]",
-          "show_description": false,
-          "required": false,
-          "allows_empty": true
-        },
-        {
-          "column": "CONTEST_FEATURE",
-          "json_path": [
-            "gosbHidden"
-          ],
-          "label": "gosbHidden",
-          "description": "gosbHidden",
-          "show_description": false,
-          "required": false,
-          "allows_empty": true
-        },
-        {
-          "column": "CONTEST_FEATURE",
-          "json_path": [
-            "gosbVisible"
-          ],
-          "label": "gosbVisible",
-          "description": "gosbVisible",
-          "show_description": false,
-          "required": false,
-          "allows_empty": true
-        },
-        {
-          "column": "CONTEST_FEATURE",
-          "json_path": [
-            "helpCodeList",
-            0
-          ],
-          "label": "helpCodeList[0]",
-          "description": "helpCodeList[0]",
-          "show_description": false,
-          "required": false,
-          "allows_empty": true
-        },
-        {
-          "column": "CONTEST_FEATURE",
-          "json_path": [
-            "helpCodeList",
-            1
-          ],
-          "label": "helpCodeList[1]",
-          "description": "helpCodeList[1]",
-          "show_description": false,
-          "required": false,
-          "allows_empty": true
-        },
-        {
-          "column": "CONTEST_FEATURE",
-          "json_path": [
-            "masking"
-          ],
-          "label": "masking",
-          "description": "masking",
-          "show_description": false,
-          "required": false,
-          "allows_empty": true
-        },
-        {
-          "column": "CONTEST_FEATURE",
-          "json_path": [
-            "minNumber"
-          ],
-          "label": "minNumber",
-          "description": "minNumber",
-          "show_description": false,
-          "required": false,
-          "allows_empty": true
-        },
-        {
-          "column": "CONTEST_FEATURE",
-          "json_path": [
-            "momentRewarding"
-          ],
-          "label": "momentRewarding",
-          "description": "momentRewarding",
-          "show_description": false,
-          "required": false,
-          "allows_empty": true
-        },
-        {
-          "column": "CONTEST_FEATURE",
-          "json_path": [
-            "persomanNumberHidden"
-          ],
-          "label": "persomanNumberHidden",
-          "description": "persomanNumberHidden",
-          "show_description": false,
-          "required": false,
-          "allows_empty": true
-        },
-        {
-          "column": "CONTEST_FEATURE",
-          "json_path": [
-            "persomanNumberVisible"
-          ],
-          "label": "persomanNumberVisible",
-          "description": "persomanNumberVisible",
-          "show_description": false,
-          "required": false,
-          "allows_empty": true
-        },
-        {
-          "column": "CONTEST_FEATURE",
-          "json_path": [
-            "persomanNumberVisible",
-            0
-          ],
-          "label": "persomanNumberVisible[0]",
-          "description": "persomanNumberVisible[0]",
-          "show_description": false,
-          "required": false,
-          "allows_empty": true
-        },
-        {
-          "column": "CONTEST_FEATURE",
-          "json_path": [
-            "persomanNumberVisible",
-            1
-          ],
-          "label": "persomanNumberVisible[1]",
-          "description": "persomanNumberVisible[1]",
-          "show_description": false,
-          "required": false,
-          "allows_empty": true
-        },
-        {
-          "column": "CONTEST_FEATURE",
-          "json_path": [
-            "persomanNumberVisible",
-            2
-          ],
-          "label": "persomanNumberVisible[2]",
-          "description": "persomanNumberVisible[2]",
-          "show_description": false,
-          "required": false,
-          "allows_empty": true
-        },
-        {
-          "column": "CONTEST_FEATURE",
-          "json_path": [
-            "persomanNumberVisible",
-            3
-          ],
-          "label": "persomanNumberVisible[3]",
-          "description": "persomanNumberVisible[3]",
-          "show_description": false,
-          "required": false,
-          "allows_empty": true
-        },
-        {
-          "column": "CONTEST_FEATURE",
-          "json_path": [
-            "persomanNumberVisible",
-            4
-          ],
-          "label": "persomanNumberVisible[4]",
-          "description": "persomanNumberVisible[4]",
-          "show_description": false,
-          "required": false,
-          "allows_empty": true
-        },
-        {
-          "column": "CONTEST_FEATURE",
-          "json_path": [
-            "persomanNumberVisible",
-            5
-          ],
-          "label": "persomanNumberVisible[5]",
-          "description": "persomanNumberVisible[5]",
-          "show_description": false,
-          "required": false,
-          "allows_empty": true
-        },
-        {
-          "column": "CONTEST_FEATURE",
-          "json_path": [
-            "persomanNumberVisible",
-            6
-          ],
-          "label": "persomanNumberVisible[6]",
-          "description": "persomanNumberVisible[6]",
-          "show_description": false,
-          "required": false,
-          "allows_empty": true
-        },
-        {
-          "column": "CONTEST_FEATURE",
-          "json_path": [
-            "preferences"
-          ],
-          "label": "preferences",
-          "description": "preferences",
-          "show_description": false,
-          "required": false,
-          "allows_empty": true
-        },
-        {
-          "column": "CONTEST_FEATURE",
-          "json_path": [
-            "preferences",
-            0
-          ],
-          "label": "preferences[0]",
-          "description": "preferences[0]",
-          "show_description": false,
-          "required": false,
-          "allows_empty": true
-        },
-        {
-          "column": "CONTEST_FEATURE",
-          "json_path": [
-            "preferences",
-            1
-          ],
-          "label": "preferences[1]",
-          "description": "preferences[1]",
-          "show_description": false,
-          "required": false,
-          "allows_empty": true
-        },
-        {
-          "column": "CONTEST_FEATURE",
-          "json_path": [
-            "preferences",
-            2
-          ],
-          "label": "preferences[2]",
-          "description": "preferences[2]",
-          "show_description": false,
-          "required": false,
-          "allows_empty": true
-        },
-        {
-          "column": "CONTEST_FEATURE",
-          "json_path": [
-            "preferences",
-            3
-          ],
-          "label": "preferences[3]",
-          "description": "preferences[3]",
-          "show_description": false,
-          "required": false,
-          "allows_empty": true
-        },
-        {
-          "column": "CONTEST_FEATURE",
-          "json_path": [
-            "tbHidden"
-          ],
-          "label": "tbHidden",
-          "description": "tbHidden",
-          "show_description": false,
-          "required": false,
-          "allows_empty": true
-        },
-        {
-          "column": "CONTEST_FEATURE",
-          "json_path": [
-            "tbVisible"
-          ],
-          "label": "tbVisible",
-          "description": "tbVisible",
-          "show_description": false,
-          "required": false,
-          "allows_empty": true
-        },
-        {
-          "column": "CONTEST_FEATURE",
-          "json_path": [
-            "tbVisible",
-            0
-          ],
-          "label": "tbVisible[0]",
-          "description": "tbVisible[0]",
-          "show_description": false,
-          "required": false,
-          "allows_empty": true
-        },
-        {
-          "column": "CONTEST_FEATURE",
-          "json_path": [
-            "tbVisible",
-            1
-          ],
-          "label": "tbVisible[1]",
-          "description": "tbVisible[1]",
-          "show_description": false,
-          "required": false,
-          "allows_empty": true
-        },
-        {
-          "column": "CONTEST_FEATURE",
-          "json_path": [
-            "tbVisible",
-            2
-          ],
-          "label": "tbVisible[2]",
-          "description": "tbVisible[2]",
-          "show_description": false,
-          "required": false,
-          "allows_empty": true
-        },
-        {
-          "column": "CONTEST_FEATURE",
-          "json_path": [
-            "tbVisible",
-            3
-          ],
-          "label": "tbVisible[3]",
-          "description": "tbVisible[3]",
-          "show_description": false,
-          "required": false,
-          "allows_empty": true
-        },
-        {
-          "column": "CONTEST_FEATURE",
-          "json_path": [
-            "tournamentEndMailing"
-          ],
-          "label": "tournamentEndMailing",
-          "description": "tournamentEndMailing",
-          "show_description": false,
-          "required": false,
-          "allows_empty": true
-        },
-        {
-          "column": "CONTEST_FEATURE",
-          "json_path": [
-            "tournamentLikeMailing"
-          ],
-          "label": "tournamentLikeMailing",
-          "description": "tournamentLikeMailing",
-          "show_description": false,
-          "required": false,
-          "allows_empty": true
-        },
-        {
-          "column": "CONTEST_FEATURE",
-          "json_path": [
-            "tournamentListMailing"
-          ],
-          "label": "tournamentListMailing",
-          "description": "tournamentListMailing",
-          "show_description": false,
-          "required": false,
-          "allows_empty": true
-        },
-        {
-          "column": "CONTEST_FEATURE",
-          "json_path": [
-            "tournamentRewardingMailing"
-          ],
-          "label": "tournamentRewardingMailing",
-          "description": "tournamentRewardingMailing",
-          "show_description": false,
-          "required": false,
-          "allows_empty": true
-        },
-        {
-          "column": "CONTEST_FEATURE",
-          "json_path": [
-            "tournamentStartMailing"
-          ],
-          "label": "tournamentStartMailing",
-          "description": "tournamentStartMailing",
-          "show_description": false,
-          "required": false,
-          "allows_empty": true
-        },
-        {
-          "column": "CONTEST_FEATURE",
-          "json_path": [
-            "tournamentTeam"
-          ],
-          "label": "tournamentTeam",
-          "description": "tournamentTeam",
-          "show_description": false,
-          "required": false,
-          "allows_empty": true
-        },
-        {
-          "column": "CONTEST_FEATURE",
-          "json_path": [
-            "typeRewarding"
-          ],
-          "label": "typeRewarding",
-          "description": "typeRewarding",
-          "show_description": false,
-          "required": false,
-          "allows_empty": true
-        },
-        {
-          "column": "CONTEST_FEATURE",
-          "json_path": [
-            "vid"
-          ],
-          "label": "vid",
-          "description": "vid",
-          "show_description": false,
-          "required": false,
-          "allows_empty": true
+          "paths": [
+            {
+              "json_path": [
+                "accuracy"
+              ],
+              "label": "Знак точности",
+              "description": "Число знаков после запятой в карточке турнира",
+              "show_description": false,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [
+                "avatarShow"
+              ],
+              "label": "avatarShow",
+              "description": "avatarShow",
+              "show_description": false,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [
+                "businessBlock"
+              ],
+              "label": "Бизнес-блок",
+              "description": "businessBlock",
+              "show_description": false,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [
+                "businessBlock",
+                0
+              ],
+              "label": "businessBlock[0]",
+              "description": "businessBlock[0]",
+              "show_description": false,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [
+                "capacity"
+              ],
+              "label": "capacity",
+              "description": "capacity",
+              "show_description": false,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [
+                "feature"
+              ],
+              "label": "feature",
+              "description": "feature",
+              "show_description": false,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [
+                "feature",
+                0
+              ],
+              "label": "feature[0]",
+              "description": "feature[0]",
+              "show_description": false,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [
+                "feature",
+                1
+              ],
+              "label": "feature[1]",
+              "description": "feature[1]",
+              "show_description": false,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [
+                "feature",
+                2
+              ],
+              "label": "feature[2]",
+              "description": "feature[2]",
+              "show_description": false,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [
+                "feature",
+                3
+              ],
+              "label": "feature[3]",
+              "description": "feature[3]",
+              "show_description": false,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [
+                "feature",
+                4
+              ],
+              "label": "feature[4]",
+              "description": "feature[4]",
+              "show_description": false,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [
+                "feature",
+                5
+              ],
+              "label": "feature[5]",
+              "description": "feature[5]",
+              "show_description": false,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [
+                "gosbHidden"
+              ],
+              "label": "gosbHidden",
+              "description": "gosbHidden",
+              "show_description": false,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [
+                "gosbVisible"
+              ],
+              "label": "gosbVisible",
+              "description": "gosbVisible",
+              "show_description": false,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [
+                "helpCodeList",
+                0
+              ],
+              "label": "helpCodeList[0]",
+              "description": "helpCodeList[0]",
+              "show_description": false,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [
+                "helpCodeList",
+                1
+              ],
+              "label": "helpCodeList[1]",
+              "description": "helpCodeList[1]",
+              "show_description": false,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [
+                "masking"
+              ],
+              "label": "masking",
+              "description": "masking",
+              "show_description": false,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [
+                "minNumber"
+              ],
+              "label": "minNumber",
+              "description": "minNumber",
+              "show_description": false,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [
+                "momentRewarding"
+              ],
+              "label": "momentRewarding",
+              "description": "momentRewarding",
+              "show_description": false,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [
+                "persomanNumberHidden"
+              ],
+              "label": "persomanNumberHidden",
+              "description": "persomanNumberHidden",
+              "show_description": false,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [
+                "persomanNumberVisible"
+              ],
+              "label": "persomanNumberVisible",
+              "description": "persomanNumberVisible",
+              "show_description": false,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [
+                "persomanNumberVisible",
+                0
+              ],
+              "label": "persomanNumberVisible[0]",
+              "description": "persomanNumberVisible[0]",
+              "show_description": false,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [
+                "persomanNumberVisible",
+                1
+              ],
+              "label": "persomanNumberVisible[1]",
+              "description": "persomanNumberVisible[1]",
+              "show_description": false,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [
+                "persomanNumberVisible",
+                2
+              ],
+              "label": "persomanNumberVisible[2]",
+              "description": "persomanNumberVisible[2]",
+              "show_description": false,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [
+                "persomanNumberVisible",
+                3
+              ],
+              "label": "persomanNumberVisible[3]",
+              "description": "persomanNumberVisible[3]",
+              "show_description": false,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [
+                "persomanNumberVisible",
+                4
+              ],
+              "label": "persomanNumberVisible[4]",
+              "description": "persomanNumberVisible[4]",
+              "show_description": false,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [
+                "persomanNumberVisible",
+                5
+              ],
+              "label": "persomanNumberVisible[5]",
+              "description": "persomanNumberVisible[5]",
+              "show_description": false,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [
+                "persomanNumberVisible",
+                6
+              ],
+              "label": "persomanNumberVisible[6]",
+              "description": "persomanNumberVisible[6]",
+              "show_description": false,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [
+                "preferences"
+              ],
+              "label": "preferences",
+              "description": "preferences",
+              "show_description": false,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [
+                "preferences",
+                0
+              ],
+              "label": "preferences[0]",
+              "description": "preferences[0]",
+              "show_description": false,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [
+                "preferences",
+                1
+              ],
+              "label": "preferences[1]",
+              "description": "preferences[1]",
+              "show_description": false,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [
+                "preferences",
+                2
+              ],
+              "label": "preferences[2]",
+              "description": "preferences[2]",
+              "show_description": false,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [
+                "preferences",
+                3
+              ],
+              "label": "preferences[3]",
+              "description": "preferences[3]",
+              "show_description": false,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [
+                "tbHidden"
+              ],
+              "label": "tbHidden",
+              "description": "tbHidden",
+              "show_description": false,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [
+                "tbVisible"
+              ],
+              "label": "tbVisible",
+              "description": "tbVisible",
+              "show_description": false,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [
+                "tbVisible",
+                0
+              ],
+              "label": "tbVisible[0]",
+              "description": "tbVisible[0]",
+              "show_description": false,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [
+                "tbVisible",
+                1
+              ],
+              "label": "tbVisible[1]",
+              "description": "tbVisible[1]",
+              "show_description": false,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [
+                "tbVisible",
+                2
+              ],
+              "label": "tbVisible[2]",
+              "description": "tbVisible[2]",
+              "show_description": false,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [
+                "tbVisible",
+                3
+              ],
+              "label": "tbVisible[3]",
+              "description": "tbVisible[3]",
+              "show_description": false,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [
+                "tournamentEndMailing"
+              ],
+              "label": "tournamentEndMailing",
+              "description": "tournamentEndMailing",
+              "show_description": false,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [
+                "tournamentLikeMailing"
+              ],
+              "label": "tournamentLikeMailing",
+              "description": "tournamentLikeMailing",
+              "show_description": false,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [
+                "tournamentListMailing"
+              ],
+              "label": "tournamentListMailing",
+              "description": "tournamentListMailing",
+              "show_description": false,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [
+                "tournamentRewardingMailing"
+              ],
+              "label": "tournamentRewardingMailing",
+              "description": "tournamentRewardingMailing",
+              "show_description": false,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [
+                "tournamentStartMailing"
+              ],
+              "label": "tournamentStartMailing",
+              "description": "tournamentStartMailing",
+              "show_description": false,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [
+                "tournamentTeam"
+              ],
+              "label": "tournamentTeam",
+              "description": "tournamentTeam",
+              "show_description": false,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [
+                "typeRewarding"
+              ],
+              "label": "typeRewarding",
+              "description": "typeRewarding",
+              "show_description": false,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [
+                "vid"
+              ],
+              "label": "vid",
+              "description": "vid",
+              "show_description": false,
+              "required": false,
+              "allows_empty": true
+            }
+          ]
         }
       ]
     },
@@ -2371,17 +2370,17 @@
       "rules": [
         {
           "column": "CONTEST_CODE",
-          "label": "CONTEST_CODE",
-          "description": "CONTEST_CODE",
-          "show_description": false,
+          "label": "Код конкурса",
+          "description": "Уникальный код конкурса",
+          "show_description": true,
           "required": true,
           "allows_empty": false
         },
         {
           "column": "GROUP_CODE",
-          "label": "GROUP_CODE",
-          "description": "GROUP_CODE",
-          "show_description": false,
+          "label": "Уровень",
+          "description": "На каких уровнях выбираем победителей",
+          "show_description": true,
           "required": true,
           "allows_empty": false
         },
@@ -2395,9 +2394,9 @@
         },
         {
           "column": "GET_CALC_METHOD",
-          "label": "GET_CALC_METHOD",
-          "description": "GET_CALC_METHOD",
-          "show_description": false,
+          "label": "Метод расчета",
+          "description": "Способ отбора победителей: 1 - выбор TOP-X, 2 - выбор TOP-X%, 3 - выбор по выполнению плана",
+          "show_description": true,
           "required": true,
           "allows_empty": false
         },
@@ -2440,9 +2439,9 @@
       "rules": [
         {
           "column": "CONTEST_CODE",
-          "label": "CONTEST_CODE",
-          "description": "CONTEST_CODE",
-          "show_description": false,
+          "label": "Код конкурса",
+          "description": "Уникальный код конкурса",
+          "show_description": true,
           "required": true,
           "allows_empty": false
         },
@@ -2528,9 +2527,9 @@
         },
         {
           "column": "CALC_TYPE",
-          "label": "CALC_TYPE",
-          "description": "CALC_TYPE",
-          "show_description": false,
+          "label": "Тип расчета",
+          "description": "Тип расчета: 1 - расчет ручной, 0 - расчет автоматический",
+          "show_description": true,
           "required": true,
           "allows_empty": false
         },
@@ -2544,12 +2543,16 @@
         },
         {
           "column": "CONTESTANT_SELECTION",
-          "json_path": [],
-          "label": "(корень)",
-          "description": "(корень)",
-          "show_description": false,
-          "required": false,
-          "allows_empty": true
+          "paths": [
+            {
+              "json_path": [],
+              "label": "Способ определения ВКО",
+              "description": "0 - ВКО на дату операции/дату отчета; 1 - ВКО на дату окончания турнира",
+              "show_description": false,
+              "required": false,
+              "allows_empty": true
+            }
+          ]
         },
         {
           "column": "INDICATOR_FILTER",
@@ -2574,7 +2577,7 @@
       "rules": [
         {
           "column": "REWARD_CODE",
-          "label": "REWARD_CODE",
+          "label": "Код награды",
           "description": "REWARD_CODE",
           "show_description": false,
           "required": true,
@@ -2582,7 +2585,7 @@
         },
         {
           "column": "REWARD_TYPE",
-          "label": "REWARD_TYPE",
+          "label": "Тип награды",
           "description": "REWARD_TYPE",
           "show_description": false,
           "required": true,
@@ -2590,7 +2593,7 @@
         },
         {
           "column": "FULL_NAME",
-          "label": "FULL_NAME",
+          "label": "Наименование награды",
           "description": "FULL_NAME",
           "show_description": false,
           "required": true,
@@ -2598,7 +2601,7 @@
         },
         {
           "column": "REWARD_DESCRIPTION",
-          "label": "REWARD_DESCRIPTION",
+          "label": "Описание награды",
           "description": "REWARD_DESCRIPTION",
           "show_description": false,
           "required": true,
@@ -2614,7 +2617,7 @@
         },
         {
           "column": "REWARD_COST",
-          "label": "REWARD_COST",
+          "label": "Кристаллы награды",
           "description": "REWARD_COST",
           "show_description": false,
           "required": true,
@@ -2622,1221 +2625,1125 @@
         },
         {
           "column": "REWARD_ADD_DATA",
-          "json_path": [
-            "bookingRequired"
-          ],
-          "label": "bookingRequired",
-          "description": "bookingRequired",
-          "show_description": false,
-          "required": false,
-          "allows_empty": true
-        },
-        {
-          "column": "REWARD_ADD_DATA",
-          "json_path": [
-            "businessBlock",
-            0
-          ],
-          "label": "businessBlock[0]",
-          "description": "businessBlock[0]",
-          "show_description": false,
-          "required": false,
-          "allows_empty": true
-        },
-        {
-          "column": "REWARD_ADD_DATA",
-          "json_path": [
-            "commingSoon"
-          ],
-          "label": "commingSoon",
-          "description": "commingSoon",
-          "show_description": false,
-          "required": false,
-          "allows_empty": true
-        },
-        {
-          "column": "REWARD_ADD_DATA",
-          "json_path": [
-            "deliveryRequired"
-          ],
-          "label": "deliveryRequired",
-          "description": "deliveryRequired",
-          "show_description": false,
-          "required": false,
-          "allows_empty": true
-        },
-        {
-          "column": "REWARD_ADD_DATA",
-          "json_path": [
-            "feature"
-          ],
-          "label": "feature",
-          "description": "feature",
-          "show_description": false,
-          "required": false,
-          "allows_empty": true
-        },
-        {
-          "column": "REWARD_ADD_DATA",
-          "json_path": [
-            "feature",
-            0
-          ],
-          "label": "feature[0]",
-          "description": "feature[0]",
-          "show_description": false,
-          "required": false,
-          "allows_empty": true
-        },
-        {
-          "column": "REWARD_ADD_DATA",
-          "json_path": [
-            "feature",
-            1
-          ],
-          "label": "feature[1]",
-          "description": "feature[1]",
-          "show_description": false,
-          "required": false,
-          "allows_empty": true
-        },
-        {
-          "column": "REWARD_ADD_DATA",
-          "json_path": [
-            "feature",
-            2
-          ],
-          "label": "feature[2]",
-          "description": "feature[2]",
-          "show_description": false,
-          "required": false,
-          "allows_empty": true
-        },
-        {
-          "column": "REWARD_ADD_DATA",
-          "json_path": [
-            "feature",
-            3
-          ],
-          "label": "feature[3]",
-          "description": "feature[3]",
-          "show_description": false,
-          "required": false,
-          "allows_empty": true
-        },
-        {
-          "column": "REWARD_ADD_DATA",
-          "json_path": [
-            "feature",
-            4
-          ],
-          "label": "feature[4]",
-          "description": "feature[4]",
-          "show_description": false,
-          "required": false,
-          "allows_empty": true
-        },
-        {
-          "column": "REWARD_ADD_DATA",
-          "json_path": [
-            "feature",
-            5
-          ],
-          "label": "feature[5]",
-          "description": "feature[5]",
-          "show_description": false,
-          "required": false,
-          "allows_empty": true
-        },
-        {
-          "column": "REWARD_ADD_DATA",
-          "json_path": [
-            "fileName"
-          ],
-          "label": "fileName",
-          "description": "fileName",
-          "show_description": false,
-          "required": false,
-          "allows_empty": true
-        },
-        {
-          "column": "REWARD_ADD_DATA",
-          "json_path": [
-            "getCondition",
-            "employeeRating",
-            "minCrystalEarnedTotal"
-          ],
-          "label": "getCondition.employeeRating.minCrystalEarnedTotal",
-          "description": "getCondition.employeeRating.minCrystalEarnedTotal",
-          "show_description": false,
-          "required": false,
-          "allows_empty": true
-        },
-        {
-          "column": "REWARD_ADD_DATA",
-          "json_path": [
-            "getCondition",
-            "employeeRating",
-            "minRatingBANK"
-          ],
-          "label": "getCondition.employeeRating.minRatingBANK",
-          "description": "getCondition.employeeRating.minRatingBANK",
-          "show_description": false,
-          "required": false,
-          "allows_empty": true
-        },
-        {
-          "column": "REWARD_ADD_DATA",
-          "json_path": [
-            "getCondition",
-            "employeeRating",
-            "minRatingGOSB"
-          ],
-          "label": "getCondition.employeeRating.minRatingGOSB",
-          "description": "getCondition.employeeRating.minRatingGOSB",
-          "show_description": false,
-          "required": false,
-          "allows_empty": true
-        },
-        {
-          "column": "REWARD_ADD_DATA",
-          "json_path": [
-            "getCondition",
-            "employeeRating",
-            "minRatingTB"
-          ],
-          "label": "getCondition.employeeRating.minRatingTB",
-          "description": "getCondition.employeeRating.minRatingTB",
-          "show_description": false,
-          "required": false,
-          "allows_empty": true
-        },
-        {
-          "column": "REWARD_ADD_DATA",
-          "json_path": [
-            "getCondition",
-            "employeeRating",
-            "seasonCode"
-          ],
-          "label": "getCondition.employeeRating.seasonCode",
-          "description": "getCondition.employeeRating.seasonCode",
-          "show_description": false,
-          "required": false,
-          "allows_empty": true
-        },
-        {
-          "column": "REWARD_ADD_DATA",
-          "json_path": [
-            "getCondition",
-            "nonRewards"
-          ],
-          "label": "getCondition.nonRewards",
-          "description": "getCondition.nonRewards",
-          "show_description": false,
-          "required": false,
-          "allows_empty": true
-        },
-        {
-          "column": "REWARD_ADD_DATA",
-          "json_path": [
-            "getCondition",
-            "nonRewards",
-            0,
-            "nonRewardCode"
-          ],
-          "label": "getCondition.nonRewards[0].nonRewardCode",
-          "description": "getCondition.nonRewards[0].nonRewardCode",
-          "show_description": false,
-          "required": false,
-          "allows_empty": true
-        },
-        {
-          "column": "REWARD_ADD_DATA",
-          "json_path": [
-            "getCondition",
-            "nonRewards",
-            1,
-            "nonRewardCode"
-          ],
-          "label": "getCondition.nonRewards[1].nonRewardCode",
-          "description": "getCondition.nonRewards[1].nonRewardCode",
-          "show_description": false,
-          "required": false,
-          "allows_empty": true
-        },
-        {
-          "column": "REWARD_ADD_DATA",
-          "json_path": [
-            "getCondition",
-            "nonRewards",
-            2,
-            "nonRewardCode"
-          ],
-          "label": "getCondition.nonRewards[2].nonRewardCode",
-          "description": "getCondition.nonRewards[2].nonRewardCode",
-          "show_description": false,
-          "required": false,
-          "allows_empty": true
-        },
-        {
-          "column": "REWARD_ADD_DATA",
-          "json_path": [
-            "getCondition",
-            "nonRewards",
-            3,
-            "nonRewardCode"
-          ],
-          "label": "getCondition.nonRewards[3].nonRewardCode",
-          "description": "getCondition.nonRewards[3].nonRewardCode",
-          "show_description": false,
-          "required": false,
-          "allows_empty": true
-        },
-        {
-          "column": "REWARD_ADD_DATA",
-          "json_path": [
-            "getCondition",
-            "nonRewards",
-            4,
-            "nonRewardCode"
-          ],
-          "label": "getCondition.nonRewards[4].nonRewardCode",
-          "description": "getCondition.nonRewards[4].nonRewardCode",
-          "show_description": false,
-          "required": false,
-          "allows_empty": true
-        },
-        {
-          "column": "REWARD_ADD_DATA",
-          "json_path": [
-            "getCondition",
-            "nonRewards",
-            5,
-            "nonRewardCode"
-          ],
-          "label": "getCondition.nonRewards[5].nonRewardCode",
-          "description": "getCondition.nonRewards[5].nonRewardCode",
-          "show_description": false,
-          "required": false,
-          "allows_empty": true
-        },
-        {
-          "column": "REWARD_ADD_DATA",
-          "json_path": [
-            "getCondition",
-            "nonRewards",
-            6,
-            "nonRewardCode"
-          ],
-          "label": "getCondition.nonRewards[6].nonRewardCode",
-          "description": "getCondition.nonRewards[6].nonRewardCode",
-          "show_description": false,
-          "required": false,
-          "allows_empty": true
-        },
-        {
-          "column": "REWARD_ADD_DATA",
-          "json_path": [
-            "getCondition",
-            "nonRewards",
-            7,
-            "nonRewardCode"
-          ],
-          "label": "getCondition.nonRewards[7].nonRewardCode",
-          "description": "getCondition.nonRewards[7].nonRewardCode",
-          "show_description": false,
-          "required": false,
-          "allows_empty": true
-        },
-        {
-          "column": "REWARD_ADD_DATA",
-          "json_path": [
-            "getCondition",
-            "rewards"
-          ],
-          "label": "getCondition.rewards",
-          "description": "getCondition.rewards",
-          "show_description": false,
-          "required": false,
-          "allows_empty": true
-        },
-        {
-          "column": "REWARD_ADD_DATA",
-          "json_path": [
-            "getCondition",
-            "rewards",
-            0,
-            "amount"
-          ],
-          "label": "getCondition.rewards[0].amount",
-          "description": "getCondition.rewards[0].amount",
-          "show_description": false,
-          "required": false,
-          "allows_empty": true
-        },
-        {
-          "column": "REWARD_ADD_DATA",
-          "json_path": [
-            "getCondition",
-            "rewards",
-            0,
-            "rewardCode"
-          ],
-          "label": "getCondition.rewards[0].rewardCode",
-          "description": "getCondition.rewards[0].rewardCode",
-          "show_description": false,
-          "required": false,
-          "allows_empty": true
-        },
-        {
-          "column": "REWARD_ADD_DATA",
-          "json_path": [
-            "getCondition",
-            "rewards",
-            1,
-            "amount"
-          ],
-          "label": "getCondition.rewards[1].amount",
-          "description": "getCondition.rewards[1].amount",
-          "show_description": false,
-          "required": false,
-          "allows_empty": true
-        },
-        {
-          "column": "REWARD_ADD_DATA",
-          "json_path": [
-            "getCondition",
-            "rewards",
-            1,
-            "rewardCode"
-          ],
-          "label": "getCondition.rewards[1].rewardCode",
-          "description": "getCondition.rewards[1].rewardCode",
-          "show_description": false,
-          "required": false,
-          "allows_empty": true
-        },
-        {
-          "column": "REWARD_ADD_DATA",
-          "json_path": [
-            "helpCodeList",
-            0
-          ],
-          "label": "helpCodeList[0]",
-          "description": "helpCodeList[0]",
-          "show_description": false,
-          "required": false,
-          "allows_empty": true
-        },
-        {
-          "column": "REWARD_ADD_DATA",
-          "json_path": [
-            "helpCodeList",
-            1
-          ],
-          "label": "helpCodeList[1]",
-          "description": "helpCodeList[1]",
-          "show_description": false,
-          "required": false,
-          "allows_empty": true
-        },
-        {
-          "column": "REWARD_ADD_DATA",
-          "json_path": [
-            "hidden"
-          ],
-          "label": "hidden",
-          "description": "hidden",
-          "show_description": false,
-          "required": false,
-          "allows_empty": true
-        },
-        {
-          "column": "REWARD_ADD_DATA",
-          "json_path": [
-            "hiddenRewardList"
-          ],
-          "label": "hiddenRewardList",
-          "description": "hiddenRewardList",
-          "show_description": false,
-          "required": false,
-          "allows_empty": true
-        },
-        {
-          "column": "REWARD_ADD_DATA",
-          "json_path": [
-            "ignoreConditions"
-          ],
-          "label": "ignoreConditions",
-          "description": "ignoreConditions",
-          "show_description": false,
-          "required": false,
-          "allows_empty": true
-        },
-        {
-          "column": "REWARD_ADD_DATA",
-          "json_path": [
-            "ignoreConditions",
-            0
-          ],
-          "label": "ignoreConditions[0]",
-          "description": "ignoreConditions[0]",
-          "show_description": false,
-          "required": false,
-          "allows_empty": true
-        },
-        {
-          "column": "REWARD_ADD_DATA",
-          "json_path": [
-            "ignoreConditions",
-            10
-          ],
-          "label": "ignoreConditions[10]",
-          "description": "ignoreConditions[10]",
-          "show_description": false,
-          "required": false,
-          "allows_empty": true
-        },
-        {
-          "column": "REWARD_ADD_DATA",
-          "json_path": [
-            "ignoreConditions",
-            11
-          ],
-          "label": "ignoreConditions[11]",
-          "description": "ignoreConditions[11]",
-          "show_description": false,
-          "required": false,
-          "allows_empty": true
-        },
-        {
-          "column": "REWARD_ADD_DATA",
-          "json_path": [
-            "ignoreConditions",
-            12
-          ],
-          "label": "ignoreConditions[12]",
-          "description": "ignoreConditions[12]",
-          "show_description": false,
-          "required": false,
-          "allows_empty": true
-        },
-        {
-          "column": "REWARD_ADD_DATA",
-          "json_path": [
-            "ignoreConditions",
-            13
-          ],
-          "label": "ignoreConditions[13]",
-          "description": "ignoreConditions[13]",
-          "show_description": false,
-          "required": false,
-          "allows_empty": true
-        },
-        {
-          "column": "REWARD_ADD_DATA",
-          "json_path": [
-            "ignoreConditions",
-            1
-          ],
-          "label": "ignoreConditions[1]",
-          "description": "ignoreConditions[1]",
-          "show_description": false,
-          "required": false,
-          "allows_empty": true
-        },
-        {
-          "column": "REWARD_ADD_DATA",
-          "json_path": [
-            "ignoreConditions",
-            2
-          ],
-          "label": "ignoreConditions[2]",
-          "description": "ignoreConditions[2]",
-          "show_description": false,
-          "required": false,
-          "allows_empty": true
-        },
-        {
-          "column": "REWARD_ADD_DATA",
-          "json_path": [
-            "ignoreConditions",
-            3
-          ],
-          "label": "ignoreConditions[3]",
-          "description": "ignoreConditions[3]",
-          "show_description": false,
-          "required": false,
-          "allows_empty": true
-        },
-        {
-          "column": "REWARD_ADD_DATA",
-          "json_path": [
-            "ignoreConditions",
-            4
-          ],
-          "label": "ignoreConditions[4]",
-          "description": "ignoreConditions[4]",
-          "show_description": false,
-          "required": false,
-          "allows_empty": true
-        },
-        {
-          "column": "REWARD_ADD_DATA",
-          "json_path": [
-            "ignoreConditions",
-            5
-          ],
-          "label": "ignoreConditions[5]",
-          "description": "ignoreConditions[5]",
-          "show_description": false,
-          "required": false,
-          "allows_empty": true
-        },
-        {
-          "column": "REWARD_ADD_DATA",
-          "json_path": [
-            "ignoreConditions",
-            6
-          ],
-          "label": "ignoreConditions[6]",
-          "description": "ignoreConditions[6]",
-          "show_description": false,
-          "required": false,
-          "allows_empty": true
-        },
-        {
-          "column": "REWARD_ADD_DATA",
-          "json_path": [
-            "ignoreConditions",
-            7
-          ],
-          "label": "ignoreConditions[7]",
-          "description": "ignoreConditions[7]",
-          "show_description": false,
-          "required": false,
-          "allows_empty": true
-        },
-        {
-          "column": "REWARD_ADD_DATA",
-          "json_path": [
-            "ignoreConditions",
-            8
-          ],
-          "label": "ignoreConditions[8]",
-          "description": "ignoreConditions[8]",
-          "show_description": false,
-          "required": false,
-          "allows_empty": true
-        },
-        {
-          "column": "REWARD_ADD_DATA",
-          "json_path": [
-            "ignoreConditions",
-            9
-          ],
-          "label": "ignoreConditions[9]",
-          "description": "ignoreConditions[9]",
-          "show_description": false,
-          "required": false,
-          "allows_empty": true
-        },
-        {
-          "column": "REWARD_ADD_DATA",
-          "json_path": [
-            "isGrouping"
-          ],
-          "label": "isGrouping",
-          "description": "isGrouping",
-          "show_description": false,
-          "required": false,
-          "allows_empty": true
-        },
-        {
-          "column": "REWARD_ADD_DATA",
-          "json_path": [
-            "isGroupingName"
-          ],
-          "label": "isGroupingName",
-          "description": "isGroupingName",
-          "show_description": false,
-          "required": false,
-          "allows_empty": true
-        },
-        {
-          "column": "REWARD_ADD_DATA",
-          "json_path": [
-            "isGroupingTitle"
-          ],
-          "label": "isGroupingTitle",
-          "description": "isGroupingTitle",
-          "show_description": false,
-          "required": false,
-          "allows_empty": true
-        },
-        {
-          "column": "REWARD_ADD_DATA",
-          "json_path": [
-            "isGroupingTultip"
-          ],
-          "label": "isGroupingTultip",
-          "description": "isGroupingTultip",
-          "show_description": false,
-          "required": false,
-          "allows_empty": true
-        },
-        {
-          "column": "REWARD_ADD_DATA",
-          "json_path": [
-            "itemAmount"
-          ],
-          "label": "itemAmount",
-          "description": "itemAmount",
-          "show_description": false,
-          "required": false,
-          "allows_empty": true
-        },
-        {
-          "column": "REWARD_ADD_DATA",
-          "json_path": [
-            "itemFeature"
-          ],
-          "label": "itemFeature",
-          "description": "itemFeature",
-          "show_description": false,
-          "required": false,
-          "allows_empty": true
-        },
-        {
-          "column": "REWARD_ADD_DATA",
-          "json_path": [
-            "itemFeature",
-            0
-          ],
-          "label": "itemFeature[0]",
-          "description": "itemFeature[0]",
-          "show_description": false,
-          "required": false,
-          "allows_empty": true
-        },
-        {
-          "column": "REWARD_ADD_DATA",
-          "json_path": [
-            "itemFeature",
-            1
-          ],
-          "label": "itemFeature[1]",
-          "description": "itemFeature[1]",
-          "show_description": false,
-          "required": false,
-          "allows_empty": true
-        },
-        {
-          "column": "REWARD_ADD_DATA",
-          "json_path": [
-            "itemFeature",
-            2
-          ],
-          "label": "itemFeature[2]",
-          "description": "itemFeature[2]",
-          "show_description": false,
-          "required": false,
-          "allows_empty": true
-        },
-        {
-          "column": "REWARD_ADD_DATA",
-          "json_path": [
-            "itemFeature",
-            3
-          ],
-          "label": "itemFeature[3]",
-          "description": "itemFeature[3]",
-          "show_description": false,
-          "required": false,
-          "allows_empty": true
-        },
-        {
-          "column": "REWARD_ADD_DATA",
-          "json_path": [
-            "itemFeature",
-            4
-          ],
-          "label": "itemFeature[4]",
-          "description": "itemFeature[4]",
-          "show_description": false,
-          "required": false,
-          "allows_empty": true
-        },
-        {
-          "column": "REWARD_ADD_DATA",
-          "json_path": [
-            "itemFeature",
-            5
-          ],
-          "label": "itemFeature[5]",
-          "description": "itemFeature[5]",
-          "show_description": false,
-          "required": false,
-          "allows_empty": true
-        },
-        {
-          "column": "REWARD_ADD_DATA",
-          "json_path": [
-            "itemGroupAmount"
-          ],
-          "label": "itemGroupAmount",
-          "description": "itemGroupAmount",
-          "show_description": false,
-          "required": false,
-          "allows_empty": true
-        },
-        {
-          "column": "REWARD_ADD_DATA",
-          "json_path": [
-            "itemGroupAmount",
-            0,
-            "itemParam"
-          ],
-          "label": "itemGroupAmount[0].itemParam",
-          "description": "itemGroupAmount[0].itemParam",
-          "show_description": false,
-          "required": false,
-          "allows_empty": true
-        },
-        {
-          "column": "REWARD_ADD_DATA",
-          "json_path": [
-            "itemGroupAmount",
-            0,
-            "itemParamAmount"
-          ],
-          "label": "itemGroupAmount[0].itemParamAmount",
-          "description": "itemGroupAmount[0].itemParamAmount",
-          "show_description": false,
-          "required": false,
-          "allows_empty": true
-        },
-        {
-          "column": "REWARD_ADD_DATA",
-          "json_path": [
-            "itemGroupAmount",
-            1,
-            "itemParam"
-          ],
-          "label": "itemGroupAmount[1].itemParam",
-          "description": "itemGroupAmount[1].itemParam",
-          "show_description": false,
-          "required": false,
-          "allows_empty": true
-        },
-        {
-          "column": "REWARD_ADD_DATA",
-          "json_path": [
-            "itemGroupAmount",
-            1,
-            "itemParamAmount"
-          ],
-          "label": "itemGroupAmount[1].itemParamAmount",
-          "description": "itemGroupAmount[1].itemParamAmount",
-          "show_description": false,
-          "required": false,
-          "allows_empty": true
-        },
-        {
-          "column": "REWARD_ADD_DATA",
-          "json_path": [
-            "itemGroupAmount",
-            2,
-            "itemParam"
-          ],
-          "label": "itemGroupAmount[2].itemParam",
-          "description": "itemGroupAmount[2].itemParam",
-          "show_description": false,
-          "required": false,
-          "allows_empty": true
-        },
-        {
-          "column": "REWARD_ADD_DATA",
-          "json_path": [
-            "itemGroupAmount",
-            2,
-            "itemParamAmount"
-          ],
-          "label": "itemGroupAmount[2].itemParamAmount",
-          "description": "itemGroupAmount[2].itemParamAmount",
-          "show_description": false,
-          "required": false,
-          "allows_empty": true
-        },
-        {
-          "column": "REWARD_ADD_DATA",
-          "json_path": [
-            "itemGroupAmount",
-            3,
-            "itemParam"
-          ],
-          "label": "itemGroupAmount[3].itemParam",
-          "description": "itemGroupAmount[3].itemParam",
-          "show_description": false,
-          "required": false,
-          "allows_empty": true
-        },
-        {
-          "column": "REWARD_ADD_DATA",
-          "json_path": [
-            "itemGroupAmount",
-            3,
-            "itemParamAmount"
-          ],
-          "label": "itemGroupAmount[3].itemParamAmount",
-          "description": "itemGroupAmount[3].itemParamAmount",
-          "show_description": false,
-          "required": false,
-          "allows_empty": true
-        },
-        {
-          "column": "REWARD_ADD_DATA",
-          "json_path": [
-            "itemGroupAmount",
-            4,
-            "itemParam"
-          ],
-          "label": "itemGroupAmount[4].itemParam",
-          "description": "itemGroupAmount[4].itemParam",
-          "show_description": false,
-          "required": false,
-          "allows_empty": true
-        },
-        {
-          "column": "REWARD_ADD_DATA",
-          "json_path": [
-            "itemGroupAmount",
-            4,
-            "itemParamAmount"
-          ],
-          "label": "itemGroupAmount[4].itemParamAmount",
-          "description": "itemGroupAmount[4].itemParamAmount",
-          "show_description": false,
-          "required": false,
-          "allows_empty": true
-        },
-        {
-          "column": "REWARD_ADD_DATA",
-          "json_path": [
-            "itemGroupAmount",
-            5,
-            "itemParam"
-          ],
-          "label": "itemGroupAmount[5].itemParam",
-          "description": "itemGroupAmount[5].itemParam",
-          "show_description": false,
-          "required": false,
-          "allows_empty": true
-        },
-        {
-          "column": "REWARD_ADD_DATA",
-          "json_path": [
-            "itemGroupAmount",
-            5,
-            "itemParamAmount"
-          ],
-          "label": "itemGroupAmount[5].itemParamAmount",
-          "description": "itemGroupAmount[5].itemParamAmount",
-          "show_description": false,
-          "required": false,
-          "allows_empty": true
-        },
-        {
-          "column": "REWARD_ADD_DATA",
-          "json_path": [
-            "itemGroupAmount",
-            6,
-            "itemParam"
-          ],
-          "label": "itemGroupAmount[6].itemParam",
-          "description": "itemGroupAmount[6].itemParam",
-          "show_description": false,
-          "required": false,
-          "allows_empty": true
-        },
-        {
-          "column": "REWARD_ADD_DATA",
-          "json_path": [
-            "itemGroupAmount",
-            6,
-            "itemParamAmount"
-          ],
-          "label": "itemGroupAmount[6].itemParamAmount",
-          "description": "itemGroupAmount[6].itemParamAmount",
-          "show_description": false,
-          "required": false,
-          "allows_empty": true
-        },
-        {
-          "column": "REWARD_ADD_DATA",
-          "json_path": [
-            "itemLimitCount"
-          ],
-          "label": "itemLimitCount",
-          "description": "itemLimitCount",
-          "show_description": false,
-          "required": false,
-          "allows_empty": true
-        },
-        {
-          "column": "REWARD_ADD_DATA",
-          "json_path": [
-            "itemLimitPeriod"
-          ],
-          "label": "itemLimitPeriod",
-          "description": "itemLimitPeriod",
-          "show_description": false,
-          "required": false,
-          "allows_empty": true
-        },
-        {
-          "column": "REWARD_ADD_DATA",
-          "json_path": [
-            "itemMinShow"
-          ],
-          "label": "itemMinShow",
-          "description": "itemMinShow",
-          "show_description": false,
-          "required": false,
-          "allows_empty": true
-        },
-        {
-          "column": "REWARD_ADD_DATA",
-          "json_path": [
-            "masterBadge"
-          ],
-          "label": "masterBadge",
-          "description": "masterBadge",
-          "show_description": false,
-          "required": false,
-          "allows_empty": true
-        },
-        {
-          "column": "REWARD_ADD_DATA",
-          "json_path": [
-            "newsType"
-          ],
-          "label": "newsType",
-          "description": "newsType",
-          "show_description": false,
-          "required": false,
-          "allows_empty": true
-        },
-        {
-          "column": "REWARD_ADD_DATA",
-          "json_path": [
-            "nftFlg"
-          ],
-          "label": "nftFlg",
-          "description": "nftFlg",
-          "show_description": false,
-          "required": false,
-          "allows_empty": true
-        },
-        {
-          "column": "REWARD_ADD_DATA",
-          "json_path": [
-            "outstanding"
-          ],
-          "label": "outstanding",
-          "description": "outstanding",
-          "show_description": false,
-          "required": false,
-          "allows_empty": true
-        },
-        {
-          "column": "REWARD_ADD_DATA",
-          "json_path": [
-            "parentRewardCode"
-          ],
-          "label": "parentRewardCode",
-          "description": "parentRewardCode",
-          "show_description": false,
-          "required": false,
-          "allows_empty": true
-        },
-        {
-          "column": "REWARD_ADD_DATA",
-          "json_path": [
-            "persomanNumberVisible"
-          ],
-          "label": "persomanNumberVisible",
-          "description": "persomanNumberVisible",
-          "show_description": false,
-          "required": false,
-          "allows_empty": true
-        },
-        {
-          "column": "REWARD_ADD_DATA",
-          "json_path": [
-            "preferences",
-            0
-          ],
-          "label": "preferences[0]",
-          "description": "preferences[0]",
-          "show_description": false,
-          "required": false,
-          "allows_empty": true
-        },
-        {
-          "column": "REWARD_ADD_DATA",
-          "json_path": [
-            "priority"
-          ],
-          "label": "priority",
-          "description": "priority",
-          "show_description": false,
-          "required": false,
-          "allows_empty": true
-        },
-        {
-          "column": "REWARD_ADD_DATA",
-          "json_path": [
-            "recommendationLevel"
-          ],
-          "label": "recommendationLevel",
-          "description": "recommendationLevel",
-          "show_description": false,
-          "required": false,
-          "allows_empty": true
-        },
-        {
-          "column": "REWARD_ADD_DATA",
-          "json_path": [
-            "refreshOldNews"
-          ],
-          "label": "refreshOldNews",
-          "description": "refreshOldNews",
-          "show_description": false,
-          "required": false,
-          "allows_empty": true
-        },
-        {
-          "column": "REWARD_ADD_DATA",
-          "json_path": [
-            "rewardAgainGlobal"
-          ],
-          "label": "rewardAgainGlobal",
-          "description": "rewardAgainGlobal",
-          "show_description": false,
-          "required": false,
-          "allows_empty": true
-        },
-        {
-          "column": "REWARD_ADD_DATA",
-          "json_path": [
-            "rewardAgainTournament"
-          ],
-          "label": "rewardAgainTournament",
-          "description": "rewardAgainTournament",
-          "show_description": false,
-          "required": false,
-          "allows_empty": true
-        },
-        {
-          "column": "REWARD_ADD_DATA",
-          "json_path": [
-            "rewardRule"
-          ],
-          "label": "rewardRule",
-          "description": "rewardRule",
-          "show_description": false,
-          "required": false,
-          "allows_empty": true
-        },
-        {
-          "column": "REWARD_ADD_DATA",
-          "json_path": [
-            "seasonItem"
-          ],
-          "label": "seasonItem",
-          "description": "seasonItem",
-          "show_description": false,
-          "required": false,
-          "allows_empty": true
-        },
-        {
-          "column": "REWARD_ADD_DATA",
-          "json_path": [
-            "seasonItem",
-            0
-          ],
-          "label": "seasonItem[0]",
-          "description": "seasonItem[0]",
-          "show_description": false,
-          "required": false,
-          "allows_empty": true
-        },
-        {
-          "column": "REWARD_ADD_DATA",
-          "json_path": [
-            "singleNews"
-          ],
-          "label": "singleNews",
-          "description": "singleNews",
-          "show_description": false,
-          "required": false,
-          "allows_empty": true
-        },
-        {
-          "column": "REWARD_ADD_DATA",
-          "json_path": [
-            "tagColor"
-          ],
-          "label": "tagColor",
-          "description": "tagColor",
-          "show_description": false,
-          "required": false,
-          "allows_empty": true
-        },
-        {
-          "column": "REWARD_ADD_DATA",
-          "json_path": [
-            "tagEndDT"
-          ],
-          "label": "tagEndDT",
-          "description": "tagEndDT",
-          "show_description": false,
-          "required": false,
-          "allows_empty": true
-        },
-        {
-          "column": "REWARD_ADD_DATA",
-          "json_path": [
-            "teamNews"
-          ],
-          "label": "teamNews",
-          "description": "teamNews",
-          "show_description": false,
-          "required": false,
-          "allows_empty": true
-        },
-        {
-          "column": "REWARD_ADD_DATA",
-          "json_path": [
-            "tournamentTeam"
-          ],
-          "label": "tournamentTeam",
-          "description": "tournamentTeam",
-          "show_description": false,
-          "required": false,
-          "allows_empty": true
-        },
-        {
-          "column": "REWARD_ADD_DATA",
-          "json_path": [
-            "winCriterion"
-          ],
-          "label": "winCriterion",
-          "description": "winCriterion",
-          "show_description": false,
-          "required": false,
-          "allows_empty": true
+          "paths": [
+            {
+              "json_path": [
+                "bookingRequired"
+              ],
+              "label": "bookingRequired",
+              "description": "bookingRequired",
+              "show_description": false,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [
+                "businessBlock",
+                0
+              ],
+              "label": "Бизнес-блок",
+              "description": "businessBlock[0]",
+              "show_description": false,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [
+                "commingSoon"
+              ],
+              "label": "commingSoon",
+              "description": "commingSoon",
+              "show_description": false,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [
+                "deliveryRequired"
+              ],
+              "label": "deliveryRequired",
+              "description": "deliveryRequired",
+              "show_description": false,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [
+                "feature"
+              ],
+              "label": "feature",
+              "description": "feature",
+              "show_description": false,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [
+                "feature",
+                0
+              ],
+              "label": "feature[0]",
+              "description": "feature[0]",
+              "show_description": false,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [
+                "feature",
+                1
+              ],
+              "label": "feature[1]",
+              "description": "feature[1]",
+              "show_description": false,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [
+                "feature",
+                2
+              ],
+              "label": "feature[2]",
+              "description": "feature[2]",
+              "show_description": false,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [
+                "feature",
+                3
+              ],
+              "label": "feature[3]",
+              "description": "feature[3]",
+              "show_description": false,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [
+                "feature",
+                4
+              ],
+              "label": "feature[4]",
+              "description": "feature[4]",
+              "show_description": false,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [
+                "feature",
+                5
+              ],
+              "label": "feature[5]",
+              "description": "feature[5]",
+              "show_description": false,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [
+                "fileName"
+              ],
+              "label": "fileName",
+              "description": "fileName",
+              "show_description": false,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [
+                "getCondition",
+                "employeeRating",
+                "minCrystalEarnedTotal"
+              ],
+              "label": "getCondition.employeeRating.minCrystalEarnedTotal",
+              "description": "getCondition.employeeRating.minCrystalEarnedTotal",
+              "show_description": false,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [
+                "getCondition",
+                "employeeRating",
+                "minRatingBANK"
+              ],
+              "label": "Минимальный рейтинг в стране",
+              "description": "Для выбора преференции надо иметь рейтинг в стране ниже указанного",
+              "show_description": true,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [
+                "getCondition",
+                "employeeRating",
+                "minRatingGOSB"
+              ],
+              "label": "Минимальный рейтинг в ТБ",
+              "description": "Для выбора преференции надо иметь рейтинг в ТБ ниже указанного",
+              "show_description": true,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [
+                "getCondition",
+                "employeeRating",
+                "minRatingTB"
+              ],
+              "label": "Минимальный рейтинг в ГОСБ",
+              "description": "Для выбора преференции надо иметь рейтинг в ГОСБ ниже указанного",
+              "show_description": true,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [
+                "getCondition",
+                "employeeRating",
+                "seasonCode"
+              ],
+              "label": "Сезон рейтинга",
+              "description": "В каком сезоне надо занять минимальный рейтинг",
+              "show_description": false,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [
+                "getCondition",
+                "nonRewards"
+              ],
+              "label": "getCondition.nonRewards",
+              "description": "getCondition.nonRewards",
+              "show_description": false,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [
+                "getCondition",
+                "nonRewards",
+                0,
+                "nonRewardCode"
+              ],
+              "label": "getCondition.nonRewards[0].nonRewardCode",
+              "description": "getCondition.nonRewards[0].nonRewardCode",
+              "show_description": false,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [
+                "getCondition",
+                "nonRewards",
+                1,
+                "nonRewardCode"
+              ],
+              "label": "getCondition.nonRewards[1].nonRewardCode",
+              "description": "getCondition.nonRewards[1].nonRewardCode",
+              "show_description": false,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [
+                "getCondition",
+                "nonRewards",
+                2,
+                "nonRewardCode"
+              ],
+              "label": "getCondition.nonRewards[2].nonRewardCode",
+              "description": "getCondition.nonRewards[2].nonRewardCode",
+              "show_description": false,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [
+                "getCondition",
+                "nonRewards",
+                3,
+                "nonRewardCode"
+              ],
+              "label": "getCondition.nonRewards[3].nonRewardCode",
+              "description": "getCondition.nonRewards[3].nonRewardCode",
+              "show_description": false,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [
+                "getCondition",
+                "nonRewards",
+                4,
+                "nonRewardCode"
+              ],
+              "label": "getCondition.nonRewards[4].nonRewardCode",
+              "description": "getCondition.nonRewards[4].nonRewardCode",
+              "show_description": false,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [
+                "getCondition",
+                "nonRewards",
+                5,
+                "nonRewardCode"
+              ],
+              "label": "getCondition.nonRewards[5].nonRewardCode",
+              "description": "getCondition.nonRewards[5].nonRewardCode",
+              "show_description": false,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [
+                "getCondition",
+                "nonRewards",
+                6,
+                "nonRewardCode"
+              ],
+              "label": "getCondition.nonRewards[6].nonRewardCode",
+              "description": "getCondition.nonRewards[6].nonRewardCode",
+              "show_description": false,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [
+                "getCondition",
+                "nonRewards",
+                7,
+                "nonRewardCode"
+              ],
+              "label": "getCondition.nonRewards[7].nonRewardCode",
+              "description": "getCondition.nonRewards[7].nonRewardCode",
+              "show_description": false,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [
+                "getCondition",
+                "rewards"
+              ],
+              "label": "getCondition.rewards",
+              "description": "getCondition.rewards",
+              "show_description": false,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [
+                "getCondition",
+                "rewards",
+                0,
+                "amount"
+              ],
+              "label": "getCondition.rewards[0].amount",
+              "description": "getCondition.rewards[0].amount",
+              "show_description": false,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [
+                "getCondition",
+                "rewards",
+                0,
+                "rewardCode"
+              ],
+              "label": "getCondition.rewards[0].rewardCode",
+              "description": "getCondition.rewards[0].rewardCode",
+              "show_description": false,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [
+                "getCondition",
+                "rewards",
+                1,
+                "amount"
+              ],
+              "label": "getCondition.rewards[1].amount",
+              "description": "getCondition.rewards[1].amount",
+              "show_description": false,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [
+                "getCondition",
+                "rewards",
+                1,
+                "rewardCode"
+              ],
+              "label": "getCondition.rewards[1].rewardCode",
+              "description": "getCondition.rewards[1].rewardCode",
+              "show_description": false,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [
+                "helpCodeList",
+                0
+              ],
+              "label": "helpCodeList[0]",
+              "description": "helpCodeList[0]",
+              "show_description": false,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [
+                "helpCodeList",
+                1
+              ],
+              "label": "helpCodeList[1]",
+              "description": "helpCodeList[1]",
+              "show_description": false,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [
+                "hidden"
+              ],
+              "label": "hidden",
+              "description": "Скрыть",
+              "show_description": false,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [
+                "hiddenRewardList"
+              ],
+              "label": "Скрыть в списках",
+              "description": "hiddenRewardList",
+              "show_description": false,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [
+                "ignoreConditions"
+              ],
+              "label": "Доступность без условий",
+              "description": "Перечисленные табельные номера не требуют выполнения условий",
+              "show_description": true,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [
+                "ignoreConditions",
+                0
+              ],
+              "label": "ignoreConditions[0]",
+              "description": "ignoreConditions[0]",
+              "show_description": false,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [
+                "ignoreConditions",
+                10
+              ],
+              "label": "ignoreConditions[10]",
+              "description": "ignoreConditions[10]",
+              "show_description": false,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [
+                "ignoreConditions",
+                11
+              ],
+              "label": "ignoreConditions[11]",
+              "description": "ignoreConditions[11]",
+              "show_description": false,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [
+                "ignoreConditions",
+                12
+              ],
+              "label": "ignoreConditions[12]",
+              "description": "ignoreConditions[12]",
+              "show_description": false,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [
+                "ignoreConditions",
+                13
+              ],
+              "label": "ignoreConditions[13]",
+              "description": "ignoreConditions[13]",
+              "show_description": false,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [
+                "ignoreConditions",
+                1
+              ],
+              "label": "ignoreConditions[1]",
+              "description": "ignoreConditions[1]",
+              "show_description": false,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [
+                "ignoreConditions",
+                2
+              ],
+              "label": "ignoreConditions[2]",
+              "description": "ignoreConditions[2]",
+              "show_description": false,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [
+                "ignoreConditions",
+                3
+              ],
+              "label": "ignoreConditions[3]",
+              "description": "ignoreConditions[3]",
+              "show_description": false,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [
+                "ignoreConditions",
+                4
+              ],
+              "label": "ignoreConditions[4]",
+              "description": "ignoreConditions[4]",
+              "show_description": false,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [
+                "ignoreConditions",
+                5
+              ],
+              "label": "ignoreConditions[5]",
+              "description": "ignoreConditions[5]",
+              "show_description": false,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [
+                "ignoreConditions",
+                6
+              ],
+              "label": "ignoreConditions[6]",
+              "description": "ignoreConditions[6]",
+              "show_description": false,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [
+                "ignoreConditions",
+                7
+              ],
+              "label": "ignoreConditions[7]",
+              "description": "ignoreConditions[7]",
+              "show_description": false,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [
+                "ignoreConditions",
+                8
+              ],
+              "label": "ignoreConditions[8]",
+              "description": "ignoreConditions[8]",
+              "show_description": false,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [
+                "ignoreConditions",
+                9
+              ],
+              "label": "ignoreConditions[9]",
+              "description": "ignoreConditions[9]",
+              "show_description": false,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [
+                "isGrouping"
+              ],
+              "label": "isGrouping",
+              "description": "isGrouping",
+              "show_description": false,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [
+                "isGroupingName"
+              ],
+              "label": "isGroupingName",
+              "description": "isGroupingName",
+              "show_description": false,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [
+                "isGroupingTitle"
+              ],
+              "label": "isGroupingTitle",
+              "description": "isGroupingTitle",
+              "show_description": false,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [
+                "isGroupingTultip"
+              ],
+              "label": "isGroupingTultip",
+              "description": "isGroupingTultip",
+              "show_description": false,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [
+                "itemAmount"
+              ],
+              "label": "itemAmount",
+              "description": "itemAmount",
+              "show_description": false,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [
+                "itemFeature"
+              ],
+              "label": "itemFeature",
+              "description": "itemFeature",
+              "show_description": false,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [
+                "itemFeature",
+                0
+              ],
+              "label": "itemFeature[0]",
+              "description": "itemFeature[0]",
+              "show_description": false,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [
+                "itemFeature",
+                1
+              ],
+              "label": "itemFeature[1]",
+              "description": "itemFeature[1]",
+              "show_description": false,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [
+                "itemFeature",
+                2
+              ],
+              "label": "itemFeature[2]",
+              "description": "itemFeature[2]",
+              "show_description": false,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [
+                "itemFeature",
+                3
+              ],
+              "label": "itemFeature[3]",
+              "description": "itemFeature[3]",
+              "show_description": false,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [
+                "itemFeature",
+                4
+              ],
+              "label": "itemFeature[4]",
+              "description": "itemFeature[4]",
+              "show_description": false,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [
+                "itemFeature",
+                5
+              ],
+              "label": "itemFeature[5]",
+              "description": "itemFeature[5]",
+              "show_description": false,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [
+                "itemGroupAmount"
+              ],
+              "label": "itemGroupAmount",
+              "description": "itemGroupAmount",
+              "show_description": false,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [
+                "itemGroupAmount",
+                0,
+                "itemParam"
+              ],
+              "label": "itemGroupAmount[0].itemParam",
+              "description": "itemGroupAmount[0].itemParam",
+              "show_description": false,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [
+                "itemGroupAmount",
+                0,
+                "itemParamAmount"
+              ],
+              "label": "itemGroupAmount[0].itemParamAmount",
+              "description": "itemGroupAmount[0].itemParamAmount",
+              "show_description": false,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [
+                "itemGroupAmount",
+                1,
+                "itemParam"
+              ],
+              "label": "itemGroupAmount[1].itemParam",
+              "description": "itemGroupAmount[1].itemParam",
+              "show_description": false,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [
+                "itemGroupAmount",
+                1,
+                "itemParamAmount"
+              ],
+              "label": "itemGroupAmount[1].itemParamAmount",
+              "description": "itemGroupAmount[1].itemParamAmount",
+              "show_description": false,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [
+                "itemGroupAmount",
+                2,
+                "itemParam"
+              ],
+              "label": "itemGroupAmount[2].itemParam",
+              "description": "itemGroupAmount[2].itemParam",
+              "show_description": false,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [
+                "itemGroupAmount",
+                2,
+                "itemParamAmount"
+              ],
+              "label": "itemGroupAmount[2].itemParamAmount",
+              "description": "itemGroupAmount[2].itemParamAmount",
+              "show_description": false,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [
+                "itemGroupAmount",
+                3,
+                "itemParam"
+              ],
+              "label": "itemGroupAmount[3].itemParam",
+              "description": "itemGroupAmount[3].itemParam",
+              "show_description": false,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [
+                "itemGroupAmount",
+                3,
+                "itemParamAmount"
+              ],
+              "label": "itemGroupAmount[3].itemParamAmount",
+              "description": "itemGroupAmount[3].itemParamAmount",
+              "show_description": false,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [
+                "itemGroupAmount",
+                4,
+                "itemParam"
+              ],
+              "label": "itemGroupAmount[4].itemParam",
+              "description": "itemGroupAmount[4].itemParam",
+              "show_description": false,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [
+                "itemGroupAmount",
+                4,
+                "itemParamAmount"
+              ],
+              "label": "itemGroupAmount[4].itemParamAmount",
+              "description": "itemGroupAmount[4].itemParamAmount",
+              "show_description": false,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [
+                "itemGroupAmount",
+                5,
+                "itemParam"
+              ],
+              "label": "itemGroupAmount[5].itemParam",
+              "description": "itemGroupAmount[5].itemParam",
+              "show_description": false,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [
+                "itemGroupAmount",
+                5,
+                "itemParamAmount"
+              ],
+              "label": "itemGroupAmount[5].itemParamAmount",
+              "description": "itemGroupAmount[5].itemParamAmount",
+              "show_description": false,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [
+                "itemGroupAmount",
+                6,
+                "itemParam"
+              ],
+              "label": "itemGroupAmount[6].itemParam",
+              "description": "itemGroupAmount[6].itemParam",
+              "show_description": false,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [
+                "itemGroupAmount",
+                6,
+                "itemParamAmount"
+              ],
+              "label": "itemGroupAmount[6].itemParamAmount",
+              "description": "itemGroupAmount[6].itemParamAmount",
+              "show_description": false,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [
+                "itemLimitCount"
+              ],
+              "label": "itemLimitCount",
+              "description": "itemLimitCount",
+              "show_description": false,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [
+                "itemLimitPeriod"
+              ],
+              "label": "itemLimitPeriod",
+              "description": "itemLimitPeriod",
+              "show_description": false,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [
+                "itemMinShow"
+              ],
+              "label": "itemMinShow",
+              "description": "itemMinShow",
+              "show_description": false,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [
+                "masterBadge"
+              ],
+              "label": "masterBadge",
+              "description": "masterBadge",
+              "show_description": false,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [
+                "newsType"
+              ],
+              "label": "Тип новости",
+              "description": "newsType",
+              "show_description": false,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [
+                "nftFlg"
+              ],
+              "label": "nftFlg",
+              "description": "nftFlg",
+              "show_description": false,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [
+                "outstanding"
+              ],
+              "label": "Формировать новость",
+              "description": "outstanding",
+              "show_description": false,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [
+                "parentRewardCode"
+              ],
+              "label": "parentRewardCode",
+              "description": "parentRewardCode",
+              "show_description": false,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [
+                "persomanNumberVisible"
+              ],
+              "label": "persomanNumberVisible",
+              "description": "persomanNumberVisible",
+              "show_description": false,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [
+                "preferences",
+                0
+              ],
+              "label": "preferences[0]",
+              "description": "preferences[0]",
+              "show_description": false,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [
+                "priority"
+              ],
+              "label": "priority",
+              "description": "priority",
+              "show_description": false,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [
+                "recommendationLevel"
+              ],
+              "label": "recommendationLevel",
+              "description": "recommendationLevel",
+              "show_description": false,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [
+                "refreshOldNews"
+              ],
+              "label": "refreshOldNews",
+              "description": "refreshOldNews",
+              "show_description": false,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [
+                "rewardAgainGlobal"
+              ],
+              "label": "rewardAgainGlobal",
+              "description": "rewardAgainGlobal",
+              "show_description": false,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [
+                "rewardAgainTournament"
+              ],
+              "label": "rewardAgainTournament",
+              "description": "rewardAgainTournament",
+              "show_description": false,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [
+                "rewardRule"
+              ],
+              "label": "rewardRule",
+              "description": "rewardRule",
+              "show_description": false,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [
+                "seasonItem"
+              ],
+              "label": "seasonItem",
+              "description": "seasonItem",
+              "show_description": false,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [
+                "seasonItem",
+                0
+              ],
+              "label": "seasonItem[0]",
+              "description": "seasonItem[0]",
+              "show_description": false,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [
+                "singleNews"
+              ],
+              "label": "singleNews",
+              "description": "singleNews",
+              "show_description": false,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [
+                "tagColor"
+              ],
+              "label": "tagColor",
+              "description": "tagColor",
+              "show_description": false,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [
+                "tagEndDT"
+              ],
+              "label": "tagEndDT",
+              "description": "tagEndDT",
+              "show_description": false,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [
+                "teamNews"
+              ],
+              "label": "teamNews",
+              "description": "teamNews",
+              "show_description": false,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [
+                "tournamentTeam"
+              ],
+              "label": "Командный турнир",
+              "description": "tournamentTeam",
+              "show_description": false,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [
+                "winCriterion"
+              ],
+              "label": "winCriterion",
+              "description": "winCriterion",
+              "show_description": false,
+              "required": false,
+              "allows_empty": true
+            }
+          ]
         }
       ]
     },
@@ -3845,15 +3752,15 @@
       "rules": [
         {
           "column": "CONTEST_CODE",
-          "label": "CONTEST_CODE",
-          "description": "CONTEST_CODE",
-          "show_description": false,
+          "label": "Код конкурса",
+          "description": "Уникальный код конкурса",
+          "show_description": true,
           "required": true,
           "allows_empty": false
         },
         {
           "column": "GROUP_CODE",
-          "label": "GROUP_CODE",
+          "label": "Уровень",
           "description": "GROUP_CODE",
           "show_description": false,
           "required": true,
@@ -3861,7 +3768,7 @@
         },
         {
           "column": "REWARD_CODE",
-          "label": "REWARD_CODE",
+          "label": "Код награды",
           "description": "REWARD_CODE",
           "show_description": false,
           "required": true,
@@ -3874,7 +3781,7 @@
       "rules": [
         {
           "column": "TOURNAMENT_CODE",
-          "label": "TOURNAMENT_CODE",
+          "label": "Код турнира",
           "description": "TOURNAMENT_CODE",
           "show_description": false,
           "required": true,
@@ -3890,7 +3797,7 @@
         },
         {
           "column": "START_DT",
-          "label": "START_DT",
+          "label": "Дата начала турнира",
           "description": "START_DT",
           "show_description": false,
           "required": true,
@@ -3898,7 +3805,7 @@
         },
         {
           "column": "END_DT",
-          "label": "END_DT",
+          "label": "Дата окончания турнира",
           "description": "END_DT",
           "show_description": false,
           "required": true,
@@ -3906,7 +3813,7 @@
         },
         {
           "column": "RESULT_DT",
-          "label": "RESULT_DT",
+          "label": "Дата подведения итогов",
           "description": "RESULT_DT",
           "show_description": false,
           "required": false,
@@ -3946,7 +3853,7 @@
         },
         {
           "column": "TOURNAMENT_STATUS",
-          "label": "TOURNAMENT_STATUS",
+          "label": "Статус турнира",
           "description": "TOURNAMENT_STATUS",
           "show_description": false,
           "required": true,
@@ -3954,17 +3861,17 @@
         },
         {
           "column": "CONTEST_CODE",
-          "label": "CONTEST_CODE",
-          "description": "CONTEST_CODE",
-          "show_description": false,
+          "label": "Код конкурса",
+          "description": "Уникальный код конкурса",
+          "show_description": true,
           "required": true,
           "allows_empty": false
         },
         {
           "column": "CALC_TYPE",
-          "label": "CALC_TYPE",
-          "description": "CALC_TYPE",
-          "show_description": false,
+          "label": "Тип расчета",
+          "description": "Тип расчета: 1 - расчет ручной, 0 - расчет автоматический",
+          "show_description": true,
           "required": true,
           "allows_empty": false
         },
@@ -3978,14 +3885,18 @@
         },
         {
           "column": "TARGET_TYPE",
-          "json_path": [
-            "seasonCode"
-          ],
-          "label": "seasonCode",
-          "description": "seasonCode",
-          "show_description": false,
-          "required": false,
-          "allows_empty": true
+          "paths": [
+            {
+              "json_path": [
+                "seasonCode"
+              ],
+              "label": "Сезон турнира",
+              "description": "seasonCode",
+              "show_description": false,
+              "required": false,
+              "allows_empty": true
+            }
+          ]
         },
         {
           "column": "TRN_INDICATOR_FILTER",

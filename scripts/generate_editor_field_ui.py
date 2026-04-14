@@ -6,6 +6,11 @@
 для колонок из sheets[].json_columns (через spod_json.try_parse_cell).
 Подписи и описания по умолчанию совпадают с именем колонки / путём; show_description: false.
 После генерации можно вручную править label, description и show_description в config.json.
+
+Формат вывода для JSON-колонок — плоский: отдельное правило на каждый путь (поля column и json_path).
+В рабочем config.json длинные блоки удобно сворачивать в одну запись с тем же column и массивом paths
+(в каждом элементе paths — json_path, label, description и пр.); развёртка в плоский список для UI —
+в editor_config.flatten_editor_field_ui (см. README).
 """
 
 from __future__ import annotations

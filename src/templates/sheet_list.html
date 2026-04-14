@@ -1,4 +1,19 @@
 {% extends "base.html" %}
+{# Миниатюрные кнопки «все / снять» над мультиселектом: зелёная галочка, красный крест. #}
+{% macro sheet_list_filter_icon_toolbar(filter_key) %}
+        <div class="sheet-list-filter-iconbar" role="group" aria-label="Быстрый выбор фильтра">
+          <button type="button" class="sheet-list-filter-iconbtn sheet-list-filter-iconbtn--all" data-sheet-list-select="{{ filter_key }}" title="Отметить все" aria-label="Отметить все">
+            <svg class="sheet-list-filter-iconsvg" viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" focusable="false">
+              <path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M3.5 8.2 6.5 11 12.5 4.5"/>
+            </svg>
+          </button>
+          <button type="button" class="sheet-list-filter-iconbtn sheet-list-filter-iconbtn--clear" data-sheet-list-clear="{{ filter_key }}" title="Снять все" aria-label="Снять все">
+            <svg class="sheet-list-filter-iconsvg" viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" focusable="false">
+              <path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="m4 4 8 8M12 4 4 12"/>
+            </svg>
+          </button>
+        </div>
+{% endmacro %}
 {% block title %}{{ sheet_title }} — строки{% endblock %}
 {% block content %}
 <section class="panel">
@@ -6,11 +21,13 @@
   {% if sheet_code == "INDICATOR" %}
   <p class="muted">Код листа: <strong>{{ sheet_code }}</strong> · колонка «Название / описание»: полное имя конкурса из CONTEST-DATA по CONTEST_CODE; ниже — название показателя из строки. Связи: награды из REWARD-LINK по группам и турниры конкурса.</p>
   {% elif sheet_code == "REWARD" %}
-  <p class="muted">Код листа: <strong>{{ sheet_code }}</strong> · колонка «Награда» — <code>FULL_NAME</code> строки; «Название / описание» — <code>REWARD_DESCRIPTION</code>. Фильтр <strong>REWARD_TYPE</strong> — множественный выбор (строка попадает в список, если тип награды входит в выбранные). Пустой выбор — без фильтра по типу.</p>
+  <p class="muted">Код листа: <strong>{{ sheet_code }}</strong> · колонка «Награда» — <code>FULL_NAME</code> строки REWARD; «Название / описание» — <code>FULL_NAME</code> конкурса из CONTEST-DATA по <code>CONTEST_CODE</code> из REWARD-LINK (несколько конкурсов — через « · »). Фильтр <strong>REWARD_TYPE</strong> — множественный выбор. Пустой выбор — без фильтра по типу.</p>
   {% elif sheet_code == "REWARD-LINK" %}
   <p class="muted">Код листа: <strong>{{ sheet_code }}</strong> · связь конкурс — группа — награда: коды и <code>FULL_NAME</code> из REWARD и CONTEST-DATA. Фильтр <strong>REWARD_TYPE</strong> — из листа REWARD по <code>REWARD_CODE</code>, множественный выбор. Колонка «Связи» скрыта.</p>
   {% elif sheet_code == "TOURNAMENT-SCHEDULE" %}
   <p class="muted">Код листа: <strong>{{ sheet_code }}</strong> · «Период» — <code>PERIOD_TYPE</code>; название конкурса — <code>FULL_NAME</code> из CONTEST-DATA; «Сезон» — <code>seasonCode</code> из JSON <code>TARGET_TYPE</code>. В «Связях»: код конкурса и награды (REWARD_CODE + GROUP_CODE) по REWARD-LINK. Фильтр по сезону — множественный выбор.</p>
+  {% elif sheet_code == "CONTEST-DATA" %}
+  <p class="muted">Код листа: <strong>{{ sheet_code }}</strong> · колонка «Код конкурса» — <code>CONTEST_CODE</code> (в выгрузке максимум 17 символов); «Наименование конкурса» — <code>FULL_NAME</code>. «Связи» — турниры и награды по коду конкурса; колонка вынесена вправо (после консистентности).</p>
   {% else %}
   <p class="muted">Код листа: <strong>{{ sheet_code }}</strong> · в таблице: ключ, название из строки или связей, подтянутые турниры/конкурсы где применимо.</p>
   {% endif %}
@@ -22,18 +39,15 @@
       {% set rtw = reward_type_options|length %}
       {% set rtw_size = [[rtw, 12]|min, 1]|max %}
       <div class="sheet-list-filter-block">
-        <div class="sheet-list-filter-head">
-          <span class="reward-filter-caption">REWARD_TYPE</span>
-          <div class="sheet-list-filter-actions" role="group" aria-label="Быстрый выбор типа награды">
-            <button type="button" class="btn btn-ghost btn-sm sheet-list-filter-all" data-sheet-list-select="reward_type">Отметить все</button>
-            <button type="button" class="btn btn-ghost btn-sm sheet-list-filter-none" data-sheet-list-clear="reward_type">Снять все</button>
-          </div>
-        </div>
+        <span class="reward-filter-caption">REWARD_TYPE</span>
+        <div class="sheet-list-filter-select-wrap">
+          {{ sheet_list_filter_icon_toolbar("reward_type") }}
         <select id="sheet-list-filter-reward-type" name="reward_type" multiple class="sheet-list-filter-multi" size="{{ rtw_size }}" aria-label="Фильтр по типу награды (несколько значений)" onchange="this.form.submit()">
           {% for o in reward_type_options %}
           <option value="{{ o.value }}" {% if o.value in reward_type_selected_list %}selected{% endif %}>{{ o.label }}</option>
           {% endfor %}
         </select>
+        </div>
         <p class="muted sheet-list-filter-hint">Несколько типов: Ctrl (Windows) или ⌘ (macOS) + клик. Без выбранных — все типы.</p>
       </div>
       {% endif %}
@@ -41,18 +55,15 @@
       {% set sn = season_options|length %}
       {% set sn_size = [[sn, 12]|min, 1]|max %}
       <div class="sheet-list-filter-block">
-        <div class="sheet-list-filter-head">
-          <span class="reward-filter-caption">Сезон (seasonCode)</span>
-          <div class="sheet-list-filter-actions" role="group" aria-label="Быстрый выбор сезона">
-            <button type="button" class="btn btn-ghost btn-sm sheet-list-filter-all" data-sheet-list-select="season">Отметить все</button>
-            <button type="button" class="btn btn-ghost btn-sm sheet-list-filter-none" data-sheet-list-clear="season">Снять все</button>
-          </div>
-        </div>
+        <span class="reward-filter-caption">Сезон (seasonCode)</span>
+        <div class="sheet-list-filter-select-wrap">
+          {{ sheet_list_filter_icon_toolbar("season") }}
         <select id="sheet-list-filter-season" name="season" multiple class="sheet-list-filter-multi" size="{{ sn_size }}" aria-label="Фильтр по сезону из TARGET_TYPE" onchange="this.form.submit()">
           {% for o in season_options %}
           <option value="{{ o.value }}" {% if o.value in season_selected_list %}selected{% endif %}>{{ o.label }}</option>
           {% endfor %}
         </select>
+        </div>
         <p class="muted sheet-list-filter-hint">Несколько сезонов: Ctrl / ⌘ + клик. Без выбранных — все сезоны.</p>
       </div>
       {% endif %}
@@ -91,7 +102,7 @@
   </form>
   {% endif %}
   <div class="table-scroll">
-    <table class="data data-list-wide">
+    <table class="data data-list-wide{% if sheet_code == 'CONTEST-DATA' %} data-list-contests{% endif %}">
       <thead>
         <tr>
           <th class="col-idx">#</th>
@@ -116,14 +127,22 @@
           <th>Период</th>
           <th>Название конкурса</th>
           <th>Сезон</th>
+          {% elif sheet_code == "CONTEST-DATA" %}
+          <th class="col-contest-code">Код конкурса</th>
+          <th class="col-contest-name">Наименование конкурса</th>
           {% else %}
           <th>Ключ</th>
           <th>Название / описание</th>
           {% endif %}
-          {% if sheet_code != "REWARD-LINK" %}
+          {% if sheet_code == "CONTEST-DATA" %}
+          <th class="col-flag">Консистентность</th>
+          <th class="col-contest-relations">Связи</th>
+          {% elif sheet_code != "REWARD-LINK" %}
           <th>Связи</th>
           {% endif %}
+          {% if sheet_code != "CONTEST-DATA" %}
           <th class="col-flag">Консистентность</th>
+          {% endif %}
           <th class="col-action"></th>
         </tr>
       </thead>
@@ -152,13 +171,14 @@
           <td class="cell-wrap">{{ r.schedule_period_col }}</td>
           <td class="cell-wrap">{{ r.schedule_contest_name_col }}</td>
           <td class="cell-mono">{{ r.schedule_season_col }}</td>
+          {% elif sheet_code == "CONTEST-DATA" %}
+          <td class="cell-mono col-contest-code">{{ r.preview }}</td>
+          <td class="cell-wrap col-contest-name">{{ r.title_line }}</td>
           {% else %}
           <td class="cell-mono">{{ r.preview }}</td>
           <td class="cell-wrap">{{ r.title_line }}</td>
           {% endif %}
-          {% if sheet_code != "REWARD-LINK" %}
-          <td class="cell-wrap cell-muted cell-relations-pre">{{ r.relations_line }}</td>
-          {% endif %}
+          {% if sheet_code == "CONTEST-DATA" %}
           <td class="col-flag">
             {% if r.ok %}
             <span class="badge badge-ok">OK</span>
@@ -166,6 +186,19 @@
             <span class="badge badge-bad">Проблемы</span>
             {% endif %}
           </td>
+          <td class="cell-wrap cell-muted cell-relations-pre col-contest-relations">{{ r.relations_line }}</td>
+          {% elif sheet_code != "REWARD-LINK" %}
+          <td class="cell-wrap cell-muted cell-relations-pre">{{ r.relations_line }}</td>
+          {% endif %}
+          {% if sheet_code != "CONTEST-DATA" %}
+          <td class="col-flag">
+            {% if r.ok %}
+            <span class="badge badge-ok">OK</span>
+            {% else %}
+            <span class="badge badge-bad">Проблемы</span>
+            {% endif %}
+          </td>
+          {% endif %}
           <td class="col-action"><a class="btn btn-ghost" href="/sheet/{{ sheet_code }}/row/{{ r.id }}?from_list=1">Просмотр</a></td>
         </tr>
         {% endfor %}

@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import json
 import sqlite3
+from collections import Counter
 from typing import Any, Dict, List, Set, Tuple
 
 from src import sheet_storage
@@ -70,12 +71,19 @@ def run_all_checks(conn: sqlite3.Connection, *, do_commit: bool = True) -> None:
             reward_code_freq[rc] = reward_code_freq.get(rc, 0) + 1
     reward_codes_duplicate: Set[str] = {rc for rc, n in reward_code_freq.items() if n > 1}
 
-    group_keys: Set[Tuple[str, str]] = set()
+    # Уникальность строки GROUP: (CONTEST_CODE, GROUP_CODE, GROUP_VALUE); для REWARD-LINK достаточно пары (CONTEST, GROUP_CODE).
+    group_triples: Set[Tuple[str, str, str]] = set()
+    group_triple_counts: Counter[Tuple[str, str, str]] = Counter()
     for row in by_code.get("GROUP", []):
         c = (row["cells"].get("CONTEST_CODE") or "").strip()
         g = (row["cells"].get("GROUP_CODE") or "").strip()
+        v = (row["cells"].get("GROUP_VALUE") or "").strip()
         if c and g:
-            group_keys.add((c, g))
+            t = (c, g, v)
+            group_triples.add(t)
+            group_triple_counts[t] += 1
+    group_pairs_from_group: Set[Tuple[str, str]] = {(t[0], t[1]) for t in group_triples}
+    duplicate_group_triples: Set[Tuple[str, str, str]] = {t for t, n in group_triple_counts.items() if n > 1}
 
     # По каждому REWARD_CODE — множество CONTEST_CODE из всех REWARD-LINK (транзитивная связь REWARD—конкурс)
     reward_code_to_contests: Dict[str, Set[str]] = {}
@@ -108,14 +116,23 @@ def run_all_checks(conn: sqlite3.Connection, *, do_commit: bool = True) -> None:
                 e.append(f"CONTEST_CODE «{cc}» отсутствует в CONTEST-DATA")
             if rc and rc not in rewards:
                 e.append(f"REWARD_CODE «{rc}» отсутствует в REWARD")
-            if cc and gc and (cc, gc) not in group_keys:
-                e.append(f"Пара (CONTEST_CODE, GROUP_CODE)=({cc},{gc}) не найдена в GROUP")
+            if cc and gc and (cc, gc) not in group_pairs_from_group:
+                e.append(
+                    f"Пара (CONTEST_CODE, GROUP_CODE)=({cc},{gc}) не найдена среди строк GROUP "
+                    f"(должна существовать хотя бы одна строка с этими полями; учёт уникальности по тройке с GROUP_VALUE)."
+                )
             if rc and rc in reward_codes_multi_contest:
                 e.append(
                     f"REWARD_CODE «{rc}» встречается в REWARD-LINK с разными CONTEST_CODE — противоречие транзитивной связи REWARD—конкурс"
                 )
         if sheet_code == "GROUP":
             cc = (cells.get("CONTEST_CODE") or "").strip()
+            gc = (cells.get("GROUP_CODE") or "").strip()
+            gv = (cells.get("GROUP_VALUE") or "").strip()
+            if cc and gc and (cc, gc, gv) in duplicate_group_triples:
+                e.append(
+                    f"Дублируется тройка (CONTEST_CODE, GROUP_CODE, GROUP_VALUE)=({cc},{gc},{gv!r}) среди актуальных строк GROUP"
+                )
             if cc and cc not in contests:
                 e.append(f"CONTEST_CODE «{cc}» отсутствует в CONTEST-DATA")
         if sheet_code == "INDICATOR":

@@ -1,0 +1,8 @@
+columnName;pkOrder;isNotNull;phDataType;descriptionColumn;infCat;dataLength;dataPrecision;dataScale
+MANAGER_PERSON_NUMBER;1;true;VARCHAR;Табельный номер сотрудника;K3;20;;
+CONTEST_CODE;2;true;VARCHAR;Код конкурса;K3;50;;
+TOURNAMENT_CODE;3;true;VARCHAR;Код турнира;K3;50;;
+CONTEST_DATE;;true;DATE;Дата расчета/дата выполнение критерий или правила конкурса;K3;;;
+PLAN_VALUE;;false;DECIMAL;Плановое значение показателя;K3;;20;5
+FACT_VALUE;;true;DECIMAL;Фактическое значение показателя;K3;;20;5
+PRIORITY_TYPE;;true;INT;Тип приоритета для дедубликации (0 - не в приоритете, 1 - в приоритете);K3;;;

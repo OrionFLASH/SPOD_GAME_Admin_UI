@@ -528,7 +528,8 @@
             return numApi.readFlatControlValue(wizRoot, wc, rowCells, "data-wiz-col");
           })
         : null;
-    var en = findEnum(sheetCode, col);
+    /* Как на карточке строки: editor_field_numeric важнее field_enums. */
+    var en = numDefW ? null : findEnum(sheetCode, col);
     var initV = val != null ? String(val) : "";
     if (dh) {
       var api = typeof window !== "undefined" ? window.SpodDatePicker : null;
@@ -766,12 +767,33 @@
     return String((state.contest.cells || {}).CONTEST_CODE || "").trim();
   }
 
+  /** Уникальные пары (GROUP_CODE, GROUP_VALUE) в шаге GROUP — как логическая уникальность строки вместе с CONTEST_CODE на сервере. */
+  function uniqGroupPairs() {
+    var seen = {};
+    var out = [];
+    (state.groups || []).forEach(function (g) {
+      var cells = g.cells || {};
+      var c = String(cells.GROUP_CODE || "").trim();
+      var v = String(cells.GROUP_VALUE || "").trim();
+      var k = c + "\t" + v;
+      if (seen[k]) {
+        return;
+      }
+      if (!c && !v) {
+        return;
+      }
+      seen[k] = true;
+      out.push({ code: c, value: v });
+    });
+    return out;
+  }
+
+  /** Список различных GROUP_CODE (для фильтра связей без поля GROUP_VALUE в CSV REWARD-LINK). */
   function uniqGroupCodes() {
     var u = {};
-    (state.groups || []).forEach(function (g) {
-      var c = String((g.cells || {}).GROUP_CODE || "").trim();
-      if (c) {
-        u[c] = true;
+    uniqGroupPairs().forEach(function (p) {
+      if (p.code) {
+        u[p.code] = true;
       }
     });
     return Object.keys(u).sort();
@@ -1351,23 +1373,23 @@
         box.appendChild(sec);
       });
     } else if (state.stepIndex === 2) {
-      var ug = uniqGroupCodes();
+      var ugp = uniqGroupPairs();
       var p2 = document.createElement("p");
       p2.className = "muted";
       p2.textContent =
-        "Различных GROUP_CODE: " +
-        ug.length +
+        "Различных пар (GROUP_CODE, GROUP_VALUE): " +
+        ugp.length +
         ". Строк REWARD-LINK не меньше этого числа (сейчас минимум " +
-        Math.max(1, ug.length) +
+        Math.max(1, ugp.length) +
         ").";
       host.appendChild(p2);
       var row2 = document.createElement("div");
       row2.className = "wiz-toolbar";
       var inp2 = document.createElement("input");
       inp2.type = "number";
-      inp2.min = String(Math.max(1, ug.length));
+      inp2.min = String(Math.max(1, ugp.length));
       inp2.max = "500";
-      inp2.value = String(Math.max(state.linkCount || 1, ug.length));
+      inp2.value = String(Math.max(state.linkCount || 1, ugp.length));
       inp2.id = "wiz-inp-link-count";
       row2.appendChild(inp2);
       var b2 = document.createElement("button");
@@ -1375,15 +1397,17 @@
       b2.className = "btn btn-secondary";
       b2.textContent = "Сформировать строки";
       b2.addEventListener("click", function () {
-        var n = parseInt(inp2.value, 10) || ug.length;
-        n = Math.max(ug.length, Math.min(500, n));
+        var pairs = uniqGroupPairs();
+        var n = parseInt(inp2.value, 10) || pairs.length;
+        n = Math.max(pairs.length, Math.min(500, n));
         state.linkCount = n;
         var cc = contestCode();
         state.reward_links = [];
         for (var j = 0; j < n; j++) {
           var rc0 = n > 1 ? "r_" + cc + "_" + (j + 1) : "r_" + cc;
+          var pair = pairs[j % pairs.length] || { code: "", value: "" };
           state.reward_links.push({
-            cells: { CONTEST_CODE: cc, GROUP_CODE: ug[j % ug.length] || "", REWARD_CODE: rc0 },
+            cells: { CONTEST_CODE: cc, GROUP_CODE: pair.code || "", REWARD_CODE: rc0 },
           });
         }
         render();
@@ -1393,10 +1417,10 @@
       var box2 = document.createElement("div");
       box2.id = "wiz-link-box";
       host.appendChild(box2);
-      if (!ug.length) {
+      if (!ugp.length) {
         var warn = document.createElement("p");
         warn.className = "muted";
-        warn.textContent = "Сначала заполните шаг GROUP (нужны GROUP_CODE).";
+        warn.textContent = "Сначала заполните шаг GROUP (нужны GROUP_CODE и при необходимости GROUP_VALUE).";
         host.appendChild(warn);
       }
       (state.reward_links || []).forEach(function (ln, ix) {
@@ -1407,7 +1431,7 @@
         var h = document.createElement("h3");
         h.textContent = "Связь " + (ix + 1);
         headL.appendChild(h);
-        var minL = Math.max(1, ug.length);
+        var minL = Math.max(1, ugp.length);
         if ((state.reward_links || []).length > minL) {
           var delL = document.createElement("button");
           delL.type = "button";
@@ -1688,9 +1712,9 @@
       return all;
     }
     if (state.stepIndex === 2) {
-      var ug = uniqGroupCodes();
-      if (!state.reward_links || state.reward_links.length < ug.length) {
-        return ["Нужно не меньше " + ug.length + " строк REWARD-LINK."];
+      var ugpV = uniqGroupPairs();
+      if (!state.reward_links || state.reward_links.length < ugpV.length) {
+        return ["Нужно не меньше " + ugpV.length + " строк REWARD-LINK (по числу различных пар GROUP_CODE + GROUP_VALUE)."];
       }
       var all2 = [];
       var nLk = (state.reward_links || []).length;

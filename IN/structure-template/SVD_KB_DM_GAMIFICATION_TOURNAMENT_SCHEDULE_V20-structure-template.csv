@@ -1,0 +1,16 @@
+columnName;pkOrder;isNotNull;phDataType;descriptionColumn;infCat;dataLength;dataPrecision;dataScale
+TOURNAMENT_CODE;1;true;VARCHAR;Код турнира;K3;50;;
+PERIOD_TYPE;;false;VARCHAR;Тип периодичность турнира;K3;100;;
+START_DT;;true;DATE;Дата начала действия ;K3;;;
+END_DT;;true;DATE;Дата окончания действия ;K3;;;
+RESULT_DT;;false;DATE;Дата подведения итога;K3;;;
+PLAN_PERIOD_START_DT;;false;DATE;Дата начала периода для планового значения или оценки роста показателя турнира.;K3;;;
+PLAN_PERIOD_END_DT;;false;DATE;Дата окончания периода для планового значения или оценки роста показателя турнира.;K3;;;
+CRITERION_MARK_TYPE;;false;VARCHAR;"Критерий участия для периода конкурса. Оператор сравнения ("">"", ""="", ""<"")";K3;10;;
+CRITERION_MARK_VALUE;;false;DECIMAL;Значение критерия участия для периода конкурса;K3;;38;12
+FILTER_PERIOD_ARR;;false;VARCHAR;Прошлые периоды турнира для определения критериев участия, period_code -  код периода, start_dt - дата начала периода, end_dt - дата окончания периода, criterion_mark_type - условие (<=, <, =, >, >=), criterion_mark_value - значение для ограничения.;K3;4000;;
+TOURNAMENT_STATUS;;true;VARCHAR;Статус турнира;K3;200;;
+CONTEST_CODE;;true;VARCHAR;Код конкурса;K3;50;;
+TARGET_TYPE;;false;VARCHAR;Дополнительные данные: вид цели расчета (ПРОМ, ИССЛ), привязка к сезону;K3;4000;;
+CALC_TYPE;;true;INT;Тип расчета конкурса (1 - ручной расчет, 0 и др. промышленный расчет);K3;;;
+TRN_INDICATOR_FILTER;;false;TEXT;Массив - Индивидуальные фильтры турнира;K3;;;

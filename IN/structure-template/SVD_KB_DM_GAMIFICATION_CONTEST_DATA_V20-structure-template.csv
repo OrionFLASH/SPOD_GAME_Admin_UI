@@ -1,0 +1,26 @@
+columnName;pkOrder;isNotNull;phDataType;descriptionColumn;infCat;dataLength;dataPrecision;dataScale
+CONTEST_CODE;1;true;VARCHAR;Код конкурса;K3;50;;
+FULL_NAME;;false;VARCHAR;Наименование конкурса;K3;2000;;
+CREATE_DT;;true;DATE;Дата создания конкурса;K3;;;
+CLOSE_DT;;false;DATE;Дата завершения конкурса;K3;;;
+BUSINESS_STATUS;;true;VARCHAR;Бизнес статус;K3;200;;
+CONTEST_TYPE;;false;VARCHAR;Тип конкурса;K3;200;;
+CONTEST_DESCRIPTION;;false;VARCHAR;Описание конкурса;K3;4000;;
+CONTEST_FEATURE;;false;VARCHAR;Особенности конкурса;K3;4000;;
+SHOW_INDICATOR;;false;VARCHAR;Оцениваемый показатель;K3;300;;
+PRODUCT_GROUP;;false;VARCHAR;Бизнес направление;K3;300;;
+PRODUCT;;false;VARCHAR;Продукт;K3;300;;
+CONTEST_SUBJECT;;false;VARCHAR;Объект агрегации индикаторов при расчете Индикатора Конкурса. Субъект конкурса (подразделение, сотрудник). Уровень группировки результатов. EMPLOYEE по сотрудникам, UNIT - по подразделениям;K3;20;;
+FACTOR_MARK_TYPE;;false;VARCHAR;Операция над показателем конкурса для определения победителя;K3;20;;
+CONTEST_INDICATOR_METHOD;;false;VARCHAR;Тип индикатора конкурса. Метод расчета ИНДИКАТОРА КОНКУРСА. INTEGRAL - интегральный метод расчета, RELATION -  отношение  агрегированных значений.;K3;20;;
+CONTEST_FACTOR_METHOD;;false;VARCHAR;Метод расчета показателя конкурса. FACT - фактическое значение индикатора конкурса,FACT0-FACT1 - разность значений за текущий и предыдущий период, RUN_RATE - разность значений за текущий и предыдущий период умноженного на коэффициент прошедших дней.;K3;20;;
+PLAN_METHOD_CODE;;false;VARCHAR;"Тип планового значения Показателя Конкурса. NOT_USED - Не используется; PRESET_VALUE - план задан определенным значением; DEPENDS_PREVIOUS_PERIOD - зависит от результатов в предыдущем периоде конкурса.";K3;50;;
+PLAN_MOD_METOD;;false;VARCHAR;Модификатор планового значения Показателя Конкурса. MULTIPLIER - умножить показатель прошлого периода на коэффициент, APPEND - добавить к показателю прошлого периода фиксированное число.;K3;20;;
+PLAN_MOD_VALUE;;false;DECIMAL;Значение модификатора для планового показателя.;K3;;20;5
+FACTOR_MATCH;;false;VARCHAR;Оператор сравнения Фактического Показателя Конкурсного и Планового.;K3;3;;
+CONTEST_PERIOD;;false;VARCHAR;Ограничения на участие в конкурсе, period_code - номер периода конкурса, criterion_mark_type - условие (<=, <, =, >, >=, <>),criterion_mark_value - значение для ограничения.;K3;4000;;
+TARGET_TYPE;;false;VARCHAR;Цель использования поля;K3;50;;
+SOURCE_UPD_FREQUENCY;;false;INT;Периодичность обновления данных в днях;K3;;;
+CALC_TYPE;;false;INT;Тип расчета конкурса (0 - промышленный расчет  на версии 1.х , 1 - ручной расчет, 2 - расчет на версии 2.0, 3 - расчет на версии и 1.х,  и 2.х одновременно);K3;;;
+BUSINESS_BLOCK;;true;VARCHAR;"Бизнес-блок для выбора участников (массив) [""""KMKKSB"""",""""MNS""""]";K3;4000;;
+FACT_POST_PROCESSING;;false;VARCHAR;Правило постобработки показателя конкурса. PERCENTILE - вычисление перцентиля от фактического показателя конкурса;K3;100;;

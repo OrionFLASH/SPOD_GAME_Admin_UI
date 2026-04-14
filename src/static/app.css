@@ -81,6 +81,13 @@ body {
   padding: 1.5rem;
 }
 
+/* Список строк любого листа (/sheet/...): почти на всю ширину окна, небольшие отступы от краёв */
+.wrap:has(table.data.data-list-wide) {
+  max-width: none;
+  width: 100%;
+  padding: 1.25rem clamp(0.65rem, 2.2vw, 1.75rem) 1.5rem;
+}
+
 .panel {
   background: var(--glass);
   backdrop-filter: blur(var(--blur));
@@ -208,6 +215,50 @@ table.data td {
   white-space: nowrap;
 }
 
+/* Список листа CONTEST-DATA («Конкурсы»): фиксированная ширина колонки кода по максимуму CONTEST_CODE в выгрузке IN/SPOD (17 символов) — 19ch; наименование широкое; «Связи» после «Консистентность». */
+.data-list-contests {
+  table-layout: fixed;
+  width: 100%;
+}
+
+.data-list-contests .col-contest-code {
+  width: 19ch;
+  min-width: 19ch;
+  max-width: 19ch;
+  white-space: nowrap;
+  overflow: visible;
+  word-break: normal;
+}
+
+.data-list-contests .cell-mono.col-contest-code {
+  max-width: 19ch;
+}
+
+.data-list-contests .col-contest-name {
+  width: 58%;
+  min-width: 22rem;
+}
+
+.data-list-contests .col-contest-relations {
+  width: 18%;
+  min-width: 10rem;
+}
+
+.data-list-contests .col-flag {
+  width: 8.5rem;
+}
+
+/* На широком списке не ограничиваем текстовые и «связи» колонки узкими rem — таблица заполняет ширину */
+.data-list-wide .cell-wrap,
+.data-list-wide .cell-muted {
+  max-width: none;
+}
+
+/* Коды и ключи: разумный потолок, но шире стандартных 14rem на больших экранах */
+.data-list-wide .cell-mono {
+  max-width: min(40rem, 38vw);
+}
+
 .cell-mono {
   font-family: ui-monospace, monospace;
   font-size: 0.82rem;
@@ -330,22 +381,13 @@ table.data th {
   margin-bottom: 0;
 }
 
-/* Блок одного множественного фильтра: подпись, кнопки «все / снять», список */
+/* Блок одного множественного фильтра: подпись, над списком — мини-кнопки справа, затем select */
 .sheet-list-form-reward .sheet-list-filter-block {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 0.4rem;
+  gap: 0.35rem;
   max-width: 28rem;
-}
-
-.sheet-list-form-reward .sheet-list-filter-head {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.5rem 0.75rem;
-  width: 100%;
 }
 
 .sheet-list-form-reward .reward-filter-caption {
@@ -354,16 +396,76 @@ table.data th {
   color: var(--muted);
 }
 
-.sheet-list-form-reward .sheet-list-filter-actions {
+/* Обёртка: ширина как у списка; иконки — в ряд у правого края над полем выбора */
+.sheet-list-form-reward .sheet-list-filter-select-wrap {
   display: flex;
-  flex-wrap: wrap;
-  gap: 0.35rem;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.28rem;
+  width: 100%;
+  max-width: 22rem;
+}
+
+.sheet-list-form-reward .sheet-list-filter-iconbar {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 0.3rem;
+  width: 100%;
+}
+
+.sheet-list-form-reward .sheet-list-filter-iconbtn {
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.7rem;
+  height: 1.7rem;
+  margin: 0;
+  padding: 0;
+  border-radius: 7px;
+  cursor: pointer;
+  line-height: 0;
+  transition: background 0.12s ease, border-color 0.12s ease, transform 0.08s ease;
+}
+
+.sheet-list-form-reward .sheet-list-filter-iconbtn:active {
+  transform: scale(0.96);
+}
+
+.sheet-list-form-reward .sheet-list-filter-iconsvg {
+  display: block;
+  flex-shrink: 0;
+}
+
+/* Зелёная галочка — отметить все */
+.sheet-list-form-reward .sheet-list-filter-iconbtn--all {
+  color: #16a34a;
+  border: 1px solid rgba(22, 163, 74, 0.45);
+  background: rgba(255, 255, 255, 0.95);
+}
+
+.sheet-list-form-reward .sheet-list-filter-iconbtn--all:hover {
+  background: rgba(22, 163, 74, 0.12);
+  border-color: rgba(22, 163, 74, 0.65);
+}
+
+/* Красный крест — снять все */
+.sheet-list-form-reward .sheet-list-filter-iconbtn--clear {
+  color: #dc2626;
+  border: 1px solid rgba(220, 38, 38, 0.45);
+  background: rgba(255, 255, 255, 0.95);
+}
+
+.sheet-list-form-reward .sheet-list-filter-iconbtn--clear:hover {
+  background: rgba(220, 38, 38, 0.1);
+  border-color: rgba(220, 38, 38, 0.65);
 }
 
 .sheet-list-form-reward select.sheet-list-filter-multi {
   display: block;
   width: 100%;
-  max-width: 22rem;
   min-width: 10rem;
   padding: 0.35rem 0.5rem;
   border-radius: 10px;

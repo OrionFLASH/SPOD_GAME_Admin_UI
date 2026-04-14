@@ -1,0 +1,17 @@
+columnName;pkOrder;isNotNull;phDataType;descriptionColumn;infCat;dataLength;dataPrecision;dataScale
+CONTEST_CODE;;true;VARCHAR;Код конкурса;K3;50;;
+INDICATOR_CALC_TYPE;;false;VARCHAR;Тип показателя (1- Расчетный, 2 - Абсолютный, 3 - Относительный);K3;10;;
+INDICATOR_ADD_CALC_TYPE;;false;VARCHAR;"Признак числителя и знаменателя для относительных показателей конкурса  (""NUMERATOR""- числитель, ""DIVIDER"" - знаменатель).";K3;10;;
+FULL_NAME;;false;VARCHAR;Наименование показателя;K3;100;;
+INDICATOR_CODE;;true;VARCHAR;Код индикатора в источнике;K3;100;;
+INDICATOR_AGG_FUNCTION;;false;VARCHAR;Метод агрегации данных индикаторов. SUM - сумма значений индикатора, MAX - максимальное значение,  MIN - минимальное значение, AVG - среднее значение, COUNT - количество значений, COUNT_DISTINCT - количество уникальных значений.;K3;25;;
+INDICATOR_WEIGHT;;false;DECIMAL;Вес (коэффициент) агрегированного индикатора в ИНДИКАТОРЕ КОНКУРСА;K3;;20;12
+INDICATOR_OBJECT;;false;VARCHAR;Параметр для определения объекта конкурса (для группировки в рамках одного сотрудника (поиск лучшей сделки) - для типа показателя - 2- Абсолютный показатель);K3;100;;
+INDICATOR_MARK_TYPE;;false;VARCHAR;Вид оценки;K3;100;;
+INDICATOR_MATCH;;false;VARCHAR;Параметр для определения победителя конкурса;K3;100;;
+INDICATOR_VALUE;;false;VARCHAR;Значение индикатора;K3;100;;
+CONTEST_CRITERION;;false;VARCHAR;Параметры для ограничения выбора сделки ;K3;4000;;
+INDICATOR_FILTER;;false;VARCHAR;Параметры для ограничения выбора операции, filteredAttributeCode - Код, filteredAtributeType - тип, filteredAtributeMatch - оператор (>,<,..., in, not_in), filteredAtributeValue - значение число, filteredAtributeCondition - значение текст.;K3;4000;;
+CONTESTANT_SELECTION;;false;INT;"Способ определения ВКО на данных источника. (null, 0 - ВКО на дату операции/дату отчета; 1 - ВКО на дату окончания турнира)";K3;;;
+CALC_TYPE;;true;INT;Тип расчета конкурса (0 - промышленный расчет на версии 1.х , 1 - ручной расчет, 2 - расчет на версии 2.0, 3 - расчет на версии и 1.х, и 2.х одновременно);K3;;;
+N;1;true;INT;Номер записи;K3;;;

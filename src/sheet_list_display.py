@@ -6,8 +6,9 @@
 Лист INDICATOR: отдельная разметка в шаблоне — CONTEST_CODE, название конкурса из CONTEST-DATA,
 INDICATOR_ADD_CALC_TYPE, INDICATOR_CODE; в «Связи» — REWARD-LINK по группам и турниры TOURNAMENT-SCHEDULE.
 
-Лист REWARD: колонка «Награда» (FULL_NAME), «Название / описание» (REWARD_DESCRIPTION), GROUP_CODE и конкурс из REWARD-LINK;
-фильтр по REWARD_TYPE задаётся в шаблоне и в маршруте списка.
+Лист REWARD: колонка «Награда» — FULL_NAME строки REWARD; «Название / описание» — FULL_NAME конкурса(ов) из CONTEST-DATA
+по CONTEST_CODE из REWARD-LINK (цепочка REWARD → связи → конкурс); GROUP_CODE и коды конкурсов в «Связи» из тех же связей;
+фильтр по REWARD_TYPE — в шаблоне и маршруте списка.
 
 Лист REWARD-LINK: колонки REWARD_CODE, название награды (REWARD.FULL_NAME), CONTEST_CODE, название конкурса (CONTEST-DATA.FULL_NAME),
 GROUP_CODE; колонка «Связи» в списке не показывается; фильтр по REWARD_TYPE берётся из строки REWARD по REWARD_CODE связи.
@@ -246,6 +247,7 @@ def display_for_sheet_row(sheet_code: str, cells: Dict[str, str], lu: Dict[str, 
     relations = ""
 
     if sheet_code == "CONTEST-DATA":
+        # primary_key (preview в списке) — CONTEST_CODE; в типовой выгрузке PROM длина кода до 17 символов (см. ширину колонки в sheet_list + app.css).
         cc = (cells.get("CONTEST_CODE") or "").strip()
         pk = cc
         title = (cells.get("FULL_NAME") or "").strip()
@@ -255,7 +257,9 @@ def display_for_sheet_row(sheet_code: str, cells: Dict[str, str], lu: Dict[str, 
     if sheet_code == "GROUP":
         cc = (cells.get("CONTEST_CODE") or "").strip()
         gc = (cells.get("GROUP_CODE") or "").strip()
-        pk = f"{cc} / {gc}" if cc or gc else ""
+        gv = (cells.get("GROUP_VALUE") or "").strip()
+        # В списке «Ключ» — как в связях карточки: GROUP_CODE : GROUP_VALUE (уникальность строки вместе с CONTEST_CODE).
+        pk = f"{gc} : {gv}" if (gc or gv) else (cc or "")
         cname = contest_full.get(cc, "")
         title = cname or ""
         relations = f"Конкурс: {cc}" + (f" · {cname}" if cname else "")
@@ -287,8 +291,6 @@ def display_for_sheet_row(sheet_code: str, cells: Dict[str, str], lu: Dict[str, 
         rc = (cells.get("REWARD_CODE") or "").strip()
         pk = rc
         reward_name = (cells.get("FULL_NAME") or "").strip()
-        desc = (cells.get("REWARD_DESCRIPTION") or "").strip()
-        title_line = desc
         links_r = lu.get("reward_links_by_reward", {}).get(rc, [])
         contests: List[str] = []
         groups: List[str] = []
@@ -303,6 +305,16 @@ def display_for_sheet_row(sheet_code: str, cells: Dict[str, str], lu: Dict[str, 
             if gcl and gcl not in seen_gc:
                 seen_gc.add(gcl)
                 groups.append(gcl)
+        # «Название / описание» в списке наград — названия конкурсов из CONTEST-DATA по цепочке REWARD-LINK → CONTEST_CODE.
+        contest_titles: List[str] = []
+        seen_titles: set = set()
+        contest_full = lu.get("contest_full") or {}
+        for ccl in contests:
+            t = (contest_full.get(ccl) or "").strip()
+            if t and t not in seen_titles:
+                seen_titles.add(t)
+                contest_titles.append(t)
+        title_line = " · ".join(contest_titles)
         relations_line = "Конкурс: " + ", ".join(contests) if contests else ""
         group_codes_col = ", ".join(groups)
         return {

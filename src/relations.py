@@ -52,13 +52,28 @@ def _preview_for_item(cells: Dict[str, str]) -> str:
     return "строка"
 
 
+def _group_link_preview(cells: Dict[str, str]) -> str:
+    """
+    Подпись ссылки на строку GROUP: «GROUP_CODE : GROUP_VALUE».
+    Уникальность строки GROUP в данных — тройка (CONTEST_CODE, GROUP_CODE, GROUP_VALUE).
+    """
+    gc = (cells.get("GROUP_CODE") or "").strip()
+    gv = (cells.get("GROUP_VALUE") or "").strip()
+    label = f"{gc} : {gv}" if (gc or gv) else ""
+    if not label:
+        label = "—"
+    text = ": " + label
+    return text[:120] if len(text) > 120 else text
+
+
 def _link_item(sheet_code: str, row_id: int, cells: Dict[str, str]) -> Dict[str, Any]:
     """Одна связанная строка: куда вести ссылку на редактирование и что показать в JSON."""
+    prev = _group_link_preview(cells) if sheet_code == "GROUP" else _preview_for_item(cells)
     return {
         "sheet_code": sheet_code,
         "row_id": row_id,
         "cells": cells,
-        "preview": _preview_for_item(cells),
+        "preview": prev,
     }
 
 
@@ -81,7 +96,10 @@ def build_context_for_row(
 
     if sheet_code == "REWARD-LINK" and cc:
         ctx["links"].append({"title": "Конкурс", "items": _find_contest(conn, cc)})
-        ctx["links"].append({"title": "Группа (уровень)", "items": _find_group(conn, cc, gc)})
+        gv = (cells.get("GROUP_VALUE") or "").strip()
+        ctx["links"].append(
+            {"title": "Группа (уровень)", "items": _find_group(conn, cc, gc, gv if gv else None)}
+        )
         if rc:
             ctx["links"].append({"title": "Награда", "items": _find_reward(conn, rc)})
     if sheet_code == "CONTEST-DATA" and cc:
@@ -110,13 +128,29 @@ def _find_contest(conn: sqlite3.Connection, contest_code: str) -> List[Dict[str,
     return []
 
 
-def _find_group(conn: sqlite3.Connection, contest_code: str, group_code: str) -> List[Dict[str, Any]]:
+def _find_group(
+    conn: sqlite3.Connection,
+    contest_code: str,
+    group_code: str,
+    group_value: str | None = None,
+) -> List[Dict[str, Any]]:
+    """
+    Строки GROUP по конкурсу и коду группы.
+    Если задан group_value — только строка с тем же GROUP_VALUE (точная тройка с CONTEST_CODE).
+    Иначе — все строки с данной парой (CONTEST_CODE, GROUP_CODE) (например, из REWARD-LINK без GROUP_VALUE).
+    """
     res: List[Dict[str, Any]] = []
+    gv_key = (group_value or "").strip()
     for r in _rows(conn, "GROUP"):
         c = r["cells"]
-        if (c.get("CONTEST_CODE") or "").strip() == contest_code and (c.get("GROUP_CODE") or "").strip() == group_code:
-            res.append(_link_item("GROUP", r["id"], c))
-    return res[:5]
+        if (c.get("CONTEST_CODE") or "").strip() != contest_code:
+            continue
+        if (c.get("GROUP_CODE") or "").strip() != group_code:
+            continue
+        if gv_key and (c.get("GROUP_VALUE") or "").strip() != gv_key:
+            continue
+        res.append(_link_item("GROUP", r["id"], c))
+    return res[:40]
 
 
 def _find_reward(conn: sqlite3.Connection, reward_code: str) -> List[Dict[str, Any]]:

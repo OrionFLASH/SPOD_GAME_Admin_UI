@@ -1,0 +1,18 @@
+columnName;pkOrder;isNotNull;phDataType;descriptionColumn;infCat;dataLength;dataPrecision;dataScale
+PERSON_NUMBER;1;true;VARCHAR;Табельный номер;K2;20;;
+PERSON_NUMBER_ADD;;true;VARCHAR;Табельный номер дополнительный;K3;20;;
+SURNAME;;true;VARCHAR;Фамилия сотрудника;K2;100;;
+FIRST_NAME;;true;VARCHAR;Имя сотрудника;K2;100;;
+MIDDLE_NAME;;false;VARCHAR;Отчество сотрудника;K2;100;;
+MANAGER_FULL_NAME;;true;VARCHAR;ФИО сотрудника;K2;300;;
+POSITION_NAME;;true;VARCHAR;Наименование должности;K3;200;;
+TB_CODE;;true;VARCHAR;Код тербанка;K3;20;;
+GOSB_CODE;;true;VARCHAR;Код ГОСБа;K3;20;;
+BUSINESS_BLOCK;;true;VARCHAR;Бизнес блок (тип участника);K3;50;;
+PRIORITY_TYPE;;true;INT;Тип приоритета для дедубликации (0 - не в приоритете, 1 - в приоритете);K3;;;
+KPK_CODE;;false;VARCHAR;Код клиентской продуктовой команды (КПК);K3;20;;
+KPK_NAME;;false;VARCHAR;Название клиентской продуктовой команды (КПК);K3;1000;;
+ROLE_CODE;;false;VARCHAR;Функциональная роль (категория должности);K3;50;;
+UCH_CODE;;true;INT;Признак участника (0 - не участник, 1 - участник, 2 - не участник (роль ТОП-менеджер));K3;;;
+GENDER;;false;INTEGER;"Пол: 1 - Муж.(М), 2 - Жен.(Ж); (0 - нет данных)";K3;;;
+ORG_UNIT_CODE;;true;VARCHAR;Код подразделения по которому определяется принадлежность сотрудника к ТБ и ГОСБ;K3;20;;

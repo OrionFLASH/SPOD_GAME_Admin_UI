@@ -1,0 +1,9 @@
+columnName;pkOrder;isNotNull;phDataType;descriptionColumn;infCat;dataLength;dataPrecision;dataScale
+CONTEST_CODE;1;true;VARCHAR;Код конкурса;K3;50;;
+GROUP_CODE;2;true;VARCHAR;Код группы конкурса (Варианты: BANK, CLUSTER, TB, GOSB);K3;100;;
+GROUP_VALUE;3;true;VARCHAR;Значение группы (определенный код ТБ, ГОСБ и тд);K3;1000;;
+GET_CALC_METHOD;;true;VARCHAR;"Метод группировки по расчету (1 - процент от числа сотрудников; 2 - число сотрудников, попадающих в ТОП, 3 - по факту достижения критерия)";K3;10;;
+GET_CALC_CRITERION;;false;DECIMAL;"Параметр определения кол-ва победителей (процент от кол-ва сотрудников; число сотрудников, попадающих в ТОП)";K3;;20;5
+ADD_CALC_CRITERION;;false;DECIMAL;Дополнительный параметр определения категории сотрудников, имеющих шанс на победу;K3;;20;5
+ADD_CALC_CRITERION_2;;false;DECIMAL;Второй дополнительный параметр определения категории сотрудников, имеющих шанс на победу;K3;;20;5
+BASE_CALC_CODE;;false;VARCHAR;Код группы конкурса для расчета параметра определения кол-ва победителей/имеющих шанс на победу ;K3;100;;

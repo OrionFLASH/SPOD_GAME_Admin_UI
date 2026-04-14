@@ -1,0 +1,8 @@
+columnName;pkOrder;isNotNull;phDataType;descriptionColumn;infCat;dataLength;dataPrecision;dataScale
+REWARD_CODE;1;true;VARCHAR;код награды;K3;50;;
+REWARD_TYPE;;true;VARCHAR;Тип награды ;K3;200;;
+FULL_NAME;;false;VARCHAR;Наименование награды;K3;2000;;
+REWARD_DESCRIPTION;;false;VARCHAR;Описание награды;K3;4000;;
+REWARD_CONDITION;;true;VARCHAR;Условия получения награды (1-победа в конкурсе, 2 - участие в конкурсе);K3;10;;
+REWARD_COST;;true;INTEGER;Стоимость (номинал) награды;K3;;;
+REWARD_ADD_DATA;;false;VARCHAR;Дополнительные сведения о награде JSON (NFT_FLG: Y, FEATURE: Достижение попадает в ленту);K3;4000;;

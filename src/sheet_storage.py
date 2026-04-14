@@ -201,6 +201,8 @@ def _create_relation_indices(
     elif sheet_code == "GROUP":
         ix(f"{t}_ix_cc", ("CONTEST_CODE",))
         ix(f"{t}_ix_cc_gc", ("CONTEST_CODE", "GROUP_CODE"))
+        # Логическая уникальность строки — тройка с GROUP_VALUE (индекс для выборок и связей).
+        ix(f"{t}_ix_cc_gc_gv", ("CONTEST_CODE", "GROUP_CODE", "GROUP_VALUE"))
     elif sheet_code == "REWARD":
         ix(f"{t}_ix_reward", ("REWARD_CODE",))
     elif sheet_code == "REWARD-LINK":
@@ -468,7 +470,7 @@ def relation_doc_lines(cfg: Dict[str, Any]) -> List[str]:
     """Краткое текстовое описание логических связей для README / database_model."""
     return [
         "CONTEST-DATA: бизнес-ключ CONTEST_CODE (не уникален между версиями строки).",
-        "GROUP: много строк на один CONTEST_CODE (N:1 к сущности конкурса).",
+        "GROUP: много строк на один CONTEST_CODE (N:1); уникальность актуальной строки — тройка (CONTEST_CODE, GROUP_CODE, GROUP_VALUE).",
         "REWARD: ключ REWARD_CODE; REWARD-LINK ссылается на CONTEST_CODE, GROUP_CODE, REWARD_CODE.",
         "INDICATOR: CONTEST_CODE + INDICATOR_CODE.",
         "TOURNAMENT-SCHEDULE: CONTEST_CODE + TOURNAMENT_CODE.",

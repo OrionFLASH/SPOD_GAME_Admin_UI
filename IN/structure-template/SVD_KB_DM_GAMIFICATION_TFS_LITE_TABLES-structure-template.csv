@@ -1,0 +1,3 @@
+columnName;pkOrder;isNotNull;phDataType;descriptionColumn;infCat;dataLength;dataPrecision;dataScale
+SEQUENCE;1;true;INT;"Порядковый номер ";K3;;;
+COMMENT;;false;VARCHAR;Комментарий;K3;2000;;

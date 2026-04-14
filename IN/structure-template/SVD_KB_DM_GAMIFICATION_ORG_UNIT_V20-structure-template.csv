@@ -1,0 +1,12 @@
+columnName;pkOrder;isNotNull;phDataType;descriptionColumn;infCat;dataLength;dataPrecision;dataScale
+TB_CODE;;true;VARCHAR;код ТБ;K3;20;;
+TB_FULL_NAME;;false;VARCHAR;Наименование ТБ полное;K3;2000;;
+TB_SHORT_NAME;;false;VARCHAR;Наименование ТБ короткое;K3;100;;
+GOSB_CODE;;true;VARCHAR;код ГОСБ;K3;20;;
+GOSB_NAME;;false;VARCHAR;Наименование ГОСБ полное;K3;2000;;
+GOSB_SHORT_NAME;;false;VARCHAR;Наименование ГОСБ короткое;K3;100;;
+CLUSTER_CODE;;false;VARCHAR;Кластер;K3;10;;
+GROUPING_CODE;;false;VARCHAR;Код группы;K3;20;;
+GOSB_CNT;;false;INT;Численность ГОСБ;K3;;;
+GROUPING_CNT;;false;INT;Численность Группы;K3;;;
+ORG_UNIT_CODE;1;true;VARCHAR;"Код подразделения сотрудника по которому определяется принадлежность к ТБ и ГОСБ ";K3;20;;

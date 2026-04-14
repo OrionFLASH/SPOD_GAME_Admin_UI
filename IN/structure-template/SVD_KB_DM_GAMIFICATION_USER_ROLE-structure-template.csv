@@ -1,0 +1,15 @@
+columnName;pkOrder;isNotNull;phDataType;descriptionColumn;infCat;dataLength;dataPrecision;dataScale
+RULE_NUM;1;true;INTEGER;Номер правила;K3;;;
+ROLE_CODE;;true;VARCHAR;Код роли;K3;100;;
+ROLE_NAME;;false;VARCHAR;Название роли;K3;1000;;
+PERSON_NUMBER_ARR;;false;VARCHAR;Массив табельных номеров, которые должны попасть с список emploee;K3;4000;;
+STAGE_ETALONE_CODE_ARR;;false;VARCHAR;Массив кодов штатных клеток / ставок;K3;4000;;
+POST_ETALONE_CODE_ARR;;false;VARCHAR;Массив кодов должностей;K3;4000;;
+DIV_CODE_ARR;;false;VARCHAR;Массив кодов подразделений, включаемых в расчет;K3;4000;;
+EXCLUDE_DIV_CODE_ARR;;false;VARCHAR;Массив кодов подразделений, исключаемых из расчета;K3;4000;;
+BUSINESS_BLOCK;;true;VARCHAR;"Принадлежность к Бизнес-блоку (""Не участник"" / ""сбросить"" / KMKKSB и т.д.)";K3;100;;
+UCH_CODE;;true;INTEGER;Признак участника;K3;;;
+ORG_UNIT_CODE;;false;VARCHAR;"Код подразделения сотрудника по которому определяется принадлежность к ТБ и ГОСБ
+(пусто - определяется автоматически, указано значение - устанавливаем указанное)";K3;20;;
+TB_CODE;;false;VARCHAR;Код ТБ (справочное);K3;10;;
+GOSB_CODE;;false;VARCHAR;Код ГОСБ для замены;K3;100;;

@@ -416,12 +416,13 @@
    * условные правила по значению другой колонки строки).
    */
   function findNumericRuleDef(bootstrap, column) {
-    var list = bootstrap.fieldNumeric || [];
+    var list = bootstrap.fieldNumeric || bootstrap.field_numeric || [];
     var sc = bootstrap.sheetCode;
+    var col = String(column || "").trim();
     var i = 0;
     for (i = 0; i < list.length; i++) {
       var r = list[i];
-      if (r && r.sheet_code === sc && r.column === column) {
+      if (r && r.sheet_code === sc && String(r.column || "").trim() === col) {
         return r;
       }
     }
@@ -453,7 +454,7 @@
     if (!ruleDef) {
       return null;
     }
-    var cfs = ruleDef.conditional_formats;
+    var cfs = ruleDef.conditional_formats || ruleDef.conditionalFormats || [];
     if (cfs && cfs.length) {
       var j = 0;
       for (j = 0; j < cfs.length; j++) {
@@ -467,7 +468,7 @@
           return cf;
         }
       }
-      return ruleDef.default_format || { format: "empty_only" };
+      return ruleDef.default_format || ruleDef.defaultFormat || { format: "empty_only" };
     }
     return ruleDef;
   }
@@ -1963,7 +1964,8 @@
 
       var dateHint = findDatePickerHint(bootstrap, col, null);
       var numDef = findNumericRuleDef(bootstrap, col);
-      var rule = findFieldEnum(bootstrap, col, null);
+      /* Числовое правило editor_field_numeric имеет приоритет над field_enums для той же колонки. */
+      var rule = numDef ? null : findFieldEnum(bootstrap, col, null);
       var initV = flat[col] != null ? String(flat[col]) : "";
       var activeNum = numDef ? resolveActiveNumericSpec(numDef, function (wc) {
         return readFlatControlValue(grid, wc, flat, "data-col");
