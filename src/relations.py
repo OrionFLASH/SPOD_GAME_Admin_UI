@@ -95,6 +95,7 @@ def build_context_for_row(
         ctx["links"].append({"title": "Конкурс", "items": _find_contest(conn, cc)})
     if sheet_code == "INDICATOR" and cc:
         ctx["links"].append({"title": "Конкурс", "items": _find_contest(conn, cc)})
+        ctx["links"].append({"title": "REWARD-LINK (награды по группам)", "items": _find_reward_links_for_contest(conn, cc)})
     if sheet_code == "TOURNAMENT-SCHEDULE" and cc:
         ctx["links"].append({"title": "Конкурс", "items": _find_contest(conn, cc)})
     if sheet_code == "TOURNAMENT-SCHEDULE" and tc:

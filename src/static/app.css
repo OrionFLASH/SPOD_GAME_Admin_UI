@@ -314,6 +314,42 @@ table.data th {
   background: rgba(255, 255, 255, 0.8);
 }
 
+/* Список REWARD: фильтр REWARD_TYPE + поиск в одной GET-форме */
+.sheet-list-form-reward {
+  margin-bottom: 1rem;
+}
+
+.sheet-list-form-reward .sheet-list-filters {
+  margin-bottom: 0.65rem;
+}
+
+.sheet-list-form-reward .reward-filter-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.sheet-list-form-reward .reward-filter-label select {
+  margin-left: 0.4rem;
+  padding: 0.35rem 0.6rem;
+  border-radius: 8px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.sheet-list-form-reward .search-row-inline {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.sheet-list-form-reward .search-row-inline input {
+  flex: 1;
+  padding: 0.45rem 0.75rem;
+  border-radius: 10px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  background: rgba(255, 255, 255, 0.8);
+}
+
 /* ---------- Страница редактирования строки ---------- */
 
 .wrap:has(.row-edit-layout) {

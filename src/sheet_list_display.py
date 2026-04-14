@@ -2,11 +2,19 @@
 """
 Дополнительные поля для таблицы списка строк: названия из связанных листов SQLite.
 Индексы строятся один раз на запрос страницы списка.
+
+Лист INDICATOR: отдельная разметка в шаблоне — CONTEST_CODE, название конкурса из CONTEST-DATA,
+INDICATOR_ADD_CALC_TYPE, INDICATOR_CODE; в «Связи» — REWARD-LINK по группам и турниры TOURNAMENT-SCHEDULE.
+
+Лист REWARD: колонка «Награда» (FULL_NAME), «Название / описание» (REWARD_DESCRIPTION), GROUP_CODE и конкурс из REWARD-LINK;
+фильтр по REWARD_TYPE задаётся в шаблоне и в маршруте списка.
 """
 
 from __future__ import annotations
 
 import json
+import sqlite3
+from collections import defaultdict
 from typing import Any, Dict, List
 
 from src import sheet_storage
@@ -37,6 +45,7 @@ def build_lookup_tables(conn: sqlite3.Connection) -> Dict[str, Any]:
     - contest_full: CONTEST_CODE -> FULL_NAME
     - reward_full: REWARD_CODE -> FULL_NAME
     - tournaments_for_contest: CONTEST_CODE -> список {TOURNAMENT_CODE, PERIOD_TYPE}
+    - reward_links_by_reward: REWARD_CODE -> список связей REWARD-LINK (CONTEST_CODE, GROUP_CODE)
     """
     contest_full: Dict[str, str] = {}
     for c in _cells_rows(conn, "CONTEST-DATA"):
@@ -58,10 +67,29 @@ def build_lookup_tables(conn: sqlite3.Connection) -> Dict[str, Any]:
         if cc and tc:
             tournaments_for_contest.setdefault(cc, []).append({"TOURNAMENT_CODE": tc, "PERIOD_TYPE": pt})
 
+    # REWARD-LINK: по конкурсу (INDICATOR) и по награде (список REWARD).
+    reward_links_by_contest: Dict[str, List[Dict[str, str]]] = {}
+    reward_links_by_reward: Dict[str, List[Dict[str, str]]] = {}
+    for c in _cells_rows(conn, "REWARD-LINK"):
+        cc_l = (c.get("CONTEST_CODE") or "").strip()
+        rc_l = (c.get("REWARD_CODE") or "").strip()
+        gc_l = (c.get("GROUP_CODE") or "").strip()
+        entry = {
+            "CONTEST_CODE": cc_l,
+            "GROUP_CODE": gc_l,
+            "REWARD_CODE": rc_l,
+        }
+        if cc_l:
+            reward_links_by_contest.setdefault(cc_l, []).append(entry)
+        if rc_l:
+            reward_links_by_reward.setdefault(rc_l, []).append(entry)
+
     return {
         "contest_full": contest_full,
         "reward_full": reward_full,
         "tournaments_for_contest": tournaments_for_contest,
+        "reward_links_by_contest": reward_links_by_contest,
+        "reward_links_by_reward": reward_links_by_reward,
     }
 
 
@@ -70,6 +98,75 @@ def _clip(s: str, n: int = 120) -> str:
     if len(s) <= n:
         return s
     return s[: n - 1] + "…"
+
+
+def _indicator_relations_line(contest_code: str, lu: Dict[str, Any]) -> str:
+    """
+    Связи для строки INDICATOR: награды по GROUP_CODE из REWARD-LINK и турниры конкурса из TOURNAMENT-SCHEDULE.
+    """
+    cc = (contest_code or "").strip()
+    if not cc:
+        return ""
+    links = lu.get("reward_links_by_contest", {}).get(cc, [])
+    tours: List[Dict[str, str]] = lu.get("tournaments_for_contest", {}).get(cc, [])
+
+    by_group: Dict[str, List[str]] = defaultdict(list)
+    seen_pair: set = set()
+    for item in links:
+        g = (item.get("GROUP_CODE") or "").strip() or "(без группы)"
+        rc = (item.get("REWARD_CODE") or "").strip()
+        if not rc:
+            continue
+        key = (g, rc)
+        if key in seen_pair:
+            continue
+        seen_pair.add(key)
+        by_group[g].append(rc)
+
+    parts: List[str] = []
+    for g in sorted(by_group.keys()):
+        codes = by_group[g][:20]
+        tail = "…" if len(by_group[g]) > 20 else ""
+        parts.append(f"{g}: {', '.join(codes)}{tail}")
+
+    rel = " · ".join(parts) if parts else ""
+    if tours:
+        t_codes: List[str] = []
+        for t in tours[:12]:
+            tc = (t.get("TOURNAMENT_CODE") or "").strip()
+            if tc and tc not in t_codes:
+                t_codes.append(tc)
+        if t_codes:
+            suf = "Турниры: " + ", ".join(t_codes)
+            rel = (rel + " | " if rel else "") + suf
+    return _clip(rel, 500)
+
+
+def _contest_data_relations_line(contest_code: str, lu: Dict[str, Any]) -> str:
+    """
+    Колонка «Связи» для списка конкурсов: только коды TOURNAMENT_CODE и REWARD_CODE (без PERIOD_TYPE и пр.).
+    """
+    cc = (contest_code or "").strip()
+    if not cc:
+        return ""
+    t_codes: List[str] = []
+    for t in lu.get("tournaments_for_contest", {}).get(cc, []):
+        tc = (t.get("TOURNAMENT_CODE") or "").strip()
+        if tc and tc not in t_codes:
+            t_codes.append(tc)
+    r_codes: List[str] = []
+    seen_r: set = set()
+    for item in lu.get("reward_links_by_contest", {}).get(cc, []):
+        rc = (item.get("REWARD_CODE") or "").strip()
+        if rc and rc not in seen_r:
+            seen_r.add(rc)
+            r_codes.append(rc)
+    parts: List[str] = []
+    if t_codes:
+        parts.append("Турниры: " + ", ".join(t_codes))
+    if r_codes:
+        parts.append("Награды: " + ", ".join(r_codes))
+    return _clip(" | ".join(parts), 600) if parts else ""
 
 
 def display_for_sheet_row(sheet_code: str, cells: Dict[str, str], lu: Dict[str, Any]) -> Dict[str, str]:
@@ -88,14 +185,7 @@ def display_for_sheet_row(sheet_code: str, cells: Dict[str, str], lu: Dict[str, 
         cc = (cells.get("CONTEST_CODE") or "").strip()
         pk = cc
         title = (cells.get("FULL_NAME") or "").strip()
-        parts: List[str] = []
-        for t in tournaments_for_contest.get(cc, [])[:5]:
-            tc = t.get("TOURNAMENT_CODE", "")
-            pt = t.get("PERIOD_TYPE", "")
-            if tc:
-                parts.append(f"{tc} — {_clip(pt, 40)}" if pt else tc)
-        if parts:
-            relations = "Турниры: " + " · ".join(parts)
+        relations = _contest_data_relations_line(cc, lu)
         return {"primary_key": pk, "title_line": title, "relations_line": relations}
 
     if sheet_code == "GROUP":
@@ -110,17 +200,54 @@ def display_for_sheet_row(sheet_code: str, cells: Dict[str, str], lu: Dict[str, 
     if sheet_code == "INDICATOR":
         ic = (cells.get("INDICATOR_CODE") or "").strip()
         cc = (cells.get("CONTEST_CODE") or "").strip()
-        pk = ic
-        title = (cells.get("FULL_NAME") or "").strip()
+        ind_full = (cells.get("FULL_NAME") or "").strip()
+        add_calc = (cells.get("INDICATOR_ADD_CALC_TYPE") or "").strip()
         cname = contest_full.get(cc, "")
-        relations = f"Конкурс: {cc}" + (f" — {_clip(cname, 80)}" if cname else "")
-        return {"primary_key": pk, "title_line": title, "relations_line": relations}
+        # В колонке «Название» — FULL_NAME конкурса из CONTEST-DATA; подпись — FULL_NAME показателя, если отличается.
+        title_line = cname or ind_full or ic
+        subtitle_line = ""
+        if ind_full and (not cname or ind_full.strip() != cname.strip()):
+            subtitle_line = ind_full
+        relations = _indicator_relations_line(cc, lu)
+        return {
+            "primary_key": ic,
+            "contest_code": cc,
+            "title_line": title_line,
+            "subtitle_line": subtitle_line,
+            "add_calc_type": add_calc,
+            "indicator_code_col": ic,
+            "relations_line": relations,
+        }
 
     if sheet_code == "REWARD":
         rc = (cells.get("REWARD_CODE") or "").strip()
         pk = rc
-        title = (cells.get("FULL_NAME") or "").strip()
-        return {"primary_key": pk, "title_line": title, "relations_line": ""}
+        reward_name = (cells.get("FULL_NAME") or "").strip()
+        desc = (cells.get("REWARD_DESCRIPTION") or "").strip()
+        title_line = desc
+        links_r = lu.get("reward_links_by_reward", {}).get(rc, [])
+        contests: List[str] = []
+        groups: List[str] = []
+        seen_cc: set = set()
+        seen_gc: set = set()
+        for L in links_r:
+            ccl = (L.get("CONTEST_CODE") or "").strip()
+            if ccl and ccl not in seen_cc:
+                seen_cc.add(ccl)
+                contests.append(ccl)
+            gcl = (L.get("GROUP_CODE") or "").strip()
+            if gcl and gcl not in seen_gc:
+                seen_gc.add(gcl)
+                groups.append(gcl)
+        relations_line = "Конкурс: " + ", ".join(contests) if contests else ""
+        group_codes_col = ", ".join(groups)
+        return {
+            "primary_key": pk,
+            "reward_name_col": reward_name,
+            "title_line": title_line,
+            "group_codes_col": group_codes_col,
+            "relations_line": relations_line,
+        }
 
     if sheet_code == "REWARD-LINK":
         cc = (cells.get("CONTEST_CODE") or "").strip()
@@ -157,8 +284,55 @@ def display_for_sheet_row(sheet_code: str, cells: Dict[str, str], lu: Dict[str, 
     return {"primary_key": spec_pk, "title_line": "", "relations_line": ""}
 
 
+def reward_type_filter_options(cfg: Dict[str, Any]) -> List[Dict[str, str]]:
+    """
+    Варианты селекта фильтра списка REWARD по REWARD_TYPE из field_enums.
+    Первый пункт — «ВСЕ» (value пустой: без фильтра). При нескольких правилах в конфиге — объединение без дублей.
+    """
+    from src import editor_config
+
+    def _opt_value(o: Any) -> str:
+        if isinstance(o, dict):
+            v = o.get("value")
+            return str(v).strip() if v is not None else ""
+        return str(o).strip() if o is not None else ""
+
+    def _opt_label(o: Any, val: str) -> str:
+        if isinstance(o, dict) and o.get("label") is not None:
+            return str(o.get("label")).strip() or val
+        return val
+
+    out: List[Dict[str, str]] = [{"label": "ВСЕ", "value": ""}]
+    seen: set = {""}
+    for rule in editor_config.flatten_field_enums(cfg):
+        if rule.get("sheet_code") != "REWARD" or rule.get("column") != "REWARD_TYPE":
+            continue
+        if rule.get("json_path"):
+            continue
+        for o in rule.get("options") or []:
+            v = _opt_value(o)
+            if not v or v in seen:
+                continue
+            seen.add(v)
+            out.append({"label": _opt_label(o, v), "value": v})
+    return out
+
+
 def search_blob(cells: Dict[str, str], disp: Dict[str, str]) -> str:
     """Объединённая строка для поиска по списку."""
     parts = [json.dumps(cells, ensure_ascii=False)]
-    parts.extend(disp.get(k, "") for k in ("primary_key", "title_line", "relations_line"))
+    parts.extend(
+        disp.get(k, "")
+        for k in (
+            "primary_key",
+            "title_line",
+            "relations_line",
+            "contest_code",
+            "subtitle_line",
+            "add_calc_type",
+            "indicator_code_col",
+            "reward_name_col",
+            "group_codes_col",
+        )
+    )
     return " ".join(parts).lower()

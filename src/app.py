@@ -240,6 +240,13 @@ def sheet_list(request: Request, code: str, q: str = ""):
     spec = next((s for s in CFG["sheets"] if s["code"] == code), None)
     ql = q.strip().lower() if q else ""
     lu = sheet_list_display.build_lookup_tables(conn)
+    reward_type_options: List[Dict[str, str]] = []
+    reward_type_selected = ""
+    if code == "REWARD":
+        reward_type_options = sheet_list_display.reward_type_filter_options(CFG)
+        rt_allowed = {str(o.get("value", "")) for o in reward_type_options}
+        rt_raw = (request.query_params.get("reward_type") or "").strip()
+        reward_type_selected = rt_raw if rt_raw in rt_allowed else ""
     for r in cur.fetchall():
         cur2 = conn.execute(
             f"SELECT * FROM {sheet_storage.quote_ident(t)} WHERE id = ?",
@@ -247,21 +254,31 @@ def sheet_list(request: Request, code: str, q: str = ""):
         )
         full = cur2.fetchone()
         cells = sheet_storage.row_to_cells(full, headers) if full else {}
+        if code == "REWARD" and reward_type_selected:
+            if (cells.get("REWARD_TYPE") or "").strip() != reward_type_selected:
+                continue
         disp = sheet_list_display.display_for_sheet_row(code, cells, lu)
         blob = sheet_list_display.search_blob(cells, disp)
         if ql and ql not in blob:
             continue
-        rows_out.append(
-            {
-                "id": r["id"],
-                "row_index": r["row_index"],
-                "preview": disp["primary_key"],
-                "title_line": disp["title_line"],
-                "relations_line": disp["relations_line"],
-                "ok": r["consistency_ok"],
-                "errors": json.loads(r["consistency_errors"] or "[]"),
-            }
-        )
+        row_out: Dict[str, Any] = {
+            "id": r["id"],
+            "row_index": r["row_index"],
+            "preview": disp.get("primary_key", ""),
+            "title_line": disp.get("title_line", ""),
+            "relations_line": disp.get("relations_line", ""),
+            "ok": r["consistency_ok"],
+            "errors": json.loads(r["consistency_errors"] or "[]"),
+        }
+        if code == "INDICATOR":
+            row_out["contest_code"] = disp.get("contest_code", "")
+            row_out["subtitle_line"] = disp.get("subtitle_line", "")
+            row_out["add_calc_type"] = disp.get("add_calc_type", "")
+            row_out["indicator_code_col"] = disp.get("indicator_code_col", "")
+        if code == "REWARD":
+            row_out["reward_name_col"] = disp.get("reward_name_col", "")
+            row_out["group_codes_col"] = disp.get("group_codes_col", "")
+        rows_out.append(row_out)
     return templates.TemplateResponse(
         request,
         "sheet_list.html",
@@ -270,6 +287,8 @@ def sheet_list(request: Request, code: str, q: str = ""):
             "sheet_title": spec.get("title") if spec else code,
             "rows": rows_out,
             "q": q,
+            "reward_type_options": reward_type_options,
+            "reward_type_selected": reward_type_selected,
         },
     )
 

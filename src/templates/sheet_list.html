@@ -3,18 +3,54 @@
 {% block content %}
 <section class="panel">
   <h1>{{ sheet_title }}</h1>
+  {% if sheet_code == "INDICATOR" %}
+  <p class="muted">Код листа: <strong>{{ sheet_code }}</strong> · колонка «Название / описание»: полное имя конкурса из CONTEST-DATA по CONTEST_CODE; ниже — название показателя из строки. Связи: награды из REWARD-LINK по группам и турниры конкурса.</p>
+  {% elif sheet_code == "REWARD" %}
+  <p class="muted">Код листа: <strong>{{ sheet_code }}</strong> · колонка «Награда» — <code>FULL_NAME</code> строки; «Название / описание» — <code>REWARD_DESCRIPTION</code>. Фильтр <strong>REWARD_TYPE</strong>: при выборе нескольких критериев в будущем будет логика <strong>И</strong>; сейчас один фильтр. Связи — конкурсы из REWARD-LINK.</p>
+  {% else %}
   <p class="muted">Код листа: <strong>{{ sheet_code }}</strong> · в таблице: ключ, название из строки или связей, подтянутые турниры/конкурсы где применимо.</p>
+  {% endif %}
+  {% if sheet_code == "REWARD" %}
+  <form class="search sheet-list-form-reward" method="get" action="/sheet/{{ sheet_code }}">
+    <div class="sheet-list-filters">
+      <label class="reward-filter-label">REWARD_TYPE
+        <select name="reward_type" aria-label="Фильтр по типу награды" onchange="this.form.submit()">
+          {% for o in reward_type_options %}
+          <option value="{{ o.value }}" {% if reward_type_selected == o.value %}selected{% endif %}>{{ o.label }}</option>
+          {% endfor %}
+        </select>
+      </label>
+    </div>
+    <div class="search-row-inline">
+      <input type="search" name="q" value="{{ q }}" placeholder="Поиск по содержимому строки…" />
+      <button type="submit" class="btn btn-primary">Найти</button>
+    </div>
+  </form>
+  {% else %}
   <form class="search" method="get" action="/sheet/{{ sheet_code }}">
     <input type="search" name="q" value="{{ q }}" placeholder="Поиск по содержимому строки…" />
     <button type="submit" class="btn btn-primary">Найти</button>
   </form>
+  {% endif %}
   <div class="table-scroll">
     <table class="data data-list-wide">
       <thead>
         <tr>
           <th class="col-idx">#</th>
+          {% if sheet_code == "INDICATOR" %}
+          <th>CONTEST_CODE</th>
+          <th>Название / описание</th>
+          <th>Настройка вычисления</th>
+          <th>Код индикатора</th>
+          {% elif sheet_code == "REWARD" %}
+          <th>Ключ</th>
+          <th>Награда</th>
+          <th>Название / описание</th>
+          <th>GROUP_CODE</th>
+          {% else %}
           <th>Ключ</th>
           <th>Название / описание</th>
+          {% endif %}
           <th>Связи</th>
           <th class="col-flag">Консистентность</th>
           <th class="col-action"></th>
@@ -24,8 +60,20 @@
         {% for r in rows %}
         <tr>
           <td class="col-idx">{{ r.row_index }}</td>
+          {% if sheet_code == "INDICATOR" %}
+          <td class="cell-mono">{{ r.contest_code }}</td>
+          <td class="cell-wrap">{{ r.title_line }}{% if r.subtitle_line %}<br><span class="muted">{{ r.subtitle_line }}</span>{% endif %}</td>
+          <td class="cell-wrap">{{ r.add_calc_type }}</td>
+          <td class="cell-mono">{{ r.indicator_code_col }}</td>
+          {% elif sheet_code == "REWARD" %}
+          <td class="cell-mono">{{ r.preview }}</td>
+          <td class="cell-wrap">{{ r.reward_name_col }}</td>
+          <td class="cell-wrap">{{ r.title_line }}</td>
+          <td class="cell-mono">{{ r.group_codes_col }}</td>
+          {% else %}
           <td class="cell-mono">{{ r.preview }}</td>
           <td class="cell-wrap">{{ r.title_line }}</td>
+          {% endif %}
           <td class="cell-wrap cell-muted">{{ r.relations_line }}</td>
           <td class="col-flag">
             {% if r.ok %}
