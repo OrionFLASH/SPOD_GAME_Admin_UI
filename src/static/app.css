@@ -337,6 +337,28 @@ table.data th {
   background: rgba(255, 255, 255, 0.9);
 }
 
+.sheet-list-form-reward select.sheet-list-filter-multi {
+  display: inline-block;
+  vertical-align: top;
+  min-width: 12rem;
+  min-height: 5.5rem;
+  margin-left: 0.4rem;
+  padding: 0.35rem 0.5rem;
+  border-radius: 8px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.sheet-list-form-reward .sheet-list-filter-hint {
+  margin: 0.35rem 0 0;
+  font-size: 0.8rem;
+  max-width: 42rem;
+}
+
+.data-list-wide .cell-relations-pre {
+  white-space: pre-line;
+}
+
 .sheet-list-form-reward .search-row-inline {
   display: flex;
   gap: 0.5rem;

@@ -132,6 +132,7 @@ def build_schema(root: Path, cfg: Dict[str, Any]) -> Dict[str, Any]:
         "fieldUi": editor_config.flatten_editor_field_ui(cfg),
         "fieldEnums": editor_config.flatten_field_enums(cfg),
         "editorTextareas": editor_config.flatten_editor_textareas(cfg),
+        "fieldNumeric": editor_config.flatten_editor_field_numeric(cfg),
         "longTextThreshold": int(cfg.get("editor_long_text_threshold", 120)),
     }
 

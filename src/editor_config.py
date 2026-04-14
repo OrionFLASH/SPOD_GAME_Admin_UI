@@ -3,7 +3,8 @@
 Развёртка настроек редактора из config.json в плоский вид для row_editor.js.
 
 В конфиге допускается группировка по листу: один объект с полем sheet_code и массивом
-rules (перечисления), hints (размеры textarea) или rules в editor_field_ui (подписи и описания полей),
+rules (перечисления), hints (размеры textarea), rules в editor_field_ui (подписи и описания полей)
+или rules в editor_field_numeric (форматы числовых плоских полей),
 вместо повторения sheet_code в каждой записи.
 Поддерживается и старый плоский формат (каждый элемент — полное правило с sheet_code).
 """
@@ -76,6 +77,38 @@ def flatten_editor_textareas(cfg: Dict[str, Any]) -> List[Dict[str, Any]]:
             for hint in block.get("hints") or []:
                 if isinstance(hint, dict):
                     merged = dict(hint)
+                    merged["sheet_code"] = sc
+                    out.append(merged)
+            continue
+        if "column" in block:
+            out.append(dict(block))
+    return out
+
+
+def flatten_editor_field_numeric(cfg: Dict[str, Any]) -> List[Dict[str, Any]]:
+    """
+    Плоский список правил формата числовых плоских полей для row_editor.js / мастера.
+
+    Формат в config.json — блоки {\"sheet_code\", \"rules\": [ {...}, ... ] }.
+    Статическое правило: \"format\": \"integer\" | \"decimal\", \"min\", \"max\",
+    для decimal — \"decimal_places\" (по умолчанию 5).
+    Условное: \"conditional_formats\": [ { \"when\": { \"column\": \"...\", \"equals\": \"...\" }, \"format\": \"...\", ... }, ... ],
+    \"default_format\": { \"format\": \"empty_only\" } — поле не заполняется (блокировка ввода).
+    """
+    raw = cfg.get("editor_field_numeric")
+    if not raw or not isinstance(raw, list):
+        return []
+    out: List[Dict[str, Any]] = []
+    for block in raw:
+        if not isinstance(block, dict):
+            continue
+        sc = block.get("sheet_code")
+        if sc is None:
+            continue
+        if "rules" in block:
+            for rule in block.get("rules") or []:
+                if isinstance(rule, dict):
+                    merged: Dict[str, Any] = dict(rule)
                     merged["sheet_code"] = sc
                     out.append(merged)
             continue

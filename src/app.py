@@ -241,12 +241,19 @@ def sheet_list(request: Request, code: str, q: str = ""):
     ql = q.strip().lower() if q else ""
     lu = sheet_list_display.build_lookup_tables(conn)
     reward_type_options: List[Dict[str, str]] = []
-    reward_type_selected = ""
-    if code == "REWARD":
-        reward_type_options = sheet_list_display.reward_type_filter_options(CFG)
-        rt_allowed = {str(o.get("value", "")) for o in reward_type_options}
-        rt_raw = (request.query_params.get("reward_type") or "").strip()
-        reward_type_selected = rt_raw if rt_raw in rt_allowed else ""
+    reward_type_selected_list: List[str] = []
+    season_options: List[Dict[str, str]] = []
+    season_selected_list: List[str] = []
+    if code in ("REWARD", "REWARD-LINK"):
+        reward_type_options = sheet_list_display.reward_type_filter_options(CFG, for_multiselect_list=True)
+        rt_allowed = {str(o.get("value", "")) for o in reward_type_options if str(o.get("value", "")).strip()}
+        reward_type_selected_list = [
+            x.strip() for x in request.query_params.getlist("reward_type") if x.strip() in rt_allowed
+        ]
+    if code == "TOURNAMENT-SCHEDULE":
+        season_options = sheet_list_display.season_filter_options(lu)
+        season_allowed = {str(o.get("value", "")) for o in season_options}
+        season_selected_list = [x.strip() for x in request.query_params.getlist("season") if x.strip() in season_allowed]
     for r in cur.fetchall():
         cur2 = conn.execute(
             f"SELECT * FROM {sheet_storage.quote_ident(t)} WHERE id = ?",
@@ -254,8 +261,17 @@ def sheet_list(request: Request, code: str, q: str = ""):
         )
         full = cur2.fetchone()
         cells = sheet_storage.row_to_cells(full, headers) if full else {}
-        if code == "REWARD" and reward_type_selected:
-            if (cells.get("REWARD_TYPE") or "").strip() != reward_type_selected:
+        if code == "TOURNAMENT-SCHEDULE" and season_selected_list:
+            s_val = sheet_list_display.target_type_season_code(cells.get("TARGET_TYPE") or "")
+            if s_val not in season_selected_list:
+                continue
+        if code == "REWARD" and reward_type_selected_list:
+            if (cells.get("REWARD_TYPE") or "").strip() not in reward_type_selected_list:
+                continue
+        if code == "REWARD-LINK" and reward_type_selected_list:
+            rc_f = (cells.get("REWARD_CODE") or "").strip()
+            rt_link = (lu.get("reward_type_by_reward") or {}).get(rc_f, "")
+            if rt_link not in reward_type_selected_list:
                 continue
         disp = sheet_list_display.display_for_sheet_row(code, cells, lu)
         blob = sheet_list_display.search_blob(cells, disp)
@@ -278,6 +294,16 @@ def sheet_list(request: Request, code: str, q: str = ""):
         if code == "REWARD":
             row_out["reward_name_col"] = disp.get("reward_name_col", "")
             row_out["group_codes_col"] = disp.get("group_codes_col", "")
+        if code == "REWARD-LINK":
+            row_out["reward_link_reward_code"] = disp.get("reward_link_reward_code", "")
+            row_out["reward_link_reward_name"] = disp.get("reward_link_reward_name", "")
+            row_out["reward_link_contest_code"] = disp.get("reward_link_contest_code", "")
+            row_out["reward_link_contest_name"] = disp.get("reward_link_contest_name", "")
+            row_out["reward_link_group_code"] = disp.get("reward_link_group_code", "")
+        if code == "TOURNAMENT-SCHEDULE":
+            row_out["schedule_period_col"] = disp.get("schedule_period_col", "")
+            row_out["schedule_contest_name_col"] = disp.get("schedule_contest_name_col", "")
+            row_out["schedule_season_col"] = disp.get("schedule_season_col", "")
         rows_out.append(row_out)
     return templates.TemplateResponse(
         request,
@@ -288,7 +314,9 @@ def sheet_list(request: Request, code: str, q: str = ""):
             "rows": rows_out,
             "q": q,
             "reward_type_options": reward_type_options,
-            "reward_type_selected": reward_type_selected,
+            "reward_type_selected_list": reward_type_selected_list,
+            "season_options": season_options,
+            "season_selected_list": season_selected_list,
         },
     )
 
@@ -353,6 +381,7 @@ def row_detail(request: Request, code: str, row_id: int):
         "fieldEnums": editor_config.flatten_field_enums(CFG),
         "editorTextareas": editor_config.flatten_editor_textareas(CFG),
         "fieldUi": editor_config.flatten_editor_field_ui(CFG),
+        "fieldNumeric": editor_config.flatten_editor_field_numeric(CFG),
         "longTextThreshold": int(CFG.get("editor_long_text_threshold", 120)),
     }
     sheet_title = str(spec.get("title") or code)

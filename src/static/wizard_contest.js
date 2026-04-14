@@ -517,6 +517,17 @@
       wizSyncSplitCodesInRoot(wrapT.parentNode || wrapT);
       return row;
     }
+    var rowCells = (meta && meta.rowCells) || {};
+    var wizRoot = (meta && meta.wizGrid) || null;
+    var numApi = typeof window !== "undefined" ? window.SpodNumericField : null;
+    var wbNum = { sheetCode: sheetCode, fieldNumeric: (schema.fieldNumeric || []).slice() };
+    var numDefW = numApi && typeof numApi.findDef === "function" ? numApi.findDef(wbNum, col) : null;
+    var activeW =
+      numDefW && numApi && typeof numApi.resolveActiveNumericSpec === "function"
+        ? numApi.resolveActiveNumericSpec(numDefW, function (wc) {
+            return numApi.readFlatControlValue(wizRoot, wc, rowCells, "data-wiz-col");
+          })
+        : null;
     var en = findEnum(sheetCode, col);
     var initV = val != null ? String(val) : "";
     if (dh) {
@@ -536,6 +547,28 @@
         inp.value = initV;
         inp.placeholder = dh.storage_format || "YYYY-MM-DD";
         row.appendChild(inp);
+      }
+    } else if (numDefW && numApi && typeof numApi.attachNumericFlatInput === "function") {
+      row.appendChild(lab);
+      if (!activeW || activeW.format === "empty_only") {
+        var inpNe = document.createElement("input");
+        inpNe.type = "text";
+        inpNe.className = "spod-leaf-control";
+        inpNe.setAttribute("data-wiz-col", col);
+        inpNe.value = "";
+        inpNe.disabled = true;
+        inpNe.title = "Поле не заполняется при текущем значении условной колонки.";
+        row.appendChild(inpNe);
+      } else {
+        var inpNw = document.createElement("input");
+        inpNw.type = "text";
+        inpNw.className = "spod-leaf-control";
+        inpNw.setAttribute("data-wiz-col", col);
+        var resW = numApi.applyNumericFormatToValue(initV, activeW);
+        inpNw.value = resW.ok ? resW.value : initV;
+        row.appendChild(inpNw);
+        var pairW = numApi.attachNumericFlatInput(inpNw, wizRoot, wbNum, col, "data-wiz-col", rowCells);
+        row.appendChild(pairW.warnEl);
       }
     } else if (en) {
       var wrap = document.createElement("div");
@@ -633,9 +666,25 @@
     var meta = wizMeta || {};
     var grid = document.createElement("div");
     grid.className = "scalar-field-grid wiz-grid";
+    meta.wizGrid = grid;
+    meta.rowCells = cells;
     (sh.flat_columns || []).forEach(function (col) {
       grid.appendChild(renderFieldRow(sheetCode, col, cells[col], locked, meta));
     });
+    if (!grid.getAttribute("data-wiz-numeric-delegation")) {
+      grid.setAttribute("data-wiz-numeric-delegation", "1");
+      grid.addEventListener(
+        "change",
+        function () {
+          grid.querySelectorAll("input.spod-numeric-input").forEach(function (el) {
+            if (typeof el.__spodRefreshNumericState === "function") {
+              el.__spodRefreshNumericState();
+            }
+          });
+        },
+        true
+      );
+    }
     (sh.json_columns || []).forEach(function (jc) {
       var row = document.createElement("div");
       row.className = "scalar-cell grid-cell wiz-field wiz-json-cell wiz-json-cell--panel";
@@ -1067,6 +1116,39 @@
     );
   }
 
+  /**
+   * После удаления черновика или иного изменения списка — заново загрузить черновики и перерисовать
+   * боковую панель «Незавершённые черновики» и блок «Продолжить черновик» на стартовом экране,
+   * чтобы оба списка совпадали с базой.
+   */
+  function refreshDraftListsAfterMutation() {
+    return Promise.all([
+      fetch("/wizard/new-contest/drafts").then(function (r) {
+        if (!r.ok) {
+          return [];
+        }
+        return r.json().then(function (data) {
+          return Array.isArray(data) ? data : [];
+        });
+      }),
+      fetch("/wizard/new-contest/seed-contests")
+        .then(function (rs) {
+          return rs.ok ? rs.json() : [];
+        })
+        .catch(function () {
+          return [];
+        }),
+    ]).then(function (pair) {
+      var rows = pair[0];
+      var seeds = pair[1];
+      renderDraftPanel(rows);
+      if ($("wiz-gate-body")) {
+        renderStartGate(rows, seeds);
+      }
+      return rows;
+    });
+  }
+
   function renderDraftPanel(rows) {
     var panel = $("wiz-draft-panel");
     if (!panel) {
@@ -1114,15 +1196,41 @@
         if (!confirm("Удалить этот черновик из базы?")) {
           return;
         }
+        var deletedSid = sid;
         fetch("/wizard/new-contest/draft/" + encodeURIComponent(sid), { method: "DELETE" })
-          .then(function () {
-            return fetch("/wizard/new-contest/drafts");
-          })
           .then(function (r) {
-            return r.json();
+            if (!r.ok) {
+              return r.text().then(function (txt) {
+                var detail = r.statusText || "Ошибка " + r.status;
+                try {
+                  var j = txt ? JSON.parse(txt) : {};
+                  if (j && j.detail !== undefined) {
+                    detail = typeof j.detail === "string" ? j.detail : JSON.stringify(j.detail);
+                  }
+                } catch (eDel) {
+                  if (txt) {
+                    detail = txt.slice(0, 400);
+                  }
+                }
+                throw new Error(detail);
+              });
+            }
           })
-          .then(function (nr) {
-            renderDraftPanel(nr);
+          .then(function () {
+            return refreshDraftListsAfterMutation();
+          })
+          .then(function () {
+            if (deletedSid && deletedSid === draftUuid) {
+              draftUuid = newDraftUuid();
+              lastSavedDraftJson = null;
+              showDraftNote(
+                "Удалён черновик, с которым вы работали. «Временное сохранение» создаст новую запись.",
+                false
+              );
+            }
+          })
+          .catch(function (e) {
+            alert((e && e.message) || "Не удалось удалить черновик.");
           });
       });
       line.appendChild(btnOpen);
@@ -1881,21 +1989,37 @@
           if (!confirm("Удалить этот черновик из базы?")) {
             return;
           }
+          var deletedSid = sid;
           fetch("/wizard/new-contest/draft/" + encodeURIComponent(sid), { method: "DELETE" })
-            .then(function () {
-              return fetch("/wizard/new-contest/drafts");
-            })
             .then(function (r) {
-              return r.json();
-            })
-            .then(function (nr) {
-              return fetch("/wizard/new-contest/seed-contests")
-                .then(function (rs) {
-                  return rs.ok ? rs.json() : [];
-                })
-                .then(function (seeds) {
-                  renderStartGate(nr, seeds);
+              if (!r.ok) {
+                return r.text().then(function (txt) {
+                  var detail = r.statusText || "Ошибка " + r.status;
+                  try {
+                    var j = txt ? JSON.parse(txt) : {};
+                    if (j && j.detail !== undefined) {
+                      detail = typeof j.detail === "string" ? j.detail : JSON.stringify(j.detail);
+                    }
+                  } catch (eDel2) {
+                    if (txt) {
+                      detail = txt.slice(0, 400);
+                    }
+                  }
+                  throw new Error(detail);
                 });
+              }
+            })
+            .then(function () {
+              return refreshDraftListsAfterMutation();
+            })
+            .then(function () {
+              if (deletedSid && deletedSid === draftUuid) {
+                draftUuid = newDraftUuid();
+                lastSavedDraftJson = null;
+              }
+            })
+            .catch(function (e) {
+              alert((e && e.message) || "Не удалось удалить черновик.");
             });
         });
         line.appendChild(btnOpen);

@@ -74,11 +74,13 @@
       "hints": [
         {
           "column": "CONTEST_DESCRIPTION",
+          "input_type": "text",
           "min_rows": 6,
           "max_rows": 18
         },
         {
           "column": "FULL_NAME",
+          "input_type": "text",
           "min_rows": 2,
           "max_rows": 8
         },
@@ -1606,6 +1608,85 @@
         "TRN_INDICATOR_FILTER"
       ],
       "primary_key_column": "TOURNAMENT_CODE"
+    }
+  ],
+  "editor_field_numeric": [
+    {
+      "sheet_code": "CONTEST-DATA",
+      "rules": [
+        {
+          "column": "CALC_TYPE",
+          "format": "integer",
+          "min": 0,
+          "max": 1
+        }
+      ]
+    },
+    {
+      "sheet_code": "INDICATOR",
+      "rules": [
+        {
+          "column": "CALC_TYPE",
+          "format": "integer",
+          "min": 0,
+          "max": 3
+        }
+      ]
+    },
+    {
+      "sheet_code": "TOURNAMENT-SCHEDULE",
+      "rules": [
+        {
+          "column": "CALC_TYPE",
+          "format": "integer",
+          "min": 0,
+          "max": 1
+        }
+      ]
+    },
+    {
+      "sheet_code": "GROUP",
+      "rules": [
+        {
+          "comment": "Условие по GET_CALC_METHOD (в выгрузке режим 2/3; в ТЗ фигурирует GET_CALC_CRITERION).",
+          "column": "ADD_CALC_CRITERION",
+          "conditional_formats": [
+            {
+              "when": { "column": "GET_CALC_METHOD", "equals": "2" },
+              "format": "integer",
+              "min": 0,
+              "max": 50
+            },
+            {
+              "when": { "column": "GET_CALC_METHOD", "equals": "3" },
+              "format": "decimal",
+              "min": 0,
+              "max": 1,
+              "decimal_places": 5
+            }
+          ],
+          "default_format": { "format": "empty_only" }
+        },
+        {
+          "column": "ADD_CALC_CRITERION_2",
+          "conditional_formats": [
+            {
+              "when": { "column": "GET_CALC_METHOD", "equals": "2" },
+              "format": "integer",
+              "min": 0,
+              "max": 50
+            },
+            {
+              "when": { "column": "GET_CALC_METHOD", "equals": "3" },
+              "format": "decimal",
+              "min": 0,
+              "max": 1,
+              "decimal_places": 5
+            }
+          ],
+          "default_format": { "format": "empty_only" }
+        }
+      ]
     }
   ],
   "editor_field_ui": [

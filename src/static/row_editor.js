@@ -412,6 +412,220 @@
   }
 
   /**
+   * Числовые плоские поля: editor_field_numeric в config.json (целое / дробное с фиксированным числом знаков,
+   * условные правила по значению другой колонки строки).
+   */
+  function findNumericRuleDef(bootstrap, column) {
+    var list = bootstrap.fieldNumeric || [];
+    var sc = bootstrap.sheetCode;
+    var i = 0;
+    for (i = 0; i < list.length; i++) {
+      var r = list[i];
+      if (r && r.sheet_code === sc && r.column === column) {
+        return r;
+      }
+    }
+    return null;
+  }
+
+  function readFlatControlValue(grid, col, flatFallback, attrName) {
+    var attr = attrName || "data-col";
+    if (grid && grid.querySelector) {
+      var el = grid.querySelector("[" + attr + '="' + col + '"]');
+      if (el) {
+        if (
+          el.type === "hidden" &&
+          el.closest &&
+          (el.closest(".spod-enum-block") || el.closest(".wiz-enum-wrap"))
+        ) {
+          return String(el.value || "");
+        }
+        return String(el.value != null ? el.value : "");
+      }
+    }
+    if (flatFallback && flatFallback[col] != null) {
+      return String(flatFallback[col]);
+    }
+    return "";
+  }
+
+  function resolveActiveNumericSpec(ruleDef, getVal) {
+    if (!ruleDef) {
+      return null;
+    }
+    var cfs = ruleDef.conditional_formats;
+    if (cfs && cfs.length) {
+      var j = 0;
+      for (j = 0; j < cfs.length; j++) {
+        var cf = cfs[j];
+        var w = cf.when || {};
+        var wcol = w.column;
+        if (!wcol) {
+          continue;
+        }
+        if (String(getVal(wcol)).trim() === String(w.equals != null ? w.equals : "").trim()) {
+          return cf;
+        }
+      }
+      return ruleDef.default_format || { format: "empty_only" };
+    }
+    return ruleDef;
+  }
+
+  function clampInt(n, lo, hi) {
+    var x = Math.round(n);
+    if (x < lo) {
+      x = lo;
+    }
+    if (x > hi) {
+      x = hi;
+    }
+    return x;
+  }
+
+  function formatDecimalToPlaces(num, places) {
+    var p = places != null ? parseInt(String(places), 10) : 5;
+    if (!isFinite(p) || p < 0) {
+      p = 5;
+    }
+    var f = Math.round(num * Math.pow(10, p)) / Math.pow(10, p);
+    var s = String(f);
+    var neg = false;
+    if (s.charAt(0) === "-") {
+      neg = true;
+      s = s.slice(1);
+    }
+    var parts = s.split(".");
+    var intp = parts[0] || "0";
+    var frac = parts.length > 1 ? parts[1] : "";
+    while (frac.length < p) {
+      frac += "0";
+    }
+    if (frac.length > p) {
+      frac = frac.slice(0, p);
+    }
+    return (neg ? "-" : "") + intp + "." + frac;
+  }
+
+  function normalizeNumericInputString(raw) {
+    return String(raw != null ? raw : "")
+      .trim()
+      .replace(/\s/g, "")
+      .replace(",", ".");
+  }
+
+  function applyNumericFormatToValue(raw, spec) {
+    if (!spec || spec.format === "empty_only") {
+      return { ok: true, value: "", warn: "" };
+    }
+    var t = normalizeNumericInputString(raw);
+    if (t === "" || t === "-") {
+      return { ok: true, value: "", warn: "" };
+    }
+    if (!/^-?\d+(\.\d*)?$/.test(t)) {
+      return {
+        ok: false,
+        value: String(raw || ""),
+        warn: "Введите число (для дроби допустимы точка или запятая).",
+      };
+    }
+    var n = parseFloat(t);
+    if (!isFinite(n)) {
+      return { ok: false, value: String(raw || ""), warn: "Некорректное число." };
+    }
+    var lo = spec.min != null ? Number(spec.min) : null;
+    var hi = spec.max != null ? Number(spec.max) : null;
+    if (spec.format === "integer") {
+      if (Math.abs(n - Math.round(n)) > 1e-9) {
+        return { ok: false, value: String(raw || ""), warn: "Ожидается целое число." };
+      }
+      var xi = clampInt(n, lo != null ? lo : -1e15, hi != null ? hi : 1e15);
+      if (lo != null && xi < lo) {
+        xi = lo;
+      }
+      if (hi != null && xi > hi) {
+        xi = hi;
+      }
+      var ws = "";
+      if (n < lo || n > hi) {
+        ws = "Значение ограничено диапазоном " + String(lo) + "…" + String(hi) + ".";
+      }
+      return { ok: true, value: String(xi), warn: ws };
+    }
+    if (spec.format === "decimal") {
+      var pl = spec.decimal_places != null ? parseInt(String(spec.decimal_places), 10) : 5;
+      var rounded = Math.round(n * Math.pow(10, pl)) / Math.pow(10, pl);
+      if (lo != null && rounded < lo) {
+        rounded = lo;
+      }
+      if (hi != null && rounded > hi) {
+        rounded = hi;
+      }
+      var out = formatDecimalToPlaces(rounded, pl);
+      var w2 = "";
+      if (n < (lo != null ? lo : n - 1) || n > (hi != null ? hi : n + 1)) {
+        w2 = "Значение приведено к диапазону " + String(lo) + "…" + String(hi) + " и формату знаков после запятой.";
+      } else if (normalizeNumericInputString(raw) !== out) {
+        w2 = "Формат: ровно " + String(pl) + " знаков после запятой (дополнение нулями или округление).";
+      }
+      return { ok: true, value: out, warn: w2 };
+    }
+    return { ok: true, value: String(raw || ""), warn: "" };
+  }
+
+  function attachNumericFlatInput(inp, grid, bootstrap, col, attrName, rowCellsFallback) {
+    var attr = attrName || "data-col";
+    var fb = rowCellsFallback != null ? rowCellsFallback : bootstrap.flat || {};
+    var warnEl = document.createElement("div");
+    warnEl.className = "muted spod-numeric-warn";
+    warnEl.style.marginTop = "0.25rem";
+    inp.classList.add("spod-numeric-input");
+    function refreshState() {
+      var active = resolveActiveNumericSpec(findNumericRuleDef(bootstrap, col), function (wc) {
+        return readFlatControlValue(grid, wc, fb, attr);
+      });
+      if (!active || active.format === "empty_only") {
+        inp.disabled = true;
+        inp.value = "";
+        inp.title = "Поле не заполняется при текущем значении условной колонки.";
+        warnEl.textContent = "";
+        inp.setAttribute("data-numeric-active", "0");
+        return;
+      }
+      inp.disabled = false;
+      inp.removeAttribute("title");
+      inp.setAttribute("data-numeric-active", "1");
+      inp.setAttribute("inputmode", active.format === "integer" ? "numeric" : "decimal");
+    }
+    function onBlurFmt() {
+      refreshState();
+      if (inp.disabled) {
+        return;
+      }
+      var active = resolveActiveNumericSpec(findNumericRuleDef(bootstrap, col), function (wc) {
+        return readFlatControlValue(grid, wc, fb, attr);
+      });
+      if (!active || active.format === "empty_only") {
+        return;
+      }
+      var res = applyNumericFormatToValue(inp.value, active);
+      if (!res.ok) {
+        warnEl.textContent = res.warn || "";
+        return;
+      }
+      inp.value = res.value;
+      warnEl.textContent = res.warn || "";
+    }
+    inp.addEventListener("blur", onBlurFmt);
+    inp.addEventListener("input", function () {
+      warnEl.textContent = "";
+    });
+    refreshState();
+    inp.__spodRefreshNumericState = refreshState;
+    return { warnEl: warnEl, refresh: refreshState };
+  }
+
+  /**
    * Метаданные подписи поля из editor_field_ui (плоская колонка или json_path внутри JSON-колонки).
    * jsonParts: null — только плоские поля; иначе массив пути как у field_enums.
    */
@@ -1716,6 +1930,19 @@
       grid.innerHTML = '<p class="muted">Все колонки этого листа относятся к JSON-блокам справа.</p>';
       return;
     }
+    if (bootstrap.sheetCode === "GROUP") {
+      keys.sort(function (a, b) {
+        var order = { GET_CALC_METHOD: 0, GET_CALC_CRITERION: 1 };
+        var oa = Object.prototype.hasOwnProperty.call(order, a) ? order[a] : 50;
+        var ob = Object.prototype.hasOwnProperty.call(order, b) ? order[b] : 50;
+        if (oa !== ob) {
+          return oa - ob;
+        }
+        return a.localeCompare(b);
+      });
+    } else {
+      keys.sort();
+    }
     var thr = bootstrap.longTextThreshold || 120;
     keys.forEach(function (col) {
       var cell = document.createElement("div");
@@ -1735,8 +1962,12 @@
       was.className = "was-value is-hidden";
 
       var dateHint = findDatePickerHint(bootstrap, col, null);
+      var numDef = findNumericRuleDef(bootstrap, col);
       var rule = findFieldEnum(bootstrap, col, null);
       var initV = flat[col] != null ? String(flat[col]) : "";
+      var activeNum = numDef ? resolveActiveNumericSpec(numDef, function (wc) {
+        return readFlatControlValue(grid, wc, flat, "data-col");
+      }) : null;
 
       if (dateHint) {
         var fmt = dateHint.storage_format || "YYYY-MM-DD";
@@ -1752,6 +1983,34 @@
         cell.appendChild(lab);
         cell.appendChild(buildDatePickerShell(initV, col, safeId, false));
         cell.appendChild(was);
+      } else if (numDef) {
+        cell.appendChild(lab);
+        if (!activeNum || activeNum.format === "empty_only") {
+          var inpE = document.createElement("input");
+          inpE.type = "text";
+          inpE.id = safeId;
+          inpE.className = "spod-leaf-control";
+          inpE.setAttribute("data-col", col);
+          inpE.setAttribute("data-initial", initV);
+          inpE.value = "";
+          inpE.disabled = true;
+          inpE.title = "Поле не заполняется при текущем значении условной колонки.";
+          cell.appendChild(inpE);
+          cell.appendChild(was);
+        } else {
+          var inpN = document.createElement("input");
+          inpN.type = "text";
+          inpN.id = safeId;
+          inpN.className = "spod-leaf-control";
+          inpN.setAttribute("data-col", col);
+          inpN.setAttribute("data-initial", initV);
+          var resN = applyNumericFormatToValue(initV, activeNum);
+          inpN.value = resN.ok ? resN.value : initV;
+          cell.appendChild(inpN);
+          var numPair = attachNumericFlatInput(inpN, grid, bootstrap, col, "data-col", null);
+          cell.appendChild(numPair.warnEl);
+          cell.appendChild(was);
+        }
       } else if (rule) {
         var wrap = document.createElement("div");
         wrap.className = "spod-enum-block spod-enum-block--flat";
@@ -1810,6 +2069,21 @@
       grid.appendChild(cell);
     });
 
+    if (!grid.getAttribute("data-spod-numeric-delegation")) {
+      grid.setAttribute("data-spod-numeric-delegation", "1");
+      grid.addEventListener(
+        "change",
+        function () {
+          grid.querySelectorAll("input.spod-numeric-input").forEach(function (el) {
+            if (typeof el.__spodRefreshNumericState === "function") {
+              el.__spodRefreshNumericState();
+            }
+          });
+        },
+        true
+      );
+    }
+
     wireEnumControls(grid);
 
     var flt = document.getElementById("flat-field-filter");
@@ -1839,6 +2113,12 @@
 
   function collectPayload(bootstrap) {
     var o = Object.assign({}, bootstrap.fullRow || {});
+    var fg = document.getElementById("flat-field-grid");
+    if (fg) {
+      fg.querySelectorAll("input.spod-numeric-input").forEach(function (el) {
+        el.dispatchEvent(new Event("blur", { bubbles: false }));
+      });
+    }
     document.querySelectorAll("[data-col]").forEach(function (el) {
       o[el.dataset.col] = el.value;
     });
@@ -2430,5 +2710,14 @@
   /** Общие бейджи ограничений для мастера (те же правила, что в applyFieldUiLabel). */
   window.SpodFieldUiSignals = {
     appendConstraintBadges: appendConstraintBadges,
+  };
+
+  /** Числовые поля по config editor_field_numeric (карточка строки и мастер). */
+  window.SpodNumericField = {
+    findDef: findNumericRuleDef,
+    resolveActiveNumericSpec: resolveActiveNumericSpec,
+    applyNumericFormatToValue: applyNumericFormatToValue,
+    readFlatControlValue: readFlatControlValue,
+    attachNumericFlatInput: attachNumericFlatInput,
   };
 })();

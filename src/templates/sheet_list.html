@@ -6,20 +6,37 @@
   {% if sheet_code == "INDICATOR" %}
   <p class="muted">Код листа: <strong>{{ sheet_code }}</strong> · колонка «Название / описание»: полное имя конкурса из CONTEST-DATA по CONTEST_CODE; ниже — название показателя из строки. Связи: награды из REWARD-LINK по группам и турниры конкурса.</p>
   {% elif sheet_code == "REWARD" %}
-  <p class="muted">Код листа: <strong>{{ sheet_code }}</strong> · колонка «Награда» — <code>FULL_NAME</code> строки; «Название / описание» — <code>REWARD_DESCRIPTION</code>. Фильтр <strong>REWARD_TYPE</strong>: при выборе нескольких критериев в будущем будет логика <strong>И</strong>; сейчас один фильтр. Связи — конкурсы из REWARD-LINK.</p>
+  <p class="muted">Код листа: <strong>{{ sheet_code }}</strong> · колонка «Награда» — <code>FULL_NAME</code> строки; «Название / описание» — <code>REWARD_DESCRIPTION</code>. Фильтр <strong>REWARD_TYPE</strong> — множественный выбор (строка попадает в список, если тип награды входит в выбранные). Пустой выбор — без фильтра по типу.</p>
+  {% elif sheet_code == "REWARD-LINK" %}
+  <p class="muted">Код листа: <strong>{{ sheet_code }}</strong> · связь конкурс — группа — награда: коды и <code>FULL_NAME</code> из REWARD и CONTEST-DATA. Фильтр <strong>REWARD_TYPE</strong> — из листа REWARD по <code>REWARD_CODE</code>, множественный выбор. Колонка «Связи» скрыта.</p>
+  {% elif sheet_code == "TOURNAMENT-SCHEDULE" %}
+  <p class="muted">Код листа: <strong>{{ sheet_code }}</strong> · «Период» — <code>PERIOD_TYPE</code>; название конкурса — <code>FULL_NAME</code> из CONTEST-DATA; «Сезон» — <code>seasonCode</code> из JSON <code>TARGET_TYPE</code>. В «Связях»: код конкурса и награды (REWARD_CODE + GROUP_CODE) по REWARD-LINK. Фильтр по сезону — множественный выбор.</p>
   {% else %}
   <p class="muted">Код листа: <strong>{{ sheet_code }}</strong> · в таблице: ключ, название из строки или связей, подтянутые турниры/конкурсы где применимо.</p>
   {% endif %}
-  {% if sheet_code == "REWARD" %}
+  {% if sheet_code == "REWARD" or sheet_code == "REWARD-LINK" or sheet_code == "TOURNAMENT-SCHEDULE" %}
   <form class="search sheet-list-form-reward" method="get" action="/sheet/{{ sheet_code }}">
     <div class="sheet-list-filters">
+      {% if sheet_code == "REWARD" or sheet_code == "REWARD-LINK" %}
       <label class="reward-filter-label">REWARD_TYPE
-        <select name="reward_type" aria-label="Фильтр по типу награды" onchange="this.form.submit()">
+        <select name="reward_type" multiple class="sheet-list-filter-multi" size="5" aria-label="Фильтр по типу награды (несколько значений)" onchange="this.form.submit()">
           {% for o in reward_type_options %}
-          <option value="{{ o.value }}" {% if reward_type_selected == o.value %}selected{% endif %}>{{ o.label }}</option>
+          <option value="{{ o.value }}" {% if o.value in reward_type_selected_list %}selected{% endif %}>{{ o.label }}</option>
           {% endfor %}
         </select>
       </label>
+      <p class="muted sheet-list-filter-hint">Несколько типов: удерживайте Ctrl (Windows) или ⌘ (macOS) и кликайте по пунктам. Без выбранных — показываются все типы.</p>
+      {% endif %}
+      {% if sheet_code == "TOURNAMENT-SCHEDULE" %}
+      <label class="reward-filter-label">Сезон (seasonCode)
+        <select name="season" multiple class="sheet-list-filter-multi" size="5" aria-label="Фильтр по сезону из TARGET_TYPE" onchange="this.form.submit()">
+          {% for o in season_options %}
+          <option value="{{ o.value }}" {% if o.value in season_selected_list %}selected{% endif %}>{{ o.label }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <p class="muted sheet-list-filter-hint">Несколько сезонов: Ctrl / ⌘ + клик. Без выбранных — все сезоны.</p>
+      {% endif %}
     </div>
     <div class="search-row-inline">
       <input type="search" name="q" value="{{ q }}" placeholder="Поиск по содержимому строки…" />
@@ -47,11 +64,24 @@
           <th>Награда</th>
           <th>Название / описание</th>
           <th>GROUP_CODE</th>
+          {% elif sheet_code == "REWARD-LINK" %}
+          <th>REWARD_CODE</th>
+          <th>Название награды</th>
+          <th>CONTEST_CODE</th>
+          <th>Название</th>
+          <th>GROUP_CODE</th>
+          {% elif sheet_code == "TOURNAMENT-SCHEDULE" %}
+          <th>Ключ</th>
+          <th>Период</th>
+          <th>Название конкурса</th>
+          <th>Сезон</th>
           {% else %}
           <th>Ключ</th>
           <th>Название / описание</th>
           {% endif %}
+          {% if sheet_code != "REWARD-LINK" %}
           <th>Связи</th>
+          {% endif %}
           <th class="col-flag">Консистентность</th>
           <th class="col-action"></th>
         </tr>
@@ -70,11 +100,24 @@
           <td class="cell-wrap">{{ r.reward_name_col }}</td>
           <td class="cell-wrap">{{ r.title_line }}</td>
           <td class="cell-mono">{{ r.group_codes_col }}</td>
+          {% elif sheet_code == "REWARD-LINK" %}
+          <td class="cell-mono">{{ r.reward_link_reward_code }}</td>
+          <td class="cell-wrap">{{ r.reward_link_reward_name }}</td>
+          <td class="cell-mono">{{ r.reward_link_contest_code }}</td>
+          <td class="cell-wrap">{{ r.reward_link_contest_name }}</td>
+          <td class="cell-mono">{{ r.reward_link_group_code }}</td>
+          {% elif sheet_code == "TOURNAMENT-SCHEDULE" %}
+          <td class="cell-mono">{{ r.preview }}</td>
+          <td class="cell-wrap">{{ r.schedule_period_col }}</td>
+          <td class="cell-wrap">{{ r.schedule_contest_name_col }}</td>
+          <td class="cell-mono">{{ r.schedule_season_col }}</td>
           {% else %}
           <td class="cell-mono">{{ r.preview }}</td>
           <td class="cell-wrap">{{ r.title_line }}</td>
           {% endif %}
-          <td class="cell-wrap cell-muted">{{ r.relations_line }}</td>
+          {% if sheet_code != "REWARD-LINK" %}
+          <td class="cell-wrap cell-muted cell-relations-pre">{{ r.relations_line }}</td>
+          {% endif %}
           <td class="col-flag">
             {% if r.ok %}
             <span class="badge badge-ok">OK</span>
