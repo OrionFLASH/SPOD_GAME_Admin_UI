@@ -268,6 +268,54 @@ table.data td {
   white-space: nowrap;
 }
 
+/* Список REWARD-LINK: узкие колонки кодов, широкие — названия награды и конкурса (таблица с table-layout: fixed). */
+.data-list-reward-link {
+  table-layout: fixed;
+  width: 100%;
+}
+
+.data-list-reward-link th,
+.data-list-reward-link td {
+  min-width: 0;
+  vertical-align: top;
+}
+
+.data-list-reward-link .col-reward-link-code {
+  width: 22ch;
+  max-width: 28ch;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.data-list-reward-link .col-reward-link-level {
+  width: 14ch;
+  max-width: 18ch;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.data-list-reward-link .col-reward-link-name {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.data-list-reward-link .col-reward-link-name--reward {
+  width: 36%;
+  min-width: 11rem;
+}
+
+.data-list-reward-link .col-reward-link-name--contest {
+  width: 36%;
+  min-width: 11rem;
+}
+
+/* Иначе глобальный потолок .data-list-wide .cell-mono мешает узким колонкам кодов. */
+.data-list-reward-link .cell-mono {
+  max-width: 100%;
+}
+
 /* На широком списке не ограничиваем текстовые и «связи» колонки узкими rem — таблица заполняет ширину */
 .data-list-wide .cell-wrap,
 .data-list-wide .cell-muted {
@@ -640,7 +688,8 @@ table.data th {
 
 .row-edit-layout {
   display: grid;
-  grid-template-columns: minmax(200px, 240px) minmax(0, 1fr);
+  /* Левая колонка «Разделы»: шире минимум/максимум, чтобы превью связей (GROUP : REWARD и т.п.) чаще помещались в одну строку */
+  grid-template-columns: minmax(240px, min(22rem, 360px)) minmax(0, 1fr);
   gap: 1.25rem;
   align-items: start;
 }
@@ -678,6 +727,27 @@ table.data th {
   letter-spacing: 0.06em;
   color: var(--muted);
   margin-bottom: 0.35rem;
+}
+
+.edit-nav-title--sub {
+  margin-top: 0.5rem;
+  font-size: 0.68rem;
+}
+
+.group-block-save-row {
+  margin-top: 1rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.edit-dock--group-multi #btn-save,
+.edit-dock--group-multi #btn-cancel {
+  display: none;
+}
+
+.group-flat-filter-hint {
+  margin: 0 0 0.75rem 0;
+  padding: 0.65rem 1rem;
 }
 
 .edit-nav a {
@@ -750,7 +820,9 @@ table.data th {
   font-size: 0.76rem !important;
   font-weight: 500 !important;
   line-height: 1.35;
-  word-break: break-word;
+  /* Не ломать строку посередине кода: перенос по пробелам; очень длинные токены — только при нехватке места */
+  word-break: normal;
+  overflow-wrap: anywhere;
 }
 
 .edit-main .panel h2 {

@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}Строка {{ row_index }} — {{ sheet_code }}{% endblock %}
+{% block title %}{% if sheet_code == "GROUP" and group_contest_code %}Конкурс {{ group_contest_code }} — {{ sheet_code }}{% else %}Строка {{ row_index }} — {{ sheet_code }}{% endif %}{% endblock %}
 {% block content %}
 {# Метаданные страницы для trail_nav.js: цепочка «назад» и переходы по связям. #}
 <div
@@ -10,21 +10,39 @@
   data-row-id="{{ row_id }}"
   data-row-index="{{ row_index }}"
   data-sheet-title="{{ sheet_title | e }}"
+  {% if sheet_code == "GROUP" and group_contest_code %}
+  data-trail-current-title="GROUP · конкурс {{ group_contest_code }}"
+  data-group-contest-code="{{ group_contest_code | e }}"
+  {% else %}
   data-trail-current-title="{{ sheet_code }} · строка {{ row_index }}"
+  {% endif %}
 ></div>
 <nav id="spod-trail-nav" class="trail-nav panel" aria-label="Цепочка переходов по связям"></nav>
-{# Данные для row_editor.js: плоские поля и разобранный JSON. #}
+{# Лист GROUP: несколько блоков плоских полей (по одной строке GROUP на уровень); иначе один bootstrap. #}
+{% if sheet_code == "GROUP" and group_row_blocks %}
+<script type="application/json" id="row-editor-group-blocks">{{ group_editor_bootstraps_json }}</script>
+{% else %}
 <script type="application/json" id="row-editor-bootstrap">{{ editor_bootstrap_json }}</script>
+{% endif %}
 
 <div class="row-edit-layout">
     <aside class="edit-nav panel" aria-label="Навигация по разделам">
       <div class="edit-nav-title">Разделы</div>
       <a href="#sec-meta">Общее</a>
+      {% if sheet_code == "GROUP" and group_row_blocks %}
+      <span class="edit-nav-title edit-nav-title--sub">Поля таблицы</span>
+      {% for blk in group_row_blocks %}
+      <a class="edit-nav-sub" href="#sec-flat-{{ blk.row_id }}">↳ {{ blk.block_label }}</a>
+      {% endfor %}
+      {% else %}
       <a href="#sec-flat">Поля таблицы</a>
+      {% endif %}
+      {% if json_blocks %}
       <a href="#json-columns-mount">JSON</a>
       {% for jb in json_blocks %}
       <a class="edit-nav-sub" href="#sec-json-{{ jb.section_slug }}">↳ {{ jb.column }}</a>
       {% endfor %}
+      {% endif %}
       {# Связи: в меню видно целевой лист (файл) и подпункты на каждую строку — переход в редактирование с учётом trail_nav.js #}
       {% if rel.links %}
       <div class="edit-nav-group" role="navigation" aria-label="Переходы по связям">
@@ -46,25 +64,60 @@
 
     <div class="edit-main">
       <section id="sec-meta" class="panel">
+        {% if sheet_code == "GROUP" and group_contest_code %}
+        <h1>GROUP · конкурс {{ group_contest_code }}</h1>
+        {% if group_contest_name %}
+        <p class="muted"><strong>Название конкурса:</strong> {{ group_contest_name }}</p>
+        {% endif %}
+        <p class="muted">На странице — все уровни (строки GROUP) этого конкурса. У каждого уровня свой блок полей и своя кнопка «Сохранить эту строку».</p>
+        {% else %}
         <h1>{{ sheet_code }} · строка {{ row_index }}</h1>
+        {% endif %}
         <p class="muted">id={{ row_id }} · режим консистентности: <strong>{{ mode }}</strong>
           {% if mode == "strict" %} (сохранение отклоняется при ошибках проверок){% endif %}
         </p>
         <p class="muted">Правки в форме не пишутся в базу сразу: кнопка «Сохранить» создаёт <strong>новую</strong> актуальную версию строки, прежняя остаётся в истории; в списках и выгрузке CSV участвуют только актуальные версии.</p>
+        {% if sheet_code != "GROUP" or not group_row_blocks %}
         {% if consistency_errors and consistency_errors|length > 0 %}
         <div class="errors">
           <strong>Проблемы консистентности:</strong>
           <ul>{% for e in consistency_errors %}<li>{{ e }}</li>{% endfor %}</ul>
         </div>
         {% endif %}
+        {% endif %}
       </section>
 
+      {% if sheet_code == "GROUP" and group_row_blocks %}
+      <p class="muted panel group-flat-filter-hint">Общий фильтр по имени колонки (во всех блоках уровня):</p>
+      <input type="search" id="flat-field-filter-group-all" class="field-filter" placeholder="Фильтр по имени колонки (все уровни)…" autocomplete="off" />
+      {% for blk in group_row_blocks %}
+      <section id="sec-flat-{{ blk.row_id }}" class="panel group-contest-flat-panel" data-group-row-id="{{ blk.row_id }}">
+        <h2>Поля таблицы (не JSON) · {{ blk.block_label }}</h2>
+        <p class="muted">Строка GROUP: <code>id={{ blk.row_id }}</code>, индекс в листе <strong>{{ blk.row_index }}</strong>
+          {% if blk.consistency_ok %}<span class="badge badge-ok">OK</span>{% else %}<span class="badge badge-bad">Проблемы</span>{% endif %}
+        </p>
+        {% if blk.consistency_errors and blk.consistency_errors|length > 0 %}
+        <div class="errors">
+          <strong>Проблемы консистентности:</strong>
+          <ul>{% for e in blk.consistency_errors %}<li>{{ e }}</li>{% endfor %}</ul>
+        </div>
+        {% endif %}
+        <p class="muted">Сетка полей этого уровня. Фильтр ниже — только для этого блока.</p>
+        <input type="search" class="field-filter flat-field-filter--group-block" data-target-grid="flat-field-grid-{{ blk.row_id }}" placeholder="Фильтр по имени колонки…" autocomplete="off" />
+        <div id="flat-field-grid-{{ blk.row_id }}" class="scalar-field-grid group-contest-flat-grid"></div>
+        <div class="group-block-save-row">
+          <button type="button" class="btn btn-primary btn-save-group-row" data-row-id="{{ blk.row_id }}">Сохранить эту строку (id {{ blk.row_id }})</button>
+        </div>
+      </section>
+      {% endfor %}
+      {% else %}
       <section id="sec-flat" class="panel">
         <h2>Поля таблицы (не JSON)</h2>
         <p class="muted">Сетка: несколько колонок в ряд. Поиск сужает список. Рядом с именем поля — бейджи из конфигурации: «Обязательно» (<code>required</code>), «Не пусто» (запрет пустого значения, <code>allows_empty: false</code>); подсказка по наведению.</p>
         <input type="search" id="flat-field-filter" class="field-filter" placeholder="Фильтр по имени колонки…" autocomplete="off" />
         <div id="flat-field-grid" class="scalar-field-grid"></div>
       </section>
+      {% endif %}
 
       <div id="json-columns-mount" class="json-mount"></div>
 
@@ -97,9 +150,13 @@
     </div>
   </div>
 
-<div id="edit-dock" class="edit-dock">
+<div id="edit-dock" class="edit-dock{% if sheet_code == 'GROUP' and group_row_blocks %} edit-dock--group-multi{% endif %}">
   <div id="edit-dirty-banner" class="edit-dirty-banner is-hidden" role="status">
+    {% if sheet_code == "GROUP" and group_row_blocks %}
+    Есть несохранённые изменения в одном или нескольких блоках уровня. Сохраните каждый блок отдельной кнопкой ниже или отмените правку страницей.
+    {% else %}
     Есть несохранённые изменения. Сохранение записывает новую версию строки; отмена сбрасывает форму к данным из базы.
+    {% endif %}
   </div>
   <div class="edit-dock-actions">
     <button type="button" class="btn btn-primary" id="btn-save" disabled>Сохранить в базу</button>

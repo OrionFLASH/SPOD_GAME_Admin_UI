@@ -10,11 +10,15 @@ INDICATOR_ADD_CALC_TYPE, INDICATOR_CODE; в «Связи» — REWARD-LINK по 
 по CONTEST_CODE из REWARD-LINK (цепочка REWARD → связи → конкурс); GROUP_CODE и коды конкурсов в «Связи» из тех же связей;
 фильтр по REWARD_TYPE — в шаблоне и маршруте списка.
 
-Лист REWARD-LINK: колонки REWARD_CODE, название награды (REWARD.FULL_NAME), CONTEST_CODE, название конкурса (CONTEST-DATA.FULL_NAME),
-GROUP_CODE; колонка «Связи» в списке не показывается; фильтр по REWARD_TYPE берётся из строки REWARD по REWARD_CODE связи.
+Лист REWARD-LINK: колонки по порядку — код награды (REWARD_CODE), уровень (GROUP_CODE), название награды (REWARD.FULL_NAME),
+название конкурса (CONTEST-DATA.FULL_NAME); код конкурса в таблице не выводится, но входит в поиск по строке; колонка «Связи» скрыта;
+фильтр по REWARD_TYPE — из строки REWARD по REWARD_CODE связи.
 
 Лист TOURNAMENT-SCHEDULE: колонка «Период» (PERIOD_TYPE), название конкурса (CONTEST-DATA.FULL_NAME), «Сезон» (seasonCode из TARGET_TYPE);
 в «Связи» — «Конкурс:» с кодом и «Награды:» с парами REWARD_CODE + GROUP_CODE из REWARD-LINK. Фильтр по сезону — множественный выбор.
+
+Лист GROUP (список): одна строка таблицы на каждый уникальный CONTEST_CODE — «Код конкурса», название конкурса из CONTEST-DATA,
+в «Связи» — перечень уровней (GROUP_CODE : GROUP_VALUE); «Просмотр» открывает карточку со всеми строками GROUP этого конкурса.
 """
 
 from __future__ import annotations
@@ -413,6 +417,32 @@ def season_filter_options(lu: Dict[str, Any]) -> List[Dict[str, str]]:
     """Опции множественного фильтра по seasonCode для списка TOURNAMENT-SCHEDULE."""
     codes: List[str] = list(lu.get("schedule_season_codes") or [])
     return [{"label": c, "value": c} for c in codes]
+
+
+def group_list_levels_relation_line(member_cells: List[Dict[str, str]]) -> str:
+    """
+    Колонка «Связи» для списка GROUP, сгруппированного по конкурсу: перечень уровней
+    (GROUP_CODE : GROUP_VALUE) по всем строкам GROUP с этим CONTEST_CODE.
+    """
+    parts: List[str] = []
+    for c in member_cells:
+        gc = (c.get("GROUP_CODE") or "").strip()
+        gv = (c.get("GROUP_VALUE") or "").strip()
+        if gc or gv:
+            parts.append(f"{gc} : {gv}")
+    if not parts:
+        return ""
+    return "Уровни: " + " · ".join(parts)
+
+
+def group_list_aggregate_search_blob(
+    contest_code: str, title: str, levels_line: str, members: List[Dict[str, str]]
+) -> str:
+    """Нижний регистр: поиск по агрегированной строке GROUP (код конкурса, название, уровни, все ячейки вхождений)."""
+    chunks = [contest_code, title, levels_line]
+    for c in members:
+        chunks.append(json.dumps(c, ensure_ascii=False))
+    return " ".join(chunks).lower()
 
 
 def search_blob(cells: Dict[str, str], disp: Dict[str, str]) -> str:

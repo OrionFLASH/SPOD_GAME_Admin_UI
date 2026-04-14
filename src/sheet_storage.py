@@ -336,6 +336,51 @@ def fetch_row_cells(conn: sqlite3.Connection, cfg: Dict[str, Any], sheet_code: s
     return row_to_cells(r, headers)
 
 
+def fetch_group_rows_for_contest(conn: sqlite3.Connection, contest_code: str) -> List[Dict[str, Any]]:
+    """
+    Все актуальные строки листа GROUP с указанным CONTEST_CODE (карточка «конкурс» — несколько уровней).
+
+    Возвращает список словарей: id, row_index, consistency_ok, consistency_errors (список строк из JSON),
+    cells — только колонки CSV.
+    Порядок: GROUP_CODE, GROUP_VALUE, id (стабильный вывод блоков на странице).
+    """
+    cc = (contest_code or "").strip()
+    if not cc:
+        return []
+    t = physical_table_name("GROUP")
+    headers = headers_for_sheet(conn, "GROUP")
+    if not headers:
+        return []
+    cur = conn.execute(
+        f"""
+        SELECT * FROM {quote_ident(t)}
+        WHERE is_current = 1 AND trim(CONTEST_CODE) = ?
+        ORDER BY trim(GROUP_CODE), trim(GROUP_VALUE), id
+        """,
+        (cc,),
+    )
+    out: List[Dict[str, Any]] = []
+    for r in cur.fetchall():
+        cells = row_to_cells(r, headers)
+        errs_raw = r["consistency_errors"] if "consistency_errors" in r.keys() else "[]"
+        try:
+            errs = json.loads(errs_raw or "[]")
+        except json.JSONDecodeError:
+            errs = []
+        if not isinstance(errs, list):
+            errs = []
+        out.append(
+            {
+                "id": int(r["id"]),
+                "row_index": int(r["row_index"]),
+                "consistency_ok": int(r["consistency_ok"] or 0),
+                "consistency_errors": [str(x) for x in errs],
+                "cells": cells,
+            }
+        )
+    return out
+
+
 def row_to_cells(row: sqlite3.Row, headers: Sequence[str]) -> Dict[str, str]:
     out: Dict[str, str] = {}
     for h in headers:

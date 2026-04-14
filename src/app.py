@@ -38,6 +38,44 @@ def _json_for_script_tag(obj: Any) -> Markup:
     return Markup(s)
 
 
+def _editor_bootstrap_for_row_cells(
+    code: str,
+    row_id: int,
+    cells: Dict[str, str],
+    json_cols: List[str],
+) -> Dict[str, Any]:
+    """
+    Параметры клиентского редактора для одной строки листа (плоские поля + jsonCols + fullRow).
+    Используется на карточке строки и для каждого блока GROUP при просмотре по конкурсу.
+    """
+    flat_columns = [k for k in cells.keys() if k not in json_cols]
+    json_cols_boot: List[Dict[str, Any]] = []
+    for col in json_cols:
+        raw_cell = cells.get(col, "") or ""
+        parsed_cell, err_cell = spod_json.try_parse_cell(raw_cell)
+        json_cols_boot.append(
+            {
+                "column": col,
+                "section_slug": re.sub(r"[^a-zA-Z0-9_-]", "_", col),
+                "raw": raw_cell,
+                "ok": err_cell is None,
+                "parsed": parsed_cell,
+            }
+        )
+    return {
+        "sheetCode": code,
+        "rowId": row_id,
+        "flat": {k: cells.get(k, "") for k in flat_columns},
+        "jsonCols": json_cols_boot,
+        "fullRow": dict(cells),
+        "fieldEnums": editor_config.flatten_field_enums(CFG),
+        "editorTextareas": editor_config.flatten_editor_textareas(CFG),
+        "fieldUi": editor_config.flatten_editor_field_ui(CFG),
+        "fieldNumeric": editor_config.flatten_editor_field_numeric(CFG),
+        "longTextThreshold": int(CFG.get("editor_long_text_threshold", 120)),
+    }
+
+
 def _tojson_readable(value: Any, indent: int = 2) -> Markup:
     """
     JSON для вывода в HTML (<pre> в блоке «Связи»): кириллица как текст, не escape \\uXXXX.
@@ -254,57 +292,100 @@ def sheet_list(request: Request, code: str, q: str = ""):
         season_options = sheet_list_display.season_filter_options(lu)
         season_allowed = {str(o.get("value", "")) for o in season_options}
         season_selected_list = [x.strip() for x in request.query_params.getlist("season") if x.strip() in season_allowed]
-    for r in cur.fetchall():
-        cur2 = conn.execute(
-            f"SELECT * FROM {sheet_storage.quote_ident(t)} WHERE id = ?",
-            (int(r["id"]),),
-        )
-        full = cur2.fetchone()
-        cells = sheet_storage.row_to_cells(full, headers) if full else {}
-        if code == "TOURNAMENT-SCHEDULE" and season_selected_list:
-            s_val = sheet_list_display.target_type_season_code(cells.get("TARGET_TYPE") or "")
-            if s_val not in season_selected_list:
+    if code == "GROUP":
+        # Одна строка списка на конкурс: код + название из CONTEST-DATA; «Связи» — все уровни GROUP (GROUP_CODE : GROUP_VALUE).
+        contest_full: Dict[str, str] = lu.get("contest_full") or {}
+        buckets: Dict[str, Dict[str, Any]] = {}
+        order_cc: List[str] = []
+        for r in cur.fetchall():
+            cur2 = conn.execute(
+                f"SELECT * FROM {sheet_storage.quote_ident(t)} WHERE id = ?",
+                (int(r["id"]),),
+            )
+            full = cur2.fetchone()
+            cells = sheet_storage.row_to_cells(full, headers) if full else {}
+            cc = (cells.get("CONTEST_CODE") or "").strip()
+            if not cc:
                 continue
-        if code == "REWARD" and reward_type_selected_list:
-            if (cells.get("REWARD_TYPE") or "").strip() not in reward_type_selected_list:
+            if cc not in buckets:
+                buckets[cc] = {"ids": [], "members": [], "any_bad": False}
+                order_cc.append(cc)
+            b = buckets[cc]
+            b["ids"].append(int(r["id"]))
+            b["members"].append(dict(cells))
+            if not int(r["consistency_ok"]):
+                b["any_bad"] = True
+        for idx, cc in enumerate(order_cc):
+            b = buckets[cc]
+            title = (contest_full.get(cc) or "").strip()
+            levels_line = sheet_list_display.group_list_levels_relation_line(b["members"])
+            blob_agg = sheet_list_display.group_list_aggregate_search_blob(cc, title, levels_line, b["members"])
+            if ql and ql not in blob_agg:
                 continue
-        if code == "REWARD-LINK" and reward_type_selected_list:
-            rc_f = (cells.get("REWARD_CODE") or "").strip()
-            rt_link = (lu.get("reward_type_by_reward") or {}).get(rc_f, "")
-            if rt_link not in reward_type_selected_list:
+            rep_id = min(b["ids"])
+            rows_out.append(
+                {
+                    "id": rep_id,
+                    "row_index": idx,
+                    "preview": cc,
+                    "title_line": title,
+                    "relations_line": levels_line,
+                    "ok": 0 if b["any_bad"] else 1,
+                    "errors": [],
+                }
+            )
+    else:
+        for r in cur.fetchall():
+            cur2 = conn.execute(
+                f"SELECT * FROM {sheet_storage.quote_ident(t)} WHERE id = ?",
+                (int(r["id"]),),
+            )
+            full = cur2.fetchone()
+            cells = sheet_storage.row_to_cells(full, headers) if full else {}
+            if code == "TOURNAMENT-SCHEDULE" and season_selected_list:
+                s_val = sheet_list_display.target_type_season_code(cells.get("TARGET_TYPE") or "")
+                if s_val not in season_selected_list:
+                    continue
+            if code == "REWARD" and reward_type_selected_list:
+                if (cells.get("REWARD_TYPE") or "").strip() not in reward_type_selected_list:
+                    continue
+            if code == "REWARD-LINK" and reward_type_selected_list:
+                rc_f = (cells.get("REWARD_CODE") or "").strip()
+                rt_link = (lu.get("reward_type_by_reward") or {}).get(rc_f, "")
+                if rt_link not in reward_type_selected_list:
+                    continue
+            disp = sheet_list_display.display_for_sheet_row(code, cells, lu)
+            blob = sheet_list_display.search_blob(cells, disp)
+            if ql and ql not in blob:
                 continue
-        disp = sheet_list_display.display_for_sheet_row(code, cells, lu)
-        blob = sheet_list_display.search_blob(cells, disp)
-        if ql and ql not in blob:
-            continue
-        row_out: Dict[str, Any] = {
-            "id": r["id"],
-            "row_index": r["row_index"],
-            "preview": disp.get("primary_key", ""),
-            "title_line": disp.get("title_line", ""),
-            "relations_line": disp.get("relations_line", ""),
-            "ok": r["consistency_ok"],
-            "errors": json.loads(r["consistency_errors"] or "[]"),
-        }
-        if code == "INDICATOR":
-            row_out["contest_code"] = disp.get("contest_code", "")
-            row_out["subtitle_line"] = disp.get("subtitle_line", "")
-            row_out["add_calc_type"] = disp.get("add_calc_type", "")
-            row_out["indicator_code_col"] = disp.get("indicator_code_col", "")
-        if code == "REWARD":
-            row_out["reward_name_col"] = disp.get("reward_name_col", "")
-            row_out["group_codes_col"] = disp.get("group_codes_col", "")
-        if code == "REWARD-LINK":
-            row_out["reward_link_reward_code"] = disp.get("reward_link_reward_code", "")
-            row_out["reward_link_reward_name"] = disp.get("reward_link_reward_name", "")
-            row_out["reward_link_contest_code"] = disp.get("reward_link_contest_code", "")
-            row_out["reward_link_contest_name"] = disp.get("reward_link_contest_name", "")
-            row_out["reward_link_group_code"] = disp.get("reward_link_group_code", "")
-        if code == "TOURNAMENT-SCHEDULE":
-            row_out["schedule_period_col"] = disp.get("schedule_period_col", "")
-            row_out["schedule_contest_name_col"] = disp.get("schedule_contest_name_col", "")
-            row_out["schedule_season_col"] = disp.get("schedule_season_col", "")
-        rows_out.append(row_out)
+            row_out: Dict[str, Any] = {
+                "id": r["id"],
+                "row_index": r["row_index"],
+                "preview": disp.get("primary_key", ""),
+                "title_line": disp.get("title_line", ""),
+                "relations_line": disp.get("relations_line", ""),
+                "ok": r["consistency_ok"],
+                "errors": json.loads(r["consistency_errors"] or "[]"),
+            }
+            if code == "INDICATOR":
+                row_out["contest_code"] = disp.get("contest_code", "")
+                row_out["subtitle_line"] = disp.get("subtitle_line", "")
+                row_out["add_calc_type"] = disp.get("add_calc_type", "")
+                row_out["indicator_code_col"] = disp.get("indicator_code_col", "")
+            if code == "REWARD":
+                row_out["reward_name_col"] = disp.get("reward_name_col", "")
+                row_out["group_codes_col"] = disp.get("group_codes_col", "")
+            if code == "REWARD-LINK":
+                row_out["reward_link_reward_code"] = disp.get("reward_link_reward_code", "")
+                row_out["reward_link_reward_name"] = disp.get("reward_link_reward_name", "")
+                row_out["reward_link_contest_code"] = disp.get("reward_link_contest_code", "")
+                row_out["reward_link_contest_name"] = disp.get("reward_link_contest_name", "")
+                row_out["reward_link_group_code"] = disp.get("reward_link_group_code", "")
+            if code == "TOURNAMENT-SCHEDULE":
+                row_out["schedule_period_col"] = disp.get("schedule_period_col", "")
+                row_out["schedule_contest_name_col"] = disp.get("schedule_contest_name_col", "")
+                row_out["schedule_season_col"] = disp.get("schedule_season_col", "")
+            rows_out.append(row_out)
     return templates.TemplateResponse(
         request,
         "sheet_list.html",
@@ -357,33 +438,46 @@ def row_detail(request: Request, code: str, row_id: int):
         )
     rel = relations.build_context_for_row(conn, code, cells)
     flat_columns = [k for k in cells.keys() if k not in json_cols]
-    # Данные для клиентского редактора: плоские поля + разобранный JSON по колонкам.
-    json_cols_boot: List[Dict[str, Any]] = []
-    for col in json_cols:
-        raw_cell = cells.get(col, "") or ""
-        parsed_cell, err_cell = spod_json.try_parse_cell(raw_cell)
-        json_cols_boot.append(
-            {
-                "column": col,
-                "section_slug": re.sub(r"[^a-zA-Z0-9_-]", "_", col),
-                "raw": raw_cell,
-                "ok": err_cell is None,
-                "parsed": parsed_cell,
-            }
-        )
-    # Параметры UI редактора: списки значений и подсказки по высоте textarea (см. config.json).
-    editor_bootstrap = {
-        "sheetCode": code,
-        "rowId": row_id,
-        "flat": {k: cells.get(k, "") for k in flat_columns},
-        "jsonCols": json_cols_boot,
-        "fullRow": dict(cells),
-        "fieldEnums": editor_config.flatten_field_enums(CFG),
-        "editorTextareas": editor_config.flatten_editor_textareas(CFG),
-        "fieldUi": editor_config.flatten_editor_field_ui(CFG),
-        "fieldNumeric": editor_config.flatten_editor_field_numeric(CFG),
-        "longTextThreshold": int(CFG.get("editor_long_text_threshold", 120)),
-    }
+    group_row_blocks: List[Dict[str, Any]] = []
+    group_editor_bootstraps: List[Dict[str, Any]] = []
+    group_contest_code: str = ""
+    group_contest_name: str = ""
+    if code == "GROUP":
+        group_contest_code = (cells.get("CONTEST_CODE") or "").strip()
+        contest_full_map: Dict[str, str] = sheet_list_display.build_lookup_tables(conn).get("contest_full") or {}
+        group_contest_name = (contest_full_map.get(group_contest_code) or "").strip()
+        siblings = sheet_storage.fetch_group_rows_for_contest(conn, group_contest_code)
+        if not siblings:
+            err_list = json.loads(r["consistency_errors"] or "[]")
+            if not isinstance(err_list, list):
+                err_list = []
+            siblings = [
+                {
+                    "id": row_id,
+                    "row_index": int(r["row_index"]),
+                    "consistency_ok": int(r["consistency_ok"] or 0),
+                    "consistency_errors": [str(x) for x in err_list],
+                    "cells": dict(cells),
+                }
+            ]
+        for sibl in siblings:
+            c = sibl["cells"]
+            gc = (c.get("GROUP_CODE") or "").strip()
+            gv = (c.get("GROUP_VALUE") or "").strip()
+            label = f"{gc} : {gv}" if (gc or gv) else "—"
+            group_row_blocks.append(
+                {
+                    "row_id": int(sibl["id"]),
+                    "row_index": int(sibl["row_index"]),
+                    "block_label": label,
+                    "consistency_ok": int(sibl["consistency_ok"] or 0),
+                    "consistency_errors": sibl.get("consistency_errors") or [],
+                }
+            )
+            group_editor_bootstraps.append(
+                _editor_bootstrap_for_row_cells(code, int(sibl["id"]), dict(c), json_cols)
+            )
+    editor_bootstrap = _editor_bootstrap_for_row_cells(code, row_id, cells, json_cols)
     sheet_title = str(spec.get("title") or code)
     return templates.TemplateResponse(
         request,
@@ -402,6 +496,10 @@ def row_detail(request: Request, code: str, row_id: int):
             "consistency_errors": json.loads(r["consistency_errors"] or "[]"),
             "rel": rel,
             "mode": CFG.get("consistency", {}).get("mode", "warn"),
+            "group_row_blocks": group_row_blocks,
+            "group_editor_bootstraps_json": _json_for_script_tag(group_editor_bootstraps),
+            "group_contest_code": group_contest_code,
+            "group_contest_name": group_contest_name,
         },
     )
 

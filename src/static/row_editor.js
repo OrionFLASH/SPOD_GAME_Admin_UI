@@ -1920,8 +1920,16 @@
     });
   }
 
+  /** Сетка плоских полей для bootstrap: общая #flat-field-grid или #flat-field-grid-{rowId} для листа GROUP (несколько уровней). */
+  function flatGridFor(bootstrap) {
+    if (bootstrap && bootstrap.__flatGridId) {
+      return document.getElementById(bootstrap.__flatGridId);
+    }
+    return document.getElementById("flat-field-grid");
+  }
+
   function renderFlatSection(bootstrap) {
-    var grid = document.getElementById("flat-field-grid");
+    var grid = flatGridFor(bootstrap);
     if (!grid) {
       return;
     }
@@ -1955,7 +1963,11 @@
           ui0 && showDescriptionEnabled(ui0) && ui0.description != null ? String(ui0.description) : "";
         cell.setAttribute("data-filter-text", (col + " " + labDisp0 + " " + descF).toLowerCase());
       }
-      var safeId = "col-" + col.replace(/[^a-zA-Z0-9_]/g, "_");
+      var ridpfx =
+        bootstrap && bootstrap.rowId != null && String(bootstrap.rowId) !== ""
+          ? "r" + String(bootstrap.rowId) + "_"
+          : "";
+      var safeId = ridpfx + "col-" + col.replace(/[^a-zA-Z0-9_]/g, "_");
       var lab = document.createElement("label");
       lab.setAttribute("for", safeId);
       applyFieldUiLabel(bootstrap, lab, col, null, col);
@@ -2115,15 +2127,15 @@
 
   function collectPayload(bootstrap) {
     var o = Object.assign({}, bootstrap.fullRow || {});
-    var fg = document.getElementById("flat-field-grid");
+    var fg = flatGridFor(bootstrap);
     if (fg) {
       fg.querySelectorAll("input.spod-numeric-input").forEach(function (el) {
         el.dispatchEvent(new Event("blur", { bubbles: false }));
       });
+      fg.querySelectorAll("[data-col]").forEach(function (el) {
+        o[el.dataset.col] = el.value;
+      });
     }
-    document.querySelectorAll("[data-col]").forEach(function (el) {
-      o[el.dataset.col] = el.value;
-    });
     (bootstrap.jsonCols || []).forEach(function (jc) {
       var box = findJsonBox(jc.column);
       if (!box) {
@@ -2200,8 +2212,21 @@
   }
 
   function isRowDirty(bootstrap) {
+    if (!bootstrap) {
+      return false;
+    }
+    if (bootstrap.__groupBlocks) {
+      var packs = bootstrap.__groupBlocks;
+      var i;
+      for (i = 0; i < packs.length; i++) {
+        var pb = packs[i].b;
+        if (canonicalPayload(pb) !== pb.__initialCanonical) {
+          return true;
+        }
+      }
+      return false;
+    }
     return (
-      bootstrap &&
       typeof bootstrap.__initialCanonical !== "undefined" &&
       canonicalPayload(bootstrap) !== bootstrap.__initialCanonical
     );
@@ -2348,6 +2373,12 @@
     }
 
     async function saveRowThenExecutePending() {
+      if (bootstrap.__groupBlocks) {
+        alert(
+          "Для листа GROUP с несколькими уровнями сохраните каждый блок кнопкой «Сохранить эту строку», затем повторите уход со страницы."
+        );
+        return;
+      }
       var payload = collectPayload(bootstrap);
       var sc = bootstrap.sheetCode;
       var rid = bootstrap.rowId;
@@ -2504,11 +2535,29 @@
     };
   }
 
+  function refreshGroupMultiDirtyState(blocks) {
+    var any = false;
+    blocks.forEach(function (blk) {
+      any = any || canonicalPayload(blk) !== blk.__initialCanonical;
+    });
+    var dock = document.getElementById("edit-dock");
+    var banner = document.getElementById("edit-dirty-banner");
+    if (dock) {
+      dock.classList.toggle("edit-dock--dirty", any);
+    }
+    if (banner) {
+      banner.classList.toggle("is-hidden", !any);
+    }
+  }
+
   function refreshDirtyState(bootstrap) {
     var dock = document.getElementById("edit-dock");
     var btnSave = document.getElementById("btn-save");
     var btnCancel = document.getElementById("btn-cancel");
     var banner = document.getElementById("edit-dirty-banner");
+    if (bootstrap.__groupBlocks) {
+      return;
+    }
     if (!btnSave || typeof bootstrap.__initialCanonical === "undefined") {
       return;
     }
@@ -2525,22 +2574,25 @@
       banner.classList.toggle("is-hidden", !dirty);
     }
 
-    document.querySelectorAll("[data-col]").forEach(function (inp) {
-      var cell = inp.closest(".scalar-cell");
-      var was = cell && cell.querySelector(".was-value");
-      if (!was) {
-        return;
-      }
-      var init = inp.getAttribute("data-initial") || "";
-      if (inp.value !== init) {
-        was.classList.remove("is-hidden");
-        was.textContent = "Было: " + (init === "" ? "∅" : init);
-        cell.classList.add("scalar-cell--changed");
-      } else {
-        was.classList.add("is-hidden");
-        cell.classList.remove("scalar-cell--changed");
-      }
-    });
+    var fgFlat = flatGridFor(bootstrap);
+    if (fgFlat) {
+      fgFlat.querySelectorAll("[data-col]").forEach(function (inp) {
+        var cell = inp.closest(".scalar-cell");
+        var was = cell && cell.querySelector(".was-value");
+        if (!was) {
+          return;
+        }
+        var init = inp.getAttribute("data-initial") || "";
+        if (inp.value !== init) {
+          was.classList.remove("is-hidden");
+          was.textContent = "Было: " + (init === "" ? "∅" : init);
+          cell.classList.add("scalar-cell--changed");
+        } else {
+          was.classList.add("is-hidden");
+          cell.classList.remove("scalar-cell--changed");
+        }
+      });
+    }
 
     (bootstrap.jsonCols || []).forEach(function (jc) {
       var box = findJsonBox(jc.column);
@@ -2591,6 +2643,130 @@
   }
 
   function init() {
+    var groupEl = document.getElementById("row-editor-group-blocks");
+    if (groupEl) {
+      var blocks;
+      try {
+        blocks = JSON.parse(groupEl.textContent);
+      } catch (e0) {
+        console.error(e0);
+        return;
+      }
+      if (!Array.isArray(blocks) || !blocks.length) {
+        return;
+      }
+      blocks.forEach(function (blk) {
+        blk.__flatGridId = "flat-field-grid-" + blk.rowId;
+      });
+      var dock0 = document.getElementById("edit-dock");
+      if (dock0) {
+        dock0.classList.add("edit-dock--group-multi");
+      }
+      blocks.forEach(function (blk) {
+        renderFlatSection(blk);
+        blk.__initialCanonical = canonicalPayload(blk);
+      });
+      var globalFilter = document.getElementById("flat-field-filter-group-all");
+      if (globalFilter) {
+        globalFilter.addEventListener("input", function () {
+          var q = (globalFilter.value || "").trim().toLowerCase();
+          document.querySelectorAll(".group-contest-flat-grid .scalar-cell").forEach(function (c) {
+            var t = c.getAttribute("data-filter-text") || "";
+            c.style.display = !q || t.indexOf(q) !== -1 ? "" : "none";
+          });
+        });
+      }
+      document.querySelectorAll(".flat-field-filter--group-block").forEach(function (inp) {
+        inp.addEventListener("input", function () {
+          var tid = inp.getAttribute("data-target-grid");
+          var g = tid ? document.getElementById(tid) : null;
+          if (!g) {
+            return;
+          }
+          var q = (inp.value || "").trim().toLowerCase();
+          g.querySelectorAll(".scalar-cell").forEach(function (c) {
+            var t = c.getAttribute("data-filter-text") || "";
+            c.style.display = !q || t.indexOf(q) !== -1 ? "" : "none";
+          });
+        });
+      });
+      var lead = blocks[0];
+      lead.__groupBlocks = blocks.map(function (b) {
+        return { b: b, grid: flatGridFor(b) };
+      });
+      var jsonRootG = document.getElementById("json-columns-mount");
+      if (jsonRootG && blocks[0]) {
+        (blocks[0].jsonCols || []).forEach(function (jc) {
+          var wrap = document.createElement("section");
+          wrap.className = "panel json-column-panel";
+          wrap.id = "sec-json-" + (jc.section_slug || jc.column.replace(/[^a-zA-Z0-9_-]/g, "_"));
+          var h = document.createElement("h2");
+          h.textContent = "JSON · " + jc.column;
+          wrap.appendChild(h);
+          var inner = document.createElement("div");
+          inner.className = "json-column-card";
+          renderJsonColumn(inner, jc, blocks[0]);
+          wrap.appendChild(inner);
+          jsonRootG.appendChild(wrap);
+        });
+      }
+      wireNav();
+      document.addEventListener("spod-editor-change", function () {
+        refreshGroupMultiDirtyState(blocks);
+      });
+      refreshGroupMultiDirtyState(blocks);
+      installLeaveGuard(lead);
+      document.querySelectorAll(".btn-save-group-row").forEach(function (btn) {
+        btn.addEventListener("click", async function () {
+          var rid = parseInt(btn.getAttribute("data-row-id"), 10);
+          var blk = null;
+          var bi;
+          for (bi = 0; bi < blocks.length; bi++) {
+            if (blocks[bi].rowId === rid) {
+              blk = blocks[bi];
+              break;
+            }
+          }
+          if (!blk) {
+            return;
+          }
+          var payload = collectPayload(blk);
+          var res = await fetch(
+            "/sheet/" + encodeURIComponent(blk.sheetCode) + "/row/" + rid + "/save",
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(payload),
+              redirect: "manual",
+            }
+          );
+          if (res.status === 303 || res.status === 302) {
+            var loc = res.headers.get("Location") || "";
+            if (loc) {
+              window.location.href = loc;
+              return;
+            }
+          }
+          if (res.ok) {
+            window.location.reload();
+            return;
+          }
+          var txt = await res.text();
+          try {
+            var j = JSON.parse(txt);
+            if (j.detail) {
+              alert(String(j.detail));
+              return;
+            }
+          } catch (e2) {
+            /* ignore */
+          }
+          alert("Ошибка сохранения: " + res.status + " " + txt.slice(0, 500));
+        });
+      });
+      return;
+    }
+
     var el = document.getElementById("row-editor-bootstrap");
     if (!el) {
       return;

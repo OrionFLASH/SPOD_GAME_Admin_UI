@@ -875,16 +875,6 @@
           ]
         },
         {
-          "column": "INDICATOR_WEIGHT",
-          "allow_custom": true,
-          "options": [
-            "",
-            "-1",
-            "1",
-            "1000"
-          ]
-        },
-        {
           "column": "INDICATOR_MARK_TYPE",
           "allow_custom": false,
           "options": [
@@ -904,32 +894,6 @@
             "X2",
             "X3",
             "X4"
-          ]
-        },
-        {
-          "column": "INDICATOR_VALUE",
-          "allow_custom": true,
-          "options": [
-            "",
-            "0",
-            "1",
-            "10",
-            "100",
-            "100000",
-            "10000000",
-            "12000000",
-            "2",
-            "3",
-            "3000000",
-            "4",
-            "5",
-            "50",
-            "500000",
-            "5000000",
-            "500000000",
-            "6",
-            "7000000",
-            "8"
           ]
         },
         {
@@ -1666,6 +1630,25 @@
           }
         }
       ]
+    },
+    {
+      "sheet_code": "INDICATOR",
+      "rules": [
+        {
+          "comment": "INDICATOR_VALUE: целое число от 0 до 1000000000 включительно (числовое поле ввода, не выпадающий список).",
+          "column": "INDICATOR_VALUE",
+          "format": "integer",
+          "min": 0,
+          "max": 1000000000
+        },
+        {
+          "comment": "INDICATOR_WEIGHT: целое от -10 до 1000; пустая строка допустима (allows_empty в editor_field_ui).",
+          "column": "INDICATOR_WEIGHT",
+          "format": "integer",
+          "min": -10,
+          "max": 1000
+        }
+      ]
     }
   ],
   "editor_field_ui": [
@@ -2335,7 +2318,7 @@
               "json_path": [
                 "tournamentTeam"
               ],
-              "label": "tournamentTeam",
+              "label": "Командный турнир",
               "description": "tournamentTeam",
               "show_description": false,
               "required": false,
@@ -2488,8 +2471,8 @@
         {
           "column": "INDICATOR_WEIGHT",
           "label": "INDICATOR_WEIGHT",
-          "description": "INDICATOR_WEIGHT",
-          "show_description": false,
+          "description": "Целое число от -10 до 1000; пустое значение допустимо.",
+          "show_description": true,
           "required": false,
           "allows_empty": true
         },
@@ -2512,8 +2495,8 @@
         {
           "column": "INDICATOR_VALUE",
           "label": "INDICATOR_VALUE",
-          "description": "INDICATOR_VALUE",
-          "show_description": false,
+          "description": "Целое число от 0 до 1000000000 (пусто допустимо).",
+          "show_description": true,
           "required": false,
           "allows_empty": true
         },
@@ -3017,8 +3000,8 @@
               "json_path": [
                 "hidden"
               ],
-              "label": "hidden",
-              "description": "Скрыть",
+              "label": "Скрыть",
+              "description": "hidden",
               "show_description": false,
               "required": false,
               "allows_empty": true
@@ -3241,7 +3224,7 @@
               "json_path": [
                 "itemAmount"
               ],
-              "label": "itemAmount",
+              "label": "Количество товаров",
               "description": "itemAmount",
               "show_description": false,
               "required": false,
@@ -3555,7 +3538,7 @@
               "json_path": [
                 "nftFlg"
               ],
-              "label": "nftFlg",
+              "label": "NFT флаг",
               "description": "nftFlg",
               "show_description": false,
               "required": false,
@@ -3585,8 +3568,8 @@
               "json_path": [
                 "persomanNumberVisible"
               ],
-              "label": "persomanNumberVisible",
-              "description": "persomanNumberVisible",
+              "label": "Показать участникам",
+              "description": "Видят только указанные табельные номера",
               "show_description": false,
               "required": false,
               "allows_empty": true
