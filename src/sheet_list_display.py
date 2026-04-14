@@ -18,7 +18,7 @@ INDICATOR_ADD_CALC_TYPE, INDICATOR_CODE; в «Связи» — REWARD-LINK по 
 фильтр по REWARD_TYPE — из строки REWARD по REWARD_CODE связи.
 
 Лист TOURNAMENT-SCHEDULE: колонка «Период» (PERIOD_TYPE), название конкурса (CONTEST-DATA.FULL_NAME), «Сезон» (seasonCode из TARGET_TYPE);
-в «Связи» — «Конкурс:» с кодом и «Награды:» с парами REWARD_CODE + GROUP_CODE из REWARD-LINK. Фильтр по сезону — множественный выбор.
+колонка «Код турнира» (TOURNAMENT_CODE); «Связанные награду» — только строки вида REWARD_CODE: GROUP_CODE из REWARD-LINK (без префиксов «Конкурс»/«Награды»). Фильтр по сезону — множественный выбор.
 
 Лист GROUP (список): одна строка таблицы на каждый уникальный CONTEST_CODE — «Код конкурса», название конкурса из CONTEST-DATA,
 в «Связи» — перечень уровней (GROUP_CODE : GROUP_VALUE); «Просмотр» открывает карточку со всеми строками GROUP этого конкурса.
@@ -208,7 +208,7 @@ def _contest_data_relations_line(contest_code: str, lu: Dict[str, Any]) -> str:
 
 
 def _schedule_rewards_line(contest_code: str, lu: Dict[str, Any]) -> str:
-    """Строка «Награды:» для расписания: пары REWARD_CODE + GROUP_CODE из REWARD-LINK конкурса."""
+    """Текст колонки «Связанные награду» в списке расписания: пары REWARD_CODE: GROUP_CODE из REWARD-LINK конкурса."""
     cc = (contest_code or "").strip()
     if not cc:
         return ""
@@ -224,21 +224,19 @@ def _schedule_rewards_line(contest_code: str, lu: Dict[str, Any]) -> str:
         if key in seen_pair:
             continue
         seen_pair.add(key)
-        parts.append(f"{rc} + {gc}" if gc else rc)
+        # В ячейке только «код: уровень», без слова «Награды» и без «+».
+        parts.append(f"{rc}: {gc}" if gc else rc)
     if not parts:
         return ""
-    return "Награды: " + "; ".join(parts)
+    return "\n".join(parts)
 
 
 def _schedule_relations_line(contest_code: str, lu: Dict[str, Any]) -> str:
-    """Связи строки расписания: код конкурса и награды по REWARD-LINK (две строки для отображения с pre-line)."""
+    """Связи строки расписания для таблицы: только награды конкурса (см. _schedule_rewards_line), без строки «Конкурс»."""
     cc = (contest_code or "").strip()
     if not cc:
         return ""
-    rw = _schedule_rewards_line(cc, lu)
-    if rw:
-        return "Конкурс: " + cc + "\n" + rw
-    return "Конкурс: " + cc
+    return _schedule_rewards_line(cc, lu)
 
 
 def display_for_sheet_row(sheet_code: str, cells: Dict[str, str], lu: Dict[str, Any]) -> Dict[str, str]:

@@ -284,6 +284,18 @@
           "column": "PLAN_PERIOD_END_DT",
           "input_type": "date",
           "storage_format": "YYYY-MM-DD"
+        },
+        {
+          "column": "FILTER_PERIOD_ARR",
+          "json_path": [0, "start_dt"],
+          "input_type": "date",
+          "storage_format": "YYYY-MM-DD"
+        },
+        {
+          "column": "FILTER_PERIOD_ARR",
+          "json_path": [0, "end_dt"],
+          "input_type": "date",
+          "storage_format": "YYYY-MM-DD"
         }
       ]
     }
@@ -1068,33 +1080,6 @@
           ]
         },
         {
-          "column": "REWARD_COST",
-          "allow_custom": true,
-          "options": [
-            "0",
-            "1",
-            "10",
-            "11",
-            "12",
-            "14",
-            "15",
-            "17",
-            "19",
-            "2",
-            "20",
-            "3",
-            "30",
-            "4",
-            "40",
-            "5",
-            "50",
-            "6",
-            "60",
-            "7",
-            "8"
-          ]
-        },
-        {
           "column": "REWARD_ADD_DATA",
           "json_path": [
             "nftFlg"
@@ -1178,7 +1163,8 @@
           ],
           "allow_custom": false,
           "options": [
-            "N"
+            { "label": "Нет", "value": "N" },
+            { "label": "Да", "value": "Y" }
           ]
         },
         {
@@ -1255,10 +1241,22 @@
           ],
           "allow_custom": false,
           "options": [
-            "BANK",
-            "GOSB",
-            "NON",
-            "TB"
+            {
+              "label": "Страна",
+              "value": "BANK"
+            },
+            {
+              "label": "ГОСБ",
+              "value": "GOSB"
+            },
+            {
+              "label": "Общий (вне уровня)",
+              "value": "NON"
+            },
+            {
+              "label": "Тер.банк",
+              "value": "TB"
+            }
           ]
         },
         {
@@ -1269,31 +1267,6 @@
           "allow_custom": false,
           "options": [
             "once"
-          ]
-        },
-        {
-          "column": "REWARD_ADD_DATA",
-          "json_path": [
-            "itemLimitCount"
-          ],
-          "allow_custom": false,
-          "options": [
-            "1"
-          ]
-        },
-        {
-          "column": "REWARD_ADD_DATA",
-          "json_path": [
-            "itemMinShow"
-          ],
-          "allow_custom": true,
-          "options": [
-            "1",
-            "10",
-            "2",
-            "3",
-            "4",
-            "5"
           ]
         },
         {
@@ -1387,74 +1360,6 @@
         {
           "column": "REWARD_ADD_DATA",
           "json_path": [
-            "getCondition",
-            "employeeRating",
-            "minRatingBANK"
-          ],
-          "allow_custom": true,
-          "options": [
-            "",
-            "1",
-            "10",
-            "100",
-            "15",
-            "2",
-            "25",
-            "3",
-            "30",
-            "35",
-            "4",
-            "40",
-            "5",
-            "50"
-          ]
-        },
-        {
-          "column": "REWARD_ADD_DATA",
-          "json_path": [
-            "getCondition",
-            "employeeRating",
-            "minRatingTB"
-          ],
-          "allow_custom": true,
-          "options": [
-            "",
-            "1",
-            "2",
-            "3",
-            "5"
-          ]
-        },
-        {
-          "column": "REWARD_ADD_DATA",
-          "json_path": [
-            "getCondition",
-            "employeeRating",
-            "minRatingGOSB"
-          ],
-          "allow_custom": true,
-          "options": [
-            "",
-            "1"
-          ]
-        },
-        {
-          "column": "REWARD_ADD_DATA",
-          "json_path": [
-            "getCondition",
-            "employeeRating",
-            "minCrystalEarnedTotal"
-          ],
-          "allow_custom": true,
-          "options": [
-            "",
-            "10",
-            "3"
-          ]
-        },
-        {
-          "column": "REWARD_ADD_DATA",
-          "json_path": [
             "helpCodeList",
             0
           ],
@@ -1507,47 +1412,60 @@
           ]
         },
         {
-          "column": "CRITERION_MARK_VALUE",
-          "allow_custom": true,
+          "column": "FILTER_PERIOD_ARR",
+          "json_path": [0, "period_code"],
+          "allow_custom": false,
+          "options": [
+            "0",
+            "1"
+          ]
+        },
+        {
+          "column": "FILTER_PERIOD_ARR",
+          "json_path": [0, "criterion_mark_type"],
+          "allow_custom": false,
           "options": [
             "",
-            "0",
-            "50000"
+            ">",
+            ">=",
+            "<",
+            "<=",
+            "="
           ]
         },
         {
           "column": "PERIOD_TYPE",
           "allow_custom": true,
           "options": [
-            "1 полугодие",
-            "март-июль",
-            "произвольный",
-            "турнир 1 квартала",
-            "турнир 1 полугодия",
-            "турнир 2 квартала",
-            "турнир 2 месяца",
-            "турнир 2 недели",
-            "турнир 2 полугодия",
-            "турнир 3 квартала",
-            "турнир 3 месяца",
-            "турнир 3 недели",
-            "турнир 4 квартала",
-            "турнир 4 месяца",
-            "турнир апреля",
-            "турнир августа",
-            "турнир года",
-            "турнир декабря",
-            "турнир июля",
-            "турнир июня",
-            "турнир квартала",
-            "турнир мая",
-            "турнир марта",
-            "турнир месяца",
-            "турнир ноября",
-            "турнир октября",
-            "турнир сентября",
+            "турнир января",
             "турнир февраля",
-            "турнир января"
+            "турнир марта",
+            "турнир апреля",
+            "турнир мая",
+            "турнир июня",
+            "турнир июля",
+            "турнир августа",
+            "турнир сентября",
+            "турнир октября",
+            "турнир ноября",
+            "турнир декабря",
+            "март-июль",
+            "турнир месяца",
+            "турнир 2 месяца",
+            "турнир 3 месяца",
+            "турнир 4 месяца",
+            "турнир 2 недели",
+            "турнир 3 недели",
+            "турнир 1 квартала",
+            "турнир 2 квартала",
+            "турнир 3 квартала",
+            "турнир 4 квартала",
+            "турнир квартала",
+            "1 полугодие",
+            "турнир 1 полугодия",
+            "турнир 2 полугодия",
+            "турнир года",
+            "произвольный"
           ]
         },
         {
@@ -1780,6 +1698,109 @@
           "format": "integer",
           "min": -10,
           "max": 1000
+        }
+      ]
+    },
+    {
+      "sheet_code": "TOURNAMENT-SCHEDULE",
+      "rules": [
+        {
+          "comment": "CRITERION_MARK_VALUE: целое 0…1000000 или пусто (allows_empty в editor_field_ui).",
+          "column": "CRITERION_MARK_VALUE",
+          "format": "integer",
+          "min": 0,
+          "max": 1000000
+        },
+        {
+          "comment": "FILTER_PERIOD_ARR[0].criterion_mark_value: то же, что плоское CRITERION_MARK_VALUE (целое 0…1000000 или пусто).",
+          "column": "FILTER_PERIOD_ARR",
+          "json_path": [
+            0,
+            "criterion_mark_value"
+          ],
+          "format": "integer",
+          "min": 0,
+          "max": 1000000
+        }
+      ]
+    },
+    {
+      "sheet_code": "REWARD",
+      "rules": [
+        {
+          "comment": "REWARD_COST: целое число 0…100 (числовое поле, не выпадающий список field_enums).",
+          "column": "REWARD_COST",
+          "format": "integer",
+          "min": 0,
+          "max": 100
+        },
+        {
+          "comment": "REWARD_ADD_DATA.itemMinShow: целое 1…10 в JSON-редакторе (без field_enums).",
+          "column": "REWARD_ADD_DATA",
+          "json_path": [
+            "itemMinShow"
+          ],
+          "format": "integer",
+          "min": 1,
+          "max": 10
+        },
+        {
+          "comment": "REWARD_ADD_DATA.itemLimitCount: целое 1…5 в JSON-редакторе (без field_enums).",
+          "column": "REWARD_ADD_DATA",
+          "json_path": [
+            "itemLimitCount"
+          ],
+          "format": "integer",
+          "min": 1,
+          "max": 5
+        },
+        {
+          "comment": "REWARD_ADD_DATA.getCondition.employeeRating.minRatingBANK: целое 1…100 или пусто (allows_empty в editor_field_ui).",
+          "column": "REWARD_ADD_DATA",
+          "json_path": [
+            "getCondition",
+            "employeeRating",
+            "minRatingBANK"
+          ],
+          "format": "integer",
+          "min": 1,
+          "max": 100
+        },
+        {
+          "comment": "REWARD_ADD_DATA.getCondition.employeeRating.minRatingTB: целое 1…10 или пусто (allows_empty в editor_field_ui).",
+          "column": "REWARD_ADD_DATA",
+          "json_path": [
+            "getCondition",
+            "employeeRating",
+            "minRatingTB"
+          ],
+          "format": "integer",
+          "min": 1,
+          "max": 10
+        },
+        {
+          "comment": "REWARD_ADD_DATA.getCondition.employeeRating.minRatingGOSB: целое 1…5 или пусто (allows_empty в editor_field_ui).",
+          "column": "REWARD_ADD_DATA",
+          "json_path": [
+            "getCondition",
+            "employeeRating",
+            "minRatingGOSB"
+          ],
+          "format": "integer",
+          "min": 1,
+          "max": 5
+        },
+        {
+          "comment": "REWARD_ADD_DATA.getCondition.employeeRating.minCrystalEarnedTotal: целое 1…50 или пусто (allows_empty в editor_field_ui).",
+          "column": "REWARD_ADD_DATA",
+          "json_path": [
+            "getCondition",
+            "employeeRating",
+            "minCrystalEarnedTotal"
+          ],
+          "format": "integer",
+          "min": 1,
+          "max": 50
         }
       ]
     }
@@ -2734,8 +2755,8 @@
         {
           "column": "REWARD_COST",
           "label": "Кристаллы награды",
-          "description": "REWARD_COST",
-          "show_description": false,
+          "description": "Целое число от 0 до 100 включительно (числовой ввод по editor_field_numeric).",
+          "show_description": true,
           "required": true,
           "allows_empty": false
         },
@@ -2875,9 +2896,9 @@
                 "employeeRating",
                 "minCrystalEarnedTotal"
               ],
-              "label": "getCondition.employeeRating.minCrystalEarnedTotal",
-              "description": "getCondition.employeeRating.minCrystalEarnedTotal",
-              "show_description": false,
+              "label": "Минимум заработанных кристаллов (minCrystalEarnedTotal)",
+              "description": "Целое число от 1 до 50 включительно (числовой ввод) или пустое значение.",
+              "show_description": true,
               "required": false,
               "allows_empty": true
             },
@@ -2888,7 +2909,7 @@
                 "minRatingBANK"
               ],
               "label": "Минимальный рейтинг в стране",
-              "description": "Для выбора преференции надо иметь рейтинг в стране ниже указанного",
+              "description": "Целое число от 1 до 100 включительно (числовой ввод) или пустое значение.",
               "show_description": true,
               "required": false,
               "allows_empty": true
@@ -2900,7 +2921,7 @@
                 "minRatingGOSB"
               ],
               "label": "Минимальный рейтинг в ТБ",
-              "description": "Для выбора преференции надо иметь рейтинг в ТБ ниже указанного",
+              "description": "Целое число от 1 до 5 включительно (числовой ввод) или пустое значение.",
               "show_description": true,
               "required": false,
               "allows_empty": true
@@ -2912,7 +2933,7 @@
                 "minRatingTB"
               ],
               "label": "Минимальный рейтинг в ГОСБ",
-              "description": "Для выбора преференции надо иметь рейтинг в ГОСБ ниже указанного",
+              "description": "Целое число от 1 до 10 включительно (числовой ввод) или пустое значение.",
               "show_description": true,
               "required": false,
               "allows_empty": true
@@ -3621,9 +3642,9 @@
               "json_path": [
                 "itemLimitCount"
               ],
-              "label": "itemLimitCount",
-              "description": "itemLimitCount",
-              "show_description": false,
+              "label": "Лимит по количеству (itemLimitCount)",
+              "description": "Целое число от 1 до 5 включительно (числовой ввод).",
+              "show_description": true,
               "required": false,
               "allows_empty": true
             },
@@ -3641,9 +3662,9 @@
               "json_path": [
                 "itemMinShow"
               ],
-              "label": "itemMinShow",
-              "description": "itemMinShow",
-              "show_description": false,
+              "label": "Минимум показов (itemMinShow)",
+              "description": "Целое число от 1 до 10 включительно (числовой ввод).",
+              "show_description": true,
               "required": false,
               "allows_empty": true
             },
@@ -3961,9 +3982,9 @@
         },
         {
           "column": "CRITERION_MARK_VALUE",
-          "label": "CRITERION_MARK_VALUE",
-          "description": "CRITERION_MARK_VALUE",
-          "show_description": false,
+          "label": "Значение критерия (CRITERION_MARK_VALUE)",
+          "description": "Целое число от 0 до 1000000 включительно (числовой ввод) или пустое значение.",
+          "show_description": true,
           "required": false,
           "allows_empty": true
         },
@@ -3993,11 +4014,53 @@
         },
         {
           "column": "FILTER_PERIOD_ARR",
-          "label": "FILTER_PERIOD_ARR",
-          "description": "FILTER_PERIOD_ARR",
-          "show_description": false,
+          "label": "Фильтр по периодам (FILTER_PERIOD_ARR)",
+          "description": "Массив из одного объекта: период для отбора показателей; даты и при необходимости критерий.",
+          "show_description": true,
           "required": false,
-          "allows_empty": true
+          "allows_empty": true,
+          "paths": [
+            {
+              "json_path": [0, "period_code"],
+              "label": "Код периода (period_code)",
+              "description": "0 или 1.",
+              "show_description": true,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [0, "start_dt"],
+              "label": "Дата начала периода (start_dt)",
+              "description": "Формат YYYY-MM-DD.",
+              "show_description": true,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [0, "end_dt"],
+              "label": "Дата окончания периода (end_dt)",
+              "description": "Формат YYYY-MM-DD.",
+              "show_description": true,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [0, "criterion_mark_type"],
+              "label": "Условие по критерию (criterion_mark_type)",
+              "description": "Как у плоских CRITERION_MARK_TYPE: >, >=, пусто и т.д.",
+              "show_description": true,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [0, "criterion_mark_value"],
+              "label": "Значение критерия (criterion_mark_value)",
+              "description": "Целое число от 0 до 1000000 включительно (числовой ввод) или пустое значение; как у плоского CRITERION_MARK_VALUE.",
+              "show_description": true,
+              "required": false,
+              "allows_empty": true
+            }
+          ]
         },
         {
           "column": "TARGET_TYPE",

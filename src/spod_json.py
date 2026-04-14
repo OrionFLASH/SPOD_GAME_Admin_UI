@@ -4,6 +4,10 @@
 
 Отдельная копия логики по смыслу как в SPOD: замена тройных кавычек на обычные
 перед вызовом json.loads.
+
+Дополнительно: ячейки вроде FILTER_PERIOD_ARR в SCHEDULE после csv.reader дают
+лишнюю закрывающую кавычку после ] и удвоенные кавычки у ключей — см. _repair_csv_spod_string_quoting
+(зеркально в row_editor.js: repairCsvSpodStringQuoting).
 """
 
 from __future__ import annotations
@@ -22,6 +26,38 @@ def normalize_spod_json_string(s: str) -> str:
     return fixed
 
 
+def _repair_csv_spod_string_quoting(s: str) -> str:
+    """
+    Убирает типичные артефакты выгрузки SPOD после обёртки поля в кавычки CSV:
+    лишняя закрывающая кавычка сразу после ] или }; удвоенные кавычки перед разделителями JSON.
+    Без этого FILTER_PERIOD_ARR и похожие ячейки вида
+    [{""period_code"": ...}]" не разбираются в «По полям».
+    """
+    out = s.strip()
+    while len(out) >= 2 and out[-1] == '"' and out[-2] in ("]", "}"):
+        try:
+            json.loads(out[:-1])
+            out = out[:-1]
+        except Exception:
+            break
+    # Лишняя " перед }: только если закрывается непустая строка (код/дата), а не «: ""}».
+    out = re.sub(r'([0-9A-Za-z_])""}', r'\1"}', out)
+    prev: Optional[str] = None
+    while prev != out:
+        prev = out
+        out = out.replace('""":', '":').replace('""",', '",')
+    return out
+
+
+def _parse_after_spod_normalization(raw: str) -> Any:
+    """Нормализация SPOD + regex + починка кавычек, затем json.loads."""
+    fixed = normalize_spod_json_string(raw)
+    fixed = re.sub(r'"{2,}([^"\s]+)"{2,}', r'"\1"', fixed)
+    fixed = re.sub(r'"{2,}([^"\s]+)"{2,}\s*:', r'"\1":', fixed)
+    fixed = _repair_csv_spod_string_quoting(fixed)
+    return json.loads(fixed)
+
+
 def try_parse_cell(s: str) -> Tuple[Optional[Any], Optional[str]]:
     """
     Пытается распарсить ячейку как JSON после нормализации SPOD.
@@ -37,10 +73,7 @@ def try_parse_cell(s: str) -> Tuple[Optional[Any], Optional[str]]:
     except Exception:
         pass
     try:
-        fixed = normalize_spod_json_string(raw)
-        fixed = re.sub(r'"{2,}([^"\s]+)"{2,}', r'"\1"', fixed)
-        fixed = re.sub(r'"{2,}([^"\s]+)"{2,}\s*:', r'"\1":', fixed)
-        return json.loads(fixed), None
+        return _parse_after_spod_normalization(raw), None
     except Exception as ex:
         return None, str(ex)[:500]
 

@@ -4,7 +4,7 @@
 
 В конфиге допускается группировка по листу: один объект с полем sheet_code и массивом
 rules (перечисления), hints (размеры textarea), rules в editor_field_ui (подписи и описания полей)
-или rules в editor_field_numeric (форматы числовых плоских полей),
+или rules в editor_field_numeric (форматы числовых полей: плоские колонки и при необходимости json_path внутри JSON-колонки),
 вместо повторения sheet_code в каждой записи.
 Поддерживается и старый плоский формат (каждый элемент — полное правило с sheet_code).
 """
@@ -92,6 +92,7 @@ def flatten_editor_field_numeric(cfg: Dict[str, Any]) -> List[Dict[str, Any]]:
     Формат в config.json — блоки {\"sheet_code\", \"rules\": [ {...}, ... ] }.
     Статическое правило: \"format\": \"integer\" | \"decimal\", \"min\", \"max\",
     для decimal — \"decimal_places\" (по умолчанию 5).
+    Опционально \"json_path\": путь внутри JSON-колонки (тот же \"column\"), например itemMinShow в REWARD_ADD_DATA.
     Условное: \"conditional_formats\": [ { \"when\": { \"column\": \"...\", \"equals\": \"...\" }, \"format\": \"...\", ... }, ... ],
     \"default_format\": { \"format\": \"empty_only\" } — поле не заполняется (блокировка ввода).
     """

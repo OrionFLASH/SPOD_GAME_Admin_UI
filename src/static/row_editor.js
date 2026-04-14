@@ -412,19 +412,31 @@
   }
 
   /**
-   * Числовые плоские поля: editor_field_numeric в config.json (целое / дробное с фиксированным числом знаков,
-   * условные правила по значению другой колонки строки).
+   * Числовые поля editor_field_numeric: плоская колонка (jsonParts не задан) или лист JSON (column + json_path в правиле).
    */
-  function findNumericRuleDef(bootstrap, column) {
+  function findNumericRuleDef(bootstrap, column, jsonParts) {
     var list = bootstrap.fieldNumeric || bootstrap.field_numeric || [];
     var sc = bootstrap.sheetCode;
     var col = String(column || "").trim();
+    var jParts = jsonParts;
     var i = 0;
     for (i = 0; i < list.length; i++) {
       var r = list[i];
-      if (r && r.sheet_code === sc && String(r.column || "").trim() === col) {
-        return r;
+      if (!r || r.sheet_code !== sc || String(r.column || "").trim() !== col) {
+        continue;
       }
+      var jp = r.json_path;
+      var hasJp = jp && jp.length;
+      if (jParts == null || !Array.isArray(jParts) || jParts.length === 0) {
+        if (hasJp) {
+          continue;
+        }
+      } else {
+        if (!hasJp || !partsMatchJsonPath(jParts, jp)) {
+          continue;
+        }
+      }
+      return r;
     }
     return null;
   }
@@ -574,15 +586,16 @@
     return { ok: true, value: String(raw || ""), warn: "" };
   }
 
-  function attachNumericFlatInput(inp, grid, bootstrap, col, attrName, rowCellsFallback) {
+  function attachNumericFlatInput(inp, grid, bootstrap, col, attrName, rowCellsFallback, jsonPartsForRule) {
     var attr = attrName || "data-col";
     var fb = rowCellsFallback != null ? rowCellsFallback : bootstrap.flat || {};
+    var jpRule = jsonPartsForRule;
     var warnEl = document.createElement("div");
     warnEl.className = "muted spod-numeric-warn";
     warnEl.style.marginTop = "0.25rem";
     inp.classList.add("spod-numeric-input");
     function refreshState() {
-      var active = resolveActiveNumericSpec(findNumericRuleDef(bootstrap, col), function (wc) {
+      var active = resolveActiveNumericSpec(findNumericRuleDef(bootstrap, col, jpRule), function (wc) {
         return readFlatControlValue(grid, wc, fb, attr);
       });
       if (!active || active.format === "empty_only") {
@@ -603,7 +616,7 @@
       if (inp.disabled) {
         return;
       }
-      var active = resolveActiveNumericSpec(findNumericRuleDef(bootstrap, col), function (wc) {
+      var active = resolveActiveNumericSpec(findNumericRuleDef(bootstrap, col, jpRule), function (wc) {
         return readFlatControlValue(grid, wc, fb, attr);
       });
       if (!active || active.format === "empty_only") {
@@ -1741,7 +1754,8 @@
           cb.checked = leaf.display === "1" || leaf.display === "true";
           row.appendChild(cb);
         } else if (leaf.vtype === "number") {
-          var enumN = findFieldEnum(bootstrap, col, leaf.parts);
+          var numDefJ = findNumericRuleDef(bootstrap, col, leaf.parts);
+          var enumN = numDefJ ? null : findFieldEnum(bootstrap, col, leaf.parts);
           if (enumN) {
             row.setAttribute("data-json-enum", "1");
             var wrapN = document.createElement("div");
@@ -1756,6 +1770,29 @@
             wrapN.appendChild(selN);
             wrapN.appendChild(taN);
             row.appendChild(wrapN);
+          } else if (numDefJ) {
+            var inpJN = document.createElement("input");
+            inpJN.type = "text";
+            inpJN.className = "json-leaf-input spod-leaf-control";
+            inpJN.setAttribute("data-initial", leaf.display != null ? String(leaf.display) : "");
+            var flatGridJ = flatGridFor(bootstrap);
+            var activeJN = resolveActiveNumericSpec(numDefJ, function (wc) {
+              return readFlatControlValue(flatGridJ, wc, bootstrap.flat || {}, "data-col");
+            });
+            var initNumStr = leaf.display != null ? String(leaf.display) : "";
+            var resJN = applyNumericFormatToValue(initNumStr, activeJN);
+            inpJN.value = resJN.ok ? resJN.value : initNumStr;
+            var numPairJ = attachNumericFlatInput(
+              inpJN,
+              flatGridJ,
+              bootstrap,
+              col,
+              "data-col",
+              null,
+              leaf.parts
+            );
+            row.appendChild(inpJN);
+            row.appendChild(numPairJ.warnEl);
           } else {
             var inpNum = document.createElement("input");
             inpNum.type = "number";
@@ -2157,6 +2194,26 @@
       .replace(/"""/g, '"');
   }
 
+  /** Дублирует `_repair_csv_spod_string_quoting` в `spod_json.py` (лишняя " после ] или }; "" перед : , } ]). */
+  function repairCsvSpodStringQuoting(s) {
+    var out = String(s || "").trim();
+    while (out.length >= 2 && out.charAt(out.length - 1) === '"' && (out.charAt(out.length - 2) === "]" || out.charAt(out.length - 2) === "}")) {
+      try {
+        JSON.parse(out.slice(0, -1));
+        out = out.slice(0, -1);
+      } catch (eStrip) {
+        break;
+      }
+    }
+    out = out.replace(/([0-9A-Za-z_])""}/g, "$1\"}");
+    var prev = null;
+    while (prev !== out) {
+      prev = out;
+      out = out.split('""":').join('":').split('""",').join('",');
+    }
+    return out;
+  }
+
   /**
    * Разбор ячейки как JSON после нормализации SPOD; сигнатура удобна для мастера (`ok` + `parsed`).
    */
@@ -2168,12 +2225,13 @@
     try {
       return { ok: true, parsed: JSON.parse(t) };
     } catch (e0) {
-      /* далее — как try_parse_cell после normalize_spod_json_string и regex в Python */
+      /* далее — как try_parse_cell в Python: normalize + regex + repairCsvSpodStringQuoting */
     }
     try {
       var fixed = normalizeSpodJsonString(t);
       fixed = fixed.replace(/"{2,}([^"\s]+)"{2,}/g, '"$1"');
       fixed = fixed.replace(/"{2,}([^"\s]+)"{2,}\s*:/g, '"$1":');
+      fixed = repairCsvSpodStringQuoting(fixed);
       return { ok: true, parsed: JSON.parse(fixed) };
     } catch (e1) {
       return { ok: false, parsed: null, error: String((e1 && e1.message) || e1) };

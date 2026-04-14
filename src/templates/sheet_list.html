@@ -43,7 +43,7 @@
   {% elif sheet_code == "REWARD-LINK" %}
   <p class="muted">Код листа: <strong>{{ sheet_code }}</strong> · порядок колонок: код награды, уровень (<code>GROUP_CODE</code>), название награды и конкурса из REWARD и CONTEST-DATA. Фильтр <strong>REWARD_TYPE</strong> — по <code>REWARD_CODE</code>, множественный выбор. Колонка «Связи» скрыта; поиск по строке включает <code>CONTEST_CODE</code>.</p>
   {% elif sheet_code == "TOURNAMENT-SCHEDULE" %}
-  <p class="muted">Код листа: <strong>{{ sheet_code }}</strong> · «Период» — <code>PERIOD_TYPE</code>; название конкурса — <code>FULL_NAME</code> из CONTEST-DATA; «Сезон» — <code>seasonCode</code> из JSON <code>TARGET_TYPE</code>. В «Связях»: код конкурса и награды (REWARD_CODE + GROUP_CODE) по REWARD-LINK. Фильтр по сезону — множественный выбор.</p>
+  <p class="muted">Код листа: <strong>{{ sheet_code }}</strong> · «Код турнира» — <code>TOURNAMENT_CODE</code>; «Период» — <code>PERIOD_TYPE</code>; название конкурса — <code>FULL_NAME</code> из CONTEST-DATA; «Сезон» — <code>seasonCode</code> из JSON <code>TARGET_TYPE</code>. Колонка «Связанные награду»: строки <code>REWARD_CODE: GROUP_CODE</code> по REWARD-LINK. Фильтр по сезону — множественный выбор.</p>
   {% elif sheet_code == "CONTEST-DATA" %}
   <p class="muted">Код листа: <strong>{{ sheet_code }}</strong> · «Код конкурса» — <code>CONTEST_CODE</code>; «Наименование» — <code>FULL_NAME</code>; «Тип конкурса» — <code>CONTEST_TYPE</code>. Фильтр по типу — множественный выбор (как на листах REWARD / расписание). Турниры и награды по конкурсу доступны через поиск по строке. «Консистентность» — перед «Просмотр».</p>
   {% elif sheet_code == "GROUP" %}
@@ -157,7 +157,7 @@
           <th class="col-reward-link-name col-reward-link-name--reward">Название награды</th>
           <th class="col-reward-link-name col-reward-link-name--contest">Название турнира</th>
           {% elif sheet_code == "TOURNAMENT-SCHEDULE" %}
-          <th>Ключ</th>
+          <th>Код турнира</th>
           <th>Период</th>
           <th>Название конкурса</th>
           <th>Сезон</th>
@@ -176,7 +176,7 @@
           <th>Название / описание</th>
           {% endif %}
           {% if sheet_code != "CONTEST-DATA" and sheet_code != "GROUP" and sheet_code != "REWARD-LINK" %}
-          <th>Связи</th>
+          <th>{% if sheet_code == "TOURNAMENT-SCHEDULE" %}Связанные награду{% else %}Связи{% endif %}</th>
           {% endif %}
           {% if sheet_code != "CONTEST-DATA" and sheet_code != "GROUP" %}
           <th class="col-flag">Консистентность</th>
