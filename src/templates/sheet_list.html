@@ -15,34 +15,75 @@
   <p class="muted">Код листа: <strong>{{ sheet_code }}</strong> · в таблице: ключ, название из строки или связей, подтянутые турниры/конкурсы где применимо.</p>
   {% endif %}
   {% if sheet_code == "REWARD" or sheet_code == "REWARD-LINK" or sheet_code == "TOURNAMENT-SCHEDULE" %}
-  <form class="search sheet-list-form-reward" method="get" action="/sheet/{{ sheet_code }}">
+  {# Класс search не используем: у него flex-row без column, из‑за этого поиск оказывался справа от фильтра (в т.ч. расписание). #}
+  <form class="sheet-list-form-reward" method="get" action="/sheet/{{ sheet_code }}">
     <div class="sheet-list-filters">
       {% if sheet_code == "REWARD" or sheet_code == "REWARD-LINK" %}
-      <label class="reward-filter-label">REWARD_TYPE
-        <select name="reward_type" multiple class="sheet-list-filter-multi" size="5" aria-label="Фильтр по типу награды (несколько значений)" onchange="this.form.submit()">
+      {% set rtw = reward_type_options|length %}
+      {% set rtw_size = [[rtw, 12]|min, 1]|max %}
+      <div class="sheet-list-filter-block">
+        <div class="sheet-list-filter-head">
+          <span class="reward-filter-caption">REWARD_TYPE</span>
+          <div class="sheet-list-filter-actions" role="group" aria-label="Быстрый выбор типа награды">
+            <button type="button" class="btn btn-ghost btn-sm sheet-list-filter-all" data-sheet-list-select="reward_type">Отметить все</button>
+            <button type="button" class="btn btn-ghost btn-sm sheet-list-filter-none" data-sheet-list-clear="reward_type">Снять все</button>
+          </div>
+        </div>
+        <select id="sheet-list-filter-reward-type" name="reward_type" multiple class="sheet-list-filter-multi" size="{{ rtw_size }}" aria-label="Фильтр по типу награды (несколько значений)" onchange="this.form.submit()">
           {% for o in reward_type_options %}
           <option value="{{ o.value }}" {% if o.value in reward_type_selected_list %}selected{% endif %}>{{ o.label }}</option>
           {% endfor %}
         </select>
-      </label>
-      <p class="muted sheet-list-filter-hint">Несколько типов: удерживайте Ctrl (Windows) или ⌘ (macOS) и кликайте по пунктам. Без выбранных — показываются все типы.</p>
+        <p class="muted sheet-list-filter-hint">Несколько типов: Ctrl (Windows) или ⌘ (macOS) + клик. Без выбранных — все типы.</p>
+      </div>
       {% endif %}
       {% if sheet_code == "TOURNAMENT-SCHEDULE" %}
-      <label class="reward-filter-label">Сезон (seasonCode)
-        <select name="season" multiple class="sheet-list-filter-multi" size="5" aria-label="Фильтр по сезону из TARGET_TYPE" onchange="this.form.submit()">
+      {% set sn = season_options|length %}
+      {% set sn_size = [[sn, 12]|min, 1]|max %}
+      <div class="sheet-list-filter-block">
+        <div class="sheet-list-filter-head">
+          <span class="reward-filter-caption">Сезон (seasonCode)</span>
+          <div class="sheet-list-filter-actions" role="group" aria-label="Быстрый выбор сезона">
+            <button type="button" class="btn btn-ghost btn-sm sheet-list-filter-all" data-sheet-list-select="season">Отметить все</button>
+            <button type="button" class="btn btn-ghost btn-sm sheet-list-filter-none" data-sheet-list-clear="season">Снять все</button>
+          </div>
+        </div>
+        <select id="sheet-list-filter-season" name="season" multiple class="sheet-list-filter-multi" size="{{ sn_size }}" aria-label="Фильтр по сезону из TARGET_TYPE" onchange="this.form.submit()">
           {% for o in season_options %}
           <option value="{{ o.value }}" {% if o.value in season_selected_list %}selected{% endif %}>{{ o.label }}</option>
           {% endfor %}
         </select>
-      </label>
-      <p class="muted sheet-list-filter-hint">Несколько сезонов: Ctrl / ⌘ + клик. Без выбранных — все сезоны.</p>
+        <p class="muted sheet-list-filter-hint">Несколько сезонов: Ctrl / ⌘ + клик. Без выбранных — все сезоны.</p>
+      </div>
       {% endif %}
     </div>
-    <div class="search-row-inline">
-      <input type="search" name="q" value="{{ q }}" placeholder="Поиск по содержимому строки…" />
+    <div class="search-row-inline sheet-list-search-full">
+      <input type="search" name="q" value="{{ q }}" placeholder="Поиск по содержимому строки…" autocomplete="off" />
       <button type="submit" class="btn btn-primary">Найти</button>
     </div>
   </form>
+  <script>
+  (function () {
+    document.querySelectorAll("[data-sheet-list-select]").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        var key = btn.getAttribute("data-sheet-list-select");
+        var sel = key === "season" ? document.getElementById("sheet-list-filter-season") : document.getElementById("sheet-list-filter-reward-type");
+        if (!sel) return;
+        Array.prototype.forEach.call(sel.options, function (opt) { opt.selected = true; });
+        sel.form.submit();
+      });
+    });
+    document.querySelectorAll("[data-sheet-list-clear]").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        var key = btn.getAttribute("data-sheet-list-clear");
+        var sel = key === "season" ? document.getElementById("sheet-list-filter-season") : document.getElementById("sheet-list-filter-reward-type");
+        if (!sel) return;
+        Array.prototype.forEach.call(sel.options, function (opt) { opt.selected = false; });
+        sel.form.submit();
+      });
+    });
+  })();
+  </script>
   {% else %}
   <form class="search" method="get" action="/sheet/{{ sheet_code }}">
     <input type="search" name="q" value="{{ q }}" placeholder="Поиск по содержимому строки…" />
