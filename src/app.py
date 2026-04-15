@@ -24,7 +24,7 @@ ROOT = Path(__file__).resolve().parent.parent
 CFG: Dict[str, Any] = {}
 CONN: sqlite3.Connection | None = None
 DB_PATH: Path | None = None
-STATIC_ASSET_VERSION = "20260415_2"
+STATIC_ASSET_VERSION = "20260415_6"
 
 
 def _cells_canonical_json(cells: Dict[str, str]) -> str:
@@ -582,6 +582,7 @@ def row_detail(request: Request, code: str, row_id: int):
             "json_blocks": json_blocks,
             "editor_bootstrap_json": _json_for_script_tag(editor_bootstrap),
             "row_edit_draft_json": _json_for_script_tag(row_edit_draft or {}),
+            "row_edit_draft": (row_edit_draft or {}),
             "consistency_ok": r["consistency_ok"],
             "consistency_errors": json.loads(r["consistency_errors"] or "[]"),
             "rel": rel,

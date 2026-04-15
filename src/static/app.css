@@ -1614,6 +1614,25 @@ body.spod-date-modal-open {
   font-size: 0.88rem;
 }
 
+.draft-variant-panel {
+  margin-top: 0.7rem;
+  padding: 0.7rem 0.85rem;
+  border-radius: 10px;
+  border: 1px solid rgba(84, 122, 188, 0.35);
+  background: rgba(235, 245, 255, 0.7);
+}
+
+.draft-variant-title {
+  font-weight: 700;
+  margin-bottom: 0.35rem;
+}
+
+.draft-variant-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
 .edit-dock {
   position: fixed;
   bottom: 0;
@@ -1693,17 +1712,17 @@ body.spod-date-modal-open {
 
 .scalar-cell--changed .json-path-label,
 .scalar-cell--changed > label {
-  color: rgba(120, 70, 20, 0.95);
+  color: rgba(145, 75, 95, 0.95);
 }
 
 .scalar-cell--changed input[data-col] {
-  border-color: rgba(200, 140, 60, 0.75);
-  background: rgba(255, 250, 235, 0.65);
+  border-color: rgba(214, 148, 168, 0.75);
+  background: rgba(255, 241, 246, 0.9);
 }
 
 .scalar-cell--changed select.spod-enum-select {
-  border-color: rgba(200, 140, 60, 0.75);
-  background: rgba(255, 250, 235, 0.65);
+  border-color: rgba(214, 148, 168, 0.75);
+  background: rgba(255, 241, 246, 0.9);
 }
 
 .scalar-cell--changed .was-actions {
@@ -1718,6 +1737,34 @@ body.spod-date-modal-open {
 .scalar-cell--confirmed select.spod-enum-select {
   border-color: rgba(60, 170, 105, 0.72);
   background: rgba(235, 255, 242, 0.72);
+}
+
+.scalar-cell--confirmed .was-action--ok {
+  display: none;
+}
+
+.json-leaf-row--changed .json-path-label {
+  color: rgba(145, 75, 95, 0.95);
+}
+
+.json-leaf-row--changed input.json-leaf-input,
+.json-leaf-row--changed textarea.json-leaf-input,
+.json-leaf-row--changed select.spod-enum-select,
+.json-leaf-row--changed .spod-date-display-btn {
+  border-color: rgba(214, 148, 168, 0.75);
+  background: rgba(255, 241, 246, 0.9);
+}
+
+.json-leaf-row--confirmed input.json-leaf-input,
+.json-leaf-row--confirmed textarea.json-leaf-input,
+.json-leaf-row--confirmed select.spod-enum-select,
+.json-leaf-row--confirmed .spod-date-display-btn {
+  border-color: rgba(60, 170, 105, 0.72);
+  background: rgba(235, 255, 242, 0.72);
+}
+
+.json-leaf-row--confirmed .was-action--ok {
+  display: none;
 }
 
 .json-column-panel--changed {

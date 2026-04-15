@@ -78,6 +78,16 @@
           {% if mode == "strict" %} (сохранение отклоняется при ошибках проверок){% endif %}
         </p>
         <p class="muted">Правки в форме не пишутся в базу сразу: кнопка «Сохранить» создаёт <strong>новую</strong> актуальную версию строки, прежняя остаётся в истории; в списках и выгрузке CSV участвуют только актуальные версии.</p>
+        {% if row_edit_draft and row_edit_draft.status == "EDIT" %}
+        <div class="draft-variant-panel">
+          <div class="draft-variant-title">Источник для редактирования</div>
+          <p class="muted">Обнаружен черновик (EDIT). Можно продолжить с черновика или начать заново от актуальной версии строки.</p>
+          <div class="draft-variant-actions">
+            <button type="button" class="btn btn-ghost btn-sm" id="btn-load-active-version">Актуальная версия</button>
+            <button type="button" class="btn btn-primary btn-sm" id="btn-load-draft-version">Черновик (EDIT)</button>
+          </div>
+        </div>
+        {% endif %}
         {% if sheet_code != "GROUP" or not group_row_blocks %}
         {% if consistency_errors and consistency_errors|length > 0 %}
         <div class="errors">
@@ -161,6 +171,7 @@
   </div>
   <div class="edit-dock-actions">
     <button type="button" class="btn btn-primary" id="btn-save" disabled>Сохранить в базу</button>
+    <button type="button" class="btn btn-secondary" id="btn-save-draft" disabled>Сохранить черновик</button>
     <button type="button" class="btn btn-ghost" id="btn-cancel" disabled>Отменить правку</button>
     <a class="btn btn-ghost spod-trail-clear-to-list" href="/sheet/{{ sheet_code }}">Назад к списку</a>
   </div>

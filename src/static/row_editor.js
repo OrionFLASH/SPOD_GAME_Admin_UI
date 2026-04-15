@@ -675,6 +675,23 @@
     return v === true || v === 1 || v === "yes" || v === "true" || v === "Y";
   }
 
+  /**
+   * Текст hover-подсказки для подписи/описания поля:
+   * - всегда показываем column;
+   * - если описание скрыто (show_description=false), добавляем description.
+   */
+  function fieldUiHoverTitle(rule, column) {
+    var colText = "column: " + String(column || "");
+    if (!rule) {
+      return colText;
+    }
+    var desc = rule.description != null ? String(rule.description).trim() : "";
+    if (!showDescriptionEnabled(rule) && desc) {
+      return colText + "\n" + desc;
+    }
+    return colText;
+  }
+
   function fieldUiRequired(r) {
     if (!r) {
       return false;
@@ -735,6 +752,7 @@
     var r = findFieldUi(bootstrap, column, jsonParts);
     var display = fallbackText;
     var desc = "";
+    var hoverTitle = fieldUiHoverTitle(r, column);
     if (r) {
       if (r.label != null && String(r.label).trim() !== "") {
         display = String(r.label);
@@ -750,6 +768,7 @@
     var cap = document.createElement("span");
     cap.className = "spod-field-ui-caption";
     cap.textContent = display;
+    cap.setAttribute("title", hoverTitle);
     top.appendChild(cap);
     var signals = document.createElement("span");
     signals.className = "spod-field-ui-signals";
@@ -764,6 +783,7 @@
       var d = document.createElement("span");
       d.className = "spod-field-ui-desc";
       d.textContent = desc.trim();
+      d.setAttribute("title", hoverTitle);
       slot.appendChild(d);
     }
     labEl.appendChild(slot);
@@ -2229,6 +2249,10 @@
     }
   }
 
+  function jsonDraftFieldKey(column, pathParts) {
+    return String(column || "") + "::" + JSON.stringify(pathParts || []);
+  }
+
   function scalarCellCurrentValue(cell) {
     if (!cell) {
       return "";
@@ -2260,6 +2284,165 @@
     } else {
       ctl.value = init;
     }
+  }
+
+  function jsonLeafComparableValue(row) {
+    if (!row) {
+      return "";
+    }
+    var v = coerceLeafValue(row);
+    if (v === null || v === undefined) {
+      return "";
+    }
+    if (typeof v === "boolean") {
+      return v ? "1" : "";
+    }
+    return String(v);
+  }
+
+  function jsonLeafControlElement(row) {
+    if (!row) {
+      return null;
+    }
+    var enSel = row.querySelector(".spod-enum-select");
+    if (enSel) {
+      return enSel;
+    }
+    return row.querySelector("input.json-leaf-input, textarea.json-leaf-input");
+  }
+
+  function jsonLeafWasDisplay(row, comparable) {
+    var vt = row ? row.getAttribute("data-vtype") : "";
+    if (vt === "boolean") {
+      return comparable === "1" || comparable === "true" ? "true" : "false";
+    }
+    return comparable === "" ? "∅" : comparable;
+  }
+
+  function revertJsonLeafToInitial(row) {
+    if (!row) {
+      return;
+    }
+    var init = row.getAttribute("data-json-initial-comparable");
+    var initial = init == null ? "" : String(init);
+    if (row.getAttribute("data-json-enum") === "1") {
+      var sel = row.querySelector(".spod-enum-select");
+      var ta = row.querySelector(".spod-enum-custom");
+      if (!sel) {
+        return;
+      }
+      var hasCustom = !!sel.querySelector('option[value="' + CUSTOM_SENTINEL + '"]');
+      initEnumSelectState(sel, ta, null, hasCustom, initial);
+      return;
+    }
+    var vt = row.getAttribute("data-vtype");
+    if (vt === "boolean") {
+      var cb = row.querySelector('input[type="checkbox"]');
+      if (cb) {
+        cb.checked = initial === "1" || initial === "true";
+      }
+      return;
+    }
+    var ctl = row.querySelector("input.json-leaf-input, textarea.json-leaf-input");
+    if (ctl) {
+      ctl.value = initial;
+    }
+  }
+
+  function ensureJsonLeafActions(row, bootstrap, column, pathParts) {
+    if (!row || row.getAttribute("data-spod-json-actions-wired") === "1") {
+      return;
+    }
+    var actions = document.createElement("div");
+    actions.className = "was-actions is-hidden";
+    actions.innerHTML =
+      '<button type="button" class="btn btn-ghost was-action was-action--ok" title="Подтвердить изменение поля">✓</button>' +
+      '<button type="button" class="btn btn-ghost was-action was-action--cancel" title="Отменить изменение поля">✕</button>';
+    var was = document.createElement("div");
+    was.className = "was-value is-hidden";
+    row.appendChild(was);
+    row.appendChild(actions);
+    row.setAttribute("data-spod-json-actions-wired", "1");
+
+    var key = jsonDraftFieldKey(column, pathParts);
+    var okBtn = actions.querySelector(".was-action--ok");
+    var cancelBtn = actions.querySelector(".was-action--cancel");
+    if (okBtn) {
+      okBtn.addEventListener("click", async function () {
+        var init = row.getAttribute("data-json-initial-comparable");
+        var current = jsonLeafComparableValue(row);
+        if (String(current) === String(init == null ? "" : init)) {
+          return;
+        }
+        ensureFieldDraftState(bootstrap);
+        bootstrap.__fieldDraftConfirmed[key] = true;
+        await persistRowEditDraft(bootstrap);
+        refreshDirtyState(bootstrap);
+      });
+    }
+    if (cancelBtn) {
+      cancelBtn.addEventListener("click", async function () {
+        revertJsonLeafToInitial(row);
+        ensureFieldDraftState(bootstrap);
+        delete bootstrap.__fieldDraftConfirmed[key];
+        await persistRowEditDraft(bootstrap);
+        document.dispatchEvent(new Event("spod-editor-change"));
+      });
+    }
+  }
+
+  function refreshJsonLeafDraftState(box, bootstrap, column) {
+    if (!box) {
+      return;
+    }
+    ensureFieldDraftState(bootstrap);
+    box.querySelectorAll(".json-leaf-row[data-json-path]").forEach(function (row) {
+      var partsRaw = row.getAttribute("data-json-path");
+      if (!partsRaw) {
+        return;
+      }
+      var parts;
+      try {
+        parts = JSON.parse(partsRaw);
+      } catch (e0) {
+        return;
+      }
+      ensureJsonLeafActions(row, bootstrap, column, parts);
+      if (!Object.prototype.hasOwnProperty.call(row.dataset, "jsonInitialComparable")) {
+        row.setAttribute("data-json-initial-comparable", jsonLeafComparableValue(row));
+      }
+      var init = row.getAttribute("data-json-initial-comparable");
+      var current = jsonLeafComparableValue(row);
+      var changed = String(current) !== String(init == null ? "" : init);
+      var key = jsonDraftFieldKey(column, parts);
+      var was = row.querySelector(".was-value");
+      var actions = row.querySelector(".was-actions");
+      if (changed) {
+        row.classList.add("json-leaf-row--changed");
+        if (bootstrap.__fieldDraftConfirmed[key]) {
+          row.classList.add("json-leaf-row--confirmed");
+        } else {
+          row.classList.remove("json-leaf-row--confirmed");
+        }
+        if (was) {
+          was.classList.remove("is-hidden");
+          was.textContent = "Было: " + jsonLeafWasDisplay(row, String(init == null ? "" : init));
+        }
+        if (actions) {
+          actions.classList.remove("is-hidden");
+        }
+      } else {
+        row.classList.remove("json-leaf-row--changed");
+        row.classList.remove("json-leaf-row--confirmed");
+        if (was) {
+          was.classList.add("is-hidden");
+        }
+        if (actions) {
+          actions.classList.add("is-hidden");
+        }
+        delete bootstrap.__fieldDraftConfirmed[key];
+      }
+    });
   }
 
   async function persistRowEditDraft(bootstrap) {
@@ -2310,6 +2493,19 @@
     }
   }
 
+  function schedulePersistRowEditDraft(bootstrap) {
+    if (!bootstrap || bootstrap.__groupBlocks) {
+      return;
+    }
+    if (bootstrap.__persistDraftTimer) {
+      clearTimeout(bootstrap.__persistDraftTimer);
+    }
+    bootstrap.__persistDraftTimer = setTimeout(function () {
+      bootstrap.__persistDraftTimer = null;
+      persistRowEditDraft(bootstrap);
+    }, 220);
+  }
+
   async function clearRowEditDraft(bootstrap) {
     if (!bootstrap || bootstrap.__groupBlocks) {
       return;
@@ -2322,6 +2518,185 @@
     } catch (e0) {
       /* ignore */
     }
+  }
+
+  function parseComparableByVtype(vtype, comparable) {
+    var c = comparable == null ? "" : String(comparable);
+    if (vtype === "boolean") {
+      return c === "1" || c === "true";
+    }
+    if (vtype === "number") {
+      var n = parseFloat(c);
+      return Number.isFinite(n) ? n : 0;
+    }
+    if (vtype === "null") {
+      return null;
+    }
+    return c;
+  }
+
+  function comparableByVtypeFromValue(vtype, value) {
+    if (value === null || value === undefined) {
+      return "";
+    }
+    if (vtype === "boolean") {
+      return value ? "1" : "";
+    }
+    return String(value);
+  }
+
+  function countUnconfirmedChanges(bootstrap) {
+    var out = 0;
+    var fg = flatGridFor(bootstrap);
+    if (fg) {
+      fg.querySelectorAll("[data-col]").forEach(function (el) {
+        var col = el.getAttribute("data-col") || "";
+        var init = el.getAttribute("data-initial") || "";
+        var cur = String(el.value == null ? "" : el.value);
+        if (cur !== init && !bootstrap.__fieldDraftConfirmed[col]) {
+          out += 1;
+        }
+      });
+    }
+    (bootstrap.jsonCols || []).forEach(function (jc) {
+      var box = findJsonBox(jc.column);
+      if (!box) {
+        return;
+      }
+      box.querySelectorAll(".json-leaf-row[data-json-path]").forEach(function (row) {
+        var partsRaw = row.getAttribute("data-json-path");
+        if (!partsRaw) {
+          return;
+        }
+        var parts;
+        try {
+          parts = JSON.parse(partsRaw);
+        } catch (e0) {
+          return;
+        }
+        var key = jsonDraftFieldKey(jc.column, parts);
+        var init = row.getAttribute("data-json-initial-comparable");
+        var cur = jsonLeafComparableValue(row);
+        if (String(cur) !== String(init == null ? "" : init) && !bootstrap.__fieldDraftConfirmed[key]) {
+          out += 1;
+        }
+      });
+    });
+    return out;
+  }
+
+  function buildConfirmedOnlyPayload(bootstrap) {
+    var payload = collectPayload(bootstrap);
+    ensureFieldDraftState(bootstrap);
+
+    var fg = flatGridFor(bootstrap);
+    if (fg) {
+      fg.querySelectorAll("[data-col]").forEach(function (el) {
+        var col = el.getAttribute("data-col") || "";
+        var init = el.getAttribute("data-initial") || "";
+        var cur = String(el.value == null ? "" : el.value);
+        if (cur !== init && !bootstrap.__fieldDraftConfirmed[col]) {
+          payload[col] = init;
+        }
+      });
+    }
+
+    (bootstrap.jsonCols || []).forEach(function (jc) {
+      var box = findJsonBox(jc.column);
+      if (!box) {
+        return;
+      }
+      var mode = box.getAttribute("data-edit-mode") || "fields";
+      if (mode === "raw") {
+        var initRaw = jc.raw == null ? "" : String(jc.raw);
+        var curRaw = buildJsonFromFields(box);
+        if (String(curRaw || "") !== String(initRaw || "")) {
+          payload[jc.column] = initRaw;
+        }
+        return;
+      }
+      var parsedCell = tryParseSpodJsonCell(payload[jc.column]);
+      if (!parsedCell.ok || parsedCell.parsed == null || typeof parsedCell.parsed !== "object") {
+        var anyUnconfirmed = false;
+        box.querySelectorAll(".json-leaf-row[data-json-path]").forEach(function (row) {
+          var partsRaw = row.getAttribute("data-json-path");
+          if (!partsRaw) {
+            return;
+          }
+          var parts;
+          try {
+            parts = JSON.parse(partsRaw);
+          } catch (e0bad) {
+            return;
+          }
+          var key = jsonDraftFieldKey(jc.column, parts);
+          var init = row.getAttribute("data-json-initial-comparable");
+          var cur = jsonLeafComparableValue(row);
+          if (String(cur) !== String(init == null ? "" : init) && !bootstrap.__fieldDraftConfirmed[key]) {
+            anyUnconfirmed = true;
+          }
+        });
+        if (anyUnconfirmed) {
+          payload[jc.column] = jc.raw == null ? "" : String(jc.raw);
+        }
+        return;
+      }
+      var parsed = parsedCell.parsed;
+      var touched = false;
+      box.querySelectorAll(".json-leaf-row[data-json-path]").forEach(function (row) {
+        var partsRaw = row.getAttribute("data-json-path");
+        if (!partsRaw) {
+          return;
+        }
+        var parts;
+        try {
+          parts = JSON.parse(partsRaw);
+        } catch (e1) {
+          return;
+        }
+        var key = jsonDraftFieldKey(jc.column, parts);
+        var init = row.getAttribute("data-json-initial-comparable");
+        var cur = jsonLeafComparableValue(row);
+        if (String(cur) === String(init == null ? "" : init)) {
+          return;
+        }
+        if (bootstrap.__fieldDraftConfirmed[key]) {
+          return;
+        }
+        var vt = row.getAttribute("data-vtype") || "string";
+        setDeep(parsed, parts, parseComparableByVtype(vt, init));
+        touched = true;
+      });
+      if (touched) {
+        payload[jc.column] = normalizeJsonCell(JSON.stringify(parsed));
+      }
+    });
+    return payload;
+  }
+
+  async function saveConfirmedDraftOnly(bootstrap) {
+    if (!bootstrap || bootstrap.__groupBlocks) {
+      return;
+    }
+    ensureFieldDraftState(bootstrap);
+    var payload = buildConfirmedOnlyPayload(bootstrap);
+    var confirmed = [];
+    Object.keys(bootstrap.__fieldDraftConfirmed || {}).forEach(function (k) {
+      if (bootstrap.__fieldDraftConfirmed[k]) {
+        confirmed.push(k);
+      }
+    });
+    await fetch("/sheet/" + encodeURIComponent(bootstrap.sheetCode) + "/row/" + bootstrap.rowId + "/draft", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        status: "EDIT",
+        state: {
+          payload: payload,
+          confirmed_fields: confirmed,
+        },
+      }),
+    });
   }
 
   function applyDraftState(bootstrap, draftState) {
@@ -2367,6 +2742,89 @@
         el.value = next;
       }
     });
+
+    (bootstrap.jsonCols || []).forEach(function (jc) {
+      if (!Object.prototype.hasOwnProperty.call(payload, jc.column)) {
+        return;
+      }
+      var box = findJsonBox(jc.column);
+      if (!box) {
+        return;
+      }
+      refreshJsonUiFromRaw(box, jc.column, payload[jc.column] == null ? "" : String(payload[jc.column]), bootstrap);
+      box.setAttribute("data-initial-json-norm", normalizeJsonCell(jc.raw == null ? "" : String(jc.raw)));
+      var activeParsed = tryParseSpodJsonCell(jc.raw == null ? "" : String(jc.raw));
+      var activeRoot = activeParsed.ok ? activeParsed.parsed : null;
+      box.querySelectorAll(".json-leaf-row[data-json-path]").forEach(function (row) {
+        var partsRaw = row.getAttribute("data-json-path");
+        if (!partsRaw) {
+          return;
+        }
+        var parts;
+        try {
+          parts = JSON.parse(partsRaw);
+        } catch (e1) {
+          return;
+        }
+        var vt = row.getAttribute("data-vtype") || "string";
+        var vv = getDeepValue(activeRoot, parts);
+        row.setAttribute("data-json-initial-comparable", comparableByVtypeFromValue(vt, vv));
+      });
+    });
+  }
+
+  function resetToActiveVersion(bootstrap) {
+    if (!bootstrap || bootstrap.__groupBlocks) {
+      return;
+    }
+    ensureFieldDraftState(bootstrap);
+    bootstrap.__fieldDraftConfirmed = Object.create(null);
+    var fg = flatGridFor(bootstrap);
+    if (fg) {
+      fg.querySelectorAll("[data-col]").forEach(function (el) {
+        var init = el.getAttribute("data-initial") || "";
+        var cell = el.closest(".scalar-cell");
+        var enumWrap = cell ? cell.querySelector(".spod-enum-block") : null;
+        if (enumWrap) {
+          var sel = enumWrap.querySelector(".spod-enum-select");
+          var ta = enumWrap.querySelector(".spod-enum-custom");
+          var hidden = enumWrap.querySelector("input[type='hidden'][data-col]");
+          var hasCustom = !!(sel && sel.querySelector('option[value="' + CUSTOM_SENTINEL + '"]'));
+          if (sel && ta && hidden) {
+            initEnumSelectState(sel, ta, hidden, hasCustom, init);
+          } else if (hidden) {
+            hidden.value = init;
+          }
+        } else {
+          el.value = init;
+        }
+      });
+    }
+    (bootstrap.jsonCols || []).forEach(function (jc) {
+      var box = findJsonBox(jc.column);
+      if (!box) {
+        return;
+      }
+      refreshJsonUiFromRaw(box, jc.column, jc.raw == null ? "" : String(jc.raw), bootstrap);
+    });
+  }
+
+  function activateDraftVariant(bootstrap, draftState, mode) {
+    var activeBtn = document.getElementById("btn-load-active-version");
+    var draftBtn = document.getElementById("btn-load-draft-version");
+    resetToActiveVersion(bootstrap);
+    if (mode === "draft") {
+      applyDraftState(bootstrap, draftState || {});
+    }
+    if (activeBtn) {
+      activeBtn.classList.toggle("btn-primary", mode === "active");
+      activeBtn.classList.toggle("btn-ghost", mode !== "active");
+    }
+    if (draftBtn) {
+      draftBtn.classList.toggle("btn-primary", mode === "draft");
+      draftBtn.classList.toggle("btn-ghost", mode !== "draft");
+    }
+    document.dispatchEvent(new Event("spod-editor-change"));
   }
 
   /**
@@ -2489,6 +2947,8 @@
     var pendingLeave = null;
     var leaveOverlay = null;
     var leaveDialog = null;
+    var unconfirmedOverlay = null;
+    var unconfirmedDialog = null;
 
     function isDirtyNow() {
       if (leaveGuardSuspended) {
@@ -2557,6 +3017,7 @@
         '<p class="muted spod-leave-modal-text">Есть правки, которые ещё не записаны в базу (кнопка «Сохранить в базу»). Что сделать?</p>' +
         '<div class="spod-leave-modal-actions">' +
         '<button type="button" class="btn btn-primary btn-sm spod-leave-btn-save">Сохранить и выйти</button>' +
+        '<button type="button" class="btn btn-secondary btn-sm spod-leave-btn-save-draft">Сохранить черновик и выйти</button>' +
         '<button type="button" class="btn btn-secondary btn-sm spod-leave-btn-discard">Выйти без сохранения</button>' +
         '<button type="button" class="btn btn-ghost btn-sm spod-leave-btn-stay">Остаться</button>' +
         "</div>";
@@ -2584,6 +3045,75 @@
         leaveOverlay.classList.add("spod-date-modal-overlay--closed");
       }
       document.body.classList.remove("spod-date-modal-open");
+    }
+
+    function ensureUnconfirmedModal() {
+      if (unconfirmedOverlay) {
+        return;
+      }
+      unconfirmedOverlay = document.createElement("div");
+      unconfirmedOverlay.className =
+        "spod-date-modal-overlay spod-leave-modal-overlay spod-date-modal-overlay--closed";
+      unconfirmedOverlay.setAttribute("role", "alertdialog");
+      unconfirmedOverlay.setAttribute("aria-modal", "true");
+      unconfirmedOverlay.setAttribute("aria-labelledby", "spod-unconfirmed-modal-title");
+      unconfirmedDialog = document.createElement("div");
+      unconfirmedDialog.className = "spod-leave-modal-dialog spod-date-modal-dialog";
+      unconfirmedDialog.addEventListener("click", function (e) {
+        e.stopPropagation();
+      });
+      unconfirmedDialog.innerHTML =
+        '<h2 id="spod-unconfirmed-modal-title" class="spod-leave-modal-title">Есть неподтверждённые правки</h2>' +
+        '<p class="muted spod-leave-modal-text" id="spod-unconfirmed-modal-text">Будут сохранены только подтверждённые изменения (с галочкой). Что сделать?</p>' +
+        '<div class="spod-leave-modal-actions">' +
+        '<button type="button" class="btn btn-primary btn-sm spod-unconfirmed-btn-ok">OK</button>' +
+        '<button type="button" class="btn btn-secondary btn-sm spod-unconfirmed-btn-no">НЕ ОК</button>' +
+        '<button type="button" class="btn btn-ghost btn-sm spod-unconfirmed-btn-stay">ПРОДОЛЖИТЬ ПРАВКУ</button>' +
+        "</div>";
+      unconfirmedOverlay.appendChild(unconfirmedDialog);
+      document.body.appendChild(unconfirmedOverlay);
+    }
+
+    function closeUnconfirmedModal() {
+      if (unconfirmedOverlay) {
+        unconfirmedOverlay.classList.add("spod-date-modal-overlay--closed");
+      }
+      document.body.classList.remove("spod-date-modal-open");
+    }
+
+    function openUnconfirmedModal(count, onOk, onNo) {
+      ensureUnconfirmedModal();
+      var txt = unconfirmedDialog.querySelector("#spod-unconfirmed-modal-text");
+      if (txt) {
+        txt.textContent =
+          "Найдено неподтверждённых правок: " +
+          count +
+          ". При сохранении черновика останутся только подтверждённые поля. Что сделать?";
+      }
+      unconfirmedOverlay.classList.remove("spod-date-modal-overlay--closed");
+      document.body.classList.add("spod-date-modal-open");
+      var okBtn = unconfirmedDialog.querySelector(".spod-unconfirmed-btn-ok");
+      var noBtn = unconfirmedDialog.querySelector(".spod-unconfirmed-btn-no");
+      var stayBtn = unconfirmedDialog.querySelector(".spod-unconfirmed-btn-stay");
+      if (okBtn) {
+        okBtn.onclick = async function () {
+          closeUnconfirmedModal();
+          await onOk();
+        };
+      }
+      if (noBtn) {
+        noBtn.onclick = function () {
+          closeUnconfirmedModal();
+          if (typeof onNo === "function") {
+            onNo();
+          }
+        };
+      }
+      if (stayBtn) {
+        stayBtn.onclick = function () {
+          closeUnconfirmedModal();
+        };
+      }
     }
 
     function executePendingAfterNavigate() {
@@ -2670,9 +3200,50 @@
       alert(msg);
     }
 
+    async function saveDraftThenMaybeExecutePending(executeAfter) {
+      if (bootstrap.__groupBlocks) {
+        alert(
+          "Для листа GROUP с несколькими уровнями сохраните каждый блок кнопкой «Сохранить эту строку», затем повторите действие."
+        );
+        return;
+      }
+      var runSave = async function () {
+        try {
+          await saveConfirmedDraftOnly(bootstrap);
+          if (executeAfter) {
+            executePendingAfterNavigate();
+          } else {
+            alert("Черновик сохранён (EDIT).");
+            refreshDirtyState(bootstrap);
+          }
+        } catch (eSave) {
+          alert("Не удалось сохранить черновик: " + String((eSave && eSave.message) || eSave));
+        }
+      };
+      var unconfirmed = countUnconfirmedChanges(bootstrap);
+      if (unconfirmed > 0) {
+        openUnconfirmedModal(
+          unconfirmed,
+          async function () {
+            await runSave();
+          },
+          function () {
+            if (executeAfter) {
+              executePendingAfterNavigate();
+            }
+          }
+        );
+        return;
+      }
+      await runSave();
+    }
+
     ensureLeaveModal();
     leaveDialog.querySelector(".spod-leave-btn-save").addEventListener("click", function () {
       saveRowThenExecutePending();
+    });
+    leaveDialog.querySelector(".spod-leave-btn-save-draft").addEventListener("click", function () {
+      saveDraftThenMaybeExecutePending(true);
     });
     leaveDialog.querySelector(".spod-leave-btn-discard").addEventListener("click", function () {
       executePendingAfterNavigate();
@@ -2695,8 +3266,8 @@
         if (e.target && e.target.closest && e.target.closest(".spod-leave-modal-overlay")) {
           return;
         }
-        /* Кнопки дока «Сохранить в базу» / «Отменить правку» — не навигация; модалку ухода не показываем. */
-        if (e.target && e.target.closest && e.target.closest("#btn-save, #btn-cancel")) {
+        /* Кнопки дока — не навигация; модалку ухода не показываем. */
+        if (e.target && e.target.closest && e.target.closest("#btn-save, #btn-save-draft, #btn-cancel")) {
           return;
         }
         var backBtn = e.target.closest && e.target.closest("#spod-trail-back");
@@ -2767,6 +3338,12 @@
 
     /* Отмена правки: перезагрузка без системного диалога beforeunload (явное действие пользователя). */
     var btnCancelDock = document.getElementById("btn-cancel");
+    var btnSaveDraftDock = document.getElementById("btn-save-draft");
+    if (btnSaveDraftDock) {
+      btnSaveDraftDock.addEventListener("click", async function () {
+        await saveDraftThenMaybeExecutePending(false);
+      });
+    }
     if (btnCancelDock) {
       btnCancelDock.addEventListener("click", async function () {
         await clearRowEditDraft(bootstrap);
@@ -2799,6 +3376,7 @@
   function refreshDirtyState(bootstrap) {
     var dock = document.getElementById("edit-dock");
     var btnSave = document.getElementById("btn-save");
+    var btnSaveDraft = document.getElementById("btn-save-draft");
     var btnCancel = document.getElementById("btn-cancel");
     var banner = document.getElementById("edit-dirty-banner");
     if (bootstrap.__groupBlocks) {
@@ -2810,6 +3388,9 @@
     var cur = canonicalPayload(bootstrap);
     var dirty = cur !== bootstrap.__initialCanonical;
     btnSave.disabled = !dirty;
+    if (btnSaveDraft) {
+      btnSaveDraft.disabled = !dirty;
+    }
     if (btnCancel) {
       btnCancel.disabled = !dirty;
     }
@@ -2901,6 +3482,7 @@
           hint2.remove();
         }
       }
+      refreshJsonLeafDraftState(box, bootstrap, jc.column);
     });
   }
 
@@ -3043,10 +3625,11 @@
 
     renderFlatSection(bootstrap);
     bootstrap.__initialCanonical = canonicalPayload(bootstrap);
+    var rowDraftState = {};
     var draftEl = document.getElementById("row-editor-draft-state");
     if (draftEl) {
       try {
-        applyDraftState(bootstrap, JSON.parse(draftEl.textContent || "{}"));
+        rowDraftState = JSON.parse(draftEl.textContent || "{}");
       } catch (e0) {
         /* ignore */
       }
@@ -3085,8 +3668,28 @@
 
     wireNav();
 
+    var hasDraft = rowDraftState && rowDraftState.status === "EDIT";
+    var btnLoadActive = document.getElementById("btn-load-active-version");
+    var btnLoadDraft = document.getElementById("btn-load-draft-version");
+    if (hasDraft && btnLoadDraft) {
+      activateDraftVariant(bootstrap, rowDraftState, "draft");
+    } else {
+      activateDraftVariant(bootstrap, rowDraftState, "active");
+    }
+    if (btnLoadActive) {
+      btnLoadActive.addEventListener("click", function () {
+        activateDraftVariant(bootstrap, rowDraftState, "active");
+      });
+    }
+    if (btnLoadDraft) {
+      btnLoadDraft.addEventListener("click", function () {
+        activateDraftVariant(bootstrap, rowDraftState, "draft");
+      });
+    }
+
     document.addEventListener("spod-editor-change", function () {
       refreshDirtyState(bootstrap);
+      schedulePersistRowEditDraft(bootstrap);
     });
     refreshDirtyState(bootstrap);
 
