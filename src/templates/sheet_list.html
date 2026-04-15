@@ -43,7 +43,7 @@
   {% elif sheet_code == "REWARD-LINK" %}
   <p class="muted">Код листа: <strong>{{ sheet_code }}</strong> · порядок колонок: код награды, уровень (<code>GROUP_CODE</code>), название награды и конкурса из REWARD и CONTEST-DATA. Фильтр <strong>REWARD_TYPE</strong> — по <code>REWARD_CODE</code>, множественный выбор. Колонка «Связи» скрыта; поиск по строке включает <code>CONTEST_CODE</code>.</p>
   {% elif sheet_code == "TOURNAMENT-SCHEDULE" %}
-  <p class="muted">Код листа: <strong>{{ sheet_code }}</strong> · «Код турнира» — <code>TOURNAMENT_CODE</code>; «Период» — <code>PERIOD_TYPE</code>; название конкурса — <code>FULL_NAME</code> из CONTEST-DATA; «Сезон» — <code>seasonCode</code> из JSON <code>TARGET_TYPE</code>. Колонка «Связанные награду»: строки <code>REWARD_CODE: GROUP_CODE</code> по REWARD-LINK. Фильтр по сезону — множественный выбор.</p>
+  <p class="muted">Код листа: <strong>{{ sheet_code }}</strong> · «Код турнира» — <code>TOURNAMENT_CODE</code>; «Период» — <code>PERIOD_TYPE</code>; название конкурса — <code>FULL_NAME</code> из CONTEST-DATA; «Сезон» — <code>seasonCode</code> из JSON <code>TARGET_TYPE</code>. Колонка «Связанные награду»: строки <code>REWARD_CODE: GROUP_CODE</code> по REWARD-LINK. Фильтры: по сезону и по типу расчёта (<code>CALC_TYPE</code>: 0 — автоматический, остальные — ручной).</p>
   {% elif sheet_code == "CONTEST-DATA" %}
   <p class="muted">Код листа: <strong>{{ sheet_code }}</strong> · «Код конкурса» — <code>CONTEST_CODE</code>; «Наименование» — <code>FULL_NAME</code>; «Тип конкурса» — <code>CONTEST_TYPE</code>. Фильтр по типу — множественный выбор (как на листах REWARD / расписание). Турниры и награды по конкурсу доступны через поиск по строке. «Консистентность» — перед «Просмотр».</p>
   {% elif sheet_code == "GROUP" %}
@@ -78,15 +78,26 @@
       ) }}
       {% endif %}
       {% if sheet_code == "TOURNAMENT-SCHEDULE" %}
-      {{ sheet_list_filter_checkbox_row(
-        "Сезон (seasonCode)",
-        "season",
-        season_options,
-        season_selected_list,
-        "season",
-        "Фильтр по сезону из TARGET_TYPE",
-        "Отметьте один или несколько сезонов. Без отметок — все сезоны."
-      ) }}
+      <div class="sheet-list-filters-grouped">
+        {{ sheet_list_filter_checkbox_row(
+          "Сезон (seasonCode)",
+          "season",
+          season_options,
+          season_selected_list,
+          "season",
+          "Фильтр по сезону из TARGET_TYPE",
+          "Отметьте один или несколько сезонов. Без отметок — все сезоны."
+        ) }}
+        {{ sheet_list_filter_checkbox_row(
+          "Тип турнира (CALC_TYPE)",
+          "calc_mode",
+          calc_mode_options,
+          calc_mode_selected_list,
+          "calc_mode",
+          "Фильтр по режиму расчета турнира",
+          "Автоматические: CALC_TYPE = 0. Ручные: все остальные значения CALC_TYPE."
+        ) }}
+      </div>
       {% endif %}
     </div>
     <div class="search-row-inline sheet-list-search-full">

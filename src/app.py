@@ -38,6 +38,59 @@ def _json_for_script_tag(obj: Any) -> Markup:
     return Markup(s)
 
 
+def _fetch_row_edit_draft(conn: sqlite3.Connection, sheet_code: str, row_id: int) -> Dict[str, Any] | None:
+    """Черновик правки строки (status=EDIT) для карточки редактирования."""
+    cur = conn.execute(
+        """
+        SELECT status, state_json, updated_at
+        FROM row_edit_draft
+        WHERE sheet_code = ? AND row_id = ?
+        """,
+        (sheet_code, int(row_id)),
+    )
+    r = cur.fetchone()
+    if not r:
+        return None
+    try:
+        state = json.loads(r["state_json"] or "{}")
+    except json.JSONDecodeError:
+        state = {}
+    if not isinstance(state, dict):
+        state = {}
+    return {
+        "status": str(r["status"] or "EDIT"),
+        "state": state,
+        "updated_at": str(r["updated_at"] or ""),
+    }
+
+
+def _upsert_row_edit_draft(
+    conn: sqlite3.Connection, sheet_code: str, row_id: int, state: Dict[str, Any], status: str = "EDIT"
+) -> None:
+    """Создаёт/обновляет черновик правки строки."""
+    now = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    state_json = json.dumps(state, ensure_ascii=False)
+    conn.execute(
+        """
+        INSERT INTO row_edit_draft(sheet_code, row_id, status, state_json, updated_at)
+        VALUES(?, ?, ?, ?, ?)
+        ON CONFLICT(sheet_code, row_id) DO UPDATE SET
+          status = excluded.status,
+          state_json = excluded.state_json,
+          updated_at = excluded.updated_at
+        """,
+        (sheet_code, int(row_id), status, state_json, now),
+    )
+
+
+def _delete_row_edit_draft(conn: sqlite3.Connection, sheet_code: str, row_id: int) -> None:
+    """Удаляет черновик правки строки."""
+    conn.execute(
+        "DELETE FROM row_edit_draft WHERE sheet_code = ? AND row_id = ?",
+        (sheet_code, int(row_id)),
+    )
+
+
 def _editor_bootstrap_for_row_cells(
     code: str,
     row_id: int,
@@ -118,6 +171,7 @@ async def lifespan(app: FastAPI):
     db.migrate_sheet_add_headers_json(CONN)
     db.migrate_legacy_data_row_removed(CONN)
     db.ensure_wizard_draft_table(CONN)
+    db.ensure_row_edit_draft_table(CONN)
     sheet_storage.rebuild_all_sheet_tables_from_config(CONN, ROOT, CFG)
     cur = CONN.execute("SELECT COUNT(*) FROM sheet")
     if cur.fetchone()[0] == 0:
@@ -282,6 +336,8 @@ def sheet_list(request: Request, code: str, q: str = ""):
     reward_type_selected_list: List[str] = []
     season_options: List[Dict[str, str]] = []
     season_selected_list: List[str] = []
+    calc_mode_options: List[Dict[str, str]] = []
+    calc_mode_selected_list: List[str] = []
     contest_type_options: List[Dict[str, str]] = []
     contest_type_selected_list: List[str] = []
     if code in ("REWARD", "REWARD-LINK"):
@@ -300,6 +356,14 @@ def sheet_list(request: Request, code: str, q: str = ""):
         season_options = sheet_list_display.season_filter_options(lu)
         season_allowed = {str(o.get("value", "")) for o in season_options}
         season_selected_list = [x.strip() for x in request.query_params.getlist("season") if x.strip() in season_allowed]
+        calc_mode_options = [
+            {"label": "Автоматические", "value": "AUTO"},
+            {"label": "Ручные", "value": "MANUAL"},
+        ]
+        calc_mode_allowed = {str(o.get("value", "")) for o in calc_mode_options}
+        calc_mode_selected_list = [
+            x.strip() for x in request.query_params.getlist("calc_mode") if x.strip() in calc_mode_allowed
+        ]
     if code == "GROUP":
         # Одна строка списка на конкурс: код + название из CONTEST-DATA; «Связи» — все уровни GROUP (GROUP_CODE : GROUP_VALUE).
         contest_full: Dict[str, str] = lu.get("contest_full") or {}
@@ -353,6 +417,11 @@ def sheet_list(request: Request, code: str, q: str = ""):
             if code == "TOURNAMENT-SCHEDULE" and season_selected_list:
                 s_val = sheet_list_display.target_type_season_code(cells.get("TARGET_TYPE") or "")
                 if s_val not in season_selected_list:
+                    continue
+            if code == "TOURNAMENT-SCHEDULE" and calc_mode_selected_list:
+                calc_type = (cells.get("CALC_TYPE") or "").strip()
+                calc_mode = "AUTO" if calc_type == "0" else "MANUAL"
+                if calc_mode not in calc_mode_selected_list:
                     continue
             if code == "REWARD" and reward_type_selected_list:
                 if (cells.get("REWARD_TYPE") or "").strip() not in reward_type_selected_list:
@@ -411,6 +480,8 @@ def sheet_list(request: Request, code: str, q: str = ""):
             "reward_type_selected_list": reward_type_selected_list,
             "season_options": season_options,
             "season_selected_list": season_selected_list,
+            "calc_mode_options": calc_mode_options,
+            "calc_mode_selected_list": calc_mode_selected_list,
             "contest_type_options": contest_type_options,
             "contest_type_selected_list": contest_type_selected_list,
         },
@@ -493,6 +564,7 @@ def row_detail(request: Request, code: str, row_id: int):
                 _editor_bootstrap_for_row_cells(code, int(sibl["id"]), dict(c), json_cols)
             )
     editor_bootstrap = _editor_bootstrap_for_row_cells(code, row_id, cells, json_cols)
+    row_edit_draft = _fetch_row_edit_draft(conn, code, row_id)
     sheet_title = str(spec.get("title") or code)
     return templates.TemplateResponse(
         request,
@@ -507,6 +579,7 @@ def row_detail(request: Request, code: str, row_id: int):
             "flat_columns": flat_columns,
             "json_blocks": json_blocks,
             "editor_bootstrap_json": _json_for_script_tag(editor_bootstrap),
+            "row_edit_draft_json": _json_for_script_tag(row_edit_draft or {}),
             "consistency_ok": r["consistency_ok"],
             "consistency_errors": json.loads(r["consistency_errors"] or "[]"),
             "rel": rel,
@@ -557,6 +630,7 @@ async def row_save(
             replaces_row_id=row_id,
         )
         consistency.run_all_checks(conn, do_commit=False)
+        _delete_row_edit_draft(conn, code, row_id)
         t = sheet_storage.physical_table_name(code)
         cur_ok = conn.execute(
             f"SELECT consistency_ok, consistency_errors FROM {sheet_storage.quote_ident(t)} WHERE id = ?",
@@ -578,6 +652,41 @@ async def row_save(
         raise
 
     return RedirectResponse(f"/sheet/{code}/row/{new_id}", status_code=303)
+
+
+@app.get("/sheet/{code}/row/{row_id}/draft")
+def row_draft_get(code: str, row_id: int):
+    """Получить промежуточный черновик правки строки (status EDIT)."""
+    conn = get_conn()
+    d = _fetch_row_edit_draft(conn, code, row_id)
+    return JSONResponse(d or {"status": "NONE", "state": {}, "updated_at": ""})
+
+
+@app.put("/sheet/{code}/row/{row_id}/draft")
+async def row_draft_put(code: str, row_id: int, payload: Dict[str, Any] = Body(...)):
+    """
+    Промежуточное подтверждение изменений конкретных полей.
+    Состояние хранится как черновик (status EDIT) до финального /save.
+    """
+    conn = get_conn()
+    state = payload.get("state")
+    if not isinstance(state, dict):
+        raise HTTPException(400, detail="Ожидается объект state.")
+    status = str(payload.get("status") or "EDIT").strip().upper() or "EDIT"
+    if status != "EDIT":
+        raise HTTPException(400, detail="Для черновика строки поддерживается только статус EDIT.")
+    _upsert_row_edit_draft(conn, code, row_id, state, status=status)
+    conn.commit()
+    return JSONResponse({"ok": True, "status": "EDIT"})
+
+
+@app.delete("/sheet/{code}/row/{row_id}/draft")
+def row_draft_delete(code: str, row_id: int):
+    """Удалить черновик правки строки (например, при явной отмене)."""
+    conn = get_conn()
+    _delete_row_edit_draft(conn, code, row_id)
+    conn.commit()
+    return JSONResponse({"ok": True})
 
 
 @app.post("/admin/reimport")

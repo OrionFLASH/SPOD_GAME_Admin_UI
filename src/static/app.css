@@ -476,6 +476,16 @@ table.data th {
   margin-bottom: 0;
 }
 
+.sheet-list-form-reward .sheet-list-filters-grouped {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 0.75rem;
+  padding: 0.6rem;
+  border-radius: 12px;
+  border: 1px solid rgba(76, 106, 146, 0.24);
+  background: rgba(235, 243, 252, 0.62);
+}
+
 /* Блок множественного фильтра: подпись; строка [мини-кнопки слева | чипы]; подсказка. Чипы — flex-wrap до края панели. */
 .sheet-list-form-reward .sheet-list-filter-block {
   display: flex;
@@ -484,6 +494,10 @@ table.data th {
   gap: 0.35rem;
   width: 100%;
   max-width: 100%;
+  padding: 0.55rem 0.6rem;
+  border-radius: 10px;
+  border: 1px solid rgba(95, 124, 163, 0.22);
+  background: rgba(248, 251, 255, 0.75);
 }
 
 .sheet-list-form-reward .reward-filter-caption {
@@ -619,6 +633,12 @@ table.data th {
   font-size: 0.78rem;
   line-height: 1.35;
   max-width: 100%;
+}
+
+@media (max-width: 1080px) {
+  .sheet-list-form-reward .sheet-list-filters-grouped {
+    grid-template-columns: 1fr;
+  }
 }
 
 .data-list-wide .cell-relations-pre {
@@ -1644,6 +1664,33 @@ body.spod-date-modal-open {
   word-break: break-word;
 }
 
+.was-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.25rem;
+  margin-top: 0.2rem;
+}
+
+.was-action {
+  min-width: 1.55rem;
+  height: 1.45rem;
+  padding: 0 0.3rem;
+  line-height: 1;
+  font-size: 0.78rem;
+}
+
+.was-action--ok {
+  color: #15603a;
+  border-color: rgba(47, 140, 90, 0.5);
+  background: rgba(226, 250, 235, 0.85);
+}
+
+.was-action--cancel {
+  color: #8a1f2d;
+  border-color: rgba(170, 70, 85, 0.45);
+  background: rgba(255, 236, 238, 0.9);
+}
+
 .scalar-cell--changed .json-path-label,
 .scalar-cell--changed > label {
   color: rgba(120, 70, 20, 0.95);
@@ -1652,6 +1699,11 @@ body.spod-date-modal-open {
 .scalar-cell--changed input[data-col] {
   border-color: rgba(200, 140, 60, 0.75);
   background: rgba(255, 250, 235, 0.65);
+}
+
+.scalar-cell--confirmed input[data-col] {
+  border-color: rgba(60, 170, 105, 0.72);
+  background: rgba(235, 255, 242, 0.72);
 }
 
 .json-column-panel--changed {

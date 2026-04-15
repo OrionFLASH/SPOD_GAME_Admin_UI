@@ -520,6 +520,8 @@ python main.py
 
 ## 8. История версий
 
+Ниже — **сквозная хронология** изменений проекта с момента начала разработки (от первой рабочей версии до текущего состояния), без пропуска этапов.
+
 | Версия | Изменения |
 |--------|-----------|
 | 0.1.0 | Первый рабочий каркас: импорт, БД, проверки, экспорт, UI. |
@@ -566,6 +568,9 @@ python main.py
 | 0.2.31 | **`config.json`**, **`field_enums`**: объекты **`label`/`value`** для **`GROUP_CODE`** (листы **GROUP** и **REWARD-LINK**), **`BASE_CALC_CODE`** (пусто → «(пусто)», уровни BANK/GOSB/GROUPING/TB с русскими подписями), **`CONTESTANT_SELECTION`** на **INDICATOR** (0/1 — ВКО на дату операции / на конец турнира); уточнены другие перечисления (в т.ч. **N/Y** → «Нет»/«Да», **`CALC_TYPE`**, сегменты и ёмкости). Список **CONTEST-DATA**: колонка **`CONTEST_TYPE`**, фильтр **`contest_type`**; фильтры **`contest_type`**, **`reward_type`**, **`season`** — **чекбоксы-чипы** и кнопки «все / снять» (`sheet_list.html`, **`app.py`**, **`contest_type_filter_options`** в **`sheet_list_display.py`**). README: **разделы 1, 2, 4** (новый **4.3** про **`field_enums`**), **5**, **6**, **6c**; комментарии в **`sheet_list_display.py`**. |
 | 0.2.32 | **`editor_field_numeric`** с **`json_path`**: числовой ввод для листьев **`REWARD_ADD_DATA`** (в т.ч. лимиты и **`getCondition.employeeRating`**), плоское **`CRITERION_MARK_VALUE`** и лист **`FILTER_PERIOD_ARR` / `criterion_mark_value`** на **TOURNAMENT-SCHEDULE**; убраны дублирующие **`field_enums`**. **`PERIOD_TYPE`**: упорядочены **`options`** (месяцы по календарю → кварталы → полугодия → год → «произвольный»). Клиент **`row_editor.js`**: **`findNumericRuleDef`** / **`attachNumericFlatInput`** с учётом пути JSON; **`editor_config.flatten_editor_field_numeric`** — докстринг про **`json_path`**. Разбор JSON в **`spod_json.py`**, тесты **`src/Tests/test_spod_json.py`**. README: **разделы 1, 2, 3, 4.2–4.3**, история версий. |
 | 0.2.33 | `config.json`: для **INDICATOR.SOURCE_UPD_FREQUENCY** убран enum и добавлено числовое правило **1…10** в `editor_field_numeric`; для **REWARD_ADD_DATA.newsType** добавлены подписи `label/value` (**AIPROMPT → AI-новость**, **TEMPLATE → Новость по шаблону**). Дополнительно уточнены подписи/описания `editor_field_ui` в нескольких листах. README: обновлены раздел **4.2**, примеры **4.3** и история версий. |
+| 0.2.34 | Карточка строки: подтверждение изменений по каждому полю через мини-кнопки **✓ / ✕** рядом с пометкой **«Было»** (`row_editor.js`, `app.css`). Для промежуточной фиксации правок добавлена таблица **`row_edit_draft`** (статус **EDIT**) и API черновиков строки: `GET/PUT/DELETE /sheet/{code}/row/{row_id}/draft` (`db.py`, `app.py`, `row_detail.html`). Черновик автоматически очищается при финальном `save` и при явной отмене правки. |
+| 0.2.35 | Блок «Связи» на карточке строки унифицирован по **CONTEST_CODE**: для любой сущности (включая **REWARD** через транзитивную связку **REWARD-LINK → CONTEST_CODE**) показывается полный комплект связанных блоков — **Конкурс**, **Связи REWARD-LINK**, **GROUP**, **INDICATOR**, **Расписание**; добавлена дедупликация ссылок (`relations.py`). Расширен smoke-тест: проверка полного набора связей для карточки REWARD (`test_smoke.py`). |
+| 0.2.36 | Список **TOURNAMENT-SCHEDULE**: добавлен второй фильтр **«Тип турнира (CALC_TYPE)»** с чипами **Автоматические / Ручные** (`AUTO` = `CALC_TYPE=0`, `MANUAL` = остальные значения), отдельными кнопками «отметить все / снять все» и серверной фильтрацией в `sheet_list` (`app.py`, `sheet_list.html`). UI фильтров: общий выделенный контейнер для пары фильтров и отдельная рамка для каждого блока с мягким фоном (`app.css`). |
 
 ---
 

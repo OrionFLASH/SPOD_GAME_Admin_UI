@@ -2010,6 +2010,11 @@
       applyFieldUiLabel(bootstrap, lab, col, null, col);
       var was = document.createElement("div");
       was.className = "was-value is-hidden";
+      var wasActions = document.createElement("div");
+      wasActions.className = "was-actions is-hidden";
+      wasActions.innerHTML =
+        '<button type="button" class="btn btn-ghost was-action was-action--ok" title="Подтвердить изменение поля">✓</button>' +
+        '<button type="button" class="btn btn-ghost was-action was-action--cancel" title="Отменить изменение поля">✕</button>';
 
       var dateHint = findDatePickerHint(bootstrap, col, null);
       var numDef = findNumericRuleDef(bootstrap, col);
@@ -2034,6 +2039,7 @@
         cell.appendChild(lab);
         cell.appendChild(buildDatePickerShell(initV, col, safeId, false));
         cell.appendChild(was);
+        cell.appendChild(wasActions);
       } else if (numDef) {
         cell.appendChild(lab);
         if (!activeNum || activeNum.format === "empty_only") {
@@ -2048,6 +2054,7 @@
           inpE.title = "Поле не заполняется при текущем значении условной колонки.";
           cell.appendChild(inpE);
           cell.appendChild(was);
+          cell.appendChild(wasActions);
         } else {
           var inpN = document.createElement("input");
           inpN.type = "text";
@@ -2061,6 +2068,7 @@
           var numPair = attachNumericFlatInput(inpN, grid, bootstrap, col, "data-col", null);
           cell.appendChild(numPair.warnEl);
           cell.appendChild(was);
+          cell.appendChild(wasActions);
         }
       } else if (rule) {
         var wrap = document.createElement("div");
@@ -2085,6 +2093,7 @@
         cell.appendChild(lab);
         cell.appendChild(wrap);
         cell.appendChild(was);
+        cell.appendChild(wasActions);
       } else {
         var hintF = findTextareaHint(bootstrap, col, null);
         var rows = textareaRows(initV, hintF, thr);
@@ -2099,6 +2108,7 @@
           cell.appendChild(lab);
           cell.appendChild(taF);
           cell.appendChild(was);
+          cell.appendChild(wasActions);
           taF.addEventListener("input", function () {
             document.dispatchEvent(new Event("spod-editor-change"));
           });
@@ -2112,11 +2122,40 @@
           cell.appendChild(lab);
           cell.appendChild(inp);
           cell.appendChild(was);
+          cell.appendChild(wasActions);
           inp.addEventListener("input", function () {
             document.dispatchEvent(new Event("spod-editor-change"));
           });
         }
       }
+      (function bindPerFieldActions(c, column) {
+        var okBtn = c.querySelector(".was-action--ok");
+        var cancelBtn = c.querySelector(".was-action--cancel");
+        if (!okBtn || !cancelBtn) {
+          return;
+        }
+        okBtn.addEventListener("click", async function () {
+          var ctl = c.querySelector("[data-col]");
+          if (!ctl) {
+            return;
+          }
+          var init = ctl.getAttribute("data-initial") || "";
+          if (String(ctl.value || "") === init) {
+            return;
+          }
+          ensureFieldDraftState(bootstrap);
+          bootstrap.__fieldDraftConfirmed[column] = true;
+          await persistRowEditDraft(bootstrap);
+          refreshDirtyState(bootstrap);
+        });
+        cancelBtn.addEventListener("click", async function () {
+          revertScalarCellToInitial(c);
+          ensureFieldDraftState(bootstrap);
+          delete bootstrap.__fieldDraftConfirmed[column];
+          await persistRowEditDraft(bootstrap);
+          document.dispatchEvent(new Event("spod-editor-change"));
+        });
+      })(cell, col);
       grid.appendChild(cell);
     });
 
@@ -2182,6 +2221,152 @@
       o[jc.column] = buildJsonFromFields(box);
     });
     return o;
+  }
+
+  function ensureFieldDraftState(bootstrap) {
+    if (!bootstrap.__fieldDraftConfirmed || typeof bootstrap.__fieldDraftConfirmed !== "object") {
+      bootstrap.__fieldDraftConfirmed = Object.create(null);
+    }
+  }
+
+  function scalarCellCurrentValue(cell) {
+    if (!cell) {
+      return "";
+    }
+    var ctl = cell.querySelector("[data-col]");
+    return ctl ? String(ctl.value != null ? ctl.value : "") : "";
+  }
+
+  function revertScalarCellToInitial(cell) {
+    if (!cell) {
+      return;
+    }
+    var ctl = cell.querySelector("[data-col]");
+    if (!ctl) {
+      return;
+    }
+    var init = ctl.getAttribute("data-initial") || "";
+    var enumWrap = cell.querySelector(".spod-enum-block");
+    if (enumWrap) {
+      var sel = enumWrap.querySelector(".spod-enum-select");
+      var ta = enumWrap.querySelector(".spod-enum-custom");
+      var hidden = enumWrap.querySelector("input[type='hidden'][data-col]");
+      var hasCustom = !!(sel && sel.querySelector('option[value="' + CUSTOM_SENTINEL + '"]'));
+      if (sel && ta && hidden) {
+        initEnumSelectState(sel, ta, hidden, hasCustom, init);
+      } else if (hidden) {
+        hidden.value = init;
+      }
+    } else {
+      ctl.value = init;
+    }
+  }
+
+  async function persistRowEditDraft(bootstrap) {
+    if (!bootstrap || bootstrap.__groupBlocks) {
+      return;
+    }
+    var cur = canonicalPayload(bootstrap);
+    if (typeof bootstrap.__initialCanonical !== "undefined" && cur === bootstrap.__initialCanonical) {
+      try {
+        await fetch(
+          "/sheet/" +
+            encodeURIComponent(bootstrap.sheetCode) +
+            "/row/" +
+            bootstrap.rowId +
+            "/draft",
+          { method: "DELETE" }
+        );
+      } catch (e0) {
+        /* ignore */
+      }
+      return;
+    }
+    ensureFieldDraftState(bootstrap);
+    var confirmed = [];
+    Object.keys(bootstrap.__fieldDraftConfirmed || {}).forEach(function (k) {
+      if (bootstrap.__fieldDraftConfirmed[k]) {
+        confirmed.push(k);
+      }
+    });
+    var payload = collectPayload(bootstrap);
+    try {
+      await fetch(
+        "/sheet/" + encodeURIComponent(bootstrap.sheetCode) + "/row/" + bootstrap.rowId + "/draft",
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            status: "EDIT",
+            state: {
+              payload: payload,
+              confirmed_fields: confirmed,
+            },
+          }),
+        }
+      );
+    } catch (e1) {
+      /* ignore */
+    }
+  }
+
+  async function clearRowEditDraft(bootstrap) {
+    if (!bootstrap || bootstrap.__groupBlocks) {
+      return;
+    }
+    try {
+      await fetch(
+        "/sheet/" + encodeURIComponent(bootstrap.sheetCode) + "/row/" + bootstrap.rowId + "/draft",
+        { method: "DELETE" }
+      );
+    } catch (e0) {
+      /* ignore */
+    }
+  }
+
+  function applyDraftState(bootstrap, draftState) {
+    if (!bootstrap || bootstrap.__groupBlocks || !draftState || typeof draftState !== "object") {
+      return;
+    }
+    var st = draftState.state;
+    if (!st || typeof st !== "object") {
+      return;
+    }
+    ensureFieldDraftState(bootstrap);
+    var confirmed = Array.isArray(st.confirmed_fields) ? st.confirmed_fields : [];
+    confirmed.forEach(function (c) {
+      bootstrap.__fieldDraftConfirmed[String(c)] = true;
+    });
+    var payload = st.payload;
+    if (!payload || typeof payload !== "object") {
+      return;
+    }
+    var fg = flatGridFor(bootstrap);
+    if (!fg) {
+      return;
+    }
+    fg.querySelectorAll("[data-col]").forEach(function (el) {
+      var col = el.getAttribute("data-col") || "";
+      if (!Object.prototype.hasOwnProperty.call(payload, col)) {
+        return;
+      }
+      var next = payload[col] == null ? "" : String(payload[col]);
+      var cell = el.closest(".scalar-cell");
+      var enumWrap = cell ? cell.querySelector(".spod-enum-block") : null;
+      if (enumWrap) {
+        var sel = enumWrap.querySelector(".spod-enum-select");
+        var ta = enumWrap.querySelector(".spod-enum-custom");
+        var hidden = enumWrap.querySelector("input[type='hidden'][data-col]");
+        var hasCustom = !!(sel && sel.querySelector('option[value="' + CUSTOM_SENTINEL + '"]'));
+        if (sel && ta && hidden) {
+          initEnumSelectState(sel, ta, hidden, hasCustom, next);
+        } else if (hidden) {
+          hidden.value = next;
+        }
+      } else {
+        el.value = next;
+      }
+    });
   }
 
   /**
@@ -2459,12 +2644,14 @@
             /* игнор */
           }
         }
+        await clearRowEditDraft(bootstrap);
         bootstrap.__initialCanonical = canonicalPayload(bootstrap);
         refreshDirtyState(bootstrap);
         executePendingAfterNavigate();
         return;
       }
       if (res.ok) {
+        await clearRowEditDraft(bootstrap);
         bootstrap.__initialCanonical = canonicalPayload(bootstrap);
         refreshDirtyState(bootstrap);
         executePendingAfterNavigate();
@@ -2581,7 +2768,8 @@
     /* Отмена правки: перезагрузка без системного диалога beforeunload (явное действие пользователя). */
     var btnCancelDock = document.getElementById("btn-cancel");
     if (btnCancelDock) {
-      btnCancelDock.addEventListener("click", function () {
+      btnCancelDock.addEventListener("click", async function () {
+        await clearRowEditDraft(bootstrap);
         leaveGuardSuspended = true;
         window.location.reload();
       });
@@ -2634,9 +2822,12 @@
 
     var fgFlat = flatGridFor(bootstrap);
     if (fgFlat) {
+      ensureFieldDraftState(bootstrap);
       fgFlat.querySelectorAll("[data-col]").forEach(function (inp) {
         var cell = inp.closest(".scalar-cell");
         var was = cell && cell.querySelector(".was-value");
+        var wasActions = cell && cell.querySelector(".was-actions");
+        var colName = inp.getAttribute("data-col") || "";
         if (!was) {
           return;
         }
@@ -2645,9 +2836,22 @@
           was.classList.remove("is-hidden");
           was.textContent = "Было: " + (init === "" ? "∅" : init);
           cell.classList.add("scalar-cell--changed");
+          if (wasActions) {
+            wasActions.classList.remove("is-hidden");
+          }
+          if (bootstrap.__fieldDraftConfirmed[colName]) {
+            cell.classList.add("scalar-cell--confirmed");
+          } else {
+            cell.classList.remove("scalar-cell--confirmed");
+          }
         } else {
           was.classList.add("is-hidden");
+          if (wasActions) {
+            wasActions.classList.add("is-hidden");
+          }
           cell.classList.remove("scalar-cell--changed");
+          cell.classList.remove("scalar-cell--confirmed");
+          delete bootstrap.__fieldDraftConfirmed[colName];
         }
       });
     }
@@ -2838,6 +3042,15 @@
     }
 
     renderFlatSection(bootstrap);
+    bootstrap.__initialCanonical = canonicalPayload(bootstrap);
+    var draftEl = document.getElementById("row-editor-draft-state");
+    if (draftEl) {
+      try {
+        applyDraftState(bootstrap, JSON.parse(draftEl.textContent || "{}"));
+      } catch (e0) {
+        /* ignore */
+      }
+    }
 
     if (bootstrap.sheetCode === "REWARD") {
       var flatMountRt = document.getElementById("flat-field-grid");
@@ -2872,7 +3085,6 @@
 
     wireNav();
 
-    bootstrap.__initialCanonical = canonicalPayload(bootstrap);
     document.addEventListener("spod-editor-change", function () {
       refreshDirtyState(bootstrap);
     });
@@ -2896,6 +3108,7 @@
         if (res.status === 303 || res.status === 302) {
           var loc = res.headers.get("Location");
           if (loc) {
+            await clearRowEditDraft(bootstrap);
             if (bootstrap.__spodSuspendLeaveForNavigation) {
               bootstrap.__spodSuspendLeaveForNavigation();
             }
@@ -2904,6 +3117,7 @@
           }
         }
         if (res.ok) {
+          await clearRowEditDraft(bootstrap);
           if (bootstrap.__spodSuspendLeaveForNavigation) {
             bootstrap.__spodSuspendLeaveForNavigation();
           }

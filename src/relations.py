@@ -109,36 +109,78 @@ def build_context_for_row(
     (последний — для подписи кнопки при нескольких связях одного типа).
     """
     ctx: Dict[str, Any] = {"links": []}
-    cc = (cells.get("CONTEST_CODE") or "").strip()
-    gc = (cells.get("GROUP_CODE") or "").strip()
+    contest_codes = _resolve_contest_codes(conn, sheet_code, cells)
     rc = (cells.get("REWARD_CODE") or "").strip()
     tc = (cells.get("TOURNAMENT_CODE") or "").strip()
 
-    if sheet_code == "REWARD-LINK" and cc:
-        ctx["links"].append({"title": "Конкурс", "items": _find_contest(conn, cc)})
-        gv = (cells.get("GROUP_VALUE") or "").strip()
-        ctx["links"].append(
-            {"title": "Группа (уровень)", "items": _find_group(conn, cc, gc, gv if gv else None)}
-        )
-        if rc:
-            ctx["links"].append({"title": "Награда", "items": _find_reward(conn, rc)})
-    if sheet_code == "CONTEST-DATA" and cc:
-        ctx["links"].append({"title": "Связи REWARD-LINK", "items": _find_reward_links_for_contest(conn, cc)})
-        ctx["links"].append({"title": "GROUP", "items": _find_groups_for_contest(conn, cc)})
-        ctx["links"].append({"title": "INDICATOR", "items": _find_indicators_for_contest(conn, cc)})
-        ctx["links"].append({"title": "Расписание", "items": _find_schedule_for_contest(conn, cc)})
-    if sheet_code == "REWARD" and rc:
-        ctx["links"].append({"title": "REWARD-LINK", "items": _find_reward_links_for_reward(conn, rc)})
-    if sheet_code == "GROUP" and cc:
-        ctx["links"].append({"title": "Конкурс", "items": _find_contest(conn, cc)})
-    if sheet_code == "INDICATOR" and cc:
-        ctx["links"].append({"title": "Конкурс", "items": _find_contest(conn, cc)})
-        ctx["links"].append({"title": "REWARD-LINK (награды по группам)", "items": _find_reward_links_for_contest(conn, cc)})
-    if sheet_code == "TOURNAMENT-SCHEDULE" and cc:
-        ctx["links"].append({"title": "Конкурс", "items": _find_contest(conn, cc)})
+    contest_items = _merge_link_lists(*[_find_contest(conn, cc) for cc in contest_codes])
+    if contest_items:
+        ctx["links"].append({"title": "Конкурс", "items": contest_items})
+
+    # Полный комплект связей по CONTEST_CODE(ам): REWARD-LINK, GROUP, INDICATOR, TOURNAMENT-SCHEDULE.
+    rl_items = _merge_link_lists(*[_find_reward_links_for_contest(conn, cc) for cc in contest_codes])
+    if rl_items:
+        ctx["links"].append({"title": "Связи REWARD-LINK", "items": rl_items})
+
+    group_items = _merge_link_lists(*[_find_groups_for_contest(conn, cc) for cc in contest_codes])
+    if group_items:
+        ctx["links"].append({"title": "GROUP", "items": group_items})
+
+    ind_items = _merge_link_lists(*[_find_indicators_for_contest(conn, cc) for cc in contest_codes])
+    if ind_items:
+        ctx["links"].append({"title": "INDICATOR", "items": ind_items})
+
+    sch_items = _merge_link_lists(*[_find_schedule_for_contest(conn, cc) for cc in contest_codes])
+    if sch_items:
+        ctx["links"].append({"title": "Расписание", "items": sch_items})
+
+    # Дополнительно: для REWARD и REWARD-LINK всегда показываем прямую связь на строку награды.
+    if rc:
+        reward_items = _find_reward(conn, rc)
+        if reward_items:
+            ctx["links"].append({"title": "Награда", "items": reward_items})
+
     if sheet_code == "TOURNAMENT-SCHEDULE" and tc:
-        ctx["links"].append({"title": "Та же строка расписания (TOURNAMENT_CODE)", "items": _find_schedule_rows(conn, tc)})
+        same_schedule_items = _find_schedule_rows(conn, tc)
+        if same_schedule_items:
+            ctx["links"].append(
+                {"title": "Та же строка расписания (TOURNAMENT_CODE)", "items": same_schedule_items}
+            )
     return ctx
+
+
+def _resolve_contest_codes(
+    conn: sqlite3.Connection, sheet_code: str, cells: Dict[str, str]
+) -> List[str]:
+    """
+    Определяет CONTEST_CODE текущей сущности:
+    - напрямую из строки (если поле есть),
+    - для REWARD — транзитивно через REWARD-LINK по REWARD_CODE.
+    """
+    direct = (cells.get("CONTEST_CODE") or "").strip()
+    codes: List[str] = [direct] if direct else []
+    if sheet_code == "REWARD":
+        rc = (cells.get("REWARD_CODE") or "").strip()
+        if rc:
+            for item in _find_reward_links_for_reward(conn, rc):
+                cc = (item.get("cells", {}).get("CONTEST_CODE") or "").strip()
+                if cc and cc not in codes:
+                    codes.append(cc)
+    return codes
+
+
+def _merge_link_lists(*lists: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    """Склейка списков связей без дублей по (sheet_code, row_id), с сохранением порядка."""
+    out: List[Dict[str, Any]] = []
+    seen: set = set()
+    for arr in lists:
+        for item in arr or []:
+            key = (str(item.get("sheet_code") or ""), int(item.get("row_id") or 0))
+            if key in seen:
+                continue
+            seen.add(key)
+            out.append(item)
+    return out
 
 
 def _find_contest(conn: sqlite3.Connection, contest_code: str) -> List[Dict[str, Any]]:

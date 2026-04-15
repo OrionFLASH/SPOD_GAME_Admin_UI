@@ -121,6 +121,34 @@ class SmokeTest(unittest.TestCase):
             self.assertEqual(old_cur, 0)
             self.assertEqual(new_cur, 1)
 
+    def test_relations_full_set_by_contest_code(self) -> None:
+        """Карточка REWARD показывает полный комплект связей по CONTEST_CODE через REWARD-LINK."""
+        from fastapi.testclient import TestClient  # noqa: PLC0415
+
+        from src import app as appmod  # noqa: PLC0415
+        from src import sheet_storage  # noqa: PLC0415
+
+        db_path = ROOT / "OUT" / "DB" / "tournament_admin.sqlite"
+        if db_path.is_file():
+            db_path.unlink()
+        with TestClient(appmod.app) as client:
+            conn = sqlite3.connect(str(db_path))
+            conn.row_factory = sqlite3.Row
+            tbl = sheet_storage.physical_table_name("REWARD")
+            rid = conn.execute(
+                f"SELECT dr.id FROM {sheet_storage.quote_ident(tbl)} dr "
+                "JOIN sheet s ON s.id = dr.sheet_id "
+                "WHERE s.code = ? AND dr.is_current = 1 LIMIT 1",
+                ("REWARD",),
+            ).fetchone()[0]
+            conn.close()
+
+            r = client.get(f"/sheet/REWARD/row/{rid}")
+            self.assertEqual(r.status_code, 200)
+            self.assertIn(">Конкурс<", r.text)
+            self.assertIn("Связи REWARD-LINK", r.text)
+            self.assertIn(">GROUP<", r.text)
+
     @patch("src.app.server_stop.schedule_local_shutdown")
     def test_admin_stop_does_not_kill_process(self, mock_sched: object) -> None:
         """POST /admin/stop отдаёт ответ; реальное завершение процесса не вызывается (мок)."""

@@ -58,6 +58,27 @@ def ensure_wizard_draft_table(conn: sqlite3.Connection) -> None:
     conn.commit()
 
 
+def ensure_row_edit_draft_table(conn: sqlite3.Connection) -> None:
+    """
+    Черновики правок карточки строки: промежуточный статус EDIT до финального сохранения версии.
+    """
+    conn.executescript(
+        """
+        CREATE TABLE IF NOT EXISTS row_edit_draft (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            sheet_code TEXT NOT NULL,
+            row_id INTEGER NOT NULL,
+            status TEXT NOT NULL DEFAULT 'EDIT',
+            state_json TEXT NOT NULL,
+            updated_at TEXT NOT NULL,
+            UNIQUE(sheet_code, row_id)
+        );
+        CREATE INDEX IF NOT EXISTS idx_row_edit_draft_status ON row_edit_draft(status, updated_at);
+        """
+    )
+    conn.commit()
+
+
 def migrate_legacy_data_row_removed(conn: sqlite3.Connection) -> None:
     """
     Совместимость: если осталась старая таблица data_row — удаляем и очищаем реестр.
