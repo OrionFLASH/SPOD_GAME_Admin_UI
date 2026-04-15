@@ -1250,6 +1250,15 @@
   }
 
   /**
+   * Значение для CSS-переменной --spod-yn-text-px: только число без единицы длины делает выражение
+   * width: calc(var(--spod-yn-text-px) + …) невалидным — трек схлопывается и переключатель не виден.
+   */
+  function spodYnTextPxCss(n) {
+    var v = Math.max(0, Math.round(Number(n)) || 0);
+    return v + "px";
+  }
+
+  /**
    * Ширина текста по реальному рендеру (probe); итоговая ширина трека не больше половины блока.
    * При нехватке места — многострочная подпись (до 3 строк по CSS), высота/бегунок подстраиваются.
    */
@@ -1291,77 +1300,79 @@
     var maxTextInner = Math.max(32, capTotal - sidePad);
     if (desiredTotal <= capTotal) {
       wrap.removeAttribute("data-spod-yn-multiline");
-      btn.style.setProperty("--spod-yn-text-px", String(textWithPad));
+      btn.style.setProperty("--spod-yn-text-px", spodYnTextPxCss(textWithPad));
     } else {
       wrap.setAttribute("data-spod-yn-multiline", "1");
-      btn.style.setProperty("--spod-yn-text-px", String(maxTextInner));
+      btn.style.setProperty("--spod-yn-text-px", spodYnTextPxCss(maxTextInner));
+    }
+    /* Запоминаем ширину блока после расчёта — чтобы ResizeObserver не дергал вёрстку из‑за шума в 1–2 px. */
+    if (block) {
+      wrap.__spodYnLastObservedBlockW = block.clientWidth || 0;
     }
   }
 
-  function fallbackSpodYnTextPxFromLabels(wrap) {
-    var btn = wrap && wrap.querySelector(".spod-yn-track");
-    if (!btn) {
+  /** Порог (px): пересчитывать переключатель только при ощутимом изменении ширины поля (окно, брейкпоинт). */
+  var SPOD_YN_BLOCK_RESIZE_THRESHOLD_PX = 24;
+
+  /**
+   * Один ResizeObserver на блок поля: не дублируем пересчёт при каждом кадре, только при заметном изменении ширины.
+   */
+  function bindSpodYnToggleResizeGuard(wrap) {
+    if (!wrap || wrap.__spodYnResizeGuardBound) {
       return;
     }
-    var l0 = wrap.getAttribute("data-label-first") || "";
-    var l1 = wrap.getAttribute("data-label-second") || "";
-    var m = Math.max(l0.length, l1.length, 1);
-    btn.style.setProperty("--spod-yn-text-px", String(Math.min(280, m * 11 + 36)));
+    var block = spodYnToggleWidthBlockEl(wrap);
+    if (!block || typeof ResizeObserver === "undefined") {
+      return;
+    }
+    wrap.__spodYnResizeGuardBound = true;
+    var ro = new ResizeObserver(function () {
+      var bw = block.clientWidth || 0;
+      var prev = wrap.__spodYnLastObservedBlockW;
+      if (bw > 0 && prev != null && Math.abs(bw - prev) < SPOD_YN_BLOCK_RESIZE_THRESHOLD_PX) {
+        return;
+      }
+      if (wrap.__spodYnLayoutTimer) {
+        clearTimeout(wrap.__spodYnLayoutTimer);
+      }
+      wrap.__spodYnLayoutTimer = setTimeout(function () {
+        wrap.__spodYnLayoutTimer = null;
+        applySpodYnToggleLayout(wrap);
+      }, 100);
+    });
+    try {
+      ro.observe(block);
+      wrap.__spodYnResizeObserver = ro;
+    } catch (eRo) {
+      /* ignore */
+    }
   }
 
-  function scheduleSpodYnToggleSize(wrap) {
-    var wait = 0;
-    function bindResizeObserver() {
-      if (!wrap || wrap.__spodYnRoBound || typeof ResizeObserver === "undefined") {
-        return;
-      }
-      var block = spodYnToggleWidthBlockEl(wrap);
-      if (!block) {
-        return;
-      }
-      var ro = new ResizeObserver(function () {
-        if (wrap.__spodYnLayoutTimer) {
-          clearTimeout(wrap.__spodYnLayoutTimer);
-        }
-        wrap.__spodYnLayoutTimer = setTimeout(function () {
-          wrap.__spodYnLayoutTimer = null;
-          applySpodYnToggleLayout(wrap);
-        }, 80);
+  /**
+   * Единый проход по всем переключателям в root: размеры фиксируются после готовности шрифтов и двойного rAF
+   * (стабильная вёрстка), без отдельных циклов на каждом toggle — иначе элементы «прыгают» и мелькают.
+   * Вызывать в конце сборки формы и при точечном пересборе фрагмента (JSON-колонка, мастер).
+   */
+  function flushSpodYnToggleLayouts(root) {
+    if (!root || !root.querySelectorAll) {
+      return;
+    }
+    function applyAll() {
+      root.querySelectorAll('.spod-yn-wrap[data-spod-yn="1"]').forEach(function (wrap) {
+        applySpodYnToggleLayout(wrap);
+        bindSpodYnToggleResizeGuard(wrap);
       });
-      try {
-        ro.observe(block);
-        wrap.__spodYnRoBound = true;
-        wrap.__spodYnResizeObserver = ro;
-      } catch (eRo) {
-        /* ignore */
-      }
     }
-    function untilConnected() {
-      wait += 1;
-      if (!wrap) {
-        return;
-      }
-      if (wrap.isConnected) {
-        requestAnimationFrame(function () {
-          requestAnimationFrame(function () {
-            applySpodYnToggleLayout(wrap);
-            bindResizeObserver();
-            if (document.fonts && document.fonts.ready) {
-              document.fonts.ready.then(function () {
-                applySpodYnToggleLayout(wrap);
-              });
-            }
-          });
-        });
-        return;
-      }
-      if (wait > 120) {
-        fallbackSpodYnTextPxFromLabels(wrap);
-        return;
-      }
-      requestAnimationFrame(untilConnected);
+    function runAfterLayout() {
+      requestAnimationFrame(function () {
+        requestAnimationFrame(applyAll);
+      });
     }
-    untilConnected();
+    if (document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(runAfterLayout).catch(runAfterLayout);
+    } else {
+      runAfterLayout();
+    }
   }
 
   /**
@@ -1418,9 +1429,9 @@
     btn.type = "button";
     btn.className = "spod-yn-track";
     btn.setAttribute("role", "switch");
-    /* До измерения в DOM — запасная ширина в px; после вставки scheduleSpodYnToggleSize уточнит по scrollWidth. */
+    /* До batch flushSpodYnToggleLayouts — грубая оценка по длине подписей (без отдельных rAF на каждый экземпляр). */
     var roughLen = Math.max(pairDisp.l0.length, pairDisp.l1.length, 1);
-    btn.style.setProperty("--spod-yn-text-px", String(Math.min(260, roughLen * 11 + 36)));
+    btn.style.setProperty("--spod-yn-text-px", spodYnTextPxCss(Math.min(260, roughLen * 11 + 36)));
     var stateLab = document.createElement("span");
     stateLab.className = "spod-yn-state-label";
     stateLab.setAttribute("aria-hidden", "true");
@@ -1431,7 +1442,6 @@
     wrap.appendChild(hidden);
     wrap.appendChild(btn);
     syncSpodYnToggleVisual(wrap);
-    scheduleSpodYnToggleSize(wrap);
     if (wrap.getAttribute("data-spod-yn-wired") !== "1") {
       wrap.setAttribute("data-spod-yn-wired", "1");
       btn.addEventListener("click", function () {
@@ -1951,6 +1961,7 @@
     if (!jcNew.ok) {
       renderJsonColumn(container, jcNew, bootstrap);
       wireEnumControls(container);
+      flushSpodYnToggleLayouts(container);
       return;
     }
     if (rk === "object" && parsed !== null && !Array.isArray(parsed)) {
@@ -1960,6 +1971,7 @@
     }
     renderJsonColumn(container, jcNew, bootstrap);
     wireEnumControls(container);
+    flushSpodYnToggleLayouts(container);
   }
 
   function renderJsonColumn(container, jc, bootstrap) {
@@ -2327,6 +2339,7 @@
         updateJsonScalarArrayAddButton(host);
         if (jsonColumnEl) {
           wireEnumControls(jsonColumnEl);
+          flushSpodYnToggleLayouts(jsonColumnEl);
         }
         document.dispatchEvent(new Event("spod-editor-change"));
       });
@@ -2697,6 +2710,7 @@
       appendJsonLeafRowsToGrid(newGrid, newLeaves, container);
       fieldsWrap.appendChild(newGrid);
       wireEnumControls(container);
+      flushSpodYnToggleLayouts(container);
       container.setAttribute("data-edit-mode", "fields");
       syncRawTextareaFromFields();
       fieldsWrap.classList.remove("is-hidden");
@@ -3771,6 +3785,8 @@
       bootstrap.__initialCanonical = canonicalPayload(bootstrap);
     }
     document.dispatchEvent(new Event("spod-editor-change"));
+    /* Один батч по всем toggle после смены актуальной/черновика — без дрожания от многократного измерения. */
+    flushSpodYnToggleLayouts(document.body);
   }
 
   /**
@@ -4550,6 +4566,7 @@
       });
       refreshGroupMultiDirtyState(blocks);
       installLeaveGuard(lead);
+      flushSpodYnToggleLayouts(document.body);
       document.querySelectorAll(".btn-save-group-row").forEach(function (btn) {
         btn.addEventListener("click", async function () {
           var rid = parseInt(btn.getAttribute("data-row-id"), 10);
@@ -4774,5 +4791,6 @@
     ynLabelsFromFieldEnumRule: ynLabelsFromFieldEnumRule,
     buildSpodYnToggleDom: buildSpodYnToggleDom,
     syncSpodYnToggleVisual: syncSpodYnToggleVisual,
+    flushSpodYnToggleLayouts: flushSpodYnToggleLayouts,
   };
 })();

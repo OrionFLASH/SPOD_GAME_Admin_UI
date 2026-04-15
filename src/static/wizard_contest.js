@@ -1658,6 +1658,11 @@
         nxBtn.classList.remove("is-hidden");
       }
     }
+    /* Один батч размеров toggle после сборки шага (как на карточке строки). */
+    var ynApi = typeof window !== "undefined" ? window.SpodYnField : null;
+    if (ynApi && typeof ynApi.flushSpodYnToggleLayouts === "function") {
+      ynApi.flushSpodYnToggleLayouts(host);
+    }
   }
 
   function readStepIntoState() {

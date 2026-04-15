@@ -24,6 +24,7 @@ def flatten_field_enums(cfg: Dict[str, Any]) -> List[Dict[str, Any]]:
     Дополнительно для правил с options (field_enums): input_display — как показывать поле в UI:
       "toggle" — при ровно двух вариантах переключатель (см. row_editor.js useToggleForEnumRule);
       "select" или отсутствие ключа — выпадающий список; если опций больше двух, всегда список.
+    Размеры переключателя на клиенте рассчитываются в row_editor.js (applySpodYnToggleLayout, батч flushSpodYnToggleLayouts) — см. README раздел 4.4.
     Элемент options может быть строкой или объектом {"label": "подпись в UI", "value": "значение в ячейке CSV"}.
     Для пути вида ["ключ", 0], ["ключ", 1], … в JSON-колонке правило с json_path ["ключ"] (без индекса)
     применяется к каждому элементу массива (select на каждую строку, в т.ч. внутри json_scalar_array).
