@@ -25,8 +25,8 @@
   </div>
 </section>
 <script type="application/json" id="wizard-schema-json">{{ wizard_schema_json }}</script>
-<script src="/static/spod_date_picker.js"></script>
+<script src="/static/spod_date_picker.js?v={{ STATIC_ASSET_VERSION }}"></script>
 {# row_editor.js: общий рендер JSON-колонок (по полям / сырой JSON) и window.SpodJsonEditor для мастера. #}
-<script src="/static/row_editor.js" defer></script>
-<script src="/static/wizard_contest.js" defer></script>
+<script src="/static/row_editor.js?v={{ STATIC_ASSET_VERSION }}" defer></script>
+<script src="/static/wizard_contest.js?v={{ STATIC_ASSET_VERSION }}" defer></script>
 {% endblock %}

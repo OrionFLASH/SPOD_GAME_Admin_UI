@@ -24,6 +24,7 @@ ROOT = Path(__file__).resolve().parent.parent
 CFG: Dict[str, Any] = {}
 CONN: sqlite3.Connection | None = None
 DB_PATH: Path | None = None
+STATIC_ASSET_VERSION = "20260415_2"
 
 
 def _cells_canonical_json(cells: Dict[str, str]) -> str:
@@ -188,6 +189,7 @@ app = FastAPI(title="SPOD Tournament Admin", lifespan=lifespan)
 app.mount("/static", StaticFiles(directory=str(ROOT / "src" / "static")), name="static")
 templates = Jinja2Templates(directory=str(ROOT / "src" / "templates"))
 templates.env.filters["tojson_readable"] = _tojson_readable
+templates.env.globals["STATIC_ASSET_VERSION"] = STATIC_ASSET_VERSION
 
 
 def get_conn() -> sqlite3.Connection:

@@ -575,8 +575,8 @@
           ],
           "allow_custom": false,
           "options": [
-            { "label": "Нет", "value": "N" },
-            { "label": "Да", "value": "Y" }
+            { "label": "Да", "value": "Y" },
+            { "label": "Нет", "value": "N" }
           ]
         },
         {
@@ -618,8 +618,8 @@
           ],
           "allow_custom": false,
           "options": [
-            { "label": "Нет", "value": "N" },
-            { "label": "Да", "value": "Y" }
+            { "label": "Да", "value": "Y" },
+            { "label": "Нет", "value": "N" }
           ]
         },
         {
@@ -629,8 +629,8 @@
           ],
           "allow_custom": false,
           "options": [
-            { "label": "Нет", "value": "N" },
-            { "label": "Да", "value": "Y" }
+            { "label": "Да", "value": "Y" },
+            { "label": "Нет", "value": "N" }
           ]
         },
         {
@@ -640,8 +640,8 @@
           ],
           "allow_custom": false,
           "options": [
-            { "label": "Нет", "value": "N" },
-            { "label": "Да", "value": "Y" }
+            { "label": "Да", "value": "Y" },
+            { "label": "Нет", "value": "N" }
           ]
         },
         {
@@ -651,8 +651,8 @@
           ],
           "allow_custom": false,
           "options": [
-            { "label": "Нет", "value": "N" },
-            { "label": "Да", "value": "Y" }
+            { "label": "Да", "value": "Y" },
+            { "label": "Нет", "value": "N" }
           ]
         },
         {
@@ -662,8 +662,8 @@
           ],
           "allow_custom": false,
           "options": [
-            { "label": "Нет", "value": "N" },
-            { "label": "Да", "value": "Y" }
+            { "label": "Да", "value": "Y" },
+            { "label": "Нет", "value": "N" }
           ]
         },
         {
@@ -781,16 +781,16 @@
               "value": "BANK"
             },
             {
+              "label": "Тер.банк",
+              "value": "TB"
+            },
+            {
               "label": "ГОСБ",
               "value": "GOSB"
             },
             {
               "label": "Группа",
               "value": "GROUPING"
-            },
-            {
-              "label": "Тер.банк",
-              "value": "TB"
             }
           ]
         },
@@ -836,12 +836,12 @@
           "allow_custom": false,
           "options": [
             {
-              "label": "(пусто)",
-              "value": ""
-            },
-            {
               "label": "Страна",
               "value": "BANK"
+            },
+            {
+              "label": "Тер.банк",
+              "value": "TB"
             },
             {
               "label": "ГОСБ",
@@ -852,8 +852,8 @@
               "value": "GROUPING"
             },
             {
-              "label": "Тер.банк",
-              "value": "TB"
+              "label": "(пусто)",
+              "value": ""
             }
           ]
         },
@@ -886,16 +886,16 @@
               "value": "BANK"
             },
             {
+              "label": "Тер.банк",
+              "value": "TB"
+            },
+            {
               "label": "ГОСБ",
               "value": "GOSB"
             },
             {
               "label": "Группа",
               "value": "GROUPING"
-            },
-            {
-              "label": "Тер.банк",
-              "value": "TB"
             }
           ]
         }
@@ -1077,8 +1077,8 @@
           ],
           "allow_custom": false,
           "options": [
-            { "label": "Нет", "value": "N" },
-            { "label": "Да", "value": "Y" }
+            { "label": "Да", "value": "Y" },
+            { "label": "Нет", "value": "N" }
           ]
         },
         {
@@ -1088,8 +1088,8 @@
           ],
           "allow_custom": false,
           "options": [
-            { "label": "Нет", "value": "N" },
-            { "label": "Да", "value": "Y" }
+            { "label": "Да", "value": "Y" },
+            { "label": "Нет", "value": "N" }
           ]
         },
         {
@@ -1099,8 +1099,8 @@
           ],
           "allow_custom": false,
           "options": [
-            { "label": "Нет", "value": "N" },
-            { "label": "Да", "value": "Y" }
+            { "label": "Да", "value": "Y" },
+            { "label": "Нет", "value": "N" }
           ]
         },
         {
@@ -1110,8 +1110,8 @@
           ],
           "allow_custom": false,
           "options": [
-            { "label": "Нет", "value": "N" },
-            { "label": "Да", "value": "Y" }
+            { "label": "Да", "value": "Y" },
+            { "label": "Нет", "value": "N" }
           ]
         },
         {
@@ -1121,8 +1121,8 @@
           ],
           "allow_custom": false,
           "options": [
-            { "label": "Нет", "value": "N" },
-            { "label": "Да", "value": "Y" }
+            { "label": "Да", "value": "Y" },
+            { "label": "Нет", "value": "N" }
           ]
         },
         {
@@ -1154,8 +1154,8 @@
           ],
           "allow_custom": false,
           "options": [
-            { "label": "Нет", "value": "N" },
-            { "label": "Да", "value": "Y" }
+            { "label": "Да", "value": "Y" },
+            { "label": "Нет", "value": "N" }
           ]
         },
         {
@@ -1165,8 +1165,8 @@
           ],
           "allow_custom": false,
           "options": [
-            { "label": "Нет", "value": "N" },
-            { "label": "Да", "value": "Y" }
+            { "label": "Да", "value": "Y" },
+            { "label": "Нет", "value": "N" }
           ]
         },
         {
@@ -1176,8 +1176,8 @@
           ],
           "allow_custom": false,
           "options": [
-            { "label": "Нет", "value": "N" },
-            { "label": "Да", "value": "Y" }
+            { "label": "Да", "value": "Y" },
+            { "label": "Нет", "value": "N" }
           ]
         },
         {
@@ -1187,8 +1187,8 @@
           ],
           "allow_custom": false,
           "options": [
-            { "label": "Нет", "value": "N" },
-            { "label": "Да", "value": "Y" }
+            { "label": "Да", "value": "Y" },
+            { "label": "Нет", "value": "N" }
           ]
         },
         {
@@ -1198,8 +1198,8 @@
           ],
           "allow_custom": false,
           "options": [
-            { "label": "Нет", "value": "N" },
-            { "label": "Да", "value": "Y" }
+            { "label": "Да", "value": "Y" },
+            { "label": "Нет", "value": "N" }
           ]
         },
         {
@@ -1237,16 +1237,16 @@
               "value": "BANK"
             },
             {
+              "label": "Тер.банк",
+              "value": "TB"
+            },
+            {
               "label": "ГОСБ",
               "value": "GOSB"
             },
             {
               "label": "Общий (вне уровня)",
               "value": "NON"
-            },
-            {
-              "label": "Тер.банк",
-              "value": "TB"
             }
           ]
         },

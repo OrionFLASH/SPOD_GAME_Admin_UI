@@ -149,6 +149,62 @@ class SmokeTest(unittest.TestCase):
             self.assertIn("Связи REWARD-LINK", r.text)
             self.assertIn(">GROUP<", r.text)
 
+    def test_row_edit_draft_roundtrip_and_clear_on_save(self) -> None:
+        """Черновик EDIT для строки создаётся через API и очищается после финального save."""
+        from fastapi.testclient import TestClient  # noqa: PLC0415
+
+        from src import app as appmod  # noqa: PLC0415
+        from src import sheet_storage  # noqa: PLC0415
+
+        db_path = ROOT / "OUT" / "DB" / "tournament_admin.sqlite"
+        if db_path.is_file():
+            db_path.unlink()
+        with TestClient(appmod.app) as client:
+            conn = sqlite3.connect(str(db_path))
+            conn.row_factory = sqlite3.Row
+            tbl = sheet_storage.physical_table_name("CONTEST-DATA")
+            rid = conn.execute(
+                f"SELECT dr.id FROM {sheet_storage.quote_ident(tbl)} dr "
+                "JOIN sheet s ON s.id = dr.sheet_id "
+                "WHERE s.code = ? AND dr.is_current = 1 LIMIT 1",
+                ("CONTEST-DATA",),
+            ).fetchone()[0]
+            headers = json.loads(
+                conn.execute("SELECT headers_json FROM sheet WHERE code = ?", ("CONTEST-DATA",)).fetchone()[0]
+            )
+            cells: dict[str, str] = {}
+            for h in headers:
+                cells[h] = conn.execute(
+                    f"SELECT {sheet_storage.quote_ident(h)} FROM {sheet_storage.quote_ident(tbl)} WHERE id = ?",
+                    (rid,),
+                ).fetchone()[0] or ""
+            conn.close()
+
+            put_r = client.put(
+                f"/sheet/CONTEST-DATA/row/{rid}/draft",
+                json={"status": "EDIT", "state": {"payload": {"FULL_NAME": "X"}, "confirmed_fields": ["FULL_NAME"]}},
+            )
+            self.assertEqual(put_r.status_code, 200)
+            self.assertEqual(put_r.json().get("status"), "EDIT")
+
+            get_r = client.get(f"/sheet/CONTEST-DATA/row/{rid}/draft")
+            self.assertEqual(get_r.status_code, 200)
+            self.assertEqual(get_r.json().get("status"), "EDIT")
+            self.assertIn("payload", get_r.json().get("state", {}))
+
+            cells2 = dict(cells)
+            cells2["FULL_NAME"] = (cells2.get("FULL_NAME") or "") + " __draft_clear__"
+            save_r = client.post(
+                f"/sheet/CONTEST-DATA/row/{rid}/save",
+                json=cells2,
+                follow_redirects=False,
+            )
+            self.assertEqual(save_r.status_code, 303)
+
+            get_after = client.get(f"/sheet/CONTEST-DATA/row/{rid}/draft")
+            self.assertEqual(get_after.status_code, 200)
+            self.assertEqual(get_after.json().get("status"), "NONE")
+
     @patch("src.app.server_stop.schedule_local_shutdown")
     def test_admin_stop_does_not_kill_process(self, mock_sched: object) -> None:
         """POST /admin/stop отдаёт ответ; реальное завершение процесса не вызывается (мок)."""

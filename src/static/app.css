@@ -1701,7 +1701,21 @@ body.spod-date-modal-open {
   background: rgba(255, 250, 235, 0.65);
 }
 
+.scalar-cell--changed select.spod-enum-select {
+  border-color: rgba(200, 140, 60, 0.75);
+  background: rgba(255, 250, 235, 0.65);
+}
+
+.scalar-cell--changed .was-actions {
+  display: flex !important;
+}
+
 .scalar-cell--confirmed input[data-col] {
+  border-color: rgba(60, 170, 105, 0.72);
+  background: rgba(235, 255, 242, 0.72);
+}
+
+.scalar-cell--confirmed select.spod-enum-select {
   border-color: rgba(60, 170, 105, 0.72);
   background: rgba(235, 255, 242, 0.72);
 }

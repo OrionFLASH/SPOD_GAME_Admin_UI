@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>{% block title %}{{ title | default('SPOD Tournament Admin') }}{% endblock %}</title>
-  <link rel="stylesheet" href="/static/app.css" />
+  <link rel="stylesheet" href="/static/app.css?v={{ STATIC_ASSET_VERSION }}" />
 </head>
 <body>
   <header class="topbar">
@@ -30,6 +30,6 @@
   <div class="wrap">
     {% block content %}{% endblock %}
   </div>
-  <script src="/static/trail_nav.js" defer></script>
+  <script src="/static/trail_nav.js?v={{ STATIC_ASSET_VERSION }}" defer></script>
 </body>
 </html>
