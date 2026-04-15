@@ -633,6 +633,7 @@
     inp.addEventListener("blur", onBlurFmt);
     inp.addEventListener("input", function () {
       warnEl.textContent = "";
+      document.dispatchEvent(new Event("spod-editor-change"));
     });
     refreshState();
     inp.__spodRefreshNumericState = refreshState;
@@ -909,9 +910,549 @@
     syncFlatHidden(hidden, sel, ta);
   }
 
+  /** Ровно две опции, без «Задать своё». */
+  function isExactlyTwoOptions(rule) {
+    return !!(rule && rule.options && rule.options.length === 2 && !rule.allow_custom);
+  }
+
+  /** Классическая пара value Y / N (как в большинстве полей Да/Нет). */
+  function isLegacyYnBinaryValues(rule) {
+    if (!isExactlyTwoOptions(rule)) {
+      return false;
+    }
+    var vals = [];
+    var i = 0;
+    for (i = 0; i < rule.options.length; i++) {
+      var op = rule.options[i];
+      var v = op != null && typeof op === "object" && !Array.isArray(op) ? op.value : op;
+      vals.push(String(v != null ? v : "").trim().toUpperCase());
+    }
+    vals.sort();
+    return vals[0] === "N" && vals[1] === "Y";
+  }
+
+  /**
+   * Показывать переключатель: input_display === "toggle" и ровно 2 опции;
+   * больше двух опций — всегда список;
+   * input_display === "select" — список;
+   * по умолчанию переключатель только для классической пары Y/N, иначе список (например all/one).
+   */
+  function useToggleForEnumRule(rule) {
+    if (!isExactlyTwoOptions(rule)) {
+      return false;
+    }
+    var id = rule.input_display;
+    if (id === "select") {
+      return false;
+    }
+    if (id === "toggle") {
+      return true;
+    }
+    return isLegacyYnBinaryValues(rule);
+  }
+
+  /** Совместимость: старое имя — то же, что useToggleForEnumRule. */
+  function isYnBinaryEnumRule(rule) {
+    return useToggleForEnumRule(rule);
+  }
+
+  /**
+   * Подписи для значений Y и N из правила field_enums (label/value), как в config.json.
+   * Используется на переключателе: одна видимая подпись = текущее состояние, цвет трека тому же состоянию соответствует.
+   */
+  function ynLabelsFromFieldEnumRule(rule) {
+    var defY = "Да";
+    var defN = "Нет";
+    if (!rule || !rule.options || !rule.options.length) {
+      return { labelYes: defY, labelNo: defN };
+    }
+    var ly = defY;
+    var ln = defN;
+    var k;
+    for (k = 0; k < rule.options.length; k++) {
+      var op = rule.options[k];
+      var v = op != null && typeof op === "object" && !Array.isArray(op) ? op.value : op;
+      var lab =
+        op != null && typeof op === "object" && !Array.isArray(op) && op.label != null
+          ? String(op.label)
+          : String(v != null ? v : "");
+      var vu = String(v != null ? v : "").trim().toUpperCase();
+      if (vu === "Y") {
+        ly = lab.trim() ? lab : defY;
+      }
+      if (vu === "N") {
+        ln = lab.trim() ? lab : defN;
+      }
+    }
+    return { labelYes: ly, labelNo: ln };
+  }
+
+  /** Нормализация значения ячейки к Y или N (регистр не важен; допускаются русские и числовые синонимы из выгрузок). */
+  function canonicalYnFromString(s) {
+    var t = String(s || "").trim().toUpperCase();
+    if (t === "Y" || t === "ДА" || t === "YES" || t === "TRUE" || t === "1") {
+      return "Y";
+    }
+    if (t === "N" || t === "НЕТ" || t === "NO" || t === "FALSE" || t === "0") {
+      return "N";
+    }
+    return "N";
+  }
+
+  /**
+   * Две опции из правила field_enums: порядок как в config — [0] = «первая» (зелёный трек, бегунок слева), [1] = «вторая».
+   */
+  function twoOptionPairFromRule(rule) {
+    if (!rule || !rule.options || rule.options.length !== 2) {
+      return null;
+    }
+    var o0 = rule.options[0];
+    var o1 = rule.options[1];
+    var v0 = o0 != null && typeof o0 === "object" && !Array.isArray(o0) ? o0.value : o0;
+    var v1 = o1 != null && typeof o1 === "object" && !Array.isArray(o1) ? o1.value : o1;
+    v0 = String(v0 != null ? v0 : "");
+    v1 = String(v1 != null ? v1 : "");
+    var l0 =
+      o0 != null && typeof o0 === "object" && !Array.isArray(o0) && o0.label != null
+        ? String(o0.label).trim()
+        : v0;
+    var l1 =
+      o1 != null && typeof o1 === "object" && !Array.isArray(o1) && o1.label != null
+        ? String(o1.label).trim()
+        : v1;
+    return { v0: v0, v1: v1, l0: l0, l1: l1, legacyYn: isLegacyYnBinaryValues(rule) };
+  }
+
+  function valuesEqualForTwoOption(a, b, legacyYn) {
+    if (legacyYn) {
+      return canonicalYnFromString(a) === canonicalYnFromString(b);
+    }
+    return String(a) === String(b);
+  }
+
+  function whichTwoOptionIndex(raw, v0, v1, legacyYn) {
+    if (valuesEqualForTwoOption(raw, v0, legacyYn)) {
+      return 0;
+    }
+    if (valuesEqualForTwoOption(raw, v1, legacyYn)) {
+      return 1;
+    }
+    return 0;
+  }
+
+  function normalizeTwoOptionValue(raw, v0, v1, legacyYn) {
+    var idx = whichTwoOptionIndex(raw, v0, v1, legacyYn);
+    return idx === 0 ? v0 : v1;
+  }
+
+  /** Сравнение текущего значения плоского контрола с эталоном из data-initial (для двухопционного переключателя — по нормализации опций). */
+  function flatControlValueMatchesInitial(ctl, hostCell) {
+    if (!ctl) {
+      return true;
+    }
+    var init = ctl.getAttribute("data-initial") || "";
+    if (hostCell && hostCell.querySelector('.spod-yn-wrap[data-spod-yn="1"]')) {
+      var wrap0 = hostCell.querySelector('.spod-yn-wrap[data-spod-yn="1"]');
+      var v0 = "Y";
+      var v1 = "N";
+      try {
+        v0 = JSON.parse(wrap0.getAttribute("data-value-first") || '"Y"');
+      } catch (e0) {
+        v0 = "Y";
+      }
+      try {
+        v1 = JSON.parse(wrap0.getAttribute("data-value-second") || '"N"');
+      } catch (e1) {
+        v1 = "N";
+      }
+      var leg = wrap0.getAttribute("data-legacy-yn") === "1";
+      return (
+        normalizeTwoOptionValue(ctl.value, v0, v1, leg) === normalizeTwoOptionValue(init, v0, v1, leg)
+      );
+    }
+    return String(ctl.value || "") === init;
+  }
+
+  /** Текст подсказки «что было в базе» для иконки прошлого значения Y/N. */
+  function ynPastHintTitle(savedRaw) {
+    var yn = String(savedRaw || "").trim().toUpperCase();
+    if (yn === "Y") {
+      return "В базе было: Да (Y)";
+    }
+    if (yn === "N") {
+      return "В базе было: Нет (N)";
+    }
+    if (savedRaw === "" || savedRaw == null) {
+      return "В базе было: пусто";
+    }
+    return "В базе было: " + String(savedRaw);
+  }
+
+  /** Подпись option по значению (для выпадающих списков — показываем label из config, а не только value). */
+  function enumOptionLabelForValue(rule, value) {
+    if (!rule || !rule.options) {
+      return "";
+    }
+    var v = String(value != null ? value : "");
+    var i;
+    for (i = 0; i < rule.options.length; i++) {
+      var op = rule.options[i];
+      var ov = op != null && typeof op === "object" && !Array.isArray(op) ? op.value : op;
+      if (String(ov) === v) {
+        return op != null && typeof op === "object" && !Array.isArray(op) && op.label != null
+          ? String(op.label)
+          : String(ov);
+      }
+    }
+    return "";
+  }
+
+  /**
+   * Видимая строка под плоским полем: прошлое значение (то же, что в подсказке при наведении раньше).
+   */
+  function visiblePastLineFlat(inp, initRaw, bootstrap) {
+    var init = initRaw == null ? "" : String(initRaw);
+    var cell = inp.closest(".scalar-cell");
+    if (cell && cell.querySelector('.spod-yn-wrap[data-spod-yn="1"]')) {
+      var colYn = inp.getAttribute("data-col") || "";
+      var ruleYn = findFieldEnum(bootstrap, colYn, null);
+      if (ruleYn && init !== "") {
+        var labYn = enumOptionLabelForValue(ruleYn, init);
+        return "В базе было: " + (labYn || init);
+      }
+      if (init === "") {
+        return "В базе было: пусто";
+      }
+      return ynPastHintTitle(init);
+    }
+    var col = inp.getAttribute("data-col") || "";
+    var rule = findFieldEnum(bootstrap, col, null);
+    if (rule && rule.options && rule.options.length) {
+      if (init === "") {
+        return "В базе было: пусто";
+      }
+      var lab = enumOptionLabelForValue(rule, init);
+      return "В базе было: " + (lab || init);
+    }
+    if (init === "") {
+      return "В базе было: пусто";
+    }
+    return "В базе было: " + init;
+  }
+
+  /** Видимая строка под полем JSON: прошлое значение для сравнения с текущим. */
+  function visiblePastLineJsonLeaf(row, initComparable, bootstrap, column) {
+    var initS = initComparable == null ? "" : String(initComparable);
+    if (row && row.getAttribute("data-json-yn") === "1") {
+      var partsYn = [];
+      try {
+        partsYn = row.getAttribute("data-json-path") ? JSON.parse(row.getAttribute("data-json-path")) : [];
+      } catch (eYn) {
+        partsYn = [];
+      }
+      var ruleYnJ = findFieldEnum(bootstrap, column, partsYn);
+      if (ruleYnJ && initS !== "") {
+        var labYnJ = enumOptionLabelForValue(ruleYnJ, initS);
+        return "В базе было: " + (labYnJ || initS);
+      }
+      if (initS === "") {
+        return "В базе было: пусто";
+      }
+      return ynPastHintTitle(initS);
+    }
+    if (row && row.getAttribute("data-json-enum") === "1") {
+      var partsRaw = row.getAttribute("data-json-path");
+      var parts = [];
+      try {
+        parts = partsRaw ? JSON.parse(partsRaw) : [];
+      } catch (e0) {
+        parts = [];
+      }
+      var ruleJe = findFieldEnum(bootstrap, column, parts);
+      if (ruleJe && ruleJe.options) {
+        if (initS === "") {
+          return "В базе было: пусто";
+        }
+        var labJe = enumOptionLabelForValue(ruleJe, initS);
+        return "В базе было: " + (labJe || initS);
+      }
+    }
+    return "В базе было: " + jsonLeafWasDisplay(row, initS);
+  }
+
+  function syncSpodYnToggleVisual(wrap) {
+    if (!wrap) {
+      return;
+    }
+    var hidden = wrap.querySelector('input[type="hidden"]');
+    if (!hidden) {
+      return;
+    }
+    var v0 = "Y";
+    var v1 = "N";
+    try {
+      v0 = JSON.parse(wrap.getAttribute("data-value-first") || '"Y"');
+    } catch (eSf) {
+      v0 = "Y";
+    }
+    try {
+      v1 = JSON.parse(wrap.getAttribute("data-value-second") || '"N"');
+    } catch (eSs) {
+      v1 = "N";
+    }
+    var legacyYn = wrap.getAttribute("data-legacy-yn") === "1";
+    hidden.value = normalizeTwoOptionValue(hidden.value, v0, v1, legacyYn);
+    var isFirst = whichTwoOptionIndex(hidden.value, v0, v1, legacyYn) === 0;
+    wrap.classList.toggle("spod-yn-wrap--opt-first", isFirst);
+    wrap.classList.toggle("spod-yn-wrap--opt-second", !isFirst);
+    wrap.classList.toggle("spod-yn-wrap--yes", isFirst);
+    wrap.classList.toggle("spod-yn-wrap--no", !isFirst);
+    var l0 = wrap.getAttribute("data-label-first") || "Да";
+    var l1 = wrap.getAttribute("data-label-second") || "Нет";
+    var stateLab = wrap.querySelector(".spod-yn-state-label");
+    if (stateLab) {
+      stateLab.textContent = isFirst ? l0 : l1;
+    }
+    var btn = wrap.querySelector(".spod-yn-track");
+    if (btn) {
+      btn.setAttribute("aria-checked", isFirst ? "true" : "false");
+      btn.setAttribute(
+        "aria-label",
+        isFirst
+          ? "Текущее значение: " + l0 + " (" + v0 + "). Нажмите для переключения."
+          : "Текущее значение: " + l1 + " (" + v1 + "). Нажмите для переключения."
+      );
+    }
+  }
+
+  /** Родительский «блок» поля: от него берём 50% как потолок ширины переключателя. */
+  function spodYnToggleWidthBlockEl(wrap) {
+    if (!wrap) {
+      return null;
+    }
+    return (
+      wrap.closest(".json-yn-band-item") ||
+      wrap.closest(".scalar-cell__yn-band-item") ||
+      wrap.closest(".json-leaf-row") ||
+      wrap.closest(".scalar-cell__yn-band-control") ||
+      wrap.closest(".wiz-enum-wrap") ||
+      wrap.parentElement
+    );
+  }
+
+  /** Два боковых отступа под бегунок + inset + зазор к тексту (px), без измеряемой полосы текста. Бегунок берём с запасом (крупнее в multiline). */
+  function spodYnToggleSidePaddingPx(btn) {
+    var fs = parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
+    var thumbRem = 1.45;
+    var insetRem = 0.2;
+    var gapRem = 0.22;
+    return Math.ceil(2 * (thumbRem * fs + insetRem * fs + gapRem * fs));
+  }
+
+  /**
+   * Ширина текста по реальному рендеру (probe); итоговая ширина трека не больше половины блока.
+   * При нехватке места — многострочная подпись (до 3 строк по CSS), высота/бегунок подстраиваются.
+   */
+  function applySpodYnToggleLayout(wrap) {
+    if (!wrap || !wrap.isConnected) {
+      return;
+    }
+    var btn = wrap.querySelector(".spod-yn-track");
+    if (!btn) {
+      return;
+    }
+    var l0 = wrap.getAttribute("data-label-first") || "";
+    var l1 = wrap.getAttribute("data-label-second") || "";
+    var block = spodYnToggleWidthBlockEl(wrap);
+    var blockW = block && block.clientWidth ? block.clientWidth : 0;
+    var capTotal =
+      blockW > 0 ? Math.max(80, Math.floor(blockW * 0.5)) : Math.min(480, Math.max(120, (l0.length + l1.length) * 8 + 80));
+    var sidePad = spodYnToggleSidePaddingPx(btn);
+    var probe = document.createElement("span");
+    probe.className = "spod-yn-state-label";
+    probe.setAttribute("aria-hidden", "true");
+    probe.style.cssText =
+      "position:absolute;left:-9999px;top:0;white-space:nowrap;visibility:hidden;pointer-events:none;max-width:none;width:auto;";
+    btn.appendChild(probe);
+    probe.textContent = l0;
+    var w0 = probe.scrollWidth;
+    probe.textContent = l1;
+    var w1 = probe.scrollWidth;
+    btn.removeChild(probe);
+    if (!isFinite(w0)) {
+      w0 = 0;
+    }
+    if (!isFinite(w1)) {
+      w1 = 0;
+    }
+    var textW = Math.max(w0, w1, 4);
+    var textWithPad = Math.ceil(textW + 14);
+    var desiredTotal = textWithPad + sidePad;
+    var maxTextInner = Math.max(32, capTotal - sidePad);
+    if (desiredTotal <= capTotal) {
+      wrap.removeAttribute("data-spod-yn-multiline");
+      btn.style.setProperty("--spod-yn-text-px", String(textWithPad));
+    } else {
+      wrap.setAttribute("data-spod-yn-multiline", "1");
+      btn.style.setProperty("--spod-yn-text-px", String(maxTextInner));
+    }
+  }
+
+  function fallbackSpodYnTextPxFromLabels(wrap) {
+    var btn = wrap && wrap.querySelector(".spod-yn-track");
+    if (!btn) {
+      return;
+    }
+    var l0 = wrap.getAttribute("data-label-first") || "";
+    var l1 = wrap.getAttribute("data-label-second") || "";
+    var m = Math.max(l0.length, l1.length, 1);
+    btn.style.setProperty("--spod-yn-text-px", String(Math.min(280, m * 11 + 36)));
+  }
+
+  function scheduleSpodYnToggleSize(wrap) {
+    var wait = 0;
+    function bindResizeObserver() {
+      if (!wrap || wrap.__spodYnRoBound || typeof ResizeObserver === "undefined") {
+        return;
+      }
+      var block = spodYnToggleWidthBlockEl(wrap);
+      if (!block) {
+        return;
+      }
+      var ro = new ResizeObserver(function () {
+        if (wrap.__spodYnLayoutTimer) {
+          clearTimeout(wrap.__spodYnLayoutTimer);
+        }
+        wrap.__spodYnLayoutTimer = setTimeout(function () {
+          wrap.__spodYnLayoutTimer = null;
+          applySpodYnToggleLayout(wrap);
+        }, 80);
+      });
+      try {
+        ro.observe(block);
+        wrap.__spodYnRoBound = true;
+        wrap.__spodYnResizeObserver = ro;
+      } catch (eRo) {
+        /* ignore */
+      }
+    }
+    function untilConnected() {
+      wait += 1;
+      if (!wrap) {
+        return;
+      }
+      if (wrap.isConnected) {
+        requestAnimationFrame(function () {
+          requestAnimationFrame(function () {
+            applySpodYnToggleLayout(wrap);
+            bindResizeObserver();
+            if (document.fonts && document.fonts.ready) {
+              document.fonts.ready.then(function () {
+                applySpodYnToggleLayout(wrap);
+              });
+            }
+          });
+        });
+        return;
+      }
+      if (wait > 120) {
+        fallbackSpodYnTextPxFromLabels(wrap);
+        return;
+      }
+      requestAnimationFrame(untilConnected);
+    }
+    untilConnected();
+  }
+
+  /**
+   * DOM двухпозиционного переключателя: скрытое поле хранит value из options[0]|options[1];
+   * первая опция — зелёный трек, бегунок слева; вторая — красный, бегунок справа.
+   * opts.enumRule — правило field_enums с ровно двумя options; иначе labelYes/labelNo и пара Y/N по умолчанию.
+   */
+  function buildSpodYnToggleDom(opts) {
+    var initRaw = opts.initialRaw != null ? String(opts.initialRaw) : "";
+    var pairDisp;
+    if (opts.enumRule) {
+      pairDisp = twoOptionPairFromRule(opts.enumRule);
+    } else {
+      pairDisp = {
+        v0: "Y",
+        v1: "N",
+        l0: opts.labelYes != null ? String(opts.labelYes) : "Да",
+        l1: opts.labelNo != null ? String(opts.labelNo) : "Нет",
+        legacyYn: true,
+      };
+    }
+    if (!pairDisp) {
+      pairDisp = {
+        v0: "Y",
+        v1: "N",
+        l0: "Да",
+        l1: "Нет",
+        legacyYn: true,
+      };
+    }
+    var hidden = document.createElement("input");
+    hidden.type = "hidden";
+    if (opts.safeId) {
+      hidden.id = opts.safeId;
+    }
+    hidden.setAttribute("data-initial", initRaw);
+    hidden.value = normalizeTwoOptionValue(initRaw, pairDisp.v0, pairDisp.v1, pairDisp.legacyYn);
+    if (opts.valueAttr && opts.flatColumn) {
+      hidden.setAttribute(opts.valueAttr, opts.flatColumn);
+    }
+    if (opts.jsonLeaf) {
+      hidden.className = "spod-yn-value";
+    }
+    var wrap = document.createElement("div");
+    wrap.className =
+      "spod-yn-wrap spod-enum-block" + (opts.enumBlockMod ? " " + opts.enumBlockMod : " spod-enum-block--flat");
+    wrap.setAttribute("data-spod-yn", "1");
+    wrap.setAttribute("data-value-first", JSON.stringify(pairDisp.v0));
+    wrap.setAttribute("data-value-second", JSON.stringify(pairDisp.v1));
+    wrap.setAttribute("data-label-first", pairDisp.l0);
+    wrap.setAttribute("data-label-second", pairDisp.l1);
+    wrap.setAttribute("data-legacy-yn", pairDisp.legacyYn ? "1" : "0");
+    var btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "spod-yn-track";
+    btn.setAttribute("role", "switch");
+    /* До измерения в DOM — запасная ширина в px; после вставки scheduleSpodYnToggleSize уточнит по scrollWidth. */
+    var roughLen = Math.max(pairDisp.l0.length, pairDisp.l1.length, 1);
+    btn.style.setProperty("--spod-yn-text-px", String(Math.min(260, roughLen * 11 + 36)));
+    var stateLab = document.createElement("span");
+    stateLab.className = "spod-yn-state-label";
+    stateLab.setAttribute("aria-hidden", "true");
+    var thumb = document.createElement("span");
+    thumb.className = "spod-yn-thumb";
+    btn.appendChild(stateLab);
+    btn.appendChild(thumb);
+    wrap.appendChild(hidden);
+    wrap.appendChild(btn);
+    syncSpodYnToggleVisual(wrap);
+    scheduleSpodYnToggleSize(wrap);
+    if (wrap.getAttribute("data-spod-yn-wired") !== "1") {
+      wrap.setAttribute("data-spod-yn-wired", "1");
+      btn.addEventListener("click", function () {
+        var vA = pairDisp.v0;
+        var vB = pairDisp.v1;
+        var leg = pairDisp.legacyYn;
+        var idx = whichTwoOptionIndex(hidden.value, vA, vB, leg);
+        hidden.value = idx === 0 ? vB : vA;
+        syncSpodYnToggleVisual(wrap);
+        document.dispatchEvent(new Event("spod-editor-change"));
+      });
+    }
+    return wrap;
+  }
+
   /** Подписка на select/textarea в блоке перечисления (плоские поля и JSON). */
   function wireEnumControls(root) {
     root.querySelectorAll(".spod-enum-block").forEach(function (blk) {
+      if (blk.getAttribute("data-spod-yn") === "1") {
+        return;
+      }
       if (blk.getAttribute("data-spod-enum-wired") === "1") {
         return;
       }
@@ -1154,6 +1695,27 @@
   }
 
   function coerceLeafValue(row) {
+    if (row.getAttribute("data-json-yn") === "1") {
+      var hidY = row.querySelector("input.spod-yn-value");
+      var wrapY = row.querySelector(".spod-yn-wrap");
+      if (!hidY || !wrapY) {
+        return "";
+      }
+      var v0 = "Y";
+      var v1 = "N";
+      try {
+        v0 = JSON.parse(wrapY.getAttribute("data-value-first") || '"Y"');
+      } catch (eC0) {
+        v0 = "Y";
+      }
+      try {
+        v1 = JSON.parse(wrapY.getAttribute("data-value-second") || '"N"');
+      } catch (eC1) {
+        v1 = "N";
+      }
+      var legY = wrapY.getAttribute("data-legacy-yn") === "1";
+      return normalizeTwoOptionValue(hidY.value, v0, v1, legY);
+    }
     if (row.getAttribute("data-json-enum") === "1") {
       var sel = row.querySelector(".spod-enum-select");
       var ta = row.querySelector(".spod-enum-custom");
@@ -1192,7 +1754,10 @@
   }
 
   function findJsonBox(col) {
-    var nodes = document.querySelectorAll("[data-json-column]");
+    /* Ограничиваем поиск карточкой на странице строки, чтобы не перепутать с другими экранами при расширении UI. */
+    var mount = document.getElementById("json-columns-mount");
+    var scope = mount || document;
+    var nodes = scope.querySelectorAll("[data-json-column]");
     for (var i = 0; i < nodes.length; i++) {
       if (nodes[i].getAttribute("data-json-column") === col) {
         return nodes[i];
@@ -1222,7 +1787,9 @@
     }
 
     if (rk === "primitive") {
-      var one = container.querySelector(".json-leaf-row");
+      /* Сначала строка с путём: иначе первым может оказаться контейнер кластера Y/N без data-json-path. */
+      var one =
+        container.querySelector(".json-leaf-row[data-json-path]") || container.querySelector(".json-leaf-row");
       if (!one) {
         return "";
       }
@@ -1328,6 +1895,40 @@
   /**
    * Пересобрать UI колонки REWARD_ADD_DATA после смены REWARD_TYPE (мастер или карточка строки).
    */
+  /**
+   * Пересобрать DOM одной JSON-колонки из сырой строки ячейки (актуальная версия из БД или значение из черновика).
+   * Вызывается при сбросе к активной версии и при подстановке черновика; без этой функции init() обрывался бы ReferenceError.
+   */
+  function refreshJsonUiFromRaw(container, column, raw, bootstrap) {
+    if (!container || !bootstrap) {
+      return;
+    }
+    var col = column != null ? String(column) : container.getAttribute("data-json-column") || "";
+    var rawStr = raw == null ? "" : String(raw);
+    var pr = tryParseSpodJsonCell(rawStr);
+    var jcNew = {
+      column: col,
+      section_slug: String(col).replace(/[^a-zA-Z0-9_-]/g, "_"),
+      raw: rawStr,
+      ok: pr.ok,
+      parsed: pr.parsed,
+    };
+    if (!jcNew.ok) {
+      renderJsonColumn(container, jcNew, bootstrap);
+      wireEnumControls(container);
+      return;
+    }
+    var parsed = pr.parsed === null || pr.parsed === undefined ? {} : pr.parsed;
+    var rk = rootKindOf(parsed);
+    if (rk === "object" && parsed !== null && !Array.isArray(parsed)) {
+      jcNew.parsed = mergeDeclaredJsonTemplate(JSON.parse(JSON.stringify(parsed)), col, bootstrap);
+    } else {
+      jcNew.parsed = parsed;
+    }
+    renderJsonColumn(container, jcNew, bootstrap);
+    wireEnumControls(container);
+  }
+
   function refreshRewardAddDataJsonUi(bootstrap, container) {
     if (!bootstrap || bootstrap.sheetCode !== "REWARD" || !container || !container.getAttribute) {
       return;
@@ -1635,19 +2236,34 @@
           } else {
             var enumRule = findFieldEnum(bootstrapLocal, colLocal, pathPartsItem);
             if (enumRule) {
-              itemRow.setAttribute("data-json-enum", "1");
-              var wrapS = document.createElement("div");
-              wrapS.className = "spod-enum-block spod-enum-block--json";
-              var selS = document.createElement("select");
-              selS.className = "spod-enum-select spod-leaf-control";
-              var taS = document.createElement("textarea");
-              taS.className = "spod-enum-custom spod-leaf-control is-hidden";
-              taS.rows = 3;
-              fillSelectOptions(selS, enumRule.options, !!enumRule.allow_custom, disp);
-              initEnumSelectState(selS, taS, null, !!enumRule.allow_custom, disp);
-              wrapS.appendChild(selS);
-              wrapS.appendChild(taS);
-              itemRow.appendChild(wrapS);
+              if (isYnBinaryEnumRule(enumRule)) {
+                itemRow.setAttribute("data-json-yn", "1");
+                itemRow.appendChild(
+                  buildSpodYnToggleDom({
+                    safeId: "",
+                    initialRaw: disp != null ? String(disp) : "",
+                    flatColumn: "",
+                    valueAttr: "",
+                    jsonLeaf: true,
+                    enumRule: enumRule,
+                    enumBlockMod: "spod-enum-block--json",
+                  })
+                );
+              } else {
+                itemRow.setAttribute("data-json-enum", "1");
+                var wrapS = document.createElement("div");
+                wrapS.className = "spod-enum-block spod-enum-block--json";
+                var selS = document.createElement("select");
+                selS.className = "spod-enum-select spod-leaf-control";
+                var taS = document.createElement("textarea");
+                taS.className = "spod-enum-custom spod-leaf-control is-hidden";
+                taS.rows = 3;
+                fillSelectOptions(selS, enumRule.options, !!enumRule.allow_custom, disp);
+                initEnumSelectState(selS, taS, null, !!enumRule.allow_custom, disp);
+                wrapS.appendChild(selS);
+                wrapS.appendChild(taS);
+                itemRow.appendChild(wrapS);
+              }
             } else {
               var rows = textareaRows(disp, taHint, thrLocal);
               if (rows > 0) {
@@ -1730,9 +2346,120 @@
       });
     }
 
+    /**
+     * Подряд идущие листья Y/N в одной JSON-колонке — общий блок с сеткой (одиночное Y/N тоже в том же стиле карточки).
+     */
+    function packYnClusterLeaves(seq) {
+      var out = [];
+      var i = 0;
+      while (i < seq.length) {
+        var L = seq[i];
+        if (!L || L.vtype === "json-scalar-array") {
+          out.push(L);
+          i++;
+          continue;
+        }
+        var enumR = null;
+        if (L.vtype === "string") {
+          if (!findDatePickerHint(bootstrap, col, L.parts)) {
+            enumR = findFieldEnum(bootstrap, col, L.parts);
+          }
+        }
+        if (enumR && isYnBinaryEnumRule(enumR)) {
+          var grp = [L];
+          var j = i + 1;
+          while (j < seq.length) {
+            var L2 = seq[j];
+            if (!L2 || L2.vtype === "json-scalar-array") {
+              break;
+            }
+            var enumR2 = null;
+            if (L2.vtype === "string") {
+              if (!findDatePickerHint(bootstrap, col, L2.parts)) {
+                enumR2 = findFieldEnum(bootstrap, col, L2.parts);
+              }
+            }
+            if (!(enumR2 && isYnBinaryEnumRule(enumR2))) {
+              break;
+            }
+            grp.push(L2);
+            j++;
+          }
+          out.push({ __spodYnCluster: true, items: grp });
+          i = j;
+          continue;
+        }
+        out.push(L);
+        i++;
+      }
+      return out;
+    }
+
     /** Сетка листьев: общая отрисовка и пересборка при переходе «Сырой JSON» → «По полям». */
     function appendJsonLeafRowsToGrid(grid, leaves, jsonColumnEl) {
-      leaves.forEach(function (leaf) {
+      var seqLeaves = packYnClusterLeaves(leaves);
+      seqLeaves.forEach(function (leaf) {
+        if (leaf && leaf.__spodYnCluster && leaf.items && leaf.items.length) {
+          var clusterRow = document.createElement("div");
+          clusterRow.className = "json-leaf-row json-yn-cluster-row grid-cell";
+          var ftc = leaf.items
+            .map(function (lf) {
+              var pathDisp = formatPath(lf.parts);
+              var uiR = findFieldUi(bootstrap, col, lf.parts);
+              var labForFilter =
+                uiR && uiR.label != null && String(uiR.label).trim() !== "" ? String(uiR.label) : pathDisp;
+              var descJf =
+                uiR && showDescriptionEnabled(uiR) && uiR.description != null ? String(uiR.description) : "";
+              return (pathDisp + " " + labForFilter + " " + descJf).toLowerCase();
+            })
+            .join(" ");
+          clusterRow.setAttribute("data-filter-text", ftc);
+          var band = document.createElement("div");
+          band.className = "json-yn-cluster-band-inner";
+          var si = 0;
+          for (si = 0; si < leaf.items.length; si++) {
+            var sub = leaf.items[si];
+            var subRow = document.createElement("div");
+            subRow.className = "json-leaf-row json-yn-band-item grid-cell";
+            subRow.setAttribute("data-json-path", JSON.stringify(sub.parts));
+            subRow.setAttribute("data-vtype", sub.vtype);
+            subRow.setAttribute("data-json-yn", "1");
+            {
+              var pathDisp2 = formatPath(sub.parts);
+              var uiR2 = findFieldUi(bootstrap, col, sub.parts);
+              var labForFilter2 =
+                uiR2 && uiR2.label != null && String(uiR2.label).trim() !== "" ? String(uiR2.label) : pathDisp2;
+              var descJf2 =
+                uiR2 && showDescriptionEnabled(uiR2) && uiR2.description != null ? String(uiR2.description) : "";
+              subRow.setAttribute(
+                "data-filter-text",
+                (pathDisp2 + " " + labForFilter2 + " " + descJf2).toLowerCase()
+              );
+            }
+            var labSub = document.createElement("label");
+            labSub.className = "json-path-label";
+            applyFieldUiLabel(bootstrap, labSub, col, sub.parts, formatPath(sub.parts));
+            subRow.appendChild(labSub);
+            var ctrlRow = document.createElement("div");
+            ctrlRow.className = "json-yn-band-item__ctrl";
+            var enumSub = findFieldEnum(bootstrap, col, sub.parts);
+            var ynWsub = buildSpodYnToggleDom({
+              safeId: "",
+              initialRaw: sub.display != null ? String(sub.display) : "",
+              flatColumn: "",
+              valueAttr: "",
+              jsonLeaf: true,
+              enumRule: enumSub,
+              enumBlockMod: "spod-enum-block--json",
+            });
+            ctrlRow.appendChild(ynWsub);
+            subRow.appendChild(ctrlRow);
+            band.appendChild(subRow);
+          }
+          clusterRow.appendChild(band);
+          grid.appendChild(clusterRow);
+          return;
+        }
         if (leaf.vtype === "json-scalar-array") {
           appendOneJsonScalarArrayHost(grid, leaf, bootstrap, col, thr, jsonColumnEl);
           return;
@@ -1847,19 +2574,34 @@
           } else {
             var enumRule = findFieldEnum(bootstrap, col, leaf.parts);
             if (enumRule) {
-              row.setAttribute("data-json-enum", "1");
-              var wrapS = document.createElement("div");
-              wrapS.className = "spod-enum-block spod-enum-block--json";
-              var selS = document.createElement("select");
-              selS.className = "spod-enum-select spod-leaf-control";
-              var taS = document.createElement("textarea");
-              taS.className = "spod-enum-custom spod-leaf-control is-hidden";
-              taS.rows = 3;
-              fillSelectOptions(selS, enumRule.options, !!enumRule.allow_custom, leaf.display);
-              initEnumSelectState(selS, taS, null, !!enumRule.allow_custom, leaf.display);
-              wrapS.appendChild(selS);
-              wrapS.appendChild(taS);
-              row.appendChild(wrapS);
+              if (isYnBinaryEnumRule(enumRule)) {
+                row.setAttribute("data-json-yn", "1");
+                row.appendChild(
+                  buildSpodYnToggleDom({
+                    safeId: "",
+                    initialRaw: leaf.display != null ? String(leaf.display) : "",
+                    flatColumn: "",
+                    valueAttr: "",
+                    jsonLeaf: true,
+                    enumRule: enumRule,
+                    enumBlockMod: "spod-enum-block--json",
+                  })
+                );
+              } else {
+                row.setAttribute("data-json-enum", "1");
+                var wrapS = document.createElement("div");
+                wrapS.className = "spod-enum-block spod-enum-block--json";
+                var selS = document.createElement("select");
+                selS.className = "spod-enum-select spod-leaf-control";
+                var taS = document.createElement("textarea");
+                taS.className = "spod-enum-custom spod-leaf-control is-hidden";
+                taS.rows = 3;
+                fillSelectOptions(selS, enumRule.options, !!enumRule.allow_custom, leaf.display);
+                initEnumSelectState(selS, taS, null, !!enumRule.allow_custom, leaf.display);
+                wrapS.appendChild(selS);
+                wrapS.appendChild(taS);
+                row.appendChild(wrapS);
+              }
             } else {
               var hintT = findTextareaHint(bootstrap, col, leaf.parts);
               var rows = textareaRows(leaf.display, hintT, thr);
@@ -2010,7 +2752,116 @@
       keys.sort();
     }
     var thr = bootstrap.longTextThreshold || 120;
-    keys.forEach(function (col) {
+    var ynCols = [];
+    var restCols = [];
+    keys.forEach(function (colK) {
+      var numDefK = findNumericRuleDef(bootstrap, colK, null);
+      var ruleK = numDefK ? null : findFieldEnum(bootstrap, colK, null);
+      if (ruleK && isYnBinaryEnumRule(ruleK)) {
+        ynCols.push(colK);
+      } else {
+        restCols.push(colK);
+      }
+    });
+
+    function bindFlatFieldConfirmRow(hostEl, column) {
+      var okBtn = hostEl.querySelector(".was-action--ok");
+      var cancelBtn = hostEl.querySelector(".was-action--cancel");
+      if (!okBtn || !cancelBtn) {
+        return;
+      }
+      okBtn.addEventListener("click", async function () {
+        var ctl = hostEl.querySelector("[data-col]");
+        if (!ctl) {
+          return;
+        }
+        if (flatControlValueMatchesInitial(ctl, hostEl)) {
+          return;
+        }
+        ensureFieldDraftState(bootstrap);
+        bootstrap.__fieldDraftConfirmed[column] = true;
+        await persistRowEditDraft(bootstrap);
+        refreshDirtyState(bootstrap);
+      });
+      cancelBtn.addEventListener("click", async function () {
+        revertScalarCellToInitial(hostEl);
+        ensureFieldDraftState(bootstrap);
+        delete bootstrap.__fieldDraftConfirmed[column];
+        await persistRowEditDraft(bootstrap);
+        document.dispatchEvent(new Event("spod-editor-change"));
+      });
+    }
+
+    if (ynCols.length) {
+      var cluster = document.createElement("div");
+      cluster.className = "scalar-cell scalar-cell--yn-cluster grid-cell";
+      var ftJoin = ynCols
+        .map(function (c0) {
+          var u0 = findFieldUi(bootstrap, c0, null);
+          var ld0 = u0 && u0.label != null && String(u0.label).trim() !== "" ? String(u0.label) : c0;
+          var df0 =
+            u0 && showDescriptionEnabled(u0) && u0.description != null ? String(u0.description) : "";
+          return (c0 + " " + ld0 + " " + df0).toLowerCase();
+        })
+        .join(" ");
+      cluster.setAttribute("data-filter-text", ftJoin);
+      var head = document.createElement("div");
+      head.className = "scalar-cell__yn-band-head";
+      head.textContent = "Параметры «Да / Нет» (Y / N)";
+      cluster.appendChild(head);
+      var bandGrid = document.createElement("div");
+      bandGrid.className = "scalar-cell__yn-band-grid";
+      ynCols.forEach(function (col) {
+        var item = document.createElement("div");
+        /* Класс scalar-cell — те же стили «изменено / подтверждено», что у обычных ячеек сетки. */
+        item.className = "scalar-cell scalar-cell__yn-band-item";
+        var ui0 = findFieldUi(bootstrap, col, null);
+        var labDisp0 = ui0 && ui0.label != null && String(ui0.label).trim() !== "" ? String(ui0.label) : col;
+        var descF =
+          ui0 && showDescriptionEnabled(ui0) && ui0.description != null ? String(ui0.description) : "";
+        item.setAttribute("data-filter-text", (col + " " + labDisp0 + " " + descF).toLowerCase());
+        var ridpfx =
+          bootstrap && bootstrap.rowId != null && String(bootstrap.rowId) !== ""
+            ? "r" + String(bootstrap.rowId) + "_"
+            : "";
+        var safeId = ridpfx + "col-" + col.replace(/[^a-zA-Z0-9_]/g, "_");
+        var lab = document.createElement("label");
+        lab.setAttribute("for", safeId);
+        applyFieldUiLabel(bootstrap, lab, col, null, col);
+        var was = document.createElement("div");
+        was.className = "was-value spod-field-past-hint is-hidden";
+        was.setAttribute("aria-hidden", "true");
+        var wasActions = document.createElement("div");
+        wasActions.className = "was-actions is-hidden";
+        wasActions.innerHTML =
+          '<button type="button" class="btn btn-ghost was-action was-action--ok" title="Подтвердить изменение поля">✓</button>' +
+          '<button type="button" class="btn btn-ghost was-action was-action--cancel" title="Отменить изменение поля">✕</button>';
+        var initV = flat[col] != null ? String(flat[col]) : "";
+        var ynRuleFlat = findFieldEnum(bootstrap, col, null);
+        var ynWrap = buildSpodYnToggleDom({
+          safeId: safeId,
+          initialRaw: initV,
+          flatColumn: col,
+          valueAttr: "data-col",
+          jsonLeaf: false,
+          enumRule: ynRuleFlat,
+          enumBlockMod: "spod-enum-block--flat",
+        });
+        var ctrlRow = document.createElement("div");
+        ctrlRow.className = "scalar-cell__yn-band-control";
+        ctrlRow.appendChild(ynWrap);
+        ctrlRow.appendChild(was);
+        ctrlRow.appendChild(wasActions);
+        item.appendChild(lab);
+        item.appendChild(ctrlRow);
+        bindFlatFieldConfirmRow(item, col);
+        bandGrid.appendChild(item);
+      });
+      cluster.appendChild(bandGrid);
+      grid.appendChild(cluster);
+    }
+
+    restCols.forEach(function (col) {
       var cell = document.createElement("div");
       cell.className = "scalar-cell grid-cell";
       {
@@ -2029,7 +2880,8 @@
       lab.setAttribute("for", safeId);
       applyFieldUiLabel(bootstrap, lab, col, null, col);
       var was = document.createElement("div");
-      was.className = "was-value is-hidden";
+      was.className = "was-value spod-field-past-hint is-hidden";
+      was.setAttribute("aria-hidden", "true");
       var wasActions = document.createElement("div");
       wasActions.className = "was-actions is-hidden";
       wasActions.innerHTML =
@@ -2148,34 +3000,7 @@
           });
         }
       }
-      (function bindPerFieldActions(c, column) {
-        var okBtn = c.querySelector(".was-action--ok");
-        var cancelBtn = c.querySelector(".was-action--cancel");
-        if (!okBtn || !cancelBtn) {
-          return;
-        }
-        okBtn.addEventListener("click", async function () {
-          var ctl = c.querySelector("[data-col]");
-          if (!ctl) {
-            return;
-          }
-          var init = ctl.getAttribute("data-initial") || "";
-          if (String(ctl.value || "") === init) {
-            return;
-          }
-          ensureFieldDraftState(bootstrap);
-          bootstrap.__fieldDraftConfirmed[column] = true;
-          await persistRowEditDraft(bootstrap);
-          refreshDirtyState(bootstrap);
-        });
-        cancelBtn.addEventListener("click", async function () {
-          revertScalarCellToInitial(c);
-          ensureFieldDraftState(bootstrap);
-          delete bootstrap.__fieldDraftConfirmed[column];
-          await persistRowEditDraft(bootstrap);
-          document.dispatchEvent(new Event("spod-editor-change"));
-        });
-      })(cell, col);
+      bindFlatFieldConfirmRow(cell, col);
       grid.appendChild(cell);
     });
 
@@ -2200,7 +3025,20 @@
     if (flt) {
       flt.addEventListener("input", function () {
         var q = (flt.value || "").trim().toLowerCase();
-        grid.querySelectorAll(".scalar-cell").forEach(function (c) {
+        grid.querySelectorAll(":scope > .scalar-cell").forEach(function (c) {
+          if (c.classList.contains("scalar-cell--yn-cluster")) {
+            var anyCl = !q || (c.getAttribute("data-filter-text") || "").indexOf(q) !== -1;
+            if (!anyCl) {
+              c.querySelectorAll(".scalar-cell__yn-band-item").forEach(function (it) {
+                var ti = it.getAttribute("data-filter-text") || "";
+                if (ti.indexOf(q) !== -1) {
+                  anyCl = true;
+                }
+              });
+            }
+            c.style.display = anyCl ? "" : "none";
+            return;
+          }
           var t = c.getAttribute("data-filter-text") || "";
           c.style.display = !q || t.indexOf(q) !== -1 ? "" : "none";
         });
@@ -2229,7 +3067,12 @@
         el.dispatchEvent(new Event("blur", { bubbles: false }));
       });
       fg.querySelectorAll("[data-col]").forEach(function (el) {
-        o[el.dataset.col] = el.value;
+        /* getAttribute надёжнее dataset для атрибута data-col. */
+        var colKey = el.getAttribute("data-col") || el.dataset.col;
+        if (!colKey) {
+          return;
+        }
+        o[colKey] = el.value;
       });
     }
     (bootstrap.jsonCols || []).forEach(function (jc) {
@@ -2270,6 +3113,28 @@
       return;
     }
     var init = ctl.getAttribute("data-initial") || "";
+    var ynW = cell.querySelector('.spod-yn-wrap[data-spod-yn="1"]');
+    if (ynW) {
+      var hidY = ynW.querySelector('input[type="hidden"]');
+      if (hidY) {
+        var v0r = "Y";
+        var v1r = "N";
+        try {
+          v0r = JSON.parse(ynW.getAttribute("data-value-first") || '"Y"');
+        } catch (eR0) {
+          v0r = "Y";
+        }
+        try {
+          v1r = JSON.parse(ynW.getAttribute("data-value-second") || '"N"');
+        } catch (eR1) {
+          v1r = "N";
+        }
+        var legR = ynW.getAttribute("data-legacy-yn") === "1";
+        hidY.value = normalizeTwoOptionValue(init, v0r, v1r, legR);
+        syncSpodYnToggleVisual(ynW);
+      }
+      return;
+    }
     var enumWrap = cell.querySelector(".spod-enum-block");
     if (enumWrap) {
       var sel = enumWrap.querySelector(".spod-enum-select");
@@ -2325,6 +3190,30 @@
     }
     var init = row.getAttribute("data-json-initial-comparable");
     var initial = init == null ? "" : String(init);
+    if (row.getAttribute("data-json-yn") === "1") {
+      var hidJ = row.querySelector("input.spod-yn-value");
+      var wrapJ = row.querySelector(".spod-yn-wrap");
+      if (hidJ && wrapJ) {
+        var v0j = "Y";
+        var v1j = "N";
+        try {
+          v0j = JSON.parse(wrapJ.getAttribute("data-value-first") || '"Y"');
+        } catch (eJ0) {
+          v0j = "Y";
+        }
+        try {
+          v1j = JSON.parse(wrapJ.getAttribute("data-value-second") || '"N"');
+        } catch (eJ1) {
+          v1j = "N";
+        }
+        var legJ = wrapJ.getAttribute("data-legacy-yn") === "1";
+        hidJ.value = normalizeTwoOptionValue(initial, v0j, v1j, legJ);
+      }
+      if (wrapJ) {
+        syncSpodYnToggleVisual(wrapJ);
+      }
+      return;
+    }
     if (row.getAttribute("data-json-enum") === "1") {
       var sel = row.querySelector(".spod-enum-select");
       var ta = row.querySelector(".spod-enum-custom");
@@ -2359,7 +3248,8 @@
       '<button type="button" class="btn btn-ghost was-action was-action--ok" title="Подтвердить изменение поля">✓</button>' +
       '<button type="button" class="btn btn-ghost was-action was-action--cancel" title="Отменить изменение поля">✕</button>';
     var was = document.createElement("div");
-    was.className = "was-value is-hidden";
+    was.className = "was-value spod-field-past-hint is-hidden";
+    was.setAttribute("aria-hidden", "true");
     row.appendChild(was);
     row.appendChild(actions);
     row.setAttribute("data-spod-json-actions-wired", "1");
@@ -2426,7 +3316,12 @@
         }
         if (was) {
           was.classList.remove("is-hidden");
-          was.textContent = "Было: " + jsonLeafWasDisplay(row, String(init == null ? "" : init));
+          var initS = String(init == null ? "" : init);
+          var lineJ = visiblePastLineJsonLeaf(row, initS, bootstrap, column);
+          was.textContent = lineJ;
+          was.setAttribute("title", lineJ);
+          was.setAttribute("aria-label", lineJ);
+          was.removeAttribute("aria-hidden");
         }
         if (actions) {
           actions.classList.remove("is-hidden");
@@ -2436,6 +3331,10 @@
         row.classList.remove("json-leaf-row--confirmed");
         if (was) {
           was.classList.add("is-hidden");
+          was.textContent = "";
+          was.removeAttribute("title");
+          was.removeAttribute("aria-label");
+          was.setAttribute("aria-hidden", "true");
         }
         if (actions) {
           actions.classList.add("is-hidden");
@@ -2545,15 +3444,19 @@
     return String(value);
   }
 
+  /** Отличается ли значение плоского поля в DOM от эталона data-initial (с учётом Y/N). */
+  function flatGridValueDiffersFromInitial(el) {
+    var cell = el.closest(".scalar-cell__yn-band-item") || el.closest(".scalar-cell");
+    return !flatControlValueMatchesInitial(el, cell);
+  }
+
   function countUnconfirmedChanges(bootstrap) {
     var out = 0;
     var fg = flatGridFor(bootstrap);
     if (fg) {
       fg.querySelectorAll("[data-col]").forEach(function (el) {
         var col = el.getAttribute("data-col") || "";
-        var init = el.getAttribute("data-initial") || "";
-        var cur = String(el.value == null ? "" : el.value);
-        if (cur !== init && !bootstrap.__fieldDraftConfirmed[col]) {
+        if (flatGridValueDiffersFromInitial(el) && !bootstrap.__fieldDraftConfirmed[col]) {
           out += 1;
         }
       });
@@ -2594,8 +3497,7 @@
       fg.querySelectorAll("[data-col]").forEach(function (el) {
         var col = el.getAttribute("data-col") || "";
         var init = el.getAttribute("data-initial") || "";
-        var cur = String(el.value == null ? "" : el.value);
-        if (cur !== init && !bootstrap.__fieldDraftConfirmed[col]) {
+        if (flatGridValueDiffersFromInitial(el) && !bootstrap.__fieldDraftConfirmed[col]) {
           payload[col] = init;
         }
       });
@@ -2726,6 +3628,25 @@
         return;
       }
       var next = payload[col] == null ? "" : String(payload[col]);
+      var ynFlat = el.closest('.spod-yn-wrap[data-spod-yn="1"]');
+      if (ynFlat) {
+        var v0d = "Y";
+        var v1d = "N";
+        try {
+          v0d = JSON.parse(ynFlat.getAttribute("data-value-first") || '"Y"');
+        } catch (eD0) {
+          v0d = "Y";
+        }
+        try {
+          v1d = JSON.parse(ynFlat.getAttribute("data-value-second") || '"N"');
+        } catch (eD1) {
+          v1d = "N";
+        }
+        var legD = ynFlat.getAttribute("data-legacy-yn") === "1";
+        el.value = normalizeTwoOptionValue(next, v0d, v1d, legD);
+        syncSpodYnToggleVisual(ynFlat);
+        return;
+      }
       var cell = el.closest(".scalar-cell");
       var enumWrap = cell ? cell.querySelector(".spod-enum-block") : null;
       if (enumWrap) {
@@ -2751,10 +3672,12 @@
       if (!box) {
         return;
       }
-      refreshJsonUiFromRaw(box, jc.column, payload[jc.column] == null ? "" : String(payload[jc.column]), bootstrap);
-      box.setAttribute("data-initial-json-norm", normalizeJsonCell(jc.raw == null ? "" : String(jc.raw)));
-      var activeParsed = tryParseSpodJsonCell(jc.raw == null ? "" : String(jc.raw));
-      var activeRoot = activeParsed.ok ? activeParsed.parsed : null;
+      var cellRaw = payload[jc.column] == null ? "" : String(payload[jc.column]);
+      refreshJsonUiFromRaw(box, jc.column, cellRaw, bootstrap);
+      /* Эталон «чистой» колонки — как в DOM после подстановки черновика (согласован с buildJsonFromFields). */
+      box.setAttribute("data-initial-json-norm", normalizeJsonCell(buildJsonFromFields(box)));
+      var basisParsed = tryParseSpodJsonCell(buildJsonFromFields(box));
+      var basisRoot = basisParsed.ok ? basisParsed.parsed : null;
       box.querySelectorAll(".json-leaf-row[data-json-path]").forEach(function (row) {
         var partsRaw = row.getAttribute("data-json-path");
         if (!partsRaw) {
@@ -2767,7 +3690,7 @@
           return;
         }
         var vt = row.getAttribute("data-vtype") || "string";
-        var vv = getDeepValue(activeRoot, parts);
+        var vv = getDeepValue(basisRoot, parts);
         row.setAttribute("data-json-initial-comparable", comparableByVtypeFromValue(vt, vv));
       });
     });
@@ -2783,6 +3706,25 @@
     if (fg) {
       fg.querySelectorAll("[data-col]").forEach(function (el) {
         var init = el.getAttribute("data-initial") || "";
+        var ynFlatR = el.closest('.spod-yn-wrap[data-spod-yn="1"]');
+        if (ynFlatR) {
+          var v0a = "Y";
+          var v1a = "N";
+          try {
+            v0a = JSON.parse(ynFlatR.getAttribute("data-value-first") || '"Y"');
+          } catch (eA0) {
+            v0a = "Y";
+          }
+          try {
+            v1a = JSON.parse(ynFlatR.getAttribute("data-value-second") || '"N"');
+          } catch (eA1) {
+            v1a = "N";
+          }
+          var legA = ynFlatR.getAttribute("data-legacy-yn") === "1";
+          el.value = normalizeTwoOptionValue(init, v0a, v1a, legA);
+          syncSpodYnToggleVisual(ynFlatR);
+          return;
+        }
         var cell = el.closest(".scalar-cell");
         var enumWrap = cell ? cell.querySelector(".spod-enum-block") : null;
         if (enumWrap) {
@@ -2823,6 +3765,10 @@
     if (draftBtn) {
       draftBtn.classList.toggle("btn-primary", mode === "draft");
       draftBtn.classList.toggle("btn-ghost", mode !== "draft");
+    }
+    /* Эталон «чистой» формы после переключения актуальная / черновик. */
+    if (typeof bootstrap.__initialCanonical !== "undefined") {
+      bootstrap.__initialCanonical = canonicalPayload(bootstrap);
     }
     document.dispatchEvent(new Event("spod-editor-change"));
   }
@@ -3346,9 +4292,14 @@
     }
     if (btnCancelDock) {
       btnCancelDock.addEventListener("click", async function () {
-        await clearRowEditDraft(bootstrap);
-        leaveGuardSuspended = true;
-        window.location.reload();
+        try {
+          await clearRowEditDraft(bootstrap);
+        } catch (eCan) {
+          /* игнор — всё равно перезагружаем страницу */
+        } finally {
+          leaveGuardSuspended = true;
+          window.location.reload();
+        }
       });
     }
 
@@ -3405,17 +4356,22 @@
     if (fgFlat) {
       ensureFieldDraftState(bootstrap);
       fgFlat.querySelectorAll("[data-col]").forEach(function (inp) {
-        var cell = inp.closest(".scalar-cell");
+        var cell = inp.closest(".scalar-cell__yn-band-item") || inp.closest(".scalar-cell");
         var was = cell && cell.querySelector(".was-value");
         var wasActions = cell && cell.querySelector(".was-actions");
         var colName = inp.getAttribute("data-col") || "";
-        if (!was) {
+        if (!was || !cell) {
           return;
         }
         var init = inp.getAttribute("data-initial") || "";
-        if (inp.value !== init) {
+        var isDirtyFlat = !flatControlValueMatchesInitial(inp, cell);
+        if (isDirtyFlat) {
           was.classList.remove("is-hidden");
-          was.textContent = "Было: " + (init === "" ? "∅" : init);
+          var lineFl = visiblePastLineFlat(inp, init, bootstrap);
+          was.textContent = lineFl;
+          was.setAttribute("title", lineFl);
+          was.setAttribute("aria-label", lineFl);
+          was.removeAttribute("aria-hidden");
           cell.classList.add("scalar-cell--changed");
           if (wasActions) {
             wasActions.classList.remove("is-hidden");
@@ -3427,6 +4383,10 @@
           }
         } else {
           was.classList.add("is-hidden");
+          was.textContent = "";
+          was.removeAttribute("title");
+          was.removeAttribute("aria-label");
+          was.setAttribute("aria-hidden", "true");
           if (wasActions) {
             wasActions.classList.add("is-hidden");
           }
@@ -3439,9 +4399,10 @@
 
     (bootstrap.jsonCols || []).forEach(function (jc) {
       var box = findJsonBox(jc.column);
-      var wrap = document.getElementById(
-        "sec-json-" + (jc.section_slug || jc.column.replace(/[^a-zA-Z0-9_-]/g, "_"))
-      );
+      var slug = jc.section_slug || jc.column.replace(/[^a-zA-Z0-9_-]/g, "_");
+      var wrap =
+        document.getElementById("sec-json-" + slug) ||
+        (box && box.closest && box.closest(".json-column-panel"));
       if (!box || !wrap) {
         return;
       }
@@ -3508,15 +4469,28 @@
       }
       blocks.forEach(function (blk) {
         renderFlatSection(blk);
-        blk.__initialCanonical = canonicalPayload(blk);
       });
       var globalFilter = document.getElementById("flat-field-filter-group-all");
       if (globalFilter) {
         globalFilter.addEventListener("input", function () {
           var q = (globalFilter.value || "").trim().toLowerCase();
-          document.querySelectorAll(".group-contest-flat-grid .scalar-cell").forEach(function (c) {
-            var t = c.getAttribute("data-filter-text") || "";
-            c.style.display = !q || t.indexOf(q) !== -1 ? "" : "none";
+          document.querySelectorAll(".group-contest-flat-grid").forEach(function (g) {
+            g.querySelectorAll(":scope > .scalar-cell").forEach(function (c) {
+              if (c.classList.contains("scalar-cell--yn-cluster")) {
+                var anyG = !q || (c.getAttribute("data-filter-text") || "").indexOf(q) !== -1;
+                if (!anyG) {
+                  c.querySelectorAll(".scalar-cell__yn-band-item").forEach(function (it) {
+                    if ((it.getAttribute("data-filter-text") || "").indexOf(q) !== -1) {
+                      anyG = true;
+                    }
+                  });
+                }
+                c.style.display = anyG ? "" : "none";
+                return;
+              }
+              var t = c.getAttribute("data-filter-text") || "";
+              c.style.display = !q || t.indexOf(q) !== -1 ? "" : "none";
+            });
           });
         });
       }
@@ -3528,7 +4502,19 @@
             return;
           }
           var q = (inp.value || "").trim().toLowerCase();
-          g.querySelectorAll(".scalar-cell").forEach(function (c) {
+          g.querySelectorAll(":scope > .scalar-cell").forEach(function (c) {
+            if (c.classList.contains("scalar-cell--yn-cluster")) {
+              var anyB = !q || (c.getAttribute("data-filter-text") || "").indexOf(q) !== -1;
+              if (!anyB) {
+                c.querySelectorAll(".scalar-cell__yn-band-item").forEach(function (it) {
+                  if ((it.getAttribute("data-filter-text") || "").indexOf(q) !== -1) {
+                    anyB = true;
+                  }
+                });
+              }
+              c.style.display = anyB ? "" : "none";
+              return;
+            }
             var t = c.getAttribute("data-filter-text") || "";
             c.style.display = !q || t.indexOf(q) !== -1 ? "" : "none";
           });
@@ -3554,6 +4540,10 @@
           jsonRootG.appendChild(wrap);
         });
       }
+      /* Эталон только после монтирования JSON (иначе collectPayload берёт сырой jc.raw без DOM). */
+      blocks.forEach(function (blk) {
+        blk.__initialCanonical = canonicalPayload(blk);
+      });
       wireNav();
       document.addEventListener("spod-editor-change", function () {
         refreshGroupMultiDirtyState(blocks);
@@ -3624,7 +4614,6 @@
     }
 
     renderFlatSection(bootstrap);
-    bootstrap.__initialCanonical = canonicalPayload(bootstrap);
     var rowDraftState = {};
     var draftEl = document.getElementById("row-editor-draft-state");
     if (draftEl) {
@@ -3686,6 +4675,9 @@
         activateDraftVariant(bootstrap, rowDraftState, "draft");
       });
     }
+
+    /* Эталон «как загрузили страницу» — только после JSON-блоков и выбора актуальная/черновик. */
+    bootstrap.__initialCanonical = canonicalPayload(bootstrap);
 
     document.addEventListener("spod-editor-change", function () {
       refreshDirtyState(bootstrap);
@@ -3772,5 +4764,15 @@
     applyNumericFormatToValue: applyNumericFormatToValue,
     readFlatControlValue: readFlatControlValue,
     attachNumericFlatInput: attachNumericFlatInput,
+  };
+
+  /** Переключатель Y/N для мастера и внешних страниц (см. buildSpodYnToggleDom). */
+  window.SpodYnField = {
+    useToggleForEnumRule: useToggleForEnumRule,
+    isYnBinaryEnumRule: isYnBinaryEnumRule,
+    canonicalYnFromString: canonicalYnFromString,
+    ynLabelsFromFieldEnumRule: ynLabelsFromFieldEnumRule,
+    buildSpodYnToggleDom: buildSpodYnToggleDom,
+    syncSpodYnToggleVisual: syncSpodYnToggleVisual,
   };
 })();

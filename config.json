@@ -557,9 +557,10 @@
             "momentRewarding"
           ],
           "allow_custom": false,
+          "input_display": "toggle",
           "options": [
             {
-              "label": "Вручаем по завершению турнира",
+              "label": "Вручаем в конце",
               "value": "AFTER"
             },
             {
@@ -574,6 +575,7 @@
             "masking"
           ],
           "allow_custom": false,
+          "input_display": "toggle",
           "options": [
             { "label": "Да", "value": "Y" },
             { "label": "Нет", "value": "N" }
@@ -617,6 +619,7 @@
             "tournamentStartMailing"
           ],
           "allow_custom": false,
+          "input_display": "toggle",
           "options": [
             { "label": "Да", "value": "Y" },
             { "label": "Нет", "value": "N" }
@@ -628,6 +631,7 @@
             "tournamentEndMailing"
           ],
           "allow_custom": false,
+          "input_display": "toggle",
           "options": [
             { "label": "Да", "value": "Y" },
             { "label": "Нет", "value": "N" }
@@ -639,6 +643,7 @@
             "tournamentLikeMailing"
           ],
           "allow_custom": false,
+          "input_display": "toggle",
           "options": [
             { "label": "Да", "value": "Y" },
             { "label": "Нет", "value": "N" }
@@ -650,6 +655,7 @@
             "tournamentRewardingMailing"
           ],
           "allow_custom": false,
+          "input_display": "toggle",
           "options": [
             { "label": "Да", "value": "Y" },
             { "label": "Нет", "value": "N" }
@@ -661,6 +667,7 @@
             "tournamentTeam"
           ],
           "allow_custom": false,
+          "input_display": "toggle",
           "options": [
             { "label": "Да", "value": "Y" },
             { "label": "Нет", "value": "N" }
@@ -672,6 +679,7 @@
             "avatarShow"
           ],
           "allow_custom": false,
+          "input_display": "toggle",
           "options": [
             { "label": "Да", "value": "Y" },
             { "label": "Нет", "value": "N" }
@@ -1076,6 +1084,7 @@
             "nftFlg"
           ],
           "allow_custom": false,
+          "input_display": "toggle",
           "options": [
             { "label": "Да", "value": "Y" },
             { "label": "Нет", "value": "N" }
@@ -1087,6 +1096,7 @@
             "outstanding"
           ],
           "allow_custom": false,
+          "input_display": "toggle",
           "options": [
             { "label": "Да", "value": "Y" },
             { "label": "Нет", "value": "N" }
@@ -1098,6 +1108,7 @@
             "hidden"
           ],
           "allow_custom": false,
+          "input_display": "toggle",
           "options": [
             { "label": "Да", "value": "Y" },
             { "label": "Нет", "value": "N" }
@@ -1109,6 +1120,7 @@
             "hiddenRewardList"
           ],
           "allow_custom": false,
+          "input_display": "toggle",
           "options": [
             { "label": "Да", "value": "Y" },
             { "label": "Нет", "value": "N" }
@@ -1120,6 +1132,7 @@
             "masterBadge"
           ],
           "allow_custom": false,
+          "input_display": "toggle",
           "options": [
             { "label": "Да", "value": "Y" },
             { "label": "Нет", "value": "N" }
@@ -1131,6 +1144,7 @@
             "bookingRequired"
           ],
           "allow_custom": false,
+          "input_display": "toggle",
           "options": [
             { "label": "Да", "value": "Y" },
             { "label": "Нет", "value": "N" }
@@ -1142,6 +1156,7 @@
             "deliveryRequired"
           ],
           "allow_custom": false,
+          "input_display": "toggle",
           "options": [
             { "label": "Да", "value": "Y" },
             { "label": "Нет", "value": "N" }
@@ -1153,6 +1168,7 @@
             "commingSoon"
           ],
           "allow_custom": false,
+          "input_display": "toggle",
           "options": [
             { "label": "Да", "value": "Y" },
             { "label": "Нет", "value": "N" }
@@ -1164,6 +1180,7 @@
             "refreshOldNews"
           ],
           "allow_custom": false,
+          "input_display": "toggle",
           "options": [
             { "label": "Да", "value": "Y" },
             { "label": "Нет", "value": "N" }
@@ -1175,6 +1192,7 @@
             "rewardAgainGlobal"
           ],
           "allow_custom": false,
+          "input_display": "toggle",
           "options": [
             { "label": "Да", "value": "Y" },
             { "label": "Нет", "value": "N" }
@@ -1186,6 +1204,7 @@
             "rewardAgainTournament"
           ],
           "allow_custom": false,
+          "input_display": "toggle",
           "options": [
             { "label": "Да", "value": "Y" },
             { "label": "Нет", "value": "N" }
@@ -1197,6 +1216,7 @@
             "isGrouping"
           ],
           "allow_custom": false,
+          "input_display": "toggle",
           "options": [
             { "label": "Да", "value": "Y" },
             { "label": "Нет", "value": "N" }
@@ -1266,6 +1286,7 @@
             "tournamentTeam"
           ],
           "allow_custom": false,
+          "input_display": "toggle",
           "options": [
             { "label": "Да", "value": "Y" },
             { "label": "Нет", "value": "N" }

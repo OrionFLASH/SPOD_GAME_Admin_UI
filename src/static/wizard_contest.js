@@ -572,37 +572,53 @@
         row.appendChild(pairW.warnEl);
       }
     } else if (en) {
-      var wrap = document.createElement("div");
-      wrap.className = "wiz-enum-wrap spod-enum-block spod-enum-block--flat";
-      var hidden = document.createElement("input");
-      hidden.type = "hidden";
-      hidden.setAttribute("data-wiz-col", col);
-      hidden.value = initV;
-      var sel = document.createElement("select");
-      sel.className = "spod-enum-select spod-leaf-control";
-      fillSelect(sel, en.options, !!en.allow_custom, initV);
-      var taC = document.createElement("textarea");
-      taC.className = "wiz-enum-custom spod-enum-custom spod-leaf-control is-hidden";
-      taC.rows = 3;
-      if (sel.value === CUSTOM) {
-        taC.classList.remove("is-hidden");
-        taC.value = initV;
-      }
-      sel.addEventListener("change", function () {
+      var ynWiz = typeof window !== "undefined" ? window.SpodYnField : null;
+      if (ynWiz && ynWiz.isYnBinaryEnumRule(en)) {
+        /* Тот же переключатель Y/N, что на карточке строки (row_editor.js). */
+        row.appendChild(
+          ynWiz.buildSpodYnToggleDom({
+            safeId: "",
+            initialRaw: initV,
+            flatColumn: col,
+            valueAttr: "data-wiz-col",
+            jsonLeaf: false,
+            enumRule: en,
+            enumBlockMod: "spod-enum-block--flat",
+          })
+        );
+      } else {
+        var wrap = document.createElement("div");
+        wrap.className = "wiz-enum-wrap spod-enum-block spod-enum-block--flat";
+        var hidden = document.createElement("input");
+        hidden.type = "hidden";
+        hidden.setAttribute("data-wiz-col", col);
+        hidden.value = initV;
+        var sel = document.createElement("select");
+        sel.className = "spod-enum-select spod-leaf-control";
+        fillSelect(sel, en.options, !!en.allow_custom, initV);
+        var taC = document.createElement("textarea");
+        taC.className = "wiz-enum-custom spod-enum-custom spod-leaf-control is-hidden";
+        taC.rows = 3;
         if (sel.value === CUSTOM) {
           taC.classList.remove("is-hidden");
-        } else {
-          taC.classList.add("is-hidden");
+          taC.value = initV;
         }
-        hidden.value = sel.value === CUSTOM ? taC.value : sel.value;
-      });
-      taC.addEventListener("input", function () {
-        hidden.value = taC.value;
-      });
-      wrap.appendChild(hidden);
-      wrap.appendChild(sel);
-      wrap.appendChild(taC);
-      row.appendChild(wrap);
+        sel.addEventListener("change", function () {
+          if (sel.value === CUSTOM) {
+            taC.classList.remove("is-hidden");
+          } else {
+            taC.classList.add("is-hidden");
+          }
+          hidden.value = sel.value === CUSTOM ? taC.value : sel.value;
+        });
+        taC.addEventListener("input", function () {
+          hidden.value = taC.value;
+        });
+        wrap.appendChild(hidden);
+        wrap.appendChild(sel);
+        wrap.appendChild(taC);
+        row.appendChild(wrap);
+      }
     } else {
       var hint = findTextareaHint(sheetCode, col);
       var thr = schema.longTextThreshold || 120;

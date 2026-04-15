@@ -24,7 +24,7 @@ ROOT = Path(__file__).resolve().parent.parent
 CFG: Dict[str, Any] = {}
 CONN: sqlite3.Connection | None = None
 DB_PATH: Path | None = None
-STATIC_ASSET_VERSION = "20260415_6"
+STATIC_ASSET_VERSION = "20260415_16"
 
 
 def _cells_canonical_json(cells: Dict[str, str]) -> str:

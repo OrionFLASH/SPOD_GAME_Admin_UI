@@ -6,6 +6,7 @@
 rules (перечисления), hints (размеры textarea), rules в editor_field_ui (подписи и описания полей)
 или rules в editor_field_numeric (форматы числовых полей: плоские колонки и при необходимости json_path внутри JSON-колонки),
 вместо повторения sheet_code в каждой записи.
+У правил field_enums в rules[] опционально поле input_display (toggle / select) — передаётся в flatten_field_enums на клиент (row_editor.js).
 Поддерживается и старый плоский формат (каждый элемент — полное правило с sheet_code).
 """
 
@@ -20,6 +21,9 @@ def flatten_field_enums(cfg: Dict[str, Any]) -> List[Dict[str, Any]]:
 
     Новый формат элемента field_enums:
       {"sheet_code": "REWARD", "rules": [{"column": "...", "allow_custom": true, "options": [...]}, ...]}
+    Дополнительно для правил с options (field_enums): input_display — как показывать поле в UI:
+      "toggle" — при ровно двух вариантах переключатель (см. row_editor.js useToggleForEnumRule);
+      "select" или отсутствие ключа — выпадающий список; если опций больше двух, всегда список.
     Элемент options может быть строкой или объектом {"label": "подпись в UI", "value": "значение в ячейке CSV"}.
     Для пути вида ["ключ", 0], ["ключ", 1], … в JSON-колонке правило с json_path ["ключ"] (без индекса)
     применяется к каждому элементу массива (select на каждую строку, в т.ч. внутри json_scalar_array).

@@ -1943,3 +1943,373 @@ body.spod-date-modal-open {
   margin: 0;
   font-size: 1rem;
 }
+
+/* ——— Двухпозиционный переключатель: ширина — --spod-yn-text-px (JS); обёртка не растягивается на всю сетку (fit-content, max 50% блока). ——— */
+.spod-yn-wrap {
+  flex: 0 0 auto;
+  width: fit-content;
+  max-width: 50%;
+  min-width: 0;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.json-yn-band-item__ctrl .spod-yn-wrap,
+.scalar-cell__yn-band-control .spod-yn-wrap {
+  align-self: flex-start;
+}
+
+.spod-yn-track {
+  --spod-thumb-w: 1.28rem;
+  --spod-yn-inset: 0.2rem;
+  --spod-yn-text-gap: 0.22rem;
+  position: relative;
+  display: block;
+  box-sizing: border-box;
+  width: calc(
+    var(--spod-yn-text-px, 3rem) + 2 * (var(--spod-thumb-w) + var(--spod-yn-inset) + var(--spod-yn-text-gap))
+  );
+  max-width: 100%;
+  min-width: 0;
+  height: 1.85rem;
+  padding: 0;
+  border: none;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background 0.22s ease, box-shadow 0.2s ease, transform 0.12s ease;
+  overflow: hidden;
+}
+
+.spod-yn-track:active {
+  transform: scale(0.97);
+}
+
+.spod-yn-wrap--opt-first .spod-yn-track,
+.spod-yn-wrap--yes .spod-yn-track {
+  background: linear-gradient(135deg, #2fb06d 0%, #1a7a48 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.28),
+    0 1px 3px rgba(20, 100, 60, 0.25);
+}
+
+.spod-yn-wrap--opt-second .spod-yn-track,
+.spod-yn-wrap--no .spod-yn-track {
+  background: linear-gradient(135deg, #e07070 0%, #a83236 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.18),
+    0 1px 3px rgba(120, 30, 35, 0.22);
+}
+
+.spod-yn-thumb {
+  position: absolute;
+  top: 50%;
+  left: var(--spod-yn-inset);
+  width: var(--spod-thumb-w);
+  height: var(--spod-thumb-w);
+  margin-top: calc(-0.5 * var(--spod-thumb-w));
+  border-radius: 50%;
+  background: linear-gradient(180deg, #fff 0%, #f0f2f5 100%);
+  box-shadow:
+    0 1px 4px rgba(0, 0, 0, 0.18),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.06);
+  transition: left 0.24s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 3;
+}
+
+/* Крайние положения бегунка — с одинаковым inset от левого и правого края трека */
+.spod-yn-wrap--opt-first .spod-yn-thumb,
+.spod-yn-wrap--yes .spod-yn-thumb {
+  left: var(--spod-yn-inset);
+}
+
+.spod-yn-wrap--opt-second .spod-yn-thumb,
+.spod-yn-wrap--no .spod-yn-thumb {
+  left: calc(100% - var(--spod-thumb-w) - var(--spod-yn-inset));
+}
+
+/* Одна строка: полоса текста между зонами бегунка; по центру */
+.spod-yn-state-label {
+  position: absolute;
+  left: calc(var(--spod-thumb-w) + var(--spod-yn-inset) + var(--spod-yn-text-gap));
+  right: calc(var(--spod-thumb-w) + var(--spod-yn-inset) + var(--spod-yn-text-gap));
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.52rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  pointer-events: none;
+  z-index: 1;
+  color: rgba(255, 255, 255, 0.97);
+  line-height: 1.1;
+  text-align: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Не помещается в половину блока: до 3 строк по высоте; бегунок слегка крупнее на высоком треке */
+.spod-yn-wrap[data-spod-yn-multiline="1"] .spod-yn-track {
+  --spod-thumb-w: clamp(1.12rem, 2.8vmin, 1.52rem);
+  height: auto;
+  min-height: 1.9rem;
+  padding: 0.32rem 0;
+}
+
+.spod-yn-wrap[data-spod-yn-multiline="1"] .spod-yn-state-label {
+  left: 50%;
+  right: auto;
+  width: calc(100% - 2 * (var(--spod-thumb-w) + var(--spod-yn-inset) + var(--spod-yn-text-gap)));
+  max-width: calc(100% - 2 * (var(--spod-thumb-w) + var(--spod-yn-inset) + var(--spod-yn-text-gap)));
+  transform: translate(-50%, -50%);
+  white-space: normal;
+  display: block;
+  overflow: hidden;
+  word-break: break-word;
+  line-height: 1.18;
+  max-height: calc(3 * 1.18em);
+  font-size: 0.48rem;
+  text-overflow: clip;
+}
+
+.scalar-cell--changed .spod-yn-track,
+.json-leaf-row--changed .spod-yn-track {
+  outline: 2px solid rgba(210, 120, 140, 0.55);
+  outline-offset: 1px;
+}
+
+.scalar-cell--confirmed .spod-yn-track,
+.json-leaf-row--confirmed .spod-yn-track {
+  outline: 2px solid rgba(60, 170, 105, 0.55);
+  outline-offset: 1px;
+}
+
+/* Прошлое значение под полем — видимый текст (не иконка); при необходимости вся строка в title */
+.was-value.spod-field-past-hint {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  margin: 0.25rem 0 0;
+  padding: 0.28rem 0.42rem;
+  border-radius: 8px;
+  font-size: 0.76rem;
+  line-height: 1.35;
+  color: rgba(45, 50, 58, 0.9);
+  background: rgba(95, 120, 150, 0.09);
+  border: 1px solid rgba(95, 120, 150, 0.2);
+  cursor: default;
+  word-break: break-word;
+}
+
+.was-value.spod-field-past-hint:empty {
+  display: none;
+}
+
+/* Кластер плоских полей Y/N на всю ширину сетки */
+.scalar-cell--yn-cluster {
+  grid-column: 1 / -1;
+  max-width: 100%;
+  padding: 0.65rem 0.9rem 0.8rem;
+  border-radius: 14px;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  background: linear-gradient(165deg, rgba(255, 255, 255, 0.96) 0%, rgba(245, 248, 252, 0.94) 100%);
+}
+
+.scalar-cell__yn-band-head {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--muted);
+  margin-bottom: 0.55rem;
+  letter-spacing: 0.02em;
+}
+
+/* До трёх колонок на широкой сетке карточки; на узкой — одна–две, ячейки не сжимаются сильнее minmax */
+.scalar-cell__yn-band-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
+  gap: 0.55rem 0.85rem;
+  align-items: stretch;
+}
+
+@media (min-width: 720px) {
+  .scalar-cell__yn-band-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1024px) {
+  .scalar-cell__yn-band-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.scalar-cell__yn-band-item {
+  padding: 0.35rem 0.45rem 0.35rem;
+  border-radius: 11px;
+  background: rgba(255, 255, 255, 0.65);
+  border: 1px solid rgba(0, 0, 0, 0.04);
+  min-width: 0;
+}
+
+/* Переключатель и ✓✕ в одной строке; строка «В базе было: …» на всю ширину под ними */
+.scalar-cell__yn-band-control {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 0.35rem 0.5rem;
+  margin-top: 0.28rem;
+}
+
+.scalar-cell__yn-band-control .spod-yn-wrap {
+  grid-column: 1;
+  grid-row: 1;
+  justify-self: start;
+}
+
+.scalar-cell__yn-band-control .was-actions {
+  grid-column: 2;
+  grid-row: 1;
+  justify-self: end;
+  margin-top: 0;
+}
+
+.scalar-cell__yn-band-control .was-value.spod-field-past-hint {
+  grid-column: 1 / -1;
+  grid-row: 2;
+}
+
+/* Несколько Y/N подряд в одной JSON-колонке */
+.json-yn-cluster-row {
+  grid-column: 1 / -1;
+  max-width: 100%;
+  padding: 0.5rem 0.65rem 0.55rem;
+  border-radius: 12px;
+  border: 1px dashed rgba(74, 95, 120, 0.2);
+  background: rgba(250, 252, 255, 0.75);
+}
+
+/* Кластер Y/N в JSON: та же сетка до 3 в ряд, что и у плоских полей */
+.json-yn-cluster-band-inner {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
+  gap: 0.55rem 0.85rem;
+  align-items: stretch;
+}
+
+@media (min-width: 720px) {
+  .json-yn-cluster-band-inner {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1024px) {
+  .json-yn-cluster-band-inner {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+/* Подпись сверху; переключатель + ✓✕ в одной строке; «В базе было» ниже на всю ширину */
+.json-yn-band-item {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: start;
+  gap: 0.25rem 0.45rem;
+  min-width: 0;
+  padding: 0.3rem 0.35rem 0.35rem;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.55);
+  border: 1px solid rgba(0, 0, 0, 0.045);
+}
+
+.json-yn-band-item .json-path-label {
+  font-size: 0.78rem;
+  line-height: 1.25;
+}
+
+.json-yn-band-item .json-yn-band-item__ctrl {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-top: 0;
+}
+
+.json-yn-band-item > .json-path-label {
+  grid-column: 1 / -1;
+}
+
+.json-yn-band-item > .json-yn-band-item__ctrl {
+  grid-column: 1;
+  grid-row: 2;
+  margin-top: 0;
+}
+
+.json-yn-band-item > .was-value.spod-field-past-hint {
+  grid-column: 1 / -1;
+  grid-row: 3;
+}
+
+.json-yn-band-item > .was-actions {
+  grid-column: 2;
+  grid-row: 2;
+  align-self: center;
+  margin-top: 0;
+}
+
+/* Одиночное поле Y/N в JSON (не в кластере): подпись, переключатель + кнопки, строка «В базе было» */
+.json-leaf-row:has(> .spod-yn-wrap) {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: start;
+  gap: 0.25rem 0.45rem;
+}
+
+.json-leaf-row:has(> .spod-yn-wrap) > .json-path-label {
+  grid-column: 1 / -1;
+}
+
+.json-leaf-row:has(> .spod-yn-wrap) > .spod-yn-wrap {
+  grid-column: 1;
+  grid-row: 2;
+  justify-self: start;
+}
+
+.json-leaf-row:has(> .spod-yn-wrap) > .was-value.spod-field-past-hint {
+  grid-column: 1 / -1;
+  grid-row: 3;
+}
+
+.json-leaf-row:has(> .spod-yn-wrap) > .was-actions {
+  grid-column: 2;
+  grid-row: 2;
+  align-self: center;
+}
+
+/* Плоское поле-выпадающий список: select и ✓✕ в строке, «В базе было» под списком */
+.scalar-cell.grid-cell:has(> .spod-enum-block.spod-enum-block--flat):has(> .was-actions) {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: start;
+  gap: 0.25rem 0.45rem;
+}
+
+.scalar-cell.grid-cell:has(> .spod-enum-block.spod-enum-block--flat) > label {
+  grid-column: 1 / -1;
+}
+
+.scalar-cell.grid-cell:has(> .spod-enum-block.spod-enum-block--flat) > .spod-enum-block {
+  grid-column: 1;
+  grid-row: 2;
+  min-width: 0;
+}
+
+.scalar-cell.grid-cell:has(> .spod-enum-block.spod-enum-block--flat) > .was-value.spod-field-past-hint {
+  grid-column: 1 / -1;
+  grid-row: 3;
+}
+
+.scalar-cell.grid-cell:has(> .spod-enum-block.spod-enum-block--flat) > .was-actions {
+  grid-column: 2;
+  grid-row: 2;
+  align-self: center;
+}
