@@ -426,15 +426,6 @@
           ]
         },
         {
-          "column": "SOURCE_UPD_FREQUENCY",
-          "allow_custom": true,
-          "options": [
-            "1",
-            "7",
-            "10"
-          ]
-        },
-        {
           "column": "CONTEST_SUBJECT",
           "allow_custom": false,
           "options": [
@@ -596,7 +587,7 @@
           "allow_custom": false,
           "options": [
             {
-              "label": "(пусто)",
+              "label": "В рублях",
               "value": ""
             },
             {
@@ -809,17 +800,17 @@
           "allow_custom": false,
           "options": [
             { "label": "Все", "value": "*" },
-            { "label": "[13]", "value": "[13]" },
-            { "label": "[16]", "value": "[16]" },
-            { "label": "[18]", "value": "[18]" },
+            { "label": "ЦЧБ", "value": "[13]" },
+            { "label": "УБ", "value": "[16]" },
+            { "label": "ББ", "value": "[18]" },
             { "label": "МБ", "value": "[38]" },
             { "label": "СРБ", "value": "[40]" },
-            { "label": "[42]", "value": "[42]" },
-            { "label": "[44]", "value": "[44]" },
-            { "label": "[52]", "value": "[52]" },
-            { "label": "[54]", "value": "[54]" },
-            { "label": "[55]", "value": "[55]" },
-            { "label": "[70]", "value": "[70]" }
+            { "label": "ВВБ", "value": "[42]" },
+            { "label": "СИБ", "value": "[44]" },
+            { "label": "ЮЗБ", "value": "[52]" },
+            { "label": "ПБ", "value": "[54]" },
+            { "label": "СЗБ", "value": "[55]" },
+            { "label": "ДВБ", "value": "[70]" }
           ]
         },
         {
@@ -1218,8 +1209,8 @@
           ],
           "allow_custom": false,
           "options": [
-            "AIPROMPT",
-            "TEMPLATE"
+            { "label": "AI-новость", "value": "AIPROMPT" },
+            { "label": "Новость по шаблону", "value": "TEMPLATE" }
           ]
         },
         {
@@ -1698,6 +1689,13 @@
           "format": "integer",
           "min": -10,
           "max": 1000
+        },
+        {
+          "comment": "SOURCE_UPD_FREQUENCY: целое число от 1 до 10 включительно.",
+          "column": "SOURCE_UPD_FREQUENCY",
+          "format": "integer",
+          "min": 1,
+          "max": 10
         }
       ]
     },
@@ -2039,7 +2037,7 @@
                 "businessBlock",
                 0
               ],
-              "label": "businessBlock[0]",
+              "label": "Бизнес-блок",
               "description": "businessBlock[0]",
               "show_description": false,
               "required": false,
@@ -2135,7 +2133,7 @@
               "json_path": [
                 "gosbHidden"
               ],
-              "label": "Скрыть в ГОСБ",
+              "label": "Скрыть от ГОСБ",
               "description": "Видят все ГОСБ кроме указанных",
               "show_description": true,
               "required": false,
@@ -2228,7 +2226,7 @@
                 "persomanNumberVisible",
                 0
               ],
-              "label": "persomanNumberVisible[0]",
+              "label": "Показать участникам",
               "description": "persomanNumberVisible[0]",
               "show_description": false,
               "required": false,
@@ -2239,7 +2237,7 @@
                 "persomanNumberVisible",
                 1
               ],
-              "label": "persomanNumberVisible[1]",
+              "label": "Показать участникам",
               "description": "persomanNumberVisible[1]",
               "show_description": false,
               "required": false,
@@ -2250,7 +2248,7 @@
                 "persomanNumberVisible",
                 2
               ],
-              "label": "persomanNumberVisible[2]",
+              "label": "Показать участникам",
               "description": "persomanNumberVisible[2]",
               "show_description": false,
               "required": false,
@@ -2261,7 +2259,7 @@
                 "persomanNumberVisible",
                 3
               ],
-              "label": "persomanNumberVisible[3]",
+              "label": "Показать участникам",
               "description": "persomanNumberVisible[3]",
               "show_description": false,
               "required": false,
@@ -2272,7 +2270,7 @@
                 "persomanNumberVisible",
                 4
               ],
-              "label": "persomanNumberVisible[4]",
+              "label": "Показать участникам",
               "description": "persomanNumberVisible[4]",
               "show_description": false,
               "required": false,
@@ -2283,7 +2281,7 @@
                 "persomanNumberVisible",
                 5
               ],
-              "label": "persomanNumberVisible[5]",
+              "label": "Показать участникам",
               "description": "persomanNumberVisible[5]",
               "show_description": false,
               "required": false,
@@ -2294,7 +2292,7 @@
                 "persomanNumberVisible",
                 6
               ],
-              "label": "persomanNumberVisible[6]",
+              "label": "Показать участникам",
               "description": "persomanNumberVisible[6]",
               "show_description": false,
               "required": false,
@@ -2358,7 +2356,7 @@
               "json_path": [
                 "tbHidden"
               ],
-              "label": "Скрыть в ТБ",
+              "label": "Скрыть от ТБ",
               "description": "Видят все ТБ кроме указанных",
               "show_description": true,
               "required": false,
@@ -2379,7 +2377,7 @@
                 "tbVisible",
                 0
               ],
-              "label": "tbVisible[0]",
+              "label": "Показать в ТБ",
               "description": "tbVisible[0]",
               "show_description": false,
               "required": false,
@@ -2390,7 +2388,7 @@
                 "tbVisible",
                 1
               ],
-              "label": "tbVisible[1]",
+              "label": "Показать в ТБ",
               "description": "tbVisible[1]",
               "show_description": false,
               "required": false,
@@ -2401,7 +2399,7 @@
                 "tbVisible",
                 2
               ],
-              "label": "tbVisible[2]",
+              "label": "Показать в ТБ",
               "description": "tbVisible[2]",
               "show_description": false,
               "required": false,
@@ -2412,7 +2410,7 @@
                 "tbVisible",
                 3
               ],
-              "label": "tbVisible[3]",
+              "label": "Показать в ТБ",
               "description": "tbVisible[3]",
               "show_description": false,
               "required": false,
@@ -2422,7 +2420,7 @@
               "json_path": [
                 "tournamentEndMailing"
               ],
-              "label": "tournamentEndMailing",
+              "label": "Письмо о завершении турнира",
               "description": "tournamentEndMailing",
               "show_description": false,
               "required": false,
@@ -2432,7 +2430,7 @@
               "json_path": [
                 "tournamentLikeMailing"
               ],
-              "label": "tournamentLikeMailing",
+              "label": "Письмо о лайках",
               "description": "tournamentLikeMailing",
               "show_description": false,
               "required": false,
@@ -2462,7 +2460,7 @@
               "json_path": [
                 "tournamentStartMailing"
               ],
-              "label": "tournamentStartMailing",
+              "label": "Письмо о начале турнира",
               "description": "tournamentStartMailing",
               "show_description": false,
               "required": false,
@@ -2492,7 +2490,7 @@
               "json_path": [
                 "vid"
               ],
-              "label": "vid",
+              "label": "Метка типа турнира",
               "description": "vid",
               "show_description": false,
               "required": false,
@@ -2523,7 +2521,7 @@
         },
         {
           "column": "GROUP_VALUE",
-          "label": "GROUP_VALUE",
+          "label": "Фильтр ТБ/ГОСБ",
           "description": "GROUP_VALUE",
           "show_description": false,
           "required": true,
@@ -2539,24 +2537,24 @@
         },
         {
           "column": "GET_CALC_CRITERION",
-          "label": "GET_CALC_CRITERION",
-          "description": "GET_CALC_CRITERION",
+          "label": "Критерий ЗОЛОТО",
+          "description": "Критерий отбора для награды ЗОЛОТО",
           "show_description": false,
           "required": false,
           "allows_empty": true
         },
         {
           "column": "ADD_CALC_CRITERION",
-          "label": "ADD_CALC_CRITERION",
-          "description": "ADD_CALC_CRITERION",
+          "label": "Критерий СЕРЕБРО",
+          "description": "Критерий отбора для награды СЕРЕБРО",
           "show_description": false,
           "required": false,
           "allows_empty": true
         },
         {
           "column": "ADD_CALC_CRITERION_2",
-          "label": "ADD_CALC_CRITERION_2",
-          "description": "ADD_CALC_CRITERION_2",
+          "label": "Критерий БРОНЗА",
+          "description": "Критерий отбора для награды БРОНЗА",
           "show_description": false,
           "required": false,
           "allows_empty": true
@@ -2608,7 +2606,7 @@
         },
         {
           "column": "INDICATOR_CODE",
-          "label": "INDICATOR_CODE",
+          "label": "Код показателя",
           "description": "INDICATOR_CODE",
           "show_description": false,
           "required": true,
@@ -2616,16 +2614,16 @@
         },
         {
           "column": "INDICATOR_AGG_FUNCTION",
-          "label": "INDICATOR_AGG_FUNCTION",
-          "description": "INDICATOR_AGG_FUNCTION",
+          "label": "Функция агрегации",
+          "description": "Функция агрегации значений показателя",
           "show_description": false,
           "required": false,
           "allows_empty": true
         },
         {
           "column": "INDICATOR_WEIGHT",
-          "label": "INDICATOR_WEIGHT",
-          "description": "Целое число от -10 до 1000; пустое значение допустимо.",
+          "label": "Вес показателя",
+          "description": "Вес показателя в для агрегации",
           "show_description": true,
           "required": false,
           "allows_empty": true
@@ -2665,7 +2663,7 @@
         {
           "column": "CALC_TYPE",
           "label": "Тип расчета",
-          "description": "В списке: «Ручной расчет» → 1, «Промышленный расчет» → 0.",
+          "description": "«Ручной расчет» → 1, «Промышленный расчет» → 0.",
           "show_description": true,
           "required": true,
           "allows_empty": false
@@ -2788,7 +2786,7 @@
               "json_path": [
                 "commingSoon"
               ],
-              "label": "commingSoon",
+              "label": "Скоро будет",
               "description": "commingSoon",
               "show_description": false,
               "required": false,
@@ -2896,8 +2894,8 @@
                 "employeeRating",
                 "minCrystalEarnedTotal"
               ],
-              "label": "Минимум заработанных кристаллов (minCrystalEarnedTotal)",
-              "description": "Целое число от 1 до 50 включительно (числовой ввод) или пустое значение.",
+              "label": "Минимум кристаллов",
+              "description": "Минимальное количество кристаллов для чтобы получить преференцию",
               "show_description": true,
               "required": false,
               "allows_empty": true
@@ -2909,7 +2907,7 @@
                 "minRatingBANK"
               ],
               "label": "Минимальный рейтинг в стране",
-              "description": "Целое число от 1 до 100 включительно (числовой ввод) или пустое значение.",
+              "description": "Минимальный рейтинг в стране для чтобы получить преференцию",
               "show_description": true,
               "required": false,
               "allows_empty": true
@@ -2921,7 +2919,7 @@
                 "minRatingGOSB"
               ],
               "label": "Минимальный рейтинг в ТБ",
-              "description": "Целое число от 1 до 5 включительно (числовой ввод) или пустое значение.",
+              "description": "Минимальный рейтинг в ТБ для чтобы получить преференцию",
               "show_description": true,
               "required": false,
               "allows_empty": true
@@ -2933,7 +2931,7 @@
                 "minRatingTB"
               ],
               "label": "Минимальный рейтинг в ГОСБ",
-              "description": "Целое число от 1 до 10 включительно (числовой ввод) или пустое значение.",
+              "description": "Минимальный рейтинг в ГОСБ для чтобы получить преференцию",
               "show_description": true,
               "required": false,
               "allows_empty": true
@@ -3874,7 +3872,7 @@
               "json_path": [
                 "winCriterion"
               ],
-              "label": "winCriterion",
+              "label": "Критерий для AI-новости",
               "description": "winCriterion",
               "show_description": false,
               "required": false,
@@ -4014,8 +4012,8 @@
         },
         {
           "column": "FILTER_PERIOD_ARR",
-          "label": "Фильтр по периодам (FILTER_PERIOD_ARR)",
-          "description": "Массив из одного объекта: период для отбора показателей; даты и при необходимости критерий.",
+          "label": "Фильтр по периодам",
+          "description": "Настройка периодов для отбора показателей",
           "show_description": true,
           "required": false,
           "allows_empty": true,
@@ -4023,7 +4021,7 @@
             {
               "json_path": [0, "period_code"],
               "label": "Код периода (period_code)",
-              "description": "0 или 1.",
+              "description": "0 или 1: 0 - текущий период, 1 - прошлый период",
               "show_description": true,
               "required": false,
               "allows_empty": true
@@ -4047,7 +4045,7 @@
             {
               "json_path": [0, "criterion_mark_type"],
               "label": "Условие по критерию (criterion_mark_type)",
-              "description": "Как у плоских CRITERION_MARK_TYPE: >, >=, пусто и т.д.",
+              "description": "Условие по критерию: >, >=, пусто и т.д.",
               "show_description": true,
               "required": false,
               "allows_empty": true
@@ -4055,7 +4053,7 @@
             {
               "json_path": [0, "criterion_mark_value"],
               "label": "Значение критерия (criterion_mark_value)",
-              "description": "Целое число от 0 до 1000000 включительно (числовой ввод) или пустое значение; как у плоского CRITERION_MARK_VALUE.",
+              "description": "Значение критерия для фильтрации",
               "show_description": true,
               "required": false,
               "allows_empty": true
