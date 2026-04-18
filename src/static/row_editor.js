@@ -678,19 +678,26 @@
 
   /**
    * Текст hover-подсказки для подписи/описания поля:
-   * - всегда показываем column;
+   * - для плоского поля: column;
+   * - для JSON-листа: полный путь ключей внутри JSON (column + цепочка jsonParts);
    * - если описание скрыто (show_description=false), добавляем description.
    */
-  function fieldUiHoverTitle(rule, column) {
-    var colText = "column: " + String(column || "");
+  function fieldUiHoverTitle(rule, column, jsonParts) {
+    var col = String(column || "");
+    var baseText;
+    if (Array.isArray(jsonParts) && jsonParts.length) {
+      baseText = "json_path: " + col + "." + formatPath(jsonParts);
+    } else {
+      baseText = "column: " + col;
+    }
     if (!rule) {
-      return colText;
+      return baseText;
     }
     var desc = rule.description != null ? String(rule.description).trim() : "";
     if (!showDescriptionEnabled(rule) && desc) {
-      return colText + "\n" + desc;
+      return baseText + "\n" + desc;
     }
-    return colText;
+    return baseText;
   }
 
   function fieldUiRequired(r) {
@@ -753,7 +760,7 @@
     var r = findFieldUi(bootstrap, column, jsonParts);
     var display = fallbackText;
     var desc = "";
-    var hoverTitle = fieldUiHoverTitle(r, column);
+    var hoverTitle = fieldUiHoverTitle(r, column, jsonParts);
     if (r) {
       if (r.label != null && String(r.label).trim() !== "") {
         display = String(r.label);

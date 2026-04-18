@@ -287,13 +287,19 @@
         },
         {
           "column": "FILTER_PERIOD_ARR",
-          "json_path": [0, "start_dt"],
+          "json_path": [
+            0,
+            "start_dt"
+          ],
           "input_type": "date",
           "storage_format": "YYYY-MM-DD"
         },
         {
           "column": "FILTER_PERIOD_ARR",
-          "json_path": [0, "end_dt"],
+          "json_path": [
+            0,
+            "end_dt"
+          ],
           "input_type": "date",
           "storage_format": "YYYY-MM-DD"
         }
@@ -577,8 +583,14 @@
           "allow_custom": false,
           "input_display": "toggle",
           "options": [
-            { "label": "Да", "value": "Y" },
-            { "label": "Нет", "value": "N" }
+            {
+              "label": "Да",
+              "value": "Y"
+            },
+            {
+              "label": "Нет",
+              "value": "N"
+            }
           ]
         },
         {
@@ -621,8 +633,14 @@
           "allow_custom": false,
           "input_display": "toggle",
           "options": [
-            { "label": "Да", "value": "Y" },
-            { "label": "Нет", "value": "N" }
+            {
+              "label": "Да",
+              "value": "Y"
+            },
+            {
+              "label": "Нет",
+              "value": "N"
+            }
           ]
         },
         {
@@ -633,8 +651,14 @@
           "allow_custom": false,
           "input_display": "toggle",
           "options": [
-            { "label": "Да", "value": "Y" },
-            { "label": "Нет", "value": "N" }
+            {
+              "label": "Да",
+              "value": "Y"
+            },
+            {
+              "label": "Нет",
+              "value": "N"
+            }
           ]
         },
         {
@@ -645,8 +669,14 @@
           "allow_custom": false,
           "input_display": "toggle",
           "options": [
-            { "label": "Да", "value": "Y" },
-            { "label": "Нет", "value": "N" }
+            {
+              "label": "Да",
+              "value": "Y"
+            },
+            {
+              "label": "Нет",
+              "value": "N"
+            }
           ]
         },
         {
@@ -657,8 +687,14 @@
           "allow_custom": false,
           "input_display": "toggle",
           "options": [
-            { "label": "Да", "value": "Y" },
-            { "label": "Нет", "value": "N" }
+            {
+              "label": "Да",
+              "value": "Y"
+            },
+            {
+              "label": "Нет",
+              "value": "N"
+            }
           ]
         },
         {
@@ -669,8 +705,14 @@
           "allow_custom": false,
           "input_display": "toggle",
           "options": [
-            { "label": "Да", "value": "Y" },
-            { "label": "Нет", "value": "N" }
+            {
+              "label": "Да",
+              "value": "Y"
+            },
+            {
+              "label": "Нет",
+              "value": "N"
+            }
           ]
         },
         {
@@ -681,8 +723,14 @@
           "allow_custom": false,
           "input_display": "toggle",
           "options": [
-            { "label": "Да", "value": "Y" },
-            { "label": "Нет", "value": "N" }
+            {
+              "label": "Да",
+              "value": "Y"
+            },
+            {
+              "label": "Нет",
+              "value": "N"
+            }
           ]
         },
         {
@@ -807,18 +855,54 @@
           "comment": "Подписи в UI: объекты { label, value }; сейчас label = value, позже можно задать человекочитаемые label.",
           "allow_custom": false,
           "options": [
-            { "label": "Все", "value": "*" },
-            { "label": "ЦЧБ", "value": "[13]" },
-            { "label": "УБ", "value": "[16]" },
-            { "label": "ББ", "value": "[18]" },
-            { "label": "МБ", "value": "[38]" },
-            { "label": "СРБ", "value": "[40]" },
-            { "label": "ВВБ", "value": "[42]" },
-            { "label": "СИБ", "value": "[44]" },
-            { "label": "ЮЗБ", "value": "[52]" },
-            { "label": "ПБ", "value": "[54]" },
-            { "label": "СЗБ", "value": "[55]" },
-            { "label": "ДВБ", "value": "[70]" }
+            {
+              "label": "Все",
+              "value": "*"
+            },
+            {
+              "label": "ЦЧБ",
+              "value": "[13]"
+            },
+            {
+              "label": "УБ",
+              "value": "[16]"
+            },
+            {
+              "label": "ББ",
+              "value": "[18]"
+            },
+            {
+              "label": "МБ",
+              "value": "[38]"
+            },
+            {
+              "label": "СРБ",
+              "value": "[40]"
+            },
+            {
+              "label": "ВВБ",
+              "value": "[42]"
+            },
+            {
+              "label": "СИБ",
+              "value": "[44]"
+            },
+            {
+              "label": "ЮЗБ",
+              "value": "[52]"
+            },
+            {
+              "label": "ПБ",
+              "value": "[54]"
+            },
+            {
+              "label": "СЗБ",
+              "value": "[55]"
+            },
+            {
+              "label": "ДВБ",
+              "value": "[70]"
+            }
           ]
         },
         {
@@ -1086,8 +1170,14 @@
           "allow_custom": false,
           "input_display": "toggle",
           "options": [
-            { "label": "Да", "value": "Y" },
-            { "label": "Нет", "value": "N" }
+            {
+              "label": "Да",
+              "value": "Y"
+            },
+            {
+              "label": "Нет",
+              "value": "N"
+            }
           ]
         },
         {
@@ -1098,8 +1188,14 @@
           "allow_custom": false,
           "input_display": "toggle",
           "options": [
-            { "label": "Да", "value": "Y" },
-            { "label": "Нет", "value": "N" }
+            {
+              "label": "Да",
+              "value": "Y"
+            },
+            {
+              "label": "Нет",
+              "value": "N"
+            }
           ]
         },
         {
@@ -1110,8 +1206,14 @@
           "allow_custom": false,
           "input_display": "toggle",
           "options": [
-            { "label": "Да", "value": "Y" },
-            { "label": "Нет", "value": "N" }
+            {
+              "label": "Да",
+              "value": "Y"
+            },
+            {
+              "label": "Нет",
+              "value": "N"
+            }
           ]
         },
         {
@@ -1122,8 +1224,14 @@
           "allow_custom": false,
           "input_display": "toggle",
           "options": [
-            { "label": "Да", "value": "Y" },
-            { "label": "Нет", "value": "N" }
+            {
+              "label": "Да",
+              "value": "Y"
+            },
+            {
+              "label": "Нет",
+              "value": "N"
+            }
           ]
         },
         {
@@ -1134,8 +1242,14 @@
           "allow_custom": false,
           "input_display": "toggle",
           "options": [
-            { "label": "Да", "value": "Y" },
-            { "label": "Нет", "value": "N" }
+            {
+              "label": "Да",
+              "value": "Y"
+            },
+            {
+              "label": "Нет",
+              "value": "N"
+            }
           ]
         },
         {
@@ -1146,8 +1260,14 @@
           "allow_custom": false,
           "input_display": "toggle",
           "options": [
-            { "label": "Да", "value": "Y" },
-            { "label": "Нет", "value": "N" }
+            {
+              "label": "Да",
+              "value": "Y"
+            },
+            {
+              "label": "Нет",
+              "value": "N"
+            }
           ]
         },
         {
@@ -1158,8 +1278,14 @@
           "allow_custom": false,
           "input_display": "toggle",
           "options": [
-            { "label": "Да", "value": "Y" },
-            { "label": "Нет", "value": "N" }
+            {
+              "label": "Да",
+              "value": "Y"
+            },
+            {
+              "label": "Нет",
+              "value": "N"
+            }
           ]
         },
         {
@@ -1170,8 +1296,14 @@
           "allow_custom": false,
           "input_display": "toggle",
           "options": [
-            { "label": "Да", "value": "Y" },
-            { "label": "Нет", "value": "N" }
+            {
+              "label": "Да",
+              "value": "Y"
+            },
+            {
+              "label": "Нет",
+              "value": "N"
+            }
           ]
         },
         {
@@ -1182,8 +1314,14 @@
           "allow_custom": false,
           "input_display": "toggle",
           "options": [
-            { "label": "Да", "value": "Y" },
-            { "label": "Нет", "value": "N" }
+            {
+              "label": "Да",
+              "value": "Y"
+            },
+            {
+              "label": "Нет",
+              "value": "N"
+            }
           ]
         },
         {
@@ -1194,8 +1332,14 @@
           "allow_custom": false,
           "input_display": "toggle",
           "options": [
-            { "label": "Да", "value": "Y" },
-            { "label": "Нет", "value": "N" }
+            {
+              "label": "Да",
+              "value": "Y"
+            },
+            {
+              "label": "Нет",
+              "value": "N"
+            }
           ]
         },
         {
@@ -1206,8 +1350,14 @@
           "allow_custom": false,
           "input_display": "toggle",
           "options": [
-            { "label": "Да", "value": "Y" },
-            { "label": "Нет", "value": "N" }
+            {
+              "label": "Да",
+              "value": "Y"
+            },
+            {
+              "label": "Нет",
+              "value": "N"
+            }
           ]
         },
         {
@@ -1218,8 +1368,14 @@
           "allow_custom": false,
           "input_display": "toggle",
           "options": [
-            { "label": "Да", "value": "Y" },
-            { "label": "Нет", "value": "N" }
+            {
+              "label": "Да",
+              "value": "Y"
+            },
+            {
+              "label": "Нет",
+              "value": "N"
+            }
           ]
         },
         {
@@ -1229,8 +1385,14 @@
           ],
           "allow_custom": false,
           "options": [
-            { "label": "AI-новость", "value": "AIPROMPT" },
-            { "label": "Новость по шаблону", "value": "TEMPLATE" }
+            {
+              "label": "AI-новость",
+              "value": "AIPROMPT"
+            },
+            {
+              "label": "Новость по шаблону",
+              "value": "TEMPLATE"
+            }
           ]
         },
         {
@@ -1288,8 +1450,14 @@
           "allow_custom": false,
           "input_display": "toggle",
           "options": [
-            { "label": "Да", "value": "Y" },
-            { "label": "Нет", "value": "N" }
+            {
+              "label": "Да",
+              "value": "Y"
+            },
+            {
+              "label": "Нет",
+              "value": "N"
+            }
           ]
         },
         {
@@ -1425,7 +1593,10 @@
         },
         {
           "column": "FILTER_PERIOD_ARR",
-          "json_path": [0, "period_code"],
+          "json_path": [
+            0,
+            "period_code"
+          ],
           "allow_custom": false,
           "options": [
             "0",
@@ -1434,7 +1605,10 @@
         },
         {
           "column": "FILTER_PERIOD_ARR",
-          "json_path": [0, "criterion_mark_type"],
+          "json_path": [
+            0,
+            "criterion_mark_type"
+          ],
           "allow_custom": false,
           "options": [
             "",
@@ -1846,16 +2020,16 @@
         },
         {
           "column": "CREATE_DT",
-          "label": "CREATE_DT",
-          "description": "CREATE_DT",
+          "label": "Дата создания",
+          "description": "Дата создания конкурса.",
           "show_description": false,
           "required": true,
           "allows_empty": false
         },
         {
           "column": "CLOSE_DT",
-          "label": "CLOSE_DT",
-          "description": "CLOSE_DT",
+          "label": "Дата завершения",
+          "description": "Дата завершения конкурса.",
           "show_description": false,
           "required": true,
           "allows_empty": false
@@ -1863,7 +2037,7 @@
         {
           "column": "BUSINESS_STATUS",
           "label": "Статус конкурса",
-          "description": "BUSINESS_STATUS",
+          "description": "Текущий бизнес-статус конкурса (например, АКТИВНЫЙ/АРХИВНЫЙ).",
           "show_description": false,
           "required": true,
           "allows_empty": false
@@ -1879,119 +2053,119 @@
         {
           "column": "CONTEST_DESCRIPTION",
           "label": "Подробное описание конкурса",
-          "description": "CONTEST_DESCRIPTION",
+          "description": "Текстовое описание условий и механики конкурса.",
           "show_description": false,
           "required": true,
           "allows_empty": false
         },
         {
           "column": "SHOW_INDICATOR",
-          "label": "SHOW_INDICATOR",
-          "description": "SHOW_INDICATOR",
+          "label": "Отображаемый показатель",
+          "description": "Подпись/единица отображения целевого показателя в UI.",
           "show_description": false,
           "required": true,
           "allows_empty": false
         },
         {
           "column": "PRODUCT_GROUP",
-          "label": "PRODUCT_GROUP",
-          "description": "PRODUCT_GROUP",
+          "label": "Бизнес-направление",
+          "description": "Продуктовая группа или направление конкурса.",
           "show_description": false,
           "required": true,
           "allows_empty": false
         },
         {
           "column": "PRODUCT",
-          "label": "PRODUCT",
-          "description": "PRODUCT",
+          "label": "Продукт",
+          "description": "Продукт или тематика конкурса.",
           "show_description": false,
           "required": true,
           "allows_empty": false
         },
         {
           "column": "CONTEST_SUBJECT",
-          "label": "CONTEST_SUBJECT",
-          "description": "CONTEST_SUBJECT",
+          "label": "Субъект конкурса",
+          "description": "Объект расчёта конкурса: сотрудник или подразделение.",
           "show_description": false,
           "required": true,
           "allows_empty": false
         },
         {
           "column": "FACTOR_MARK_TYPE",
-          "label": "FACTOR_MARK_TYPE",
-          "description": "FACTOR_MARK_TYPE",
+          "label": "Тип оценки",
+          "description": "Тип оценки показателя (например, рейтинг или критерий).",
           "show_description": false,
           "required": true,
           "allows_empty": false
         },
         {
           "column": "CONTEST_INDICATOR_METHOD",
-          "label": "CONTEST_INDICATOR_METHOD",
-          "description": "CONTEST_INDICATOR_METHOD",
+          "label": "Метод расчёта индикатора",
+          "description": "Алгоритм расчёта агрегированного индикатора конкурса (INTEGRAL/RELATION).",
           "show_description": false,
           "required": true,
           "allows_empty": false
         },
         {
           "column": "CONTEST_FACTOR_METHOD",
-          "label": "CONTEST_FACTOR_METHOD",
-          "description": "CONTEST_FACTOR_METHOD",
+          "label": "Метод итогового показателя",
+          "description": "Правило расчёта итогового показателя конкурса по периодам.",
           "show_description": false,
           "required": true,
           "allows_empty": false
         },
         {
           "column": "PLAN_METHOD_CODE",
-          "label": "PLAN_METHOD_CODE",
-          "description": "PLAN_METHOD_CODE",
+          "label": "Метод расчёта плана",
+          "description": "Метод вычисления планового значения показателя (из справочника методов).",
           "show_description": false,
           "required": true,
           "allows_empty": false
         },
         {
           "column": "PLAN_MOD_METOD",
-          "label": "PLAN_MOD_METOD",
-          "description": "PLAN_MOD_METOD",
+          "label": "Операция модификации плана",
+          "description": "Операция изменения плана (например, MULTIPLIER/APPEND).",
           "show_description": false,
           "required": false,
           "allows_empty": true
         },
         {
           "column": "PLAN_MOD_VALUE",
-          "label": "PLAN_MOD_VALUE",
-          "description": "PLAN_MOD_VALUE",
+          "label": "Значение модификатора плана",
+          "description": "Числовое значение модификатора для выбранного метода плана.",
           "show_description": false,
           "required": true,
           "allows_empty": false
         },
         {
           "column": "FACTOR_MATCH",
-          "label": "FACTOR_MATCH",
-          "description": "FACTOR_MATCH",
+          "label": "Оператор сравнения",
+          "description": "Правило сравнения для определения результата (например, =, >, >=).",
           "show_description": false,
           "required": true,
           "allows_empty": false
         },
         {
           "column": "CONTEST_PERIOD",
-          "label": "CONTEST_PERIOD",
-          "description": "CONTEST_PERIOD",
+          "label": "Правила периодов",
+          "description": "Правила периодов и критериев конкурса (обычно JSON-массив).",
           "show_description": false,
           "required": false,
           "allows_empty": true
         },
         {
           "column": "TARGET_TYPE",
-          "label": "TARGET_TYPE",
-          "description": "TARGET_TYPE",
+          "label": "Вид цели расчёта",
+          "description": "Тип цели расчёта конкурса (например, ПРОМ/ТЕСТ).",
           "show_description": false,
           "required": true,
           "allows_empty": false
         },
         {
           "column": "SOURCE_UPD_FREQUENCY",
-          "label": "SOURCE_UPD_FREQUENCY",
-          "description": "SOURCE_UPD_FREQUENCY",
+          "label": "Частота обновления источника",
+          "description": "Периодичность обновления данных источника, в днях.",
           "show_description": false,
           "required": true,
           "allows_empty": false
@@ -2007,21 +2181,23 @@
         {
           "column": "BUSINESS_BLOCK",
           "label": "Бизнес-блок",
-          "description": "BUSINESS_BLOCK",
+          "description": "Бизнес-блок(и), к которым относится конкурс.",
           "show_description": false,
           "required": true,
           "allows_empty": false
         },
         {
           "column": "FACT_POST_PROCESSING",
-          "label": "FACT_POST_PROCESSING",
-          "description": "FACT_POST_PROCESSING",
+          "label": "Постобработка факта",
+          "description": "Метод постобработки фактического показателя (из справочника методов).",
           "show_description": false,
           "required": false,
           "allows_empty": true
         },
         {
           "column": "CONTEST_FEATURE",
+          "label": "Параметры конкурса (JSON)",
+          "description": "Настройки отображения и поведения конкурса: рассылки, видимость, награждение и др.",
           "paths": [
             {
               "json_path": [
@@ -2037,8 +2213,8 @@
               "json_path": [
                 "avatarShow"
               ],
-              "label": "avatarShow",
-              "description": "avatarShow",
+              "label": "Показывать аватар",
+              "description": "Флаг отображения аватара участника в карточке конкурса.",
               "show_description": false,
               "required": false,
               "allows_empty": true
@@ -2078,8 +2254,8 @@
               "json_path": [
                 "feature"
               ],
-              "label": "feature",
-              "description": "feature",
+              "label": "Особенности конкурса",
+              "description": "Список коротких пояснений, которые показываются участнику.",
               "show_description": false,
               "required": false,
               "allows_empty": true
@@ -2089,8 +2265,8 @@
                 "feature",
                 0
               ],
-              "label": "feature[0]",
-              "description": "feature[0]",
+              "label": "Особенность конкурса (элемент 1)",
+              "description": "Текст дополнительной особенности конкурса.",
               "show_description": false,
               "required": false,
               "allows_empty": true
@@ -2100,8 +2276,8 @@
                 "feature",
                 1
               ],
-              "label": "feature[1]",
-              "description": "feature[1]",
+              "label": "Особенность конкурса (элемент 2)",
+              "description": "Текст дополнительной особенности конкурса.",
               "show_description": false,
               "required": false,
               "allows_empty": true
@@ -2111,8 +2287,8 @@
                 "feature",
                 2
               ],
-              "label": "feature[2]",
-              "description": "feature[2]",
+              "label": "Особенность конкурса (элемент 3)",
+              "description": "Текст дополнительной особенности конкурса.",
               "show_description": false,
               "required": false,
               "allows_empty": true
@@ -2122,8 +2298,8 @@
                 "feature",
                 3
               ],
-              "label": "feature[3]",
-              "description": "feature[3]",
+              "label": "Особенность конкурса (элемент 4)",
+              "description": "Текст дополнительной особенности конкурса.",
               "show_description": false,
               "required": false,
               "allows_empty": true
@@ -2133,8 +2309,8 @@
                 "feature",
                 4
               ],
-              "label": "feature[4]",
-              "description": "feature[4]",
+              "label": "Особенность конкурса (элемент 5)",
+              "description": "Текст дополнительной особенности конкурса.",
               "show_description": false,
               "required": false,
               "allows_empty": true
@@ -2144,8 +2320,8 @@
                 "feature",
                 5
               ],
-              "label": "feature[5]",
-              "description": "feature[5]",
+              "label": "Особенность конкурса (элемент 6)",
+              "description": "Текст дополнительной особенности конкурса.",
               "show_description": false,
               "required": false,
               "allows_empty": true
@@ -2175,8 +2351,8 @@
                 "helpCodeList",
                 0
               ],
-              "label": "helpCodeList[0]",
-              "description": "helpCodeList[0]",
+              "label": "Код помощи (элемент 1)",
+              "description": "Код справочного блока/подсказки для UI.",
               "show_description": false,
               "required": false,
               "allows_empty": true
@@ -2186,8 +2362,8 @@
                 "helpCodeList",
                 1
               ],
-              "label": "helpCodeList[1]",
-              "description": "helpCodeList[1]",
+              "label": "Код помощи (элемент 2)",
+              "description": "Код справочного блока/подсказки для UI.",
               "show_description": false,
               "required": false,
               "allows_empty": true
@@ -2196,8 +2372,8 @@
               "json_path": [
                 "masking"
               ],
-              "label": "masking",
-              "description": "masking",
+              "label": "Скрытие персональных данных",
+              "description": "Флаг маскирования персональных данных в витрине конкурса.",
               "show_description": false,
               "required": false,
               "allows_empty": true
@@ -2323,8 +2499,8 @@
               "json_path": [
                 "preferences"
               ],
-              "label": "preferences",
-              "description": "preferences",
+              "label": "Преференции",
+              "description": "Список дополнительных преимуществ/условий для участника.",
               "show_description": false,
               "required": false,
               "allows_empty": true
@@ -2334,8 +2510,8 @@
                 "preferences",
                 0
               ],
-              "label": "preferences[0]",
-              "description": "preferences[0]",
+              "label": "Преференция (элемент 1)",
+              "description": "Текст конкретной преференции.",
               "show_description": false,
               "required": false,
               "allows_empty": true
@@ -2345,8 +2521,8 @@
                 "preferences",
                 1
               ],
-              "label": "preferences[1]",
-              "description": "preferences[1]",
+              "label": "Преференция (элемент 2)",
+              "description": "Текст конкретной преференции.",
               "show_description": false,
               "required": false,
               "allows_empty": true
@@ -2356,8 +2532,8 @@
                 "preferences",
                 2
               ],
-              "label": "preferences[2]",
-              "description": "preferences[2]",
+              "label": "Преференция (элемент 3)",
+              "description": "Текст конкретной преференции.",
               "show_description": false,
               "required": false,
               "allows_empty": true
@@ -2367,8 +2543,8 @@
                 "preferences",
                 3
               ],
-              "label": "preferences[3]",
-              "description": "preferences[3]",
+              "label": "Преференция (элемент 4)",
+              "description": "Текст конкретной преференции.",
               "show_description": false,
               "required": false,
               "allows_empty": true
@@ -2461,8 +2637,8 @@
               "json_path": [
                 "tournamentListMailing"
               ],
-              "label": "tournamentListMailing",
-              "description": "tournamentListMailing",
+              "label": "Рассылка списка участников",
+              "description": "Параметры рассылки списка участников турнира.",
               "show_description": false,
               "required": false,
               "allows_empty": true
@@ -2471,8 +2647,8 @@
               "json_path": [
                 "tournamentRewardingMailing"
               ],
-              "label": "tournamentRewardingMailing",
-              "description": "tournamentRewardingMailing",
+              "label": "Рассылка о награждении",
+              "description": "Параметры рассылки уведомлений о награждении.",
               "show_description": false,
               "required": false,
               "allows_empty": true
@@ -2501,8 +2677,8 @@
               "json_path": [
                 "typeRewarding"
               ],
-              "label": "typeRewarding",
-              "description": "typeRewarding",
+              "label": "Режим награждения",
+              "description": "Тип выдачи наград (например, всем или одному лучшему).",
               "show_description": false,
               "required": false,
               "allows_empty": true
@@ -2511,8 +2687,8 @@
               "json_path": [
                 "vid"
               ],
-              "label": "Метка типа турнира",
-              "description": "vid",
+              "label": "Тип витрины",
+              "description": "Тип витрины/режим отображения конкурса (например, ПРОМ/ТЕСТ).",
               "show_description": false,
               "required": false,
               "allows_empty": true
@@ -2542,48 +2718,48 @@
         },
         {
           "column": "GROUP_VALUE",
-          "label": "Фильтр ТБ/ГОСБ",
-          "description": "GROUP_VALUE",
+          "label": "Значения уровня",
+          "description": "Конкретные коды/значения выбранного уровня группировки.",
           "show_description": false,
           "required": true,
           "allows_empty": false
         },
         {
           "column": "GET_CALC_METHOD",
-          "label": "Метод расчета",
-          "description": "Способ отбора победителей: 1 - выбор TOP-X, 2 - выбор TOP-X%, 3 - выбор по выполнению плана",
+          "label": "Метод выбора победителей",
+          "description": "Способ расчёта победителей: 1 - процент, 2 - TOP-N, 3 - по выполнению критерия.",
           "show_description": true,
           "required": true,
           "allows_empty": false
         },
         {
           "column": "GET_CALC_CRITERION",
-          "label": "Критерий ЗОЛОТО",
-          "description": "Критерий отбора для награды ЗОЛОТО",
+          "label": "Основной критерий отбора",
+          "description": "Основной порог/значение для определения победителей.",
           "show_description": false,
           "required": false,
           "allows_empty": true
         },
         {
           "column": "ADD_CALC_CRITERION",
-          "label": "Критерий СЕРЕБРО",
-          "description": "Критерий отбора для награды СЕРЕБРО",
+          "label": "Доп. критерий 1",
+          "description": "Первый дополнительный критерий отбора участников.",
           "show_description": false,
           "required": false,
           "allows_empty": true
         },
         {
           "column": "ADD_CALC_CRITERION_2",
-          "label": "Критерий БРОНЗА",
-          "description": "Критерий отбора для награды БРОНЗА",
+          "label": "Доп. критерий 2",
+          "description": "Второй дополнительный критерий отбора участников.",
           "show_description": false,
           "required": false,
           "allows_empty": true
         },
         {
           "column": "BASE_CALC_CODE",
-          "label": "BASE_CALC_CODE",
-          "description": "BASE_CALC_CODE",
+          "label": "Базовый уровень расчёта",
+          "description": "Уровень, относительно которого считается критерий отбора.",
           "show_description": false,
           "required": false,
           "allows_empty": true
@@ -2603,24 +2779,24 @@
         },
         {
           "column": "INDICATOR_CALC_TYPE",
-          "label": "INDICATOR_CALC_TYPE",
-          "description": "INDICATOR_CALC_TYPE",
+          "label": "Тип расчёта индикатора",
+          "description": "Служебный тип расчёта индикатора.",
           "show_description": false,
           "required": true,
           "allows_empty": false
         },
         {
           "column": "INDICATOR_ADD_CALC_TYPE",
-          "label": "INDICATOR_ADD_CALC_TYPE",
-          "description": "INDICATOR_ADD_CALC_TYPE",
+          "label": "Роль в формуле",
+          "description": "Роль индикатора в формуле: NUMERATOR (числитель) или DIVIDER (знаменатель).",
           "show_description": false,
           "required": false,
           "allows_empty": true
         },
         {
           "column": "FULL_NAME",
-          "label": "FULL_NAME",
-          "description": "FULL_NAME",
+          "label": "Название индикатора",
+          "description": "Человекочитаемое название индикатора.",
           "show_description": false,
           "required": true,
           "allows_empty": false
@@ -2628,7 +2804,7 @@
         {
           "column": "INDICATOR_CODE",
           "label": "Код показателя",
-          "description": "INDICATOR_CODE",
+          "description": "Код индикатора в источнике данных.",
           "show_description": false,
           "required": true,
           "allows_empty": false
@@ -2644,39 +2820,39 @@
         {
           "column": "INDICATOR_WEIGHT",
           "label": "Вес показателя",
-          "description": "Вес показателя в для агрегации",
+          "description": "Вес (коэффициент) индикатора в итоговой формуле конкурса.",
           "show_description": true,
           "required": false,
           "allows_empty": true
         },
         {
           "column": "INDICATOR_MARK_TYPE",
-          "label": "INDICATOR_MARK_TYPE",
-          "description": "INDICATOR_MARK_TYPE",
+          "label": "Тип оценки индикатора",
+          "description": "Тип оценки индикатора (например, RATING/CRITERION).",
           "show_description": false,
           "required": true,
           "allows_empty": false
         },
         {
           "column": "INDICATOR_MATCH",
-          "label": "INDICATOR_MATCH",
-          "description": "INDICATOR_MATCH",
+          "label": "Оператор сравнения",
+          "description": "Правило сравнения значения индикатора.",
           "show_description": false,
           "required": true,
           "allows_empty": false
         },
         {
           "column": "INDICATOR_VALUE",
-          "label": "INDICATOR_VALUE",
-          "description": "Целое число от 0 до 1000000000 (пусто допустимо).",
+          "label": "Пороговое значение индикатора",
+          "description": "Порог/значение индикатора для правила расчёта.",
           "show_description": true,
           "required": false,
           "allows_empty": true
         },
         {
           "column": "CONTEST_CRITERION",
-          "label": "CONTEST_CRITERION",
-          "description": "CONTEST_CRITERION",
+          "label": "Критерий конкурса",
+          "description": "Критерий отбора данных по конкурсу на уровне индикатора.",
           "show_description": false,
           "required": false,
           "allows_empty": true
@@ -2691,8 +2867,8 @@
         },
         {
           "column": "N",
-          "label": "Уникальный номер",
-          "description": "Технический уникальный идентификатор строки",
+          "label": "Порядковый номер",
+          "description": "Технический порядковый номер записи индикатора.",
           "show_description": false,
           "required": true,
           "allows_empty": false
@@ -2712,8 +2888,8 @@
         },
         {
           "column": "INDICATOR_FILTER",
-          "label": "INDICATOR_FILTER",
-          "description": "INDICATOR_FILTER",
+          "label": "Фильтр индикатора (JSON)",
+          "description": "Ограничения выборки операций по атрибутам источника для расчёта индикатора (code/match/value|condition|dt).",
           "show_description": false,
           "required": false,
           "allows_empty": true
@@ -2734,7 +2910,7 @@
         {
           "column": "REWARD_CODE",
           "label": "Код награды",
-          "description": "REWARD_CODE",
+          "description": "Уникальный код награды.",
           "show_description": false,
           "required": true,
           "allows_empty": false
@@ -2742,7 +2918,7 @@
         {
           "column": "REWARD_TYPE",
           "label": "Тип награды",
-          "description": "REWARD_TYPE",
+          "description": "Категория награды (ITEM/BADGE/LABEL/CRYSTAL).",
           "show_description": false,
           "required": true,
           "allows_empty": false
@@ -2750,7 +2926,7 @@
         {
           "column": "FULL_NAME",
           "label": "Наименование награды",
-          "description": "FULL_NAME",
+          "description": "Краткое отображаемое название награды.",
           "show_description": false,
           "required": true,
           "allows_empty": false
@@ -2758,15 +2934,15 @@
         {
           "column": "REWARD_DESCRIPTION",
           "label": "Описание награды",
-          "description": "REWARD_DESCRIPTION",
+          "description": "Подробности о награде и условиях получения.",
           "show_description": false,
           "required": true,
           "allows_empty": false
         },
         {
           "column": "REWARD_CONDITION",
-          "label": "REWARD_CONDITION",
-          "description": "REWARD_CONDITION",
+          "label": "Условие выдачи",
+          "description": "Основание выдачи награды (победа/участие).",
           "show_description": false,
           "required": true,
           "allows_empty": false
@@ -2781,13 +2957,15 @@
         },
         {
           "column": "REWARD_ADD_DATA",
+          "label": "Доп. параметры награды (JSON)",
+          "description": "Расширенные параметры награды: правила выдачи, видимость, новости и ограничения.",
           "paths": [
             {
               "json_path": [
                 "bookingRequired"
               ],
-              "label": "bookingRequired",
-              "description": "bookingRequired",
+              "label": "Требуется бронирование",
+              "description": "Флаг: для награды необходимо предварительное бронирование.",
               "show_description": false,
               "required": false,
               "allows_empty": true
@@ -2817,8 +2995,8 @@
               "json_path": [
                 "deliveryRequired"
               ],
-              "label": "deliveryRequired",
-              "description": "deliveryRequired",
+              "label": "Требуется доставка",
+              "description": "Флаг: награда требует оформления доставки.",
               "show_description": false,
               "required": false,
               "allows_empty": true
@@ -2838,8 +3016,8 @@
                 "feature",
                 0
               ],
-              "label": "feature[0]",
-              "description": "feature[0]",
+              "label": "Особенность награды (элемент 1)",
+              "description": "Текст дополнительной особенности награды.",
               "show_description": false,
               "required": false,
               "allows_empty": true
@@ -2849,8 +3027,8 @@
                 "feature",
                 1
               ],
-              "label": "feature[1]",
-              "description": "feature[1]",
+              "label": "Особенность награды (элемент 2)",
+              "description": "Текст дополнительной особенности награды.",
               "show_description": false,
               "required": false,
               "allows_empty": true
@@ -2860,8 +3038,8 @@
                 "feature",
                 2
               ],
-              "label": "feature[2]",
-              "description": "feature[2]",
+              "label": "Особенность награды (элемент 3)",
+              "description": "Текст дополнительной особенности награды.",
               "show_description": false,
               "required": false,
               "allows_empty": true
@@ -2871,8 +3049,8 @@
                 "feature",
                 3
               ],
-              "label": "feature[3]",
-              "description": "feature[3]",
+              "label": "Особенность награды (элемент 4)",
+              "description": "Текст дополнительной особенности награды.",
               "show_description": false,
               "required": false,
               "allows_empty": true
@@ -2882,8 +3060,8 @@
                 "feature",
                 4
               ],
-              "label": "feature[4]",
-              "description": "feature[4]",
+              "label": "Особенность награды (элемент 5)",
+              "description": "Текст дополнительной особенности награды.",
               "show_description": false,
               "required": false,
               "allows_empty": true
@@ -2893,8 +3071,8 @@
                 "feature",
                 5
               ],
-              "label": "feature[5]",
-              "description": "feature[5]",
+              "label": "Особенность награды (элемент 6)",
+              "description": "Текст дополнительной особенности награды.",
               "show_description": false,
               "required": false,
               "allows_empty": true
@@ -2903,8 +3081,8 @@
               "json_path": [
                 "fileName"
               ],
-              "label": "fileName",
-              "description": "fileName",
+              "label": "Код медиа-файла",
+              "description": "Идентификатор файла/ресурса награды в витрине.",
               "show_description": false,
               "required": false,
               "allows_empty": true
@@ -2974,8 +3152,8 @@
                 "getCondition",
                 "nonRewards"
               ],
-              "label": "getCondition.nonRewards",
-              "description": "getCondition.nonRewards",
+              "label": "Запрещающие награды",
+              "description": "Список кодов наград, при наличии которых текущая награда не выдаётся.",
               "show_description": false,
               "required": false,
               "allows_empty": true
@@ -2987,8 +3165,8 @@
                 0,
                 "nonRewardCode"
               ],
-              "label": "getCondition.nonRewards[0].nonRewardCode",
-              "description": "getCondition.nonRewards[0].nonRewardCode",
+              "label": "Код исключающей награды (элемент 1)",
+              "description": "Код награды-исключения из условий получения.",
               "show_description": false,
               "required": false,
               "allows_empty": true
@@ -3000,8 +3178,8 @@
                 1,
                 "nonRewardCode"
               ],
-              "label": "getCondition.nonRewards[1].nonRewardCode",
-              "description": "getCondition.nonRewards[1].nonRewardCode",
+              "label": "Код исключающей награды (элемент 2)",
+              "description": "Код награды-исключения из условий получения.",
               "show_description": false,
               "required": false,
               "allows_empty": true
@@ -3013,8 +3191,8 @@
                 2,
                 "nonRewardCode"
               ],
-              "label": "getCondition.nonRewards[2].nonRewardCode",
-              "description": "getCondition.nonRewards[2].nonRewardCode",
+              "label": "Код исключающей награды (элемент 3)",
+              "description": "Код награды-исключения из условий получения.",
               "show_description": false,
               "required": false,
               "allows_empty": true
@@ -3026,8 +3204,8 @@
                 3,
                 "nonRewardCode"
               ],
-              "label": "getCondition.nonRewards[3].nonRewardCode",
-              "description": "getCondition.nonRewards[3].nonRewardCode",
+              "label": "Код исключающей награды (элемент 4)",
+              "description": "Код награды-исключения из условий получения.",
               "show_description": false,
               "required": false,
               "allows_empty": true
@@ -3039,8 +3217,8 @@
                 4,
                 "nonRewardCode"
               ],
-              "label": "getCondition.nonRewards[4].nonRewardCode",
-              "description": "getCondition.nonRewards[4].nonRewardCode",
+              "label": "Код исключающей награды (элемент 5)",
+              "description": "Код награды-исключения из условий получения.",
               "show_description": false,
               "required": false,
               "allows_empty": true
@@ -3052,8 +3230,8 @@
                 5,
                 "nonRewardCode"
               ],
-              "label": "getCondition.nonRewards[5].nonRewardCode",
-              "description": "getCondition.nonRewards[5].nonRewardCode",
+              "label": "Код исключающей награды (элемент 6)",
+              "description": "Код награды-исключения из условий получения.",
               "show_description": false,
               "required": false,
               "allows_empty": true
@@ -3065,8 +3243,8 @@
                 6,
                 "nonRewardCode"
               ],
-              "label": "getCondition.nonRewards[6].nonRewardCode",
-              "description": "getCondition.nonRewards[6].nonRewardCode",
+              "label": "Код исключающей награды (элемент 7)",
+              "description": "Код награды-исключения из условий получения.",
               "show_description": false,
               "required": false,
               "allows_empty": true
@@ -3078,8 +3256,8 @@
                 7,
                 "nonRewardCode"
               ],
-              "label": "getCondition.nonRewards[7].nonRewardCode",
-              "description": "getCondition.nonRewards[7].nonRewardCode",
+              "label": "Код исключающей награды (элемент 8)",
+              "description": "Код награды-исключения из условий получения.",
               "show_description": false,
               "required": false,
               "allows_empty": true
@@ -3089,8 +3267,8 @@
                 "getCondition",
                 "rewards"
               ],
-              "label": "getCondition.rewards",
-              "description": "getCondition.rewards",
+              "label": "Требуемые награды",
+              "description": "Список наград, необходимых для получения текущей.",
               "show_description": false,
               "required": false,
               "allows_empty": true
@@ -3102,8 +3280,8 @@
                 0,
                 "amount"
               ],
-              "label": "getCondition.rewards[0].amount",
-              "description": "getCondition.rewards[0].amount",
+              "label": "Количество требуемых наград (элемент 1)",
+              "description": "Сколько единиц указанной награды требуется.",
               "show_description": false,
               "required": false,
               "allows_empty": true
@@ -3115,8 +3293,8 @@
                 0,
                 "rewardCode"
               ],
-              "label": "getCondition.rewards[0].rewardCode",
-              "description": "getCondition.rewards[0].rewardCode",
+              "label": "Код требуемой награды (элемент 1)",
+              "description": "Код награды, необходимой для получения текущей.",
               "show_description": false,
               "required": false,
               "allows_empty": true
@@ -3128,8 +3306,8 @@
                 1,
                 "amount"
               ],
-              "label": "getCondition.rewards[1].amount",
-              "description": "getCondition.rewards[1].amount",
+              "label": "Количество требуемых наград (элемент 2)",
+              "description": "Сколько единиц указанной награды требуется.",
               "show_description": false,
               "required": false,
               "allows_empty": true
@@ -3141,8 +3319,8 @@
                 1,
                 "rewardCode"
               ],
-              "label": "getCondition.rewards[1].rewardCode",
-              "description": "getCondition.rewards[1].rewardCode",
+              "label": "Код требуемой награды (элемент 2)",
+              "description": "Код награды, необходимой для получения текущей.",
               "show_description": false,
               "required": false,
               "allows_empty": true
@@ -3204,8 +3382,8 @@
                 "ignoreConditions",
                 0
               ],
-              "label": "ignoreConditions[0]",
-              "description": "ignoreConditions[0]",
+              "label": "Табельный номер без проверки условий (элемент 1)",
+              "description": "Участник, для которого ограничения выдачи не применяются.",
               "show_description": false,
               "required": false,
               "allows_empty": true
@@ -3215,8 +3393,8 @@
                 "ignoreConditions",
                 10
               ],
-              "label": "ignoreConditions[10]",
-              "description": "ignoreConditions[10]",
+              "label": "Табельный номер без проверки условий (элемент 11)",
+              "description": "Участник, для которого ограничения выдачи не применяются.",
               "show_description": false,
               "required": false,
               "allows_empty": true
@@ -3226,8 +3404,8 @@
                 "ignoreConditions",
                 11
               ],
-              "label": "ignoreConditions[11]",
-              "description": "ignoreConditions[11]",
+              "label": "Табельный номер без проверки условий (элемент 12)",
+              "description": "Участник, для которого ограничения выдачи не применяются.",
               "show_description": false,
               "required": false,
               "allows_empty": true
@@ -3237,8 +3415,8 @@
                 "ignoreConditions",
                 12
               ],
-              "label": "ignoreConditions[12]",
-              "description": "ignoreConditions[12]",
+              "label": "Табельный номер без проверки условий (элемент 13)",
+              "description": "Участник, для которого ограничения выдачи не применяются.",
               "show_description": false,
               "required": false,
               "allows_empty": true
@@ -3248,8 +3426,8 @@
                 "ignoreConditions",
                 13
               ],
-              "label": "ignoreConditions[13]",
-              "description": "ignoreConditions[13]",
+              "label": "Табельный номер без проверки условий (элемент 14)",
+              "description": "Участник, для которого ограничения выдачи не применяются.",
               "show_description": false,
               "required": false,
               "allows_empty": true
@@ -3259,8 +3437,8 @@
                 "ignoreConditions",
                 1
               ],
-              "label": "ignoreConditions[1]",
-              "description": "ignoreConditions[1]",
+              "label": "Табельный номер без проверки условий (элемент 2)",
+              "description": "Участник, для которого ограничения выдачи не применяются.",
               "show_description": false,
               "required": false,
               "allows_empty": true
@@ -3270,8 +3448,8 @@
                 "ignoreConditions",
                 2
               ],
-              "label": "ignoreConditions[2]",
-              "description": "ignoreConditions[2]",
+              "label": "Табельный номер без проверки условий (элемент 3)",
+              "description": "Участник, для которого ограничения выдачи не применяются.",
               "show_description": false,
               "required": false,
               "allows_empty": true
@@ -3281,8 +3459,8 @@
                 "ignoreConditions",
                 3
               ],
-              "label": "ignoreConditions[3]",
-              "description": "ignoreConditions[3]",
+              "label": "Табельный номер без проверки условий (элемент 4)",
+              "description": "Участник, для которого ограничения выдачи не применяются.",
               "show_description": false,
               "required": false,
               "allows_empty": true
@@ -3292,8 +3470,8 @@
                 "ignoreConditions",
                 4
               ],
-              "label": "ignoreConditions[4]",
-              "description": "ignoreConditions[4]",
+              "label": "Табельный номер без проверки условий (элемент 5)",
+              "description": "Участник, для которого ограничения выдачи не применяются.",
               "show_description": false,
               "required": false,
               "allows_empty": true
@@ -3303,8 +3481,8 @@
                 "ignoreConditions",
                 5
               ],
-              "label": "ignoreConditions[5]",
-              "description": "ignoreConditions[5]",
+              "label": "Табельный номер без проверки условий (элемент 6)",
+              "description": "Участник, для которого ограничения выдачи не применяются.",
               "show_description": false,
               "required": false,
               "allows_empty": true
@@ -3314,8 +3492,8 @@
                 "ignoreConditions",
                 6
               ],
-              "label": "ignoreConditions[6]",
-              "description": "ignoreConditions[6]",
+              "label": "Табельный номер без проверки условий (элемент 7)",
+              "description": "Участник, для которого ограничения выдачи не применяются.",
               "show_description": false,
               "required": false,
               "allows_empty": true
@@ -3325,8 +3503,8 @@
                 "ignoreConditions",
                 7
               ],
-              "label": "ignoreConditions[7]",
-              "description": "ignoreConditions[7]",
+              "label": "Табельный номер без проверки условий (элемент 8)",
+              "description": "Участник, для которого ограничения выдачи не применяются.",
               "show_description": false,
               "required": false,
               "allows_empty": true
@@ -3336,8 +3514,8 @@
                 "ignoreConditions",
                 8
               ],
-              "label": "ignoreConditions[8]",
-              "description": "ignoreConditions[8]",
+              "label": "Табельный номер без проверки условий (элемент 9)",
+              "description": "Участник, для которого ограничения выдачи не применяются.",
               "show_description": false,
               "required": false,
               "allows_empty": true
@@ -3347,8 +3525,8 @@
                 "ignoreConditions",
                 9
               ],
-              "label": "ignoreConditions[9]",
-              "description": "ignoreConditions[9]",
+              "label": "Табельный номер без проверки условий (элемент 10)",
+              "description": "Участник, для которого ограничения выдачи не применяются.",
               "show_description": false,
               "required": false,
               "allows_empty": true
@@ -3418,8 +3596,8 @@
                 "itemFeature",
                 0
               ],
-              "label": "itemFeature[0]",
-              "description": "itemFeature[0]",
+              "label": "Особенность товара (элемент 1)",
+              "description": "Пояснение по характеристике награды типа ITEM.",
               "show_description": false,
               "required": false,
               "allows_empty": true
@@ -3429,8 +3607,8 @@
                 "itemFeature",
                 1
               ],
-              "label": "itemFeature[1]",
-              "description": "itemFeature[1]",
+              "label": "Особенность товара (элемент 2)",
+              "description": "Пояснение по характеристике награды типа ITEM.",
               "show_description": false,
               "required": false,
               "allows_empty": true
@@ -3440,8 +3618,8 @@
                 "itemFeature",
                 2
               ],
-              "label": "itemFeature[2]",
-              "description": "itemFeature[2]",
+              "label": "Особенность товара (элемент 3)",
+              "description": "Пояснение по характеристике награды типа ITEM.",
               "show_description": false,
               "required": false,
               "allows_empty": true
@@ -3451,8 +3629,8 @@
                 "itemFeature",
                 3
               ],
-              "label": "itemFeature[3]",
-              "description": "itemFeature[3]",
+              "label": "Особенность товара (элемент 4)",
+              "description": "Пояснение по характеристике награды типа ITEM.",
               "show_description": false,
               "required": false,
               "allows_empty": true
@@ -3462,8 +3640,8 @@
                 "itemFeature",
                 4
               ],
-              "label": "itemFeature[4]",
-              "description": "itemFeature[4]",
+              "label": "Особенность товара (элемент 5)",
+              "description": "Пояснение по характеристике награды типа ITEM.",
               "show_description": false,
               "required": false,
               "allows_empty": true
@@ -3473,8 +3651,8 @@
                 "itemFeature",
                 5
               ],
-              "label": "itemFeature[5]",
-              "description": "itemFeature[5]",
+              "label": "Особенность товара (элемент 6)",
+              "description": "Пояснение по характеристике награды типа ITEM.",
               "show_description": false,
               "required": false,
               "allows_empty": true
@@ -3495,8 +3673,8 @@
                 0,
                 "itemParam"
               ],
-              "label": "itemGroupAmount[0].itemParam",
-              "description": "itemGroupAmount[0].itemParam",
+              "label": "Параметр группового лимита (элемент 1)",
+              "description": "Наименование параметра ограничения для групповой выдачи.",
               "show_description": false,
               "required": false,
               "allows_empty": true
@@ -3507,8 +3685,8 @@
                 0,
                 "itemParamAmount"
               ],
-              "label": "itemGroupAmount[0].itemParamAmount",
-              "description": "itemGroupAmount[0].itemParamAmount",
+              "label": "Значение группового лимита (элемент 1)",
+              "description": "Числовое значение ограничения по выбранному параметру.",
               "show_description": false,
               "required": false,
               "allows_empty": true
@@ -3519,8 +3697,8 @@
                 1,
                 "itemParam"
               ],
-              "label": "itemGroupAmount[1].itemParam",
-              "description": "itemGroupAmount[1].itemParam",
+              "label": "Параметр группового лимита (элемент 2)",
+              "description": "Наименование параметра ограничения для групповой выдачи.",
               "show_description": false,
               "required": false,
               "allows_empty": true
@@ -3531,8 +3709,8 @@
                 1,
                 "itemParamAmount"
               ],
-              "label": "itemGroupAmount[1].itemParamAmount",
-              "description": "itemGroupAmount[1].itemParamAmount",
+              "label": "Значение группового лимита (элемент 2)",
+              "description": "Числовое значение ограничения по выбранному параметру.",
               "show_description": false,
               "required": false,
               "allows_empty": true
@@ -3543,8 +3721,8 @@
                 2,
                 "itemParam"
               ],
-              "label": "itemGroupAmount[2].itemParam",
-              "description": "itemGroupAmount[2].itemParam",
+              "label": "Параметр группового лимита (элемент 3)",
+              "description": "Наименование параметра ограничения для групповой выдачи.",
               "show_description": false,
               "required": false,
               "allows_empty": true
@@ -3555,8 +3733,8 @@
                 2,
                 "itemParamAmount"
               ],
-              "label": "itemGroupAmount[2].itemParamAmount",
-              "description": "itemGroupAmount[2].itemParamAmount",
+              "label": "Значение группового лимита (элемент 3)",
+              "description": "Числовое значение ограничения по выбранному параметру.",
               "show_description": false,
               "required": false,
               "allows_empty": true
@@ -3567,8 +3745,8 @@
                 3,
                 "itemParam"
               ],
-              "label": "itemGroupAmount[3].itemParam",
-              "description": "itemGroupAmount[3].itemParam",
+              "label": "Параметр группового лимита (элемент 4)",
+              "description": "Наименование параметра ограничения для групповой выдачи.",
               "show_description": false,
               "required": false,
               "allows_empty": true
@@ -3579,8 +3757,8 @@
                 3,
                 "itemParamAmount"
               ],
-              "label": "itemGroupAmount[3].itemParamAmount",
-              "description": "itemGroupAmount[3].itemParamAmount",
+              "label": "Значение группового лимита (элемент 4)",
+              "description": "Числовое значение ограничения по выбранному параметру.",
               "show_description": false,
               "required": false,
               "allows_empty": true
@@ -3591,8 +3769,8 @@
                 4,
                 "itemParam"
               ],
-              "label": "itemGroupAmount[4].itemParam",
-              "description": "itemGroupAmount[4].itemParam",
+              "label": "Параметр группового лимита (элемент 5)",
+              "description": "Наименование параметра ограничения для групповой выдачи.",
               "show_description": false,
               "required": false,
               "allows_empty": true
@@ -3603,8 +3781,8 @@
                 4,
                 "itemParamAmount"
               ],
-              "label": "itemGroupAmount[4].itemParamAmount",
-              "description": "itemGroupAmount[4].itemParamAmount",
+              "label": "Значение группового лимита (элемент 5)",
+              "description": "Числовое значение ограничения по выбранному параметру.",
               "show_description": false,
               "required": false,
               "allows_empty": true
@@ -3615,8 +3793,8 @@
                 5,
                 "itemParam"
               ],
-              "label": "itemGroupAmount[5].itemParam",
-              "description": "itemGroupAmount[5].itemParam",
+              "label": "Параметр группового лимита (элемент 6)",
+              "description": "Наименование параметра ограничения для групповой выдачи.",
               "show_description": false,
               "required": false,
               "allows_empty": true
@@ -3627,8 +3805,8 @@
                 5,
                 "itemParamAmount"
               ],
-              "label": "itemGroupAmount[5].itemParamAmount",
-              "description": "itemGroupAmount[5].itemParamAmount",
+              "label": "Значение группового лимита (элемент 6)",
+              "description": "Числовое значение ограничения по выбранному параметру.",
               "show_description": false,
               "required": false,
               "allows_empty": true
@@ -3639,8 +3817,8 @@
                 6,
                 "itemParam"
               ],
-              "label": "itemGroupAmount[6].itemParam",
-              "description": "itemGroupAmount[6].itemParam",
+              "label": "Параметр группового лимита (элемент 7)",
+              "description": "Наименование параметра ограничения для групповой выдачи.",
               "show_description": false,
               "required": false,
               "allows_empty": true
@@ -3651,8 +3829,8 @@
                 6,
                 "itemParamAmount"
               ],
-              "label": "itemGroupAmount[6].itemParamAmount",
-              "description": "itemGroupAmount[6].itemParamAmount",
+              "label": "Значение группового лимита (элемент 7)",
+              "description": "Числовое значение ограничения по выбранному параметру.",
               "show_description": false,
               "required": false,
               "allows_empty": true
@@ -3671,8 +3849,8 @@
               "json_path": [
                 "itemLimitPeriod"
               ],
-              "label": "itemLimitPeriod",
-              "description": "itemLimitPeriod",
+              "label": "Период лимита выдачи",
+              "description": "Период, в рамках которого действует лимит количества выдач.",
               "show_description": false,
               "required": false,
               "allows_empty": true
@@ -3691,8 +3869,8 @@
               "json_path": [
                 "masterBadge"
               ],
-              "label": "masterBadge",
-              "description": "masterBadge",
+              "label": "Мастер-бейдж",
+              "description": "Флаг принадлежности награды к мастер-бейджам.",
               "show_description": false,
               "required": false,
               "allows_empty": true
@@ -3702,7 +3880,7 @@
                 "newsType"
               ],
               "label": "Тип новости",
-              "description": "newsType",
+              "description": "Формат новости о награде (например, AIPROMPT/TEMPLATE).",
               "show_description": false,
               "required": false,
               "allows_empty": true
@@ -3711,8 +3889,8 @@
               "json_path": [
                 "nftFlg"
               ],
-              "label": "NFT флаг",
-              "description": "nftFlg",
+              "label": "NFT-награда",
+              "description": "Флаг NFT-формата награды.",
               "show_description": false,
               "required": false,
               "allows_empty": true
@@ -3721,8 +3899,8 @@
               "json_path": [
                 "outstanding"
               ],
-              "label": "Формировать новость",
-              "description": "outstanding",
+              "label": "Публиковать в ленте",
+              "description": "Флаг публикации новости о получении награды в ленте.",
               "show_description": false,
               "required": false,
               "allows_empty": true
@@ -3731,8 +3909,8 @@
               "json_path": [
                 "parentRewardCode"
               ],
-              "label": "parentRewardCode",
-              "description": "parentRewardCode",
+              "label": "Родительская награда",
+              "description": "Код родительской награды в иерархии.",
               "show_description": false,
               "required": false,
               "allows_empty": true
@@ -3762,8 +3940,8 @@
               "json_path": [
                 "priority"
               ],
-              "label": "priority",
-              "description": "priority",
+              "label": "Приоритет награды",
+              "description": "Приоритет отображения/обработки награды.",
               "show_description": false,
               "required": false,
               "allows_empty": true
@@ -3772,8 +3950,8 @@
               "json_path": [
                 "recommendationLevel"
               ],
-              "label": "recommendationLevel",
-              "description": "recommendationLevel",
+              "label": "Уровень рекомендации",
+              "description": "Рекомендуемый уровень применения награды (BANK/TB/GOSB/NON).",
               "show_description": false,
               "required": false,
               "allows_empty": true
@@ -3782,8 +3960,8 @@
               "json_path": [
                 "refreshOldNews"
               ],
-              "label": "refreshOldNews",
-              "description": "refreshOldNews",
+              "label": "Обновлять старые новости",
+              "description": "Флаг обновления ранее созданных новостей по награде.",
               "show_description": false,
               "required": false,
               "allows_empty": true
@@ -3792,8 +3970,8 @@
               "json_path": [
                 "rewardAgainGlobal"
               ],
-              "label": "rewardAgainGlobal",
-              "description": "rewardAgainGlobal",
+              "label": "Повторная выдача (глобально)",
+              "description": "Разрешение на повторное получение награды в целом.",
               "show_description": false,
               "required": false,
               "allows_empty": true
@@ -3802,8 +3980,8 @@
               "json_path": [
                 "rewardAgainTournament"
               ],
-              "label": "rewardAgainTournament",
-              "description": "rewardAgainTournament",
+              "label": "Повторная выдача (в турнире)",
+              "description": "Разрешение на повторное получение награды в рамках одного турнира.",
               "show_description": false,
               "required": false,
               "allows_empty": true
@@ -3812,8 +3990,8 @@
               "json_path": [
                 "rewardRule"
               ],
-              "label": "rewardRule",
-              "description": "rewardRule",
+              "label": "Правило выдачи",
+              "description": "Текстовое правило получения награды.",
               "show_description": false,
               "required": false,
               "allows_empty": true
@@ -3822,8 +4000,8 @@
               "json_path": [
                 "seasonItem"
               ],
-              "label": "seasonItem",
-              "description": "seasonItem",
+              "label": "Сезоны действия",
+              "description": "Список сезонов, в которых действует награда.",
               "show_description": false,
               "required": false,
               "allows_empty": true
@@ -3843,8 +4021,8 @@
               "json_path": [
                 "singleNews"
               ],
-              "label": "singleNews",
-              "description": "singleNews",
+              "label": "Текст личной новости",
+              "description": "Шаблон персональной новости о выдаче награды.",
               "show_description": false,
               "required": false,
               "allows_empty": true
@@ -3853,8 +4031,8 @@
               "json_path": [
                 "tagColor"
               ],
-              "label": "tagColor",
-              "description": "tagColor",
+              "label": "Цвет тега",
+              "description": "Цветовой код тега (для наград типа LABEL).",
               "show_description": false,
               "required": false,
               "allows_empty": true
@@ -3863,8 +4041,8 @@
               "json_path": [
                 "tagEndDT"
               ],
-              "label": "tagEndDT",
-              "description": "tagEndDT",
+              "label": "Дата окончания тега",
+              "description": "Дата, до которой тег активен.",
               "show_description": false,
               "required": false,
               "allows_empty": true
@@ -3873,8 +4051,8 @@
               "json_path": [
                 "teamNews"
               ],
-              "label": "teamNews",
-              "description": "teamNews",
+              "label": "Текст командной новости",
+              "description": "Шаблон новости для командного формата.",
               "show_description": false,
               "required": false,
               "allows_empty": true
@@ -3893,8 +4071,8 @@
               "json_path": [
                 "winCriterion"
               ],
-              "label": "Критерий для AI-новости",
-              "description": "winCriterion",
+              "label": "Критерий победы для новости",
+              "description": "Формулировка критерия победы для генерации новости.",
               "show_description": false,
               "required": false,
               "allows_empty": true
@@ -3917,7 +4095,7 @@
         {
           "column": "GROUP_CODE",
           "label": "Уровень",
-          "description": "GROUP_CODE",
+          "description": "Код уровня конкурса для связи награды (BANK/TB/GOSB/GROUPING).",
           "show_description": false,
           "required": true,
           "allows_empty": false
@@ -3925,7 +4103,7 @@
         {
           "column": "REWARD_CODE",
           "label": "Код награды",
-          "description": "REWARD_CODE",
+          "description": "Код награды, связанной с указанным конкурсом и уровнем.",
           "show_description": false,
           "required": true,
           "allows_empty": false
@@ -3938,15 +4116,15 @@
         {
           "column": "TOURNAMENT_CODE",
           "label": "Код турнира",
-          "description": "TOURNAMENT_CODE",
+          "description": "Уникальный код турнира в рамках конкурса.",
           "show_description": false,
           "required": true,
           "allows_empty": false
         },
         {
           "column": "PERIOD_TYPE",
-          "label": "PERIOD_TYPE",
-          "description": "PERIOD_TYPE",
+          "label": "Тип периода",
+          "description": "Тип периодичности турнира (месяц, квартал, произвольный и т.п.).",
           "show_description": false,
           "required": true,
           "allows_empty": false
@@ -3954,7 +4132,7 @@
         {
           "column": "START_DT",
           "label": "Дата начала турнира",
-          "description": "START_DT",
+          "description": "Дата начала основного периода турнира.",
           "show_description": false,
           "required": true,
           "allows_empty": false
@@ -3962,7 +4140,7 @@
         {
           "column": "END_DT",
           "label": "Дата окончания турнира",
-          "description": "END_DT",
+          "description": "Дата окончания основного периода турнира.",
           "show_description": false,
           "required": true,
           "allows_empty": false
@@ -3970,31 +4148,31 @@
         {
           "column": "RESULT_DT",
           "label": "Дата подведения итогов",
-          "description": "RESULT_DT",
+          "description": "Дата фиксации или публикации итогов турнира.",
           "show_description": false,
           "required": false,
           "allows_empty": true
         },
         {
           "column": "PLAN_PERIOD_START_DT",
-          "label": "PLAN_PERIOD_START_DT",
-          "description": "PLAN_PERIOD_START_DT",
+          "label": "Начало планового периода",
+          "description": "Дата начала периода для расчёта планового значения/оценки роста.",
           "show_description": false,
           "required": false,
           "allows_empty": true
         },
         {
           "column": "PLAN_PERIOD_END_DT",
-          "label": "PLAN_PERIOD_END_DT",
-          "description": "PLAN_PERIOD_END_DT",
+          "label": "Конец планового периода",
+          "description": "Дата окончания периода для расчёта планового значения/оценки роста.",
           "show_description": false,
           "required": false,
           "allows_empty": true
         },
         {
           "column": "CRITERION_MARK_TYPE",
-          "label": "CRITERION_MARK_TYPE",
-          "description": "CRITERION_MARK_TYPE",
+          "label": "Оператор критерия участия",
+          "description": "Оператор сравнения для допуска участника в турнир (>, >=, = и т.д.).",
           "show_description": false,
           "required": false,
           "allows_empty": true
@@ -4010,7 +4188,7 @@
         {
           "column": "TOURNAMENT_STATUS",
           "label": "Статус турнира",
-          "description": "TOURNAMENT_STATUS",
+          "description": "Текущий статус турнира.",
           "show_description": false,
           "required": true,
           "allows_empty": false
@@ -4034,21 +4212,27 @@
         {
           "column": "FILTER_PERIOD_ARR",
           "label": "Фильтр по периодам",
-          "description": "Настройка периодов для отбора показателей",
+          "description": "Дополнительные периоды и пороги участия/расчёта в JSON-формате.",
           "show_description": true,
           "required": false,
           "allows_empty": true,
           "paths": [
             {
-              "json_path": [0, "period_code"],
-              "label": "Код периода (period_code)",
-              "description": "0 или 1: 0 - текущий период, 1 - прошлый период",
+              "json_path": [
+                0,
+                "period_code"
+              ],
+              "label": "Код периода",
+              "description": "Номер периода: 0 — текущий, 1..N — дополнительные.",
               "show_description": true,
               "required": false,
               "allows_empty": true
             },
             {
-              "json_path": [0, "start_dt"],
+              "json_path": [
+                0,
+                "start_dt"
+              ],
               "label": "Дата начала периода (start_dt)",
               "description": "Формат YYYY-MM-DD.",
               "show_description": true,
@@ -4056,7 +4240,10 @@
               "allows_empty": true
             },
             {
-              "json_path": [0, "end_dt"],
+              "json_path": [
+                0,
+                "end_dt"
+              ],
               "label": "Дата окончания периода (end_dt)",
               "description": "Формат YYYY-MM-DD.",
               "show_description": true,
@@ -4064,17 +4251,23 @@
               "allows_empty": true
             },
             {
-              "json_path": [0, "criterion_mark_type"],
-              "label": "Условие по критерию (criterion_mark_type)",
-              "description": "Условие по критерию: >, >=, пусто и т.д.",
+              "json_path": [
+                0,
+                "criterion_mark_type"
+              ],
+              "label": "Оператор критерия участия",
+              "description": "Оператор сравнения для допуска участника.",
               "show_description": true,
               "required": false,
               "allows_empty": true
             },
             {
-              "json_path": [0, "criterion_mark_value"],
-              "label": "Значение критерия (criterion_mark_value)",
-              "description": "Значение критерия для фильтрации",
+              "json_path": [
+                0,
+                "criterion_mark_value"
+              ],
+              "label": "Порог критерия участия",
+              "description": "Пороговое значение критерия участия.",
               "show_description": true,
               "required": false,
               "allows_empty": true
@@ -4083,6 +4276,8 @@
         },
         {
           "column": "TARGET_TYPE",
+          "label": "Параметры цели (JSON)",
+          "description": "JSON-параметры цели турнира (в т.ч. сезонность).",
           "paths": [
             {
               "json_path": [
@@ -4098,8 +4293,8 @@
         },
         {
           "column": "TRN_INDICATOR_FILTER",
-          "label": "TRN_INDICATOR_FILTER",
-          "description": "TRN_INDICATOR_FILTER",
+          "label": "Фильтр индикаторов турнира",
+          "description": "Дополнительный фильтр индикаторов на уровне турнира.",
           "show_description": false,
           "required": false,
           "allows_empty": true

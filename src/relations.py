@@ -122,6 +122,12 @@ def build_context_for_row(
     if rl_items:
         ctx["links"].append({"title": "Связи REWARD-LINK", "items": rl_items})
 
+    # Награды конкурса определяем через REWARD-LINK:
+    # CONTEST_CODE -> REWARD-LINK -> REWARD_CODE -> REWARD.
+    reward_items_from_links = _merge_link_lists(*[_find_rewards_for_contest(conn, cc) for cc in contest_codes])
+    if reward_items_from_links:
+        ctx["links"].append({"title": "Награды", "items": reward_items_from_links})
+
     group_items = _merge_link_lists(*[_find_groups_for_contest(conn, cc) for cc in contest_codes])
     if group_items:
         ctx["links"].append({"title": "GROUP", "items": group_items})
@@ -238,6 +244,22 @@ def _find_reward_links_for_reward(conn: sqlite3.Connection, reward_code: str) ->
         if (c.get("REWARD_CODE") or "").strip() == reward_code:
             res.append(_link_item("REWARD-LINK", r["id"], c))
     return res[:30]
+
+
+def _find_rewards_for_contest(conn: sqlite3.Connection, contest_code: str) -> List[Dict[str, Any]]:
+    """
+    Связанные награды конкурса через REWARD-LINK.
+    Нужен отдельный блок «Награды» в меню «Связи», даже когда у текущей строки нет REWARD_CODE.
+    """
+    out: List[Dict[str, Any]] = []
+    seen_codes: set[str] = set()
+    for item in _find_reward_links_for_contest(conn, contest_code):
+        rc = (item.get("cells", {}).get("REWARD_CODE") or "").strip()
+        if not rc or rc in seen_codes:
+            continue
+        seen_codes.add(rc)
+        out.extend(_find_reward(conn, rc))
+    return out[:30]
 
 
 def _find_groups_for_contest(conn: sqlite3.Connection, contest_code: str) -> List[Dict[str, Any]]:
