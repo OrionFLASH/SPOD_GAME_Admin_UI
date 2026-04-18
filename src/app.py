@@ -40,7 +40,7 @@ ROOT = Path(__file__).resolve().parent.parent
 CFG: Dict[str, Any] = {}
 CONN: sqlite3.Connection | None = None
 DB_PATH: Path | None = None
-STATIC_ASSET_VERSION = "20260419_01"
+STATIC_ASSET_VERSION = "20260419_02"
 
 
 def _cells_canonical_json(cells: Dict[str, str]) -> str:
@@ -203,6 +203,31 @@ def _sheet_list_columns_for_sheet(cfg: Dict[str, Any], sheet_code: str) -> List[
         {"key": "title_line", "label": "Название / описание", "cell_class": "cell-wrap"},
         {"key": "relations_line", "label": "Связи", "cell_class": "cell-wrap cell-muted cell-relations-pre"},
     ]
+
+
+def _sheet_list_consistency_column_for_sheet(cfg: Dict[str, Any], sheet_code: str) -> Dict[str, Any]:
+    """
+    Параметры колонки «Консистентность» из блока sheet_list_columns для листа.
+    Если в конфиге для листа задан объект consistency_column — используются show, label, cell_class.
+    Иначе: show = ложь для CONTEST-DATA и GROUP (как раньше), иначе истина; подпись и класс по умолчанию.
+    """
+    default_show = sheet_code not in ("CONTEST-DATA", "GROUP")
+    raw = cfg.get("sheet_list_columns")
+    if isinstance(raw, list):
+        for block in raw:
+            if not isinstance(block, dict):
+                continue
+            if str(block.get("sheet_code") or "") != sheet_code:
+                continue
+            cc = block.get("consistency_column")
+            if isinstance(cc, dict):
+                show_raw = cc.get("show")
+                show = default_show if show_raw is None else bool(show_raw)
+                label = str(cc.get("label") or "Консистентность").strip() or "Консистентность"
+                cell_class = str(cc.get("cell_class") or "col-flag").strip() or "col-flag"
+                return {"show": show, "label": label, "cell_class": cell_class}
+            return {"show": default_show, "label": "Консистентность", "cell_class": "col-flag"}
+    return {"show": default_show, "label": "Консистентность", "cell_class": "col-flag"}
 
 
 def _setup_logging() -> None:
@@ -407,6 +432,7 @@ def sheet_list(request: Request, code: str, q: str = ""):
     allowed_cc = global_sheet_filters.matching_contests(gf_ix, gf_sel) if apply_gf else None
     global_filter_blocks = global_sheet_filters.filter_blocks_for_template(gf_ix, gf_sel, CFG)
     list_columns = _sheet_list_columns_for_sheet(CFG, code)
+    consistency_column = _sheet_list_consistency_column_for_sheet(CFG, code)
     if code == "GROUP":
         # Одна строка списка на конкурс: код + название из CONTEST-DATA; «Связи» — все уровни GROUP (GROUP_CODE : GROUP_VALUE).
         contest_full: Dict[str, str] = lu.get("contest_full") or {}
@@ -546,6 +572,7 @@ def sheet_list(request: Request, code: str, q: str = ""):
             "sheet_title": spec.get("title") if spec else code,
             "rows": rows_out,
             "list_columns": list_columns,
+            "consistency_column": consistency_column,
             "q": q,
             "global_filter_blocks": global_filter_blocks,
         },

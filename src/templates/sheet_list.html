@@ -185,8 +185,8 @@
           {% for c in list_columns %}
           <th class="{{ c.cell_class }}">{{ c.label }}</th>
           {% endfor %}
-          {% if sheet_code != "CONTEST-DATA" and sheet_code != "GROUP" %}
-          <th class="col-flag">Консистентность</th>
+          {% if consistency_column.show %}
+          <th class="{{ consistency_column.cell_class }}">{{ consistency_column.label }}</th>
           {% endif %}
           <th class="col-action"></th>
         </tr>
@@ -204,8 +204,8 @@
             {% endif %}
           </td>
           {% endfor %}
-          {% if sheet_code != "CONTEST-DATA" and sheet_code != "GROUP" %}
-          <td class="col-flag">
+          {% if consistency_column.show %}
+          <td class="{{ consistency_column.cell_class }}">
             {% if r.ok %}
             <span class="badge badge-ok">OK</span>
             {% else %}

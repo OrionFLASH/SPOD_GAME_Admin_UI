@@ -50,6 +50,12 @@
   "sheet_list_columns": [
     {
       "sheet_code": "CONTEST-DATA",
+      "consistency_column": {
+        "show": false,
+        "label": "Консистентность",
+        "cell_class": "col-flag",
+        "comment_ru": "Для справочника конкурсов колонка консистентности в таблице списка по умолчанию скрыта (флаг в БД есть, детали — на карточке строки)."
+      },
       "rules": [
         {"key": "preview", "label": "Код конкурса", "cell_class": "cell-mono col-contest-code", "value": {"kind": "cell", "column": "CONTEST_CODE"}},
         {"key": "title_line", "label": "Наименование конкурса", "cell_class": "cell-wrap col-contest-name", "value": {"kind": "cell", "column": "FULL_NAME"}},
@@ -58,6 +64,12 @@
     },
     {
       "sheet_code": "GROUP",
+      "consistency_column": {
+        "show": false,
+        "label": "Консистентность",
+        "cell_class": "col-flag",
+        "comment_ru": "Агрегат по конкурсу: признак консистентности на карточке по строкам GROUP; в таблице списка колонка по умолчанию скрыта."
+      },
       "rules": [
         {"key": "preview", "label": "Код конкурса", "cell_class": "cell-mono col-contest-code", "value": {"kind": "builtin", "name": "group_list_contest_code"}},
         {"key": "title_line", "label": "Название конкурса", "cell_class": "cell-wrap col-contest-name", "value": {"kind": "builtin", "name": "group_list_contest_name"}},
@@ -66,6 +78,11 @@
     },
     {
       "sheet_code": "INDICATOR",
+      "consistency_column": {
+        "show": true,
+        "label": "Консистентность",
+        "cell_class": "col-flag"
+      },
       "rules": [
         {"key": "contest_code", "label": "CONTEST_CODE", "cell_class": "cell-mono", "value": {"kind": "cell", "column": "CONTEST_CODE"}},
         {"key": "title_line", "label": "Название / описание", "cell_class": "cell-wrap", "value": {"kind": "display_field", "field": "title_line"}},
@@ -76,6 +93,11 @@
     },
     {
       "sheet_code": "REWARD",
+      "consistency_column": {
+        "show": true,
+        "label": "Консистентность",
+        "cell_class": "col-flag"
+      },
       "rules": [
         {"key": "preview", "label": "Ключ", "cell_class": "cell-mono", "value": {"kind": "cell", "column": "REWARD_CODE"}},
         {"key": "reward_name_col", "label": "Награда", "cell_class": "cell-wrap", "value": {"kind": "display_field", "field": "reward_name_col"}},
@@ -86,6 +108,11 @@
     },
     {
       "sheet_code": "REWARD-LINK",
+      "consistency_column": {
+        "show": true,
+        "label": "Консистентность",
+        "cell_class": "col-flag"
+      },
       "rules": [
         {"key": "reward_link_reward_code", "label": "Код награды", "cell_class": "cell-mono col-reward-link-code", "value": {"kind": "cell", "column": "REWARD_CODE"}},
         {"key": "reward_link_group_code", "label": "Уровень", "cell_class": "cell-mono col-reward-link-level", "value": {"kind": "cell", "column": "GROUP_CODE"}},
@@ -95,6 +122,11 @@
     },
     {
       "sheet_code": "TOURNAMENT-SCHEDULE",
+      "consistency_column": {
+        "show": true,
+        "label": "Консистентность",
+        "cell_class": "col-flag"
+      },
       "rules": [
         {"key": "preview", "label": "Код турнира", "cell_class": "cell-mono", "value": {"kind": "cell", "column": "TOURNAMENT_CODE"}},
         {"key": "schedule_tournament_status_col", "label": "Статус", "cell_class": "cell-wrap", "value": {"kind": "cell", "column": "TOURNAMENT_STATUS"}},
