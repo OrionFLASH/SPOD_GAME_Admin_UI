@@ -776,10 +776,10 @@ _Смысловые трактовки — рабочие гипотезы по 
 | `PRODUCT` | Продукт или тематика конкурса. |
 | `CONTEST_SUBJECT` | Субъект расчёта конкурса (обычно сотрудник/подразделение). |
 | `FACTOR_MARK_TYPE` | Тип оценки показателя (например рейтинг/критерий). |
-| `CONTEST_INDICATOR_METHOD` | Метод расчёта агрегированного индикатора конкурса (`INTEGRAL`, `RELATION`). |
-| `CONTEST_FACTOR_METHOD` | Метод расчёта итогового показателя конкурса (`FACT`, `RUN_RATE` и др.). |
-| `PLAN_METHOD_CODE` | Метод расчёта планового значения (см. `dm_gamification_method_dic`). |
-| `PLAN_MOD_METOD` | Операция модификации плана (`MULTIPLIER`, `APPEND`). |
+| `CONTEST_INDICATOR_METHOD` | Метод расчёта индикатора: `INTEGRAL` (взвешенная сумма), `RELATION` (отношение сумм). |
+| `CONTEST_FACTOR_METHOD` | Метод итогового факта: `FACT`, `FACT0-FACT1`, `RUN_RATE`, `RUN_RATE-FACT1`, `FACT0-RUN_RATE1_DOWN`, `RUN_RATE/FACT1`, `FACT0/RUN_RATE1_DOWN`. |
+| `PLAN_METHOD_CODE` | Метод расчёта плана: `NOT_USED` (план не задан), `PRESET_VALUE`, `DEPENDS_PREVIOUS_PERIOD`. |
+| `PLAN_MOD_METOD` | Операция модификации плана: `MULTIPLIER` (умножить), `APPEND` (добавить), либо пусто. |
 | `PLAN_MOD_VALUE` | Числовое значение модификатора плана. |
 | `FACTOR_MATCH` | Оператор сравнения для определения результата (`=`, `>`, `>=` и др.). |
 | `CONTEST_PERIOD` | Правила периодов/критериев конкурса (часто JSON-массив). |
@@ -787,7 +787,7 @@ _Смысловые трактовки — рабочие гипотезы по 
 | `SOURCE_UPD_FREQUENCY` | Периодичность обновления данных источника (в днях). |
 | `CALC_TYPE` | Тип расчёта (промышленный/ручной, кодовое значение). |
 | `BUSINESS_BLOCK` | Бизнес-блок(и) конкурса. |
-| `FACT_POST_PROCESSING` | Метод постобработки факта (перцентиль, спец-метрики и др.). |
+| `FACT_POST_PROCESSING` | Постобработка факта: `PERCENTILE`, `PERCENTILE_DOWN`, `PERCENTILE_UPEST`, `PERCENTILE_UP`, `SPECIAL_INDICATOR_1`, `COUNT_BIGGER`, либо пусто. |
 
 ### Плоские колонки (статистика значений)
 
@@ -806,10 +806,10 @@ _Смысловые трактовки — рабочие гипотезы по 
 | `PRODUCT` | строка | 338/338 | 65 | **высокая кардинальность** (65 уник.); примеры: `['HR', 'IT', 'COM', 'CSI', 'ESG', 'SLA', 'ДМС', 'ЛПП', 'СМР', 'СФН', 'УКП', 'ФОТ', 'ЦКП', 'RAIT', 'Лига']` |
 | `CONTEST_SUBJECT` | строка | 338/338 | 1 | `['EMPLOYEE']` |
 | `FACTOR_MARK_TYPE` | строка | 338/338 | 3 | `['CRITERION', 'RATING_MAX', 'RATING_MIN']` |
-| `CONTEST_INDICATOR_METHOD` | строка | 338/338 | 2 | `['INTEGRAL', 'RELATION']` |
-| `CONTEST_FACTOR_METHOD` | строка | 338/338 | 4 | `['FACT', 'RUN_RATE', 'FACT0-FACT1', 'FACT0-RUN_RATE1_DOWN']` |
-| `PLAN_METHOD_CODE` | строка | 338/338 | 2 | `['PRESET_VALUE', 'DEPENDS_PREVIOUS_PERIOD']` |
-| `PLAN_MOD_METOD` | строка | 3/338 | 1 | `['MULTIPLIER']` |
+| `CONTEST_INDICATOR_METHOD` | строка | 338/338 | 2 | выгрузка: `['INTEGRAL', 'RELATION']`; в `config.json` те же 2 значения (с короткими label). |
+| `CONTEST_FACTOR_METHOD` | строка | 338/338 | 4 | выгрузка: `['FACT', 'RUN_RATE', 'FACT0-FACT1', 'FACT0-RUN_RATE1_DOWN']`; в `config.json` расширено до 7 методов из справочника. |
+| `PLAN_METHOD_CODE` | строка | 338/338 | 2 | выгрузка: `['PRESET_VALUE', 'DEPENDS_PREVIOUS_PERIOD']`; в `config.json` дополнительно есть `NOT_USED`. |
+| `PLAN_MOD_METOD` | строка | 3/338 | 1 | выгрузка: `['MULTIPLIER']`; в `config.json` доступны `MULTIPLIER`, `APPEND` и пусто. |
 | `PLAN_MOD_VALUE` | целое (строкой в CSV) | 338/338 | 24 | `['0', '1', '2', '3', '4', '5', '10', '50', '100', '50000', '100000', '250000', '300000', '500000', '1000000', '2000000', '3000000', '5000000', '7000000', '10000000', '12000000', '15000000', '500000000', '1000000000']` |
 | `FACTOR_MATCH` | строка | 338/338 | 3 | `['=', '>', '>=']` |
 | `CONTEST_PERIOD` | строка | 312/338 | 3 | `['[]', '[{"period_code""": -1, """criterion_mark_type""": """>""", """criterion_mark_value""": 0}]"', '[{"period_code""": 0, """criterion_mark_type""": """>""", """criterion_mark_value""": 0}, {"""period_code""": 1, """criterion_mark_type""": """>""", """criterion_mark_value""": 0}]"']` |
@@ -817,7 +817,7 @@ _Смысловые трактовки — рабочие гипотезы по 
 | `SOURCE_UPD_FREQUENCY` | целое (строкой в CSV) | 338/338 | 3 | `['1', '7', '10']` |
 | `CALC_TYPE` | целое (строкой в CSV) | 338/338 | 2 | `['0', '1']` |
 | `BUSINESS_BLOCK` | строка | 338/338 | 9 | `['[]', '["""MNS"""]', '["""IMUB"""]', '["""RNUB"""]', '["""RSB1"""]', '["""KMSB1"""]', '["""KMKKSB"""]', '["""SERVICEMEN"""]', '["""KMFACTORING"""]']` |
-| `FACT_POST_PROCESSING` | строка | 10/338 | 3 | `['PERCENTILE', 'PERCENTILE_UP', 'SPECIAL_INDICATOR_1']` |
+| `FACT_POST_PROCESSING` | строка | 10/338 | 3 | выгрузка: `['PERCENTILE', 'PERCENTILE_UP', 'SPECIAL_INDICATOR_1']`; в `config.json` полный набор из 6 методов + пусто. |
 
 \* Уникальных по непустым значениям; для длинных текстов перечисление ограничено.
 
@@ -1363,10 +1363,10 @@ CONTEST_FEATURE                    [корневой object]
 |---------|------------|
 | `CONTEST_CODE` | Код конкурса (внешний ключ на `CONTEST`). |
 | `INDICATOR_CALC_TYPE` | Тип расчёта индикатора (служебный код). |
-| `INDICATOR_ADD_CALC_TYPE` | Роль индикатора в формуле: `NUMERATOR`/`DIVIDER`. |
+| `INDICATOR_ADD_CALC_TYPE` | Роль индикатора в формуле: `NUMERATOR` (числитель), `DIVIDER` (знаменатель), либо пусто. |
 | `FULL_NAME` | Человекочитаемое название индикатора. |
 | `INDICATOR_CODE` | Код индикатора из источников данных. |
-| `INDICATOR_AGG_FUNCTION` | Функция агрегации (`SUM`, `MAX`, `COUNT_DISTINCT` и др.). |
+| `INDICATOR_AGG_FUNCTION` | Функция агрегации: `SUM`, `MAX`, `MIN`, `AVG`, `COUNT`, `COUNT_DISTINCT`, `COUNT_DISTINCT_CUSTOMER`, `COUNT_DISTINCT_DEAL`, `LAST_VALUE`, либо пусто. |
 | `INDICATOR_WEIGHT` | Вес индикатора в итоговой формуле конкурса. |
 | `INDICATOR_OBJECT` | Объект/уровень применения индикатора (в текущих данных обычно пусто). |
 | `INDICATOR_MARK_TYPE` | Тип оценки индикатора (`GAIN`, `RATING`, `CRITERION`). |
@@ -1384,10 +1384,10 @@ CONTEST_FEATURE                    [корневой object]
 |---------|--------------|----------|-------------|-------------------------|
 | `CONTEST_CODE` | строка | 325/325 | 320 | **высокая кардинальность** (320 уник.); примеры: `['CONTEST_01', 'CONTEST_02', 'CONTEST_03', 'CONTEST_04', 'CONTEST_05', 'CONTEST_06', 'CONTEST_07', 'CONTEST_11', 'CONTEST_12', 'CONTEST_13', 'CONTEST_14', 'CONTEST_15', 'CONTEST_16', 'CONTEST_17', 'CONTEST_19']` |
 | `INDICATOR_CALC_TYPE` | целое (строкой в CSV) | 325/325 | 1 | `['1']` |
-| `INDICATOR_ADD_CALC_TYPE` | строка | 8/325 | 2 | `['DIVIDER', 'NUMERATOR']` |
+| `INDICATOR_ADD_CALC_TYPE` | строка | 8/325 | 2 | выгрузка: `['DIVIDER', 'NUMERATOR']`; в `config.json` те же значения + пусто и короткие label. |
 | `FULL_NAME` | строка | 325/325 | 25 | `['WD', 'WAIT', 'INCOME', 'PPO_IN', 'PPO_ALL', 'COMPASARS_KKP_ID', 'PULMIS_SDO_IN_RUB', 'PFIMIS_CUSTOMER_ID', 'CC360_NKD_DETAIL_CHKD', 'EFFICIENCYARSKKSB_EFF', 'PULMIS_AGRMNT_AMT_RUB', 'PULMIS_BALANCE_OUT_RUB', 'CC360_CLIENT_VOLUM_FOT_M', 'FUNNELARS_ACTIVE_DEAL_ID', 'TRUSTLEVELCC360_STAR_COUNT', 'INSURANCEMIS_BANK_COMMISION', 'FUNNELARS_ACTIVE_CUSTOMER_ID', 'FUNNELARS_ACTIVE_DEAL_MARGIN', 'TRUSTLEVELCC360_LEVEL0_COUNT', 'TRUSTLEVELCC360_LEVEL3_COUNT', 'TRUSTLEVELCC360_LEVEL4_COUNT', 'TRUSTLEVELCC360_LEVEL5_COUNT', 'EFFICIENCYARSKKSB_OD_YEAR_TEMP', 'EFFICIENCYARSKKSB_OD_YEAR_GROWTH', 'TRUSTLEVELCC360_STAR_START_COUNT']` |
 | `INDICATOR_CODE` | строка | 325/325 | 26 | `['WD', 'WAIT', 'INCOME', 'PPO_IN', 'PPO_ALL', 'LEAGUEDEL', 'COMPASARS_KKP_ID', 'PULMIS_SDO_IN_RUB', 'PFIMIS_CUSTOMER_ID', 'CC360_NKD_DETAIL_CHKD', 'EFFICIENCYARSKKSB_EFF', 'PULMIS_AGRMNT_AMT_RUB', 'PULMIS_BALANCE_OUT_RUB', 'CC360_CLIENT_VOLUM_FOT_M', 'FUNNELARS_ACTIVE_DEAL_ID', 'TRUSTLEVELCC360_STAR_COUNT', 'INSURANCEMIS_BANK_COMMISION', 'FUNNELARS_ACTIVE_CUSTOMER_ID', 'FUNNELARS_ACTIVE_DEAL_MARGIN', 'TRUSTLEVELCC360_LEVEL0_COUNT', 'TRUSTLEVELCC360_LEVEL3_COUNT', 'TRUSTLEVELCC360_LEVEL4_COUNT', 'TRUSTLEVELCC360_LEVEL5_COUNT', 'EFFICIENCYARSKKSB_OD_YEAR_TEMP', 'EFFICIENCYARSKKSB_OD_YEAR_GROWTH', 'TRUSTLEVELCC360_STAR_START_COUNT']` |
-| `INDICATOR_AGG_FUNCTION` | строка | 74/325 | 5 | `['MAX', 'SUM', 'COUNT_DISTINCT', 'COUNT_DISTINCT_DEAL', 'COUNT_DISTINCT_CUSTOMER']` |
+| `INDICATOR_AGG_FUNCTION` | строка | 74/325 | 5 | выгрузка: `['MAX', 'SUM', 'COUNT_DISTINCT', 'COUNT_DISTINCT_DEAL', 'COUNT_DISTINCT_CUSTOMER']`; в `config.json` расширено до полного набора из справочника (9 значений + пусто). |
 | `INDICATOR_WEIGHT` | целое (строкой в CSV) | 74/325 | 3 | `['1', '-1', '1000']` |
 | `INDICATOR_OBJECT` | пусто | 0/325 | 0 | все пусто |
 | `INDICATOR_MARK_TYPE` | строка | 325/325 | 3 | `['GAIN', 'RATING', 'CRITERION']` |
@@ -1526,7 +1526,7 @@ CONTEST_FEATURE                    [корневой object]
 | `RESULT_DT` | Дата подведения/публикации итогов турнира. |
 | `PLAN_PERIOD_START_DT` | Начало планового периода для сравнения/оценки роста. |
 | `PLAN_PERIOD_END_DT` | Конец планового периода для сравнения/оценки роста. |
-| `CRITERION_MARK_TYPE` | Оператор критерия допуска участника (`>`, `>=`, `=` и др.). |
+| `CRITERION_MARK_TYPE` | Оператор критерия допуска участника: `>=`, `>`, `=`, `<=`, `<`, `<>`, либо пусто. |
 | `CRITERION_MARK_VALUE` | Пороговое значение критерия допуска участника. |
 | `FILTER_PERIOD_ARR` | JSON дополнительных периодов и критериев (`period_code`, даты, пороги). |
 | `TOURNAMENT_STATUS` | Статус турнира (`АКТИВНЫЙ`, `ЗАВЕРШЕН`, `ОТМЕНЕН`, и др.). |
@@ -1546,7 +1546,7 @@ CONTEST_FEATURE                    [корневой object]
 | `RESULT_DT` | строка | 560/579 | 140 | **высокая кардинальность** (140 уник.); примеры: `['2023-08-31', '2023-09-04', '2023-10-07', '2023-10-10', '2023-11-13', '2023-12-13', '2023-12-14', '2023-12-29', '2024-01-15', '2024-01-24', '2024-01-30', '2024-02-14', '2024-02-20', '2024-02-22', '2024-03-01']` |
 | `PLAN_PERIOD_START_DT` | строка | 124/579 | 17 | `['2023-06-01', '2023-07-01', '2023-08-01', '2023-09-01', '2023-10-01', '2023-11-01', '2023-12-01', '2024-01-01', '2024-02-01', '2024-03-01', '2024-04-01', '2024-05-01', '2024-06-01', '2024-07-01', '2024-08-01', '2024-09-01', '2024-10-01']` |
 | `PLAN_PERIOD_END_DT` | строка | 124/579 | 16 | `['2023-06-30', '2023-07-31', '2023-08-31', '2023-09-30', '2023-10-31', '2023-11-30', '2023-12-31', '2024-02-29', '2024-03-31', '2024-04-30', '2024-05-31', '2024-06-30', '2024-07-31', '2024-08-31', '2024-09-30', '2024-10-31']` |
-| `CRITERION_MARK_TYPE` | строка | 40/579 | 2 | `['>', '>=']` |
+| `CRITERION_MARK_TYPE` | строка | 40/579 | 2 | выгрузка: `['>', '>=']`; в `config.json` доступны `>=`, `>`, `=`, `<=`, `<`, `<>` и пусто (с label). |
 | `CRITERION_MARK_VALUE` | целое (строкой в CSV) | 40/579 | 2 | `['0', '50000']` |
 | `FILTER_PERIOD_ARR` | строка | 56/579 | 38 | `['[{"period_code""": 1, """start_dt""":"""2024-01-01""", """end_dt""":"""2024-12-31"""}]"', '[{"period_code""": 1, """start_dt""":"""2025-01-01""", """end_dt""":"""2025-01-01"""}]"', '[{"period_code""": 1, """start_dt""": """2025-02-01""" , """end_dt""": """2025-02-28"""}]"', '[{"period_code""": 1, """start_dt""": """2025-03-01""" , """end_dt""": """2025-03-31"""}]"', '[{"period_code""": 1, """start_dt""": """2025-04-01""" , """end_dt""": """2025-04-30"""}]"', '[{"period_code""": 1, """start_dt""": """2025-05-01""" , """end_dt""": """2025-05-31"""}]"', '[{"period_code""": 1, """start_dt""": """2025-06-01""" , """end_dt""": """2025-06-30"""}]"', '[{"period_code""": 1, """start_dt""": """2025-07-01""" , """end_dt""": """2025-07-31"""}]"', '[{"period_code""": 1, """start_dt""": """2025-08-01""" , """end_dt""": """2025-08-31"""}]"', '[{"period_code""": 1, """start_dt""": """2025-09-01""" , """end_dt""": """2025-09-30"""}]"', '[{"period_code""": 1, """start_dt""": """2025-10-01""" , """end_dt""": """2025-10-31"""}]"', '[{"period_code""": 1, """start_dt""": """2025-11-01""" , """end_dt""": """2025-11-30"""}]"', '[{"period_code""": 1, """start_dt""": """2026-01-01""" , """end_dt""": """2026-01-31"""}]"', '[{"period_code""": 1, """start_dt""": """2026-02-01""" , """end_dt""": """2026-02-28"""}]"', '[{"period_code": 1, "criterion_mark_type": ">=", "criterion_mark_value": 0, "start_dt":"2025-01-01", "end_dt":"2025-01-31"}]', '[{"period_code": 1, "criterion_mark_type": ">=", "criterion_mark_value": 0, "start_dt":"2025-02-01", "end_dt":"2025-02-28"}]', '[{"period_code": 0, "criterion_mark_type": ">", "criterion_mark_value": 0, "start_dt": "2023-06-01" , "end_dt": "2023-06-30"}]', '[{"period_code": 1, "criterion_mark_type": ">", "criterion_mark_value": 0, "start_dt": "2023-06-01" , "end_dt": "2023-06-30"}]', '[{"period_code": 1, "criterion_mark_type": ">", "criterion_mark_value": 0, "start_dt": "2023-07-01" , "end_dt": "2023-07-31"}]', '[{"period_code": 1, "criterion_mark_type": ">", "criterion_mark_value": 0, "start_dt": "2023-08-01" , "end_dt": "2023-08-31"}]', '[{"period_code": 1, "criterion_mark_type": ">", "criterion_mark_value": 0, "start_dt": "2023-09-01" , "end_dt": "2023-09-30"}]', '[{"period_code": 1, "criterion_mark_type": ">", "criterion_mark_value": 0, "start_dt": "2023-10-01" , "end_dt": "2023-10-31"}]', '[{"period_code": 1, "criterion_mark_type": ">", "criterion_mark_value": 0, "start_dt": "2023-11-01" , "end_dt": "2023-11-30"}]', '[{"period_code": 1, "criterion_mark_type": ">", "criterion_mark_value": 0, "start_dt": "2023-12-01" , "end_dt": "2023-12-31"}]', '[{"period_code": 1, "criterion_mark_type": ">", "criterion_mark_value": 0, "start_dt": "2024-02-01" , "end_dt": "2024-02-29"}]', '[{"period_code": 1, "criterion_mark_type": ">", "criterion_mark_value": 0, "start_dt": "2024-03-01" , "end_dt": "2024-03-31"}]', '[{"period_code": 1, "criterion_mark_type": ">", "criterion_mark_value": 0, "start_dt": "2024-04-01" , "end_dt": "2024-04-30"}]', '[{"period_code": 1, "criterion_mark_type": ">", "criterion_mark_value": 0, "start_dt": "2024-05-01" , "end_dt": "2024-05-31"}]', '[{"period_code": 1, "criterion_mark_type": ">", "criterion_mark_value": 0, "start_dt": "2024-06-01" , "end_dt": "2024-06-30"}]', '[{"period_code": 1, "criterion_mark_type": ">", "criterion_mark_value": 0, "start_dt": "2024-07-01" , "end_dt": "2024-07-31"}]', '[{"period_code": 1, "criterion_mark_type": ">", "criterion_mark_value": 0, "start_dt": "2024-08-01" , "end_dt": "2024-08-31"}]', '[{"period_code": 1, "criterion_mark_type": ">", "criterion_mark_value": 0, "start_dt": "2024-09-01" , "end_dt": "2024-09-30"}]', '[{"period_code": 1, "criterion_mark_type": ">", "criterion_mark_value": 0, "start_dt": "2024-10-01" , "end_dt": "2024-10-31"}]', '[{"period_code""": 1, """criterion_mark_type""": """>""", """criterion_mark_value""": 0, """start_dt""": """2025-01-01""" , """end_dt""": """2025-01-31"""}]"', '[{"period_code""": 1, """criterion_mark_type""": """>""", """criterion_mark_value""": 0, """start_dt""": """2025-02-01""" , """end_dt""": """2025-02-28"""}]"', '[{"period_code""": 1, """criterion_mark_type""": """>""", """criterion_mark_value""": 0, """start_dt""": """2025-03-01""" , """end_dt""": """2025-03-31"""}]"', '[{"period_code""": 1, """criterion_mark_type""": """>""", """criterion_mark_value""": 0, """start_dt""": """2025-04-01""" , """end_dt""": """2025-04-30"""}]"', '[{"period_code""": 1, """criterion_mark_type""": """>""", """criterion_mark_value""": 0, """start_dt""": """2025-05-01""" , """end_dt""": """2025-05-31"""}]"']` |
 | `TOURNAMENT_STATUS` | строка | 579/579 | 5 | `['УДАЛЕН', 'ОТМЕНЕН', 'АКТИВНЫЙ', 'ЗАВЕРШЕН', 'ПОДВЕДЕНИЕ ИТОГОВ']` |
