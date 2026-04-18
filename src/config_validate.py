@@ -53,6 +53,86 @@ def validate_field_enum_sheet_options(cfg: Dict[str, Any]) -> List[str]:
     return out
 
 
+def validate_sheet_list_lookups(cfg: Dict[str, Any]) -> List[str]:
+    """
+    Проверяет sheet_list_lookups: лист из sheets, уникальные id, непустые колонки.
+    """
+    sheets = cfg.get("sheets") or []
+    codes = {str(s.get("code") or "") for s in sheets if s.get("code")}
+    raw = cfg.get("sheet_list_lookups")
+    if not raw:
+        return []
+    if not isinstance(raw, list):
+        return ["sheet_list_lookups: ожидается массив"]
+    out: List[str] = []
+    seen: set[str] = set()
+    for block in raw:
+        if not isinstance(block, dict):
+            out.append("sheet_list_lookups: пропущен не-объект")
+            continue
+        lid = str(block.get("id") or "").strip()
+        if not lid:
+            out.append("sheet_list_lookups: элемент без id")
+            continue
+        if lid in seen:
+            out.append(f"sheet_list_lookups: повтор id «{lid}»")
+        seen.add(lid)
+        src = str(block.get("source_sheet") or "").strip()
+        if not src:
+            out.append(f"sheet_list_lookups: «{lid}» без source_sheet")
+            continue
+        if src not in codes:
+            out.append(f"sheet_list_lookups: неизвестный лист «{src}» (id={lid})")
+        kc = str(block.get("key_column") or "").strip()
+        vc = str(block.get("value_column") or "").strip()
+        if not kc or not vc:
+            out.append(f"sheet_list_lookups: «{lid}» — задайте key_column и value_column")
+    return out
+
+
+def validate_sheet_list_column_values(cfg: Dict[str, Any]) -> List[str]:
+    """
+    Проверяет sheet_list_columns.rules[].value: допустимый kind, ссылки lookup_id на sheet_list_lookups.
+    """
+    lookup_ids: set[str] = set()
+    for block in cfg.get("sheet_list_lookups") or []:
+        if isinstance(block, dict) and str(block.get("id") or "").strip():
+            lookup_ids.add(str(block.get("id")).strip())
+
+    kinds_ok = {"cell", "lookup", "json_leaf", "display_field", "builtin"}
+    builtins_ok = {"group_list_contest_code", "group_list_contest_name", "group_list_relations"}
+    out: List[str] = []
+    for block in cfg.get("sheet_list_columns") or []:
+        if not isinstance(block, dict):
+            continue
+        scode = str(block.get("sheet_code") or "")
+        for rule in block.get("rules") or []:
+            if not isinstance(rule, dict):
+                continue
+            spec = rule.get("value")
+            if not isinstance(spec, dict):
+                continue
+            kind = str(spec.get("kind") or "").strip()
+            if not kind:
+                continue
+            if kind not in kinds_ok:
+                out.append(f"sheet_list_columns: лист «{scode}», key={rule.get('key')!r} — неизвестный value.kind={kind!r}")
+                continue
+            if kind == "lookup":
+                lid = str(spec.get("lookup_id") or "").strip()
+                if lid and lid not in lookup_ids:
+                    out.append(
+                        f"sheet_list_columns: лист «{scode}» — value.lookup_id={lid!r} отсутствует в sheet_list_lookups"
+                    )
+                if not str(spec.get("key_from_column") or "").strip():
+                    out.append(f"sheet_list_columns: лист «{scode}» — lookup без key_from_column")
+            if kind == "builtin":
+                name = str(spec.get("name") or "").strip()
+                if name and name not in builtins_ok:
+                    out.append(f"sheet_list_columns: лист «{scode}» — неизвестный builtin «{name}»")
+    return out
+
+
 def validate_sheet_bindings(cfg: Dict[str, Any]) -> List[str]:
     """
     Сверяет sheet_bindings с sheets[]: один код листа — одна запись, заголовок по желанию.

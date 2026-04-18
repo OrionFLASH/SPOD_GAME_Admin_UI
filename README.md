@@ -78,7 +78,8 @@
 | `src/consistency.py` | Проверки и флаги строк |
 | `src/export_csv.py` | Экспорт листа |
 | `src/relations.py` | Контекст связей для шаблона |
-| `src/sheet_list_display.py` | Списки: **CONTEST-DATA** (тип конкурса, фильтр **`contest_type`**), **INDICATOR**, **REWARD**, **REWARD-LINK**, **TOURNAMENT-SCHEDULE**, **GROUP** (агрегат по конкурсу) — свои колонки и фильтры; `seasonCode` из **TARGET_TYPE**; связи расписания по REWARD-LINK |
+| `src/sheet_list_display.py` | Списки: **CONTEST-DATA** (тип конкурса, фильтр **`contest_type`**), **INDICATOR**, **REWARD**, **REWARD-LINK**, **TOURNAMENT-SCHEDULE**, **GROUP** (агрегат по конкурсу) — свои колонки и фильтры; `seasonCode` из **TARGET_TYPE**; связи расписания по REWARD-LINK; **`build_lookup_tables(conn, cfg)`** и **`sheet_list_lookups`** |
+| `src/sheet_list_column_values.py` | Заполнение ячеек таблицы списка по **`sheet_list_columns.rules[].value`** (**`cell`**, **`lookup`**, **`json_leaf`**, **`display_field`**, **`builtin`**) |
 | `src/static/app.css` | Оформление |
 | `src/static/spod_date_picker.js` | Модальное окно календаря и блок поля даты (YYYY-MM-DD); год в модалке **1000–4000**, быстрые кнопки «Начало» / «Конец» / **«4000-01-01»** (условная дата «без срока»); подключается до `row_editor.js` и `wizard_contest.js` |
 | `src/static/row_editor.js` | Логика сетки полей и JSON на странице строки; числовые поля по **`fieldNumeric`** — плоские и листья JSON (**`findNumericRuleDef`**, **`attachNumericFlatInput`** с путём для правила; `SpodNumericField`); перечисления с **`input_display`** — см. **раздел 4.4** (`useToggleForEnumRule`, `buildSpodYnToggleDom`, `SpodYnField`) |
@@ -113,7 +114,8 @@
 | `sheets[].file` | Имя файла в `IN/SPOD` (единственное место в конфиге для имени CSV листа) |
 | `sheets[].json_columns` | Колонки, выносимые в JSON-редактор |
 | `sheets[].primary_key_column` | Колонка для превью в таблице списка |
-| `sheet_list_columns[]` | Блоки по листу: **`sheet_code`** + массив **`rules`**. Каждое правило задаёт одну колонку таблицы списка строк (`GET /sheet/{code}`): **`key`** — имя поля в объекте строки, которое формирует **`sheet_list_display.display_for_sheet_row`** и дополняет **`app.sheet_list`** (например **`preview`**, **`title_line`**, **`schedule_contest_name_col`**, **`relations_line`**); **`label`** — заголовок `<th>`; **`cell_class`** — CSS-классы ячейки (`cell-mono`, `cell-wrap`, модификаторы вроде **`col-contest-code`**). Порядок **`rules`** = порядок колонок слева направо (после столбца **#**). Если для листа блок отсутствует или пуст, используется запасной набор в **`app._sheet_list_columns_for_sheet`**. Зависимые от других листов значения по-прежнему вычисляются в **`build_lookup_tables`** / **`display_for_sheet_row`** (например **`FULL_NAME`** конкурса по **`CONTEST_CODE`**); конфиг только выбирает, **какие** из этих полей показать и под какими подписями. Подробнее — **раздел 6c.6**. |
+| `sheet_list_lookups[]` | Именованные справочники **`id`** → карта «ключ колонки → значение колонки» по актуальным строкам листа **`source_sheet`** (**`key_column`**, **`value_column`**). Строятся в **`sheet_list_display.build_lookup_tables(conn, cfg)`** и попадают в **`lu[lookup_id]`** (обязательные **`contest_full`**, **`reward_full`** — как в примере в репозитории). Используются в **`sheet_list_columns.rules[].value`** с **`kind`: `lookup`**. Опционально **`comment_ru`**. |
+| `sheet_list_columns[]` | Блоки по листу: **`sheet_code`** + массив **`rules`**. Каждое правило задаёт одну колонку таблицы списка строк (`GET /sheet/{code}`): **`key`** — имя поля в объекте строки **`r`**; **`label`** — заголовок `<th>`; **`cell_class`** — CSS-классы ячейки; **`value`** — **как заполнить ячейку** (см. **раздел 6c.6**): плоское поле строки, **`lookup`** по **`sheet_list_lookups`**, **`display_field`** (поле из **`display_for_sheet_row`**), **`builtin`** (агрегат **GROUP**). Порядок **`rules`** = порядок колонок (после **#**). Если для листа блок отсутствует или пуст — запасной набор в **`app._sheet_list_columns_for_sheet`**. Подробнее — **раздел 6c.6**. |
 
 **Пример:** после правок JSON перезапуск не обязателен; смена `config.json` требует перезапуска. При смене имени CSV достаточно обновить **`sheets[].file`**.
 
@@ -398,7 +400,8 @@
 | `server_stop.schedule_local_shutdown` | Фоновый поток: задержка, завершение дочерних процессов (POSIX), SIGTERM/SIGKILL процессу панели |
 | `app.admin_stop` | POST `/admin/stop`: логирование, вызов `schedule_local_shutdown`, HTML «Сервер останавливается» |
 | `app.index`, `sheet_list`, `row_detail` | HTML-страницы; **`sheet_list`** — **`_sheet_list_columns_for_sheet`**, **`list_columns`** в шаблон; для **GROUP** строки списка по **`CONTEST_CODE`**; фильтры **`gf_*`**; **`sheet_list_display`** + **`search_blob`** / **`group_list_aggregate_search_blob`** и **`q`**; **`row_detail`** — `editor_bootstrap_json`, для **GROUP** — несколько блоков и **`row-editor-group-blocks`** |
-| `sheet_list_display.build_lookup_tables` | Справочники: конкурсы, награды, тип награды по коду, **REWARD-LINK**, турниры по конкурсу, уникальные **`seasonCode`** из **TARGET_TYPE** для фильтра расписания |
+| `sheet_list_display.build_lookup_tables` | Справочники: карты из **`sheet_list_lookups`**, конкурсы/награды, **REWARD-LINK**, турниры по конкурсу, уникальные **`seasonCode`** из **TARGET_TYPE** |
+| `sheet_list_column_values.apply_configured_list_column_values` | Заполнение **`r[key]`** по **`sheet_list_columns.rules[].value`** после **`display_for_sheet_row`** |
 | `sheet_list_display.display_for_sheet_row` | Подписи и поля для ячеек списка; **`key`** в **`sheet_list_columns.rules`** ссылается на имена этих полей (**`reward_name_col`**, **`schedule_contest_name_col`**, **`reward_link_*`**, `relations_line`, …) |
 | `sheet_list_display.reward_type_filter_options` | Опции **`REWARD_TYPE`** из **`field_enums`**; режим **`for_multiselect_list=True`** — список **`{ label, value }`** без пункта «ВСЕ» (для чекбоксов фильтра в **`sheet_list.html`**) |
 | `sheet_list_display.contest_type_filter_options` | Опции **`CONTEST_TYPE`** для листа **CONTEST-DATA**; та же семантика **`for_multiselect_list`**, что у **`reward_type_filter_options`** |
@@ -473,7 +476,7 @@ curl -X PUT "http://127.0.0.1:8765/wizard/new-contest/draft" \
 
 1. **Загрузка строк из БД.** Из таблицы листа **`spod_sheet_<КОД>`** выбираются актуальные версии строк (`is_current = 1`, порядок `sort_key`, `row_index`, `id`). Для каждой строки читается полный набор ячеек через **`sheet_storage.row_to_cells`**.
 
-2. **Справочники и индекс связей — один раз на запрос.** Функция **`sheet_list_display.build_lookup_tables(conn)`** обходит актуальные строки листов CONTEST-DATA, REWARD, TOURNAMENT-SCHEDULE и REWARD-LINK и возвращает словарь:
+2. **Справочники и индекс связей — один раз на запрос.** Функция **`sheet_list_display.build_lookup_tables(conn, CFG)`** строит именованные карты из **`config.json` → `sheet_list_lookups`**, затем индексы по TOURNAMENT-SCHEDULE и REWARD-LINK и возвращает словарь **`lu`**:
    - **`contest_full`** — `CONTEST_CODE` → `FULL_NAME` конкурса;
    - **`reward_full`** — `REWARD_CODE` → `FULL_NAME` (используется при подписях на других листах);
    - **`tournaments_for_contest`** — список турниров по конкурсу;
@@ -523,28 +526,40 @@ curl -X PUT "http://127.0.0.1:8765/wizard/new-contest/draft" \
 
 В списке **REWARD-LINK** кнопка **«Просмотр»** открывает **`/sheet/REWARD-LINK/row/{id}?from_list=1`** — редактирование **конкретной** строки связи (пара конкурс — группа — награда). На карточке по-прежнему доступны все поля CSV этой строки, включая **`CONTEST_CODE`**, даже если в таблице списка колонка с кодом конкурса скрыта. Цепочка возврата в **`trail_nav.js`** учитывает **`from_list=1`** так же, как для других листов.
 
-### 6c.6. Конфигурация колонок таблицы списка (`sheet_list_columns`)
+### 6c.6. Конфигурация колонок таблицы списка (`sheet_list_columns`, `sheet_list_lookups`)
 
-В **`config.json`** на верхнем уровне задаётся массив **`sheet_list_columns`**. Каждый элемент описывает **один лист со списком**:
+В **`config.json`** задаются:
 
-| Поле | Назначение |
-|------|------------|
-| **`sheet_code`** | Код листа (**CONTEST-DATA**, **GROUP**, **INDICATOR**, **REWARD**, **REWARD-LINK**, **TOURNAMENT-SCHEDULE**) — должен совпадать с кодом в **`sheets[]`**. |
-| **`rules`** | Упорядоченный список колонок **данных** таблицы (между столбцом **#** и служебными колонками справа). |
+1. **`sheet_list_lookups`** — именованные справочники для подстановки **значения с другого листа** по ключу из текущей строки (например **`contest_full`**: `CONTEST_CODE` → `FULL_NAME` с листа **CONTEST-DATA**). Элементы: **`id`**, **`source_sheet`**, **`key_column`**, **`value_column`**, опционально **`comment_ru`**.
+
+2. **`sheet_list_columns`** — для каждого листа со списком: **`sheet_code`** и **`rules`**.
 
 Каждый элемент **`rules[]`** — объект:
 
 | Поле | Назначение |
 |------|------------|
-| **`key`** | Имя атрибута в объекте строки **`r`**, который формирует **`sheet_list`** после **`display_for_sheet_row`** и дополнительной обработки в **`app.py`** (например **`preview`**, **`title_line`**, **`contest_type_col`**, **`schedule_tournament_status_col`**, **`schedule_contest_code_col`**, **`schedule_contest_name_col`**, **`relations_line`**, **`reward_link_reward_name`**). Значение в ячейке: **`r.get(key, "")`**, кроме особого случая **`title_line`** при наличии **`subtitle_line`** (INDICATOR) — тогда выводятся две строки с приглушённой подписью. |
-| **`label`** | Текст заголовка **`<th>`** (видимое имя колонки в UI). |
-| **`cell_class`** | Пробел-разделённые CSS-классы ячейки (**`th`** и **`td`**): **`cell-mono`**, **`cell-wrap`**, модификаторы ширины (**`col-contest-code`**, **`col-reward-name`** и т.д.) — см. **`src/static/app.css`**. |
+| **`key`** | Имя атрибута в объекте строки **`r`**, под которым в шаблоне читается значение (**`r.get(key)`**). |
+| **`label`** | Текст заголовка **`<th>`**. |
+| **`cell_class`** | CSS-классы ячейки — см. **`src/static/app.css`**. |
+| **`value`** | После сборки строки списка **`app.sheet_list`** вызывает **`sheet_list_column_values.apply_configured_list_column_values`**: по этому объекту **перезаписывается** **`r[key]`**. Источник задаётся полем **`kind`**: |
 
-**Что не входит в `rules`:** после цикла по **`list_columns`** шаблон **`sheet_list.html`** добавляет фиксированные колонки: для листов **кроме** **CONTEST-DATA** и **GROUP** — **«Консистентность»** (бейдж OK / Проблемы по **`r.ok`**); для всех — пустой заголовок и ссылка **«Просмотр»**. То есть **`sheet_list_columns`** настраивает только **основные** колонки данных, не индикатор консистентности и не действие просмотра.
+**Варианты `value.kind`:**
 
-**Связь с логикой данных:** **`key`** не «тянет» данные из CSV напрямую — он ссылается на **уже вычисленное** представление строки. Справочники и связи по-прежнему собираются в **`build_lookup_tables`**; подписи и агрегаты — в **`display_for_sheet_row`** (в т.ч. **`FULL_NAME`** конкурса по **`CONTEST_CODE`**, сезон из **TARGET_TYPE**, поля **REWARD-LINK**). Если в **`rules`** указан **`key`**, для которого в объекте строки нет значения, ячейка будет пустой. При отсутствии блока для листа в конфиге или пустом **`rules`** используется запасной набор в **`_sheet_list_columns_for_sheet`** в **`app.py`**.
+| `kind` | Назначение |
+|--------|------------|
+| **`cell`** | Значение из ячейки текущей строки: **`column`** — имя колонки CSV. |
+| **`lookup`** | **`lookup_id`** — имя из **`sheet_list_lookups`** (карта в **`lu[lookup_id]`**); **`key_from_column`** — колонка текущей строки, по которой ищется ключ (например подпись конкурса по **`CONTEST_CODE`**). |
+| **`json_leaf`** | Лист JSON в колонке **`column`**, путь **`path`** (массив ключей); для **`TARGET_TYPE` / `seasonCode`** используется тот же смысл, что и **`target_type_season_code`**. |
+| **`display_field`** | Поле из результата **`display_for_sheet_row`** — **`field`**: имя ключа (например **`relations_line`**, **`title_line`**, **`reward_name_col`**). Сложная логика между листами остаётся в **`sheet_list_display.display_for_sheet_row`**; в конфиге явно задаётся, **какое поле** показать в колонке. |
+| **`builtin`** | Зарегистрированные сценарии в **`sheet_list_column_values`**: для агрегированного списка **GROUP** — **`group_list_contest_code`**, **`group_list_contest_name`**, **`group_list_relations`**. |
 
-**Поиск по `q`:** не зависит от набора колонок: **`search_blob`** по-прежнему включает JSON ячеек и поля из **`display_for_sheet_row`** (см. шаг 5 в **разделе 6c.1**).
+**Что не входит в `rules`:** после цикла по **`list_columns`** шаблон **`sheet_list.html`** добавляет фиксированные колонки: для листов **кроме** **CONTEST-DATA** и **GROUP** — **«Консистентность»**; для всех — **«Просмотр»**.
+
+**Особый случай шаблона:** для **INDICATOR** при **`title_line`** и наличии **`subtitle_line`** выводятся две строки (см. **`sheet_list.html`**) — **`subtitle_line`** по-прежнему приходит из **`display_for_sheet_row`**.
+
+**Поиск по `q`:** **`search_blob`** по-прежнему строится из ячеек и **`display_for_sheet_row`** (шаг 5 в **разделе 6c.1**), не из произвольных `value` в конфиге.
+
+При отсутствии блока для листа или пустом **`rules`** используется запасной набор в **`_sheet_list_columns_for_sheet`** в **`app.py`**. Валидация: **`config_validate.validate_sheet_list_lookups`**, **`validate_sheet_list_column_values`** (предупреждения в лог при старте).
 
 ---
 
@@ -781,6 +796,7 @@ python main.py
 | 0.2.46 | **`field_enums.options_from_sheet`:** динамические варианты выпадающих списков из актуальных строк листа SQLite (`source_sheet_code`, `value_column`, `label_column`, опционально `where` с `equals` / `in`, `order_by`). Подмешивание при отдаче **`fieldEnums`** в карточке строки и мастере (**`field_enum_sheet_options.py`**, **`app.py`**, **`wizard_contest.py`**). Пример: **`nonRewardCode`** — все **`REWARD_CODE`** с **`REWARD_TYPE=ITEM`**, подпись **`FULL_NAME`** (`config.json`). В **`row_editor.js`** — сопоставление пути **`…, индекс массива, nonRewardCode`** с правилом **`json_path`** без индекса. Валидация конфига — **`config_validate.validate_field_enum_sheet_options`**. Тесты **`test_field_enum_sheet_options.py`**, версия статики **`STATIC_ASSET_VERSION`**. |
 | 0.2.47 | **JSON «массив объектов» и расширения перечислений:** в **`editor_textareas`** для **`REWARD_ADD_DATA`** заданы **`json_object_array`** + **`object_array_item_keys`** для **`getCondition.nonRewards`** (исключающие ITEM-коды), **`getCondition.rewards`** (пары **`rewardCode`** + **`amount`** 1/2/3), **`itemGroupAmount`** (пары **`itemParam`** — месяцы из **`field_enums`**, **`itemParamAmount`** — строка 0…100 с **`whitelist_validated_input`**). **`field_enums`:** **`label_template`** в **`options_from_sheet`** (составная подпись **`{FULL_NAME}: ["{REWARD_CODE}"]`**); **`whitelist_validated_input`** для **`rewardCode`** (BADGE из БД) и **`itemParamAmount`** (статический список **0…100**) — текстовое поле с подсветкой (нейтрально / неверно / верно), стили **`.json-leaf-validated-wrap-*`** в **`app.css`**. Клиент **`row_editor.js`**: хост **`appendOneJsonObjectArrayHost`**, **`wireJsonLeafPostRender`**, ослабленная проверка **`isObjectArrayValueForHint`** для неполных объектов в массиве; **`findFieldUi`** для путей с индексом. Сервер: **`field_enum_sheet_options`** (`label_template_placeholders`, **`format_label_from_template`**), **`config_validate`**. **`editor_field_ui`:** единые пути без фиксированных индексов для вложенных полей массивов. Документация: **README раздел 4.5**, **`Docs/GAMIFICATION_PATHS_LABELS_PLAN.md`**, **`Docs/JSON/SPOD_INPUT_DATA_CATALOG.md`**. Версия статики **`STATIC_ASSET_VERSION`**. |
 | 0.2.48 | **Списки листов:** в **`config.json`** добавлен блок **`sheet_list_columns`** — для каждого листа со списком задаются порядок и подписи колонок (**`rules`**: **`key`**, **`label`**, **`cell_class`**). В **`app.py`** — функция **`_sheet_list_columns_for_sheet`**, в контекст шаблона передаётся **`list_columns`**; в объекте строки при необходимости — **`cells`**. В **`sheet_list.html`** таблица строится по **`list_columns`**; исправлено закрытие цикла по колонкам (**`endfor`**). В **`sheet_list_display.display_for_sheet_row`** для **TOURNAMENT-SCHEDULE** дополнены поля для колонок статуса и кода конкурса (**`schedule_tournament_status_col`**, **`schedule_contest_code_col`** и связанные). Документация: **разделы 2, 3, 4, 5, 6c** (в т.ч. новый **6c.6**), **8**; версия статики **`STATIC_ASSET_VERSION`**. |
+| 0.2.49 | **`config.json` → `sheet_list_lookups`** и **`sheet_list_columns.rules[].value`**: привязки колонок списка задаются в конфиге (**`cell`**, **`lookup`**, **`json_leaf`**, **`display_field`**, **`builtin`**). Модуль **`src/sheet_list_column_values.py`**; **`build_lookup_tables(conn, cfg)`**; валидация **`config_validate`**. README **разделы 4, 5, 6c.6, 8**. |
 
 ---
 

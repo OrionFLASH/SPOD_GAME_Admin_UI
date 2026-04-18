@@ -24,7 +24,7 @@ from __future__ import annotations
 import json
 import sqlite3
 from collections import defaultdict
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 from src import sheet_storage, spod_json
 
@@ -59,7 +59,17 @@ def _cells_rows(conn: sqlite3.Connection, sheet_code: str) -> List[Dict[str, str
     return out
 
 
-def build_lookup_tables(conn: sqlite3.Connection) -> Dict[str, Any]:
+def _lookup_map_from_sheet(conn: sqlite3.Connection, source_sheet: str, key_column: str, value_column: str) -> Dict[str, str]:
+    """Справочник key_column -> value_column по актуальным строкам листа source_sheet."""
+    out: Dict[str, str] = {}
+    for c in _cells_rows(conn, source_sheet):
+        k = (c.get(key_column) or "").strip()
+        if k:
+            out[k] = (c.get(value_column) or "").strip()
+    return out
+
+
+def build_lookup_tables(conn: sqlite3.Connection, cfg: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
     """
     Справочники для подписей в списках:
     - contest_full: CONTEST_CODE -> FULL_NAME
@@ -68,19 +78,38 @@ def build_lookup_tables(conn: sqlite3.Connection) -> Dict[str, Any]:
     - reward_links_by_reward: REWARD_CODE -> список связей REWARD-LINK (CONTEST_CODE, GROUP_CODE)
     - reward_type_by_reward: REWARD_CODE -> REWARD_TYPE (для фильтра списка REWARD-LINK)
     - schedule_season_codes: уникальные seasonCode из TARGET_TYPE (для фильтра списка расписания)
-    """
-    contest_full: Dict[str, str] = {}
-    for c in _cells_rows(conn, "CONTEST-DATA"):
-        cc = (c.get("CONTEST_CODE") or "").strip()
-        if cc:
-            contest_full[cc] = (c.get("FULL_NAME") or "").strip()
 
-    reward_full: Dict[str, str] = {}
+    Именованные карты из config.json → sheet_list_lookups попадают в тот же словарь lu под полем id
+    (например contest_full, reward_full) и используются в sheet_list_columns.rules[].value kind=lookup.
+    """
+    named_maps: Dict[str, Dict[str, str]] = {}
+    lookups_cfg = (cfg or {}).get("sheet_list_lookups") if cfg else None
+    if isinstance(lookups_cfg, list):
+        for block in lookups_cfg:
+            if not isinstance(block, dict):
+                continue
+            lid = str(block.get("id") or "").strip()
+            src = str(block.get("source_sheet") or "").strip()
+            kc = str(block.get("key_column") or "").strip()
+            vc = str(block.get("value_column") or "").strip()
+            if not (lid and src and kc and vc):
+                continue
+            named_maps[lid] = _lookup_map_from_sheet(conn, src, kc, vc)
+
+    contest_full: Dict[str, str] = dict(named_maps.get("contest_full") or {})
+    if not contest_full:
+        for c in _cells_rows(conn, "CONTEST-DATA"):
+            cc = (c.get("CONTEST_CODE") or "").strip()
+            if cc:
+                contest_full[cc] = (c.get("FULL_NAME") or "").strip()
+
+    reward_full: Dict[str, str] = dict(named_maps.get("reward_full") or {})
     reward_type_by_reward: Dict[str, str] = {}
     for c in _cells_rows(conn, "REWARD"):
         rc = (c.get("REWARD_CODE") or "").strip()
         if rc:
-            reward_full[rc] = (c.get("FULL_NAME") or "").strip()
+            if rc not in reward_full:
+                reward_full[rc] = (c.get("FULL_NAME") or "").strip()
             reward_type_by_reward[rc] = (c.get("REWARD_TYPE") or "").strip()
 
     tournaments_for_contest: Dict[str, List[Dict[str, str]]] = {}
@@ -115,7 +144,7 @@ def build_lookup_tables(conn: sqlite3.Connection) -> Dict[str, Any]:
         if rc_l:
             reward_links_by_reward.setdefault(rc_l, []).append(entry)
 
-    return {
+    out: Dict[str, Any] = {
         "contest_full": contest_full,
         "reward_full": reward_full,
         "tournaments_for_contest": tournaments_for_contest,
@@ -124,6 +153,12 @@ def build_lookup_tables(conn: sqlite3.Connection) -> Dict[str, Any]:
         "reward_type_by_reward": reward_type_by_reward,
         "schedule_season_codes": schedule_season_codes,
     }
+    # Дополнительные справочники из sheet_list_lookups (все id, кроме уже слитых contest_full/reward_full).
+    for lid, mp in named_maps.items():
+        if lid in out:
+            continue
+        out[lid] = dict(mp)
+    return out
 
 
 def _clip(s: str, n: int = 120) -> str:

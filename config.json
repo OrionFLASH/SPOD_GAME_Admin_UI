@@ -31,62 +31,78 @@
     "mode": "warn",
     "comment": "strict — не сохранять при ошибках; warn — сохранять с флагом; soft — только подсветка"
   },
+  "sheet_list_lookups": [
+    {
+      "id": "contest_full",
+      "comment_ru": "Справочник: CONTEST_CODE → FULL_NAME с листа CONTEST-DATA (для kind=lookup и согласованности с display_field).",
+      "source_sheet": "CONTEST-DATA",
+      "key_column": "CONTEST_CODE",
+      "value_column": "FULL_NAME"
+    },
+    {
+      "id": "reward_full",
+      "comment_ru": "Справочник: REWARD_CODE → FULL_NAME с листа REWARD.",
+      "source_sheet": "REWARD",
+      "key_column": "REWARD_CODE",
+      "value_column": "FULL_NAME"
+    }
+  ],
   "sheet_list_columns": [
     {
       "sheet_code": "CONTEST-DATA",
       "rules": [
-        {"key": "preview", "label": "Код конкурса", "cell_class": "cell-mono col-contest-code"},
-        {"key": "title_line", "label": "Наименование конкурса", "cell_class": "cell-wrap col-contest-name"},
-        {"key": "contest_type_col", "label": "Тип конкурса", "cell_class": "cell-wrap col-contest-type"}
+        {"key": "preview", "label": "Код конкурса", "cell_class": "cell-mono col-contest-code", "value": {"kind": "cell", "column": "CONTEST_CODE"}},
+        {"key": "title_line", "label": "Наименование конкурса", "cell_class": "cell-wrap col-contest-name", "value": {"kind": "cell", "column": "FULL_NAME"}},
+        {"key": "contest_type_col", "label": "Тип конкурса", "cell_class": "cell-wrap col-contest-type", "value": {"kind": "cell", "column": "CONTEST_TYPE"}}
       ]
     },
     {
       "sheet_code": "GROUP",
       "rules": [
-        {"key": "preview", "label": "Код конкурса", "cell_class": "cell-mono col-contest-code"},
-        {"key": "title_line", "label": "Название конкурса", "cell_class": "cell-wrap col-contest-name"},
-        {"key": "relations_line", "label": "Связи", "cell_class": "cell-wrap cell-muted cell-relations-pre col-contest-relations"}
+        {"key": "preview", "label": "Код конкурса", "cell_class": "cell-mono col-contest-code", "value": {"kind": "builtin", "name": "group_list_contest_code"}},
+        {"key": "title_line", "label": "Название конкурса", "cell_class": "cell-wrap col-contest-name", "value": {"kind": "builtin", "name": "group_list_contest_name"}},
+        {"key": "relations_line", "label": "Связи", "cell_class": "cell-wrap cell-muted cell-relations-pre col-contest-relations", "value": {"kind": "builtin", "name": "group_list_relations"}}
       ]
     },
     {
       "sheet_code": "INDICATOR",
       "rules": [
-        {"key": "contest_code", "label": "CONTEST_CODE", "cell_class": "cell-mono"},
-        {"key": "title_line", "label": "Название / описание", "cell_class": "cell-wrap"},
-        {"key": "add_calc_type", "label": "Настройка вычисления", "cell_class": "cell-wrap"},
-        {"key": "indicator_code_col", "label": "Код индикатора", "cell_class": "cell-mono"},
-        {"key": "relations_line", "label": "Связи", "cell_class": "cell-wrap cell-muted cell-relations-pre"}
+        {"key": "contest_code", "label": "CONTEST_CODE", "cell_class": "cell-mono", "value": {"kind": "cell", "column": "CONTEST_CODE"}},
+        {"key": "title_line", "label": "Название / описание", "cell_class": "cell-wrap", "value": {"kind": "display_field", "field": "title_line"}},
+        {"key": "add_calc_type", "label": "Настройка вычисления", "cell_class": "cell-wrap", "value": {"kind": "cell", "column": "INDICATOR_ADD_CALC_TYPE"}},
+        {"key": "indicator_code_col", "label": "Код индикатора", "cell_class": "cell-mono", "value": {"kind": "cell", "column": "INDICATOR_CODE"}},
+        {"key": "relations_line", "label": "Связи", "cell_class": "cell-wrap cell-muted cell-relations-pre", "value": {"kind": "display_field", "field": "relations_line"}}
       ]
     },
     {
       "sheet_code": "REWARD",
       "rules": [
-        {"key": "preview", "label": "Ключ", "cell_class": "cell-mono"},
-        {"key": "reward_name_col", "label": "Награда", "cell_class": "cell-wrap"},
-        {"key": "title_line", "label": "Название / описание", "cell_class": "cell-wrap"},
-        {"key": "group_codes_col", "label": "GROUP_CODE", "cell_class": "cell-mono"},
-        {"key": "relations_line", "label": "Связи", "cell_class": "cell-wrap cell-muted cell-relations-pre"}
+        {"key": "preview", "label": "Ключ", "cell_class": "cell-mono", "value": {"kind": "cell", "column": "REWARD_CODE"}},
+        {"key": "reward_name_col", "label": "Награда", "cell_class": "cell-wrap", "value": {"kind": "display_field", "field": "reward_name_col"}},
+        {"key": "title_line", "label": "Название / описание", "cell_class": "cell-wrap", "value": {"kind": "display_field", "field": "title_line"}},
+        {"key": "group_codes_col", "label": "GROUP_CODE", "cell_class": "cell-mono", "value": {"kind": "display_field", "field": "group_codes_col"}},
+        {"key": "relations_line", "label": "Связи", "cell_class": "cell-wrap cell-muted cell-relations-pre", "value": {"kind": "display_field", "field": "relations_line"}}
       ]
     },
     {
       "sheet_code": "REWARD-LINK",
       "rules": [
-        {"key": "reward_link_reward_code", "label": "Код награды", "cell_class": "cell-mono col-reward-link-code"},
-        {"key": "reward_link_group_code", "label": "Уровень", "cell_class": "cell-mono col-reward-link-level"},
-        {"key": "reward_link_reward_name", "label": "Название награды", "cell_class": "cell-wrap col-reward-link-name col-reward-link-name--reward"},
-        {"key": "reward_link_contest_name", "label": "Название турнира", "cell_class": "cell-wrap col-reward-link-name col-reward-link-name--contest"}
+        {"key": "reward_link_reward_code", "label": "Код награды", "cell_class": "cell-mono col-reward-link-code", "value": {"kind": "cell", "column": "REWARD_CODE"}},
+        {"key": "reward_link_group_code", "label": "Уровень", "cell_class": "cell-mono col-reward-link-level", "value": {"kind": "cell", "column": "GROUP_CODE"}},
+        {"key": "reward_link_reward_name", "label": "Название награды", "cell_class": "cell-wrap col-reward-link-name col-reward-link-name--reward", "value": {"kind": "lookup", "lookup_id": "reward_full", "key_from_column": "REWARD_CODE"}},
+        {"key": "reward_link_contest_name", "label": "Название турнира", "cell_class": "cell-wrap col-reward-link-name col-reward-link-name--contest", "value": {"kind": "lookup", "lookup_id": "contest_full", "key_from_column": "CONTEST_CODE"}}
       ]
     },
     {
       "sheet_code": "TOURNAMENT-SCHEDULE",
       "rules": [
-        {"key": "preview", "label": "Код турнира", "cell_class": "cell-mono"},
-        {"key": "schedule_tournament_status_col", "label": "Статус", "cell_class": "cell-wrap"},
-        {"key": "schedule_contest_code_col", "label": "CONTEST_CODE", "cell_class": "cell-mono"},
-        {"key": "schedule_contest_name_col", "label": "Конкурс (CONTEST-DATA.FULL_NAME)", "cell_class": "cell-wrap"},
-        {"key": "schedule_period_col", "label": "Период", "cell_class": "cell-wrap"},
-        {"key": "schedule_season_col", "label": "Сезон", "cell_class": "cell-mono"},
-        {"key": "relations_line", "label": "Связанные награды", "cell_class": "cell-wrap cell-muted cell-relations-pre"}
+        {"key": "preview", "label": "Код турнира", "cell_class": "cell-mono", "value": {"kind": "cell", "column": "TOURNAMENT_CODE"}},
+        {"key": "schedule_tournament_status_col", "label": "Статус", "cell_class": "cell-wrap", "value": {"kind": "cell", "column": "TOURNAMENT_STATUS"}},
+        {"key": "schedule_contest_code_col", "label": "CONTEST_CODE", "cell_class": "cell-mono", "value": {"kind": "cell", "column": "CONTEST_CODE"}},
+        {"key": "schedule_contest_name_col", "label": "Конкурс (CONTEST-DATA.FULL_NAME)", "cell_class": "cell-wrap", "value": {"kind": "lookup", "lookup_id": "contest_full", "key_from_column": "CONTEST_CODE"}},
+        {"key": "schedule_period_col", "label": "Период", "cell_class": "cell-wrap", "value": {"kind": "display_field", "field": "schedule_period_col"}},
+        {"key": "schedule_season_col", "label": "Сезон", "cell_class": "cell-mono", "value": {"kind": "json_leaf", "column": "TARGET_TYPE", "path": ["seasonCode"]}},
+        {"key": "relations_line", "label": "Связанные награды", "cell_class": "cell-wrap cell-muted cell-relations-pre", "value": {"kind": "display_field", "field": "relations_line"}}
       ]
     }
   ],

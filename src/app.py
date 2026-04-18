@@ -29,6 +29,7 @@ from src import (
     ingest,
     relations,
     server_stop,
+    sheet_list_column_values,
     sheet_list_display,
     sheet_storage,
     spod_json,
@@ -186,13 +187,15 @@ def _sheet_list_columns_for_sheet(cfg: Dict[str, Any], sheet_code: str) -> List[
                 key = str(r.get("key") or "").strip()
                 if not key:
                     continue
-                out.append(
-                    {
-                        "key": key,
-                        "label": str(r.get("label") or key),
-                        "cell_class": str(r.get("cell_class") or "cell-wrap"),
-                    }
-                )
+                item: Dict[str, Any] = {
+                    "key": key,
+                    "label": str(r.get("label") or key),
+                    "cell_class": str(r.get("cell_class") or "cell-wrap"),
+                }
+                val = r.get("value")
+                if isinstance(val, dict) and str(val.get("kind") or "").strip():
+                    item["value"] = val
+                out.append(item)
             if out:
                 return out
     return [
@@ -225,6 +228,10 @@ async def lifespan(app: FastAPI):
     for msg in config_validate.validate_sheet_bindings(CFG):
         logging.warning("%s", msg)
     for msg in config_validate.validate_field_enum_sheet_options(CFG):
+        logging.warning("%s", msg)
+    for msg in config_validate.validate_sheet_list_lookups(CFG):
+        logging.warning("%s", msg)
+    for msg in config_validate.validate_sheet_list_column_values(CFG):
         logging.warning("%s", msg)
     DB_PATH = db.get_db_path(ROOT, CFG)
     CONN = db.open_connection(DB_PATH)
@@ -393,7 +400,7 @@ def sheet_list(request: Request, code: str, q: str = ""):
     rows_out: List[Dict[str, Any]] = []
     spec = next((s for s in CFG["sheets"] if s["code"] == code), None)
     ql = q.strip().lower() if q else ""
-    lu = sheet_list_display.build_lookup_tables(conn)
+    lu = sheet_list_display.build_lookup_tables(conn, CFG)
     gf_ix = global_sheet_filters.build_filter_index(conn)
     gf_sel = global_sheet_filters.selection_from_request(request, gf_ix)
     apply_gf = any(bool(gf_sel[k]) for k in gf_sel)
@@ -446,18 +453,25 @@ def sheet_list(request: Request, code: str, q: str = ""):
                 continue
             rep_id = min(rid for rid, _, _ in triples)
             any_bad_f = any(int(ok_f) == 0 for _, _, ok_f in triples)
-            rows_out.append(
-                {
-                    "id": rep_id,
-                    "row_index": agg_row_index,
-                    "preview": cc,
-                    "title_line": title,
-                    "relations_line": levels_line,
-                    "cells": {"CONTEST_CODE": cc},
-                    "ok": 0 if any_bad_f else 1,
-                    "errors": [],
-                }
+            row_g: Dict[str, Any] = {
+                "id": rep_id,
+                "row_index": agg_row_index,
+                "preview": cc,
+                "title_line": title,
+                "relations_line": levels_line,
+                "cells": {"CONTEST_CODE": cc},
+                "ok": 0 if any_bad_f else 1,
+                "errors": [],
+            }
+            sheet_list_column_values.apply_configured_list_column_values(
+                list_columns,
+                row_g,
+                cells=None,
+                lu=lu,
+                disp=None,
+                agg={"contest_code": cc, "members": members_f},
             )
+            rows_out.append(row_g)
             agg_row_index += 1
     else:
         for r in cur.fetchall():
@@ -515,6 +529,14 @@ def sheet_list(request: Request, code: str, q: str = ""):
                 row_out["schedule_season_col"] = disp.get("schedule_season_col", "")
             if code == "CONTEST-DATA":
                 row_out["contest_type_col"] = disp.get("contest_type_col", "")
+            sheet_list_column_values.apply_configured_list_column_values(
+                list_columns,
+                row_out,
+                cells=cells,
+                lu=lu,
+                disp=disp,
+                agg=None,
+            )
             rows_out.append(row_out)
     return templates.TemplateResponse(
         request,
@@ -572,7 +594,7 @@ def row_detail(request: Request, code: str, row_id: int):
     group_contest_name: str = ""
     if code == "GROUP":
         group_contest_code = (cells.get("CONTEST_CODE") or "").strip()
-        contest_full_map: Dict[str, str] = sheet_list_display.build_lookup_tables(conn).get("contest_full") or {}
+        contest_full_map: Dict[str, str] = sheet_list_display.build_lookup_tables(conn, CFG).get("contest_full") or {}
         group_contest_name = (contest_full_map.get(group_contest_code) or "").strip()
         siblings = sheet_storage.fetch_group_rows_for_contest(conn, group_contest_code)
         if not siblings:
