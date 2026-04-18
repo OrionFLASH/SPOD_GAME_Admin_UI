@@ -31,6 +31,65 @@
     "mode": "warn",
     "comment": "strict — не сохранять при ошибках; warn — сохранять с флагом; soft — только подсветка"
   },
+  "sheet_list_columns": [
+    {
+      "sheet_code": "CONTEST-DATA",
+      "rules": [
+        {"key": "preview", "label": "Код конкурса", "cell_class": "cell-mono col-contest-code"},
+        {"key": "title_line", "label": "Наименование конкурса", "cell_class": "cell-wrap col-contest-name"},
+        {"key": "contest_type_col", "label": "Тип конкурса", "cell_class": "cell-wrap col-contest-type"}
+      ]
+    },
+    {
+      "sheet_code": "GROUP",
+      "rules": [
+        {"key": "preview", "label": "Код конкурса", "cell_class": "cell-mono col-contest-code"},
+        {"key": "title_line", "label": "Название конкурса", "cell_class": "cell-wrap col-contest-name"},
+        {"key": "relations_line", "label": "Связи", "cell_class": "cell-wrap cell-muted cell-relations-pre col-contest-relations"}
+      ]
+    },
+    {
+      "sheet_code": "INDICATOR",
+      "rules": [
+        {"key": "contest_code", "label": "CONTEST_CODE", "cell_class": "cell-mono"},
+        {"key": "title_line", "label": "Название / описание", "cell_class": "cell-wrap"},
+        {"key": "add_calc_type", "label": "Настройка вычисления", "cell_class": "cell-wrap"},
+        {"key": "indicator_code_col", "label": "Код индикатора", "cell_class": "cell-mono"},
+        {"key": "relations_line", "label": "Связи", "cell_class": "cell-wrap cell-muted cell-relations-pre"}
+      ]
+    },
+    {
+      "sheet_code": "REWARD",
+      "rules": [
+        {"key": "preview", "label": "Ключ", "cell_class": "cell-mono"},
+        {"key": "reward_name_col", "label": "Награда", "cell_class": "cell-wrap"},
+        {"key": "title_line", "label": "Название / описание", "cell_class": "cell-wrap"},
+        {"key": "group_codes_col", "label": "GROUP_CODE", "cell_class": "cell-mono"},
+        {"key": "relations_line", "label": "Связи", "cell_class": "cell-wrap cell-muted cell-relations-pre"}
+      ]
+    },
+    {
+      "sheet_code": "REWARD-LINK",
+      "rules": [
+        {"key": "reward_link_reward_code", "label": "Код награды", "cell_class": "cell-mono col-reward-link-code"},
+        {"key": "reward_link_group_code", "label": "Уровень", "cell_class": "cell-mono col-reward-link-level"},
+        {"key": "reward_link_reward_name", "label": "Название награды", "cell_class": "cell-wrap col-reward-link-name col-reward-link-name--reward"},
+        {"key": "reward_link_contest_name", "label": "Название турнира", "cell_class": "cell-wrap col-reward-link-name col-reward-link-name--contest"}
+      ]
+    },
+    {
+      "sheet_code": "TOURNAMENT-SCHEDULE",
+      "rules": [
+        {"key": "preview", "label": "Код турнира", "cell_class": "cell-mono"},
+        {"key": "schedule_tournament_status_col", "label": "Статус", "cell_class": "cell-wrap"},
+        {"key": "schedule_contest_code_col", "label": "CONTEST_CODE", "cell_class": "cell-mono"},
+        {"key": "schedule_contest_name_col", "label": "Конкурс (CONTEST-DATA.FULL_NAME)", "cell_class": "cell-wrap"},
+        {"key": "schedule_period_col", "label": "Период", "cell_class": "cell-wrap"},
+        {"key": "schedule_season_col", "label": "Сезон", "cell_class": "cell-mono"},
+        {"key": "relations_line", "label": "Связанные награды", "cell_class": "cell-wrap cell-muted cell-relations-pre"}
+      ]
+    }
+  ],
   "editor_long_text_threshold": 140,
   "editor_textareas": [
     {
@@ -166,6 +225,15 @@
           "json_scalar_array": true,
           "min_rows": 2,
           "max_rows": 12
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": ["seasonItem"],
+          "json_scalar_array": true,
+          "array_allows_empty": true,
+          "array_max_items": 1,
+          "min_rows": 1,
+          "max_rows": 2
         }
       ]
     },
@@ -228,7 +296,7 @@
             {"value": "[\"\"\"MNS\"\"\"]", "label": "Цифровой менеджер"},
             {"value": "[\"\"\"KMSB1\"\"\"]", "label": "KMSB1"},
             {"value": "[\"\"\"SERVICEMEN\"\"\"]", "label": "SERVICEMEN"},
-            {"value": "[\"\"\"KMFACTORING\"\"\"]", "label": "KMFACTORING"},
+            {"value": "[\"\"\"KMFACTORING\"\"\"]", "label": "Менеджер факторинга"},
             {"value": "[\"\"\"IMUB\"\"\"]", "label": "IMUB"},
             {"value": "[\"\"\"RNUB\"\"\"]", "label": "RNUB"},
             {"value": "[\"\"\"RSB1\"\"\"]", "label": "RSB1"}
@@ -1190,26 +1258,53 @@
           "json_path": ["getCondition", "employeeRating", "seasonCode"],
           "allow_custom": false,
           "options": [
-            "",
-            "NON",
-            "SEASON_2024",
-            "SEASON_2025_1",
-            "SEASON_2025_2",
-            "SEASON_2026_1",
-            "SEASON_2026_2",
-            "SEASON_f_2025",
-            "SEASON_f_2026",
-            "SEASON_imub_2025",
-            "SEASON_kmsb1_2025",
-            "SEASON_m_2024",
-            "SEASON_m_2025_1",
-            "SEASON_m_2025_2",
-            "SEASON_m_2026_1",
-            "SEASON_m_2026_2",
-            "SEASON_rnub_2025",
-            "SEASON_rsb1_2025",
-            "SEASON_s_2024",
-            "SEASON_s_2025"
+            {"value": "", "label": "(пусто)"},
+            {"value": "NON", "label": "Без сезона"},
+            {"value": "SEASON_2024", "label": "Сезон 2024"},
+            {"value": "SEASON_2025_1", "label": "Сезон 1ПГ 2025"},
+            {"value": "SEASON_2025_2", "label": "Сезон 2ПГ 2025"},
+            {"value": "SEASON_2026_1", "label": "Сезон 1ПГ 2026"},
+            {"value": "SEASON_2026_2", "label": "Сезон 2ПГ 2026"},
+            {"value": "SEASON_f_2025", "label": "Сезон 2025 (Факторинг)"},
+            {"value": "SEASON_f_2026", "label": "Сезон 2026 (Факторинг)"},
+            {"value": "SEASON_imub_2025", "label": "Сезон 2025 (IMUB)"},
+            {"value": "SEASON_kmsb1_2025", "label": "Сезон 2025 (KMSB1)"},
+            {"value": "SEASON_m_2024", "label": "Сезон 2024 (МНС)"},
+            {"value": "SEASON_m_2025_1", "label": "Сезон 1ПГ 2025 (МНС)"},
+            {"value": "SEASON_m_2025_2", "label": "Сезон 2ПГ 2025 (МНС)"},
+            {"value": "SEASON_m_2026_1", "label": "Сезон 1ПГ 2026 (МНС)"},
+            {"value": "SEASON_m_2026_2", "label": "Сезон 2ПГ 2026 (МНС)"},
+            {"value": "SEASON_rnub_2025", "label": "Сезон 2025 (RNUB)"},
+            {"value": "SEASON_rsb1_2025", "label": "Сезон 2025 (RSB1)"},
+            {"value": "SEASON_s_2024", "label": "Сезон 2024 (S)"},
+            {"value": "SEASON_s_2025", "label": "Сезон 2025 (S)"}
+          ]
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": ["seasonItem"],
+          "allow_custom": false,
+          "options": [
+            {"value": "", "label": "(пусто)"},
+            {"value": "NON", "label": "Без сезона"},
+            {"value": "SEASON_2024", "label": "Сезон 2024"},
+            {"value": "SEASON_2025_1", "label": "Сезон 1ПГ 2025"},
+            {"value": "SEASON_2025_2", "label": "Сезон 2ПГ 2025"},
+            {"value": "SEASON_2026_1", "label": "Сезон 1ПГ 2026"},
+            {"value": "SEASON_2026_2", "label": "Сезон 2ПГ 2026"},
+            {"value": "SEASON_f_2025", "label": "Сезон 2025 (Факторинг)"},
+            {"value": "SEASON_f_2026", "label": "Сезон 2026 (Факторинг)"},
+            {"value": "SEASON_imub_2025", "label": "Сезон 2025 (IMUB)"},
+            {"value": "SEASON_kmsb1_2025", "label": "Сезон 2025 (KMSB1)"},
+            {"value": "SEASON_m_2024", "label": "Сезон 2024 (МНС)"},
+            {"value": "SEASON_m_2025_1", "label": "Сезон 1ПГ 2025 (МНС)"},
+            {"value": "SEASON_m_2025_2", "label": "Сезон 2ПГ 2025 (МНС)"},
+            {"value": "SEASON_m_2026_1", "label": "Сезон 1ПГ 2026 (МНС)"},
+            {"value": "SEASON_m_2026_2", "label": "Сезон 2ПГ 2026 (МНС)"},
+            {"value": "SEASON_rnub_2025", "label": "Сезон 2025 (RNUB)"},
+            {"value": "SEASON_rsb1_2025", "label": "Сезон 2025 (RSB1)"},
+            {"value": "SEASON_s_2024", "label": "Сезон 2024 (S)"},
+            {"value": "SEASON_s_2025", "label": "Сезон 2025 (S)"}
           ]
         },
         {
@@ -1307,26 +1402,26 @@
           "json_path": ["seasonCode"],
           "allow_custom": false,
           "options": [
-            "",
-            "NON",
-            "SEASON_2024",
-            "SEASON_2025_1",
-            "SEASON_2025_2",
-            "SEASON_2026_1",
-            "SEASON_2026_2",
-            "SEASON_f_2025",
-            "SEASON_f_2026",
-            "SEASON_imub_2025",
-            "SEASON_kmsb1_2025",
-            "SEASON_m_2024",
-            "SEASON_m_2025_1",
-            "SEASON_m_2025_2",
-            "SEASON_m_2026_1",
-            "SEASON_m_2026_2",
-            "SEASON_rnub_2025",
-            "SEASON_rsb1_2025",
-            "SEASON_s_2024",
-            "SEASON_s_2025"
+            {"value": "", "label": "(пусто)"},
+            {"value": "NON", "label": "Без сезона"},
+            {"value": "SEASON_2024", "label": "Сезон 2024"},
+            {"value": "SEASON_2025_1", "label": "Сезон 1ПГ 2025"},
+            {"value": "SEASON_2025_2", "label": "Сезон 2ПГ 2025"},
+            {"value": "SEASON_2026_1", "label": "Сезон 1ПГ 2026"},
+            {"value": "SEASON_2026_2", "label": "Сезон 2ПГ 2026"},
+            {"value": "SEASON_f_2025", "label": "Сезон 2025 (Факторинг)"},
+            {"value": "SEASON_f_2026", "label": "Сезон 2026 (Факторинг)"},
+            {"value": "SEASON_imub_2025", "label": "Сезон 2025 (IMUB)"},
+            {"value": "SEASON_kmsb1_2025", "label": "Сезон 2025 (KMSB1)"},
+            {"value": "SEASON_m_2024", "label": "Сезон 2024 (МНС)"},
+            {"value": "SEASON_m_2025_1", "label": "Сезон 1ПГ 2025 (МНС)"},
+            {"value": "SEASON_m_2025_2", "label": "Сезон 2ПГ 2025 (МНС)"},
+            {"value": "SEASON_m_2026_1", "label": "Сезон 1ПГ 2026 (МНС)"},
+            {"value": "SEASON_m_2026_2", "label": "Сезон 2ПГ 2026 (МНС)"},
+            {"value": "SEASON_rnub_2025", "label": "Сезон 2025 (RNUB)"},
+            {"value": "SEASON_rsb1_2025", "label": "Сезон 2025 (RSB1)"},
+            {"value": "SEASON_s_2024", "label": "Сезон 2024 (S)"},
+            {"value": "SEASON_s_2025", "label": "Сезон 2025 (S)"}
           ]
         },
         {
@@ -2006,7 +2101,7 @@
               "json_path": ["persomanNumberVisible", 0],
               "label": "Показать участникам",
               "description": "persomanNumberVisible[0]",
-              "show_description": false,
+              "show_description": true,
               "required": false,
               "allows_empty": true
             },
@@ -2014,7 +2109,7 @@
               "json_path": ["persomanNumberVisible", 1],
               "label": "Показать участникам",
               "description": "persomanNumberVisible[1]",
-              "show_description": false,
+              "show_description": true,
               "required": false,
               "allows_empty": true
             },
@@ -2022,7 +2117,7 @@
               "json_path": ["persomanNumberVisible", 2],
               "label": "Показать участникам",
               "description": "persomanNumberVisible[2]",
-              "show_description": false,
+              "show_description": true,
               "required": false,
               "allows_empty": true
             },
@@ -2030,7 +2125,7 @@
               "json_path": ["persomanNumberVisible", 3],
               "label": "Показать участникам",
               "description": "persomanNumberVisible[3]",
-              "show_description": false,
+              "show_description": true,
               "required": false,
               "allows_empty": true
             },
@@ -2038,7 +2133,7 @@
               "json_path": ["persomanNumberVisible", 4],
               "label": "Показать участникам",
               "description": "persomanNumberVisible[4]",
-              "show_description": false,
+              "show_description": true,
               "required": false,
               "allows_empty": true
             },
@@ -2046,7 +2141,7 @@
               "json_path": ["persomanNumberVisible", 5],
               "label": "Показать участникам",
               "description": "persomanNumberVisible[5]",
-              "show_description": false,
+              "show_description": true,
               "required": false,
               "allows_empty": true
             },
@@ -2054,7 +2149,7 @@
               "json_path": ["persomanNumberVisible", 6],
               "label": "Показать участникам",
               "description": "persomanNumberVisible[6]",
-              "show_description": false,
+              "show_description": true,
               "required": false,
               "allows_empty": true
             },
@@ -2993,7 +3088,7 @@
               "json_path": ["persomanNumberVisible"],
               "label": "Показать участникам",
               "description": "Видят только указанные табельные номера",
-              "show_description": false,
+              "show_description": true,
               "required": false,
               "allows_empty": true
             },
@@ -3055,16 +3150,8 @@
             },
             {
               "json_path": ["seasonItem"],
-              "label": "Сезоны действия",
-              "description": "Список сезонов, в которых действует награда.",
-              "show_description": false,
-              "required": false,
-              "allows_empty": true
-            },
-            {
-              "json_path": ["seasonItem", 0],
-              "label": "seasonItem[0]",
-              "description": "seasonItem[0]",
+              "label": "Сезон действия",
+              "description": "Сезон, в котором действует награда (одно значение или пусто).",
               "show_description": false,
               "required": false,
               "allows_empty": true

@@ -2788,6 +2788,25 @@
       var basePath = leaf.parts || [];
       var arrayHint = leaf.objectArrayHint || jsonObjectArrayHintForPath(bootstrapLocal, colLocal, basePath) || {};
       var keys = objectArrayItemKeysFromHint(arrayHint);
+      var orderedKeys = keys.slice();
+      if (orderedKeys.length > 1) {
+        var toggleKeys = [];
+        var restKeys = [];
+        orderedKeys.forEach(function (keyName) {
+          var pathForKey = basePath.concat(keyName);
+          if (findDatePickerHint(bootstrapLocal, colLocal, pathForKey)) {
+            restKeys.push(keyName);
+            return;
+          }
+          var enumForKey = findFieldEnum(bootstrapLocal, colLocal, pathForKey);
+          if (enumForKey && useToggleForEnumRule(enumForKey)) {
+            toggleKeys.push(keyName);
+          } else {
+            restKeys.push(keyName);
+          }
+        });
+        orderedKeys = toggleKeys.concat(restKeys);
+      }
       var maxRaw = arrayHint.array_max_items;
       var maxN =
         typeof maxRaw === "number" && maxRaw > 0
@@ -2807,8 +2826,8 @@
       if (items.length === 0 && !allowsEmpty) {
         var stub = {};
         var si;
-        for (si = 0; si < keys.length; si++) {
-          stub[keys[si]] = "";
+        for (si = 0; si < orderedKeys.length; si++) {
+          stub[orderedKeys[si]] = "";
         }
         items.push(stub);
       }
@@ -2825,7 +2844,7 @@
       host.className = "json-leaf-row json-object-array-host grid-cell";
       host.setAttribute("data-json-object-array-host", "1");
       host.setAttribute("data-json-base-path", JSON.stringify(basePath));
-      host.setAttribute("data-object-array-keys", JSON.stringify(keys));
+      host.setAttribute("data-object-array-keys", JSON.stringify(orderedKeys));
       host.setAttribute("data-vtype", "json-object-array");
       host.setAttribute("data-array-allows-empty", allowsEmpty ? "1" : "0");
       if (maxN != null) {
@@ -2923,8 +2942,8 @@
         var fieldsCol = document.createElement("div");
         fieldsCol.className = "json-object-array-line-fields";
         var ki;
-        for (ki = 0; ki < keys.length; ki++) {
-          var keyK = keys[ki];
+        for (ki = 0; ki < orderedKeys.length; ki++) {
+          var keyK = orderedKeys[ki];
           var disp = obj[keyK] != null ? String(obj[keyK]) : "";
           var pathPartsItem = basePath.concat(lineIndex, keyK);
           var rowK = document.createElement("div");
@@ -3060,7 +3079,51 @@
 
     /** Сетка листьев: общая отрисовка и пересборка при переходе «Сырой JSON» → «По полям». */
     function appendJsonLeafRowsToGrid(grid, leaves, jsonColumnEl) {
-      var seqLeaves = packYnClusterLeaves(leaves);
+      function leafHasToggleControl(leafNode) {
+        if (!leafNode) {
+          return false;
+        }
+        if (leafNode.vtype === "json-object-array") {
+          var pathToArray = leafNode.parts || [];
+          var arrayHint = leafNode.objectArrayHint || jsonObjectArrayHintForPath(bootstrap, col, pathToArray) || {};
+          var arrKeys = objectArrayItemKeysFromHint(arrayHint);
+          var kk;
+          for (kk = 0; kk < arrKeys.length; kk++) {
+            var pathForKey = pathToArray.concat(arrKeys[kk]);
+            if (findDatePickerHint(bootstrap, col, pathForKey)) {
+              continue;
+            }
+            var enumForKey = findFieldEnum(bootstrap, col, pathForKey);
+            if (enumForKey && useToggleForEnumRule(enumForKey)) {
+              return true;
+            }
+          }
+          return false;
+        }
+        if (leafNode.vtype === "json-scalar-array") {
+          return false;
+        }
+        if (leafNode.vtype === "string" || leafNode.vtype === "number") {
+          if (findDatePickerHint(bootstrap, col, leafNode.parts)) {
+            return false;
+          }
+          var enumRuleForLeaf = findFieldEnum(bootstrap, col, leafNode.parts);
+          return !!(enumRuleForLeaf && useToggleForEnumRule(enumRuleForLeaf));
+        }
+        return false;
+      }
+
+      var toggleLeaves = [];
+      var restLeaves = [];
+      leaves.forEach(function (leafNode) {
+        if (leafHasToggleControl(leafNode)) {
+          toggleLeaves.push(leafNode);
+        } else {
+          restLeaves.push(leafNode);
+        }
+      });
+
+      var seqLeaves = packYnClusterLeaves(toggleLeaves.concat(restLeaves));
       seqLeaves.forEach(function (leaf) {
         if (leaf && leaf.__spodYnCluster && leaf.items && leaf.items.length) {
           var clusterRow = document.createElement("div");

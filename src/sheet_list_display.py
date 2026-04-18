@@ -352,6 +352,7 @@ def display_for_sheet_row(sheet_code: str, cells: Dict[str, str], lu: Dict[str, 
     if sheet_code == "TOURNAMENT-SCHEDULE":
         tc = (cells.get("TOURNAMENT_CODE") or "").strip()
         cc = (cells.get("CONTEST_CODE") or "").strip()
+        tournament_status = (cells.get("TOURNAMENT_STATUS") or "").strip()
         pk = tc
         period = (cells.get("PERIOD_TYPE") or "").strip() or tc
         cname = contest_full.get(cc, "")
@@ -361,6 +362,8 @@ def display_for_sheet_row(sheet_code: str, cells: Dict[str, str], lu: Dict[str, 
             "primary_key": pk,
             "title_line": period,
             "relations_line": relations,
+            "schedule_tournament_status_col": tournament_status,
+            "schedule_contest_code_col": cc,
             "schedule_period_col": period,
             "schedule_contest_name_col": cname,
             "schedule_season_col": season,

@@ -39,7 +39,7 @@ ROOT = Path(__file__).resolve().parent.parent
 CFG: Dict[str, Any] = {}
 CONN: sqlite3.Connection | None = None
 DB_PATH: Path | None = None
-STATIC_ASSET_VERSION = "20260418_24"
+STATIC_ASSET_VERSION = "20260419_01"
 
 
 def _cells_canonical_json(cells: Dict[str, str]) -> str:
@@ -158,6 +158,48 @@ def _tojson_readable(value: Any, indent: int = 2) -> Markup:
 def _load_config() -> Dict[str, Any]:
     with open(ROOT / "config.json", "r", encoding="utf-8") as f:
         return json.load(f)
+
+
+def _sheet_list_columns_for_sheet(cfg: Dict[str, Any], sheet_code: str) -> List[Dict[str, Any]]:
+    """
+    Колонки списка листа из config.json (sheet_list_columns):
+    [
+      {"sheet_code": "TOURNAMENT-SCHEDULE", "rules": [{"key":"preview","label":"Код турнира"}, ...]},
+      ...
+    ]
+    Если блок для листа не задан — используется запасной набор.
+    """
+    raw = cfg.get("sheet_list_columns")
+    if isinstance(raw, list):
+        for block in raw:
+            if not isinstance(block, dict):
+                continue
+            if str(block.get("sheet_code") or "") != sheet_code:
+                continue
+            rules = block.get("rules")
+            if not isinstance(rules, list):
+                continue
+            out: List[Dict[str, Any]] = []
+            for r in rules:
+                if not isinstance(r, dict):
+                    continue
+                key = str(r.get("key") or "").strip()
+                if not key:
+                    continue
+                out.append(
+                    {
+                        "key": key,
+                        "label": str(r.get("label") or key),
+                        "cell_class": str(r.get("cell_class") or "cell-wrap"),
+                    }
+                )
+            if out:
+                return out
+    return [
+        {"key": "preview", "label": "Ключ", "cell_class": "cell-mono"},
+        {"key": "title_line", "label": "Название / описание", "cell_class": "cell-wrap"},
+        {"key": "relations_line", "label": "Связи", "cell_class": "cell-wrap cell-muted cell-relations-pre"},
+    ]
 
 
 def _setup_logging() -> None:
@@ -357,6 +399,7 @@ def sheet_list(request: Request, code: str, q: str = ""):
     apply_gf = any(bool(gf_sel[k]) for k in gf_sel)
     allowed_cc = global_sheet_filters.matching_contests(gf_ix, gf_sel) if apply_gf else None
     global_filter_blocks = global_sheet_filters.filter_blocks_for_template(gf_ix, gf_sel, CFG)
+    list_columns = _sheet_list_columns_for_sheet(CFG, code)
     if code == "GROUP":
         # Одна строка списка на конкурс: код + название из CONTEST-DATA; «Связи» — все уровни GROUP (GROUP_CODE : GROUP_VALUE).
         contest_full: Dict[str, str] = lu.get("contest_full") or {}
@@ -410,6 +453,7 @@ def sheet_list(request: Request, code: str, q: str = ""):
                     "preview": cc,
                     "title_line": title,
                     "relations_line": levels_line,
+                    "cells": {"CONTEST_CODE": cc},
                     "ok": 0 if any_bad_f else 1,
                     "errors": [],
                 }
@@ -445,6 +489,7 @@ def sheet_list(request: Request, code: str, q: str = ""):
                 "preview": disp.get("primary_key", ""),
                 "title_line": disp.get("title_line", ""),
                 "relations_line": disp.get("relations_line", ""),
+                "cells": dict(cells),
                 "ok": r["consistency_ok"],
                 "errors": json.loads(r["consistency_errors"] or "[]"),
             }
@@ -463,6 +508,8 @@ def sheet_list(request: Request, code: str, q: str = ""):
                 row_out["reward_link_contest_name"] = disp.get("reward_link_contest_name", "")
                 row_out["reward_link_group_code"] = disp.get("reward_link_group_code", "")
             if code == "TOURNAMENT-SCHEDULE":
+                row_out["schedule_tournament_status_col"] = disp.get("schedule_tournament_status_col", "")
+                row_out["schedule_contest_code_col"] = disp.get("schedule_contest_code_col", "")
                 row_out["schedule_period_col"] = disp.get("schedule_period_col", "")
                 row_out["schedule_contest_name_col"] = disp.get("schedule_contest_name_col", "")
                 row_out["schedule_season_col"] = disp.get("schedule_season_col", "")
@@ -476,6 +523,7 @@ def sheet_list(request: Request, code: str, q: str = ""):
             "sheet_code": code,
             "sheet_title": spec.get("title") if spec else code,
             "rows": rows_out,
+            "list_columns": list_columns,
             "q": q,
             "global_filter_blocks": global_filter_blocks,
         },

@@ -182,43 +182,9 @@
       <thead>
         <tr>
           <th class="col-idx">#</th>
-          {% if sheet_code == "INDICATOR" %}
-          <th>CONTEST_CODE</th>
-          <th>Название / описание</th>
-          <th>Настройка вычисления</th>
-          <th>Код индикатора</th>
-          {% elif sheet_code == "REWARD" %}
-          <th>Ключ</th>
-          <th>Награда</th>
-          <th>Название / описание</th>
-          <th>GROUP_CODE</th>
-          {% elif sheet_code == "REWARD-LINK" %}
-          <th class="col-reward-link-code">Код награды</th>
-          <th class="col-reward-link-level">Уровень</th>
-          <th class="col-reward-link-name col-reward-link-name--reward">Название награды</th>
-          <th class="col-reward-link-name col-reward-link-name--contest">Название турнира</th>
-          {% elif sheet_code == "TOURNAMENT-SCHEDULE" %}
-          <th>Код турнира</th>
-          <th>Период</th>
-          <th>Название конкурса</th>
-          <th>Сезон</th>
-          {% elif sheet_code == "CONTEST-DATA" %}
-          <th class="col-contest-code">Код конкурса</th>
-          <th class="col-contest-name">Наименование конкурса</th>
-          <th class="col-contest-type">Тип конкурса</th>
-          <th class="col-flag">Консистентность</th>
-          {% elif sheet_code == "GROUP" %}
-          <th class="col-contest-code">Код конкурса</th>
-          <th class="col-contest-name">Название конкурса</th>
-          <th class="col-contest-relations">Связи</th>
-          <th class="col-flag">Консистентность</th>
-          {% else %}
-          <th>Ключ</th>
-          <th>Название / описание</th>
-          {% endif %}
-          {% if sheet_code != "CONTEST-DATA" and sheet_code != "GROUP" and sheet_code != "REWARD-LINK" %}
-          <th>{% if sheet_code == "TOURNAMENT-SCHEDULE" %}Связанные награду{% else %}Связи{% endif %}</th>
-          {% endif %}
+          {% for c in list_columns %}
+          <th class="{{ c.cell_class }}">{{ c.label }}</th>
+          {% endfor %}
           {% if sheet_code != "CONTEST-DATA" and sheet_code != "GROUP" %}
           <th class="col-flag">Консистентность</th>
           {% endif %}
@@ -229,55 +195,15 @@
         {% for r in rows %}
         <tr>
           <td class="col-idx">{{ r.row_index }}</td>
-          {% if sheet_code == "INDICATOR" %}
-          <td class="cell-mono">{{ r.contest_code }}</td>
-          <td class="cell-wrap">{{ r.title_line }}{% if r.subtitle_line %}<br><span class="muted">{{ r.subtitle_line }}</span>{% endif %}</td>
-          <td class="cell-wrap">{{ r.add_calc_type }}</td>
-          <td class="cell-mono">{{ r.indicator_code_col }}</td>
-          {% elif sheet_code == "REWARD" %}
-          <td class="cell-mono">{{ r.preview }}</td>
-          <td class="cell-wrap">{{ r.reward_name_col }}</td>
-          <td class="cell-wrap">{{ r.title_line }}</td>
-          <td class="cell-mono">{{ r.group_codes_col }}</td>
-          {% elif sheet_code == "REWARD-LINK" %}
-          <td class="cell-mono col-reward-link-code">{{ r.reward_link_reward_code }}</td>
-          <td class="cell-mono col-reward-link-level">{{ r.reward_link_group_code }}</td>
-          <td class="cell-wrap col-reward-link-name col-reward-link-name--reward">{{ r.reward_link_reward_name }}</td>
-          <td class="cell-wrap col-reward-link-name col-reward-link-name--contest">{{ r.reward_link_contest_name }}</td>
-          {% elif sheet_code == "TOURNAMENT-SCHEDULE" %}
-          <td class="cell-mono">{{ r.preview }}</td>
-          <td class="cell-wrap">{{ r.schedule_period_col }}</td>
-          <td class="cell-wrap">{{ r.schedule_contest_name_col }}</td>
-          <td class="cell-mono">{{ r.schedule_season_col }}</td>
-          {% elif sheet_code == "CONTEST-DATA" %}
-          <td class="cell-mono col-contest-code">{{ r.preview }}</td>
-          <td class="cell-wrap col-contest-name">{{ r.title_line }}</td>
-          <td class="cell-wrap col-contest-type">{{ r.contest_type_col }}</td>
-          <td class="col-flag">
-            {% if r.ok %}
-            <span class="badge badge-ok">OK</span>
+          {% for c in list_columns %}
+          <td class="{{ c.cell_class }}">
+            {% if c.key == "title_line" and r.subtitle_line %}
+            {{ r.title_line }}<br><span class="muted">{{ r.subtitle_line }}</span>
             {% else %}
-            <span class="badge badge-bad">Проблемы</span>
+            {{ r.get(c.key, "") }}
             {% endif %}
           </td>
-          {% elif sheet_code == "GROUP" %}
-          <td class="cell-mono col-contest-code">{{ r.preview }}</td>
-          <td class="cell-wrap col-contest-name">{{ r.title_line }}</td>
-          <td class="cell-wrap cell-muted cell-relations-pre col-contest-relations">{{ r.relations_line }}</td>
-          <td class="col-flag">
-            {% if r.ok %}
-            <span class="badge badge-ok">OK</span>
-            {% else %}
-            <span class="badge badge-bad">Проблемы</span>
-            {% endif %}
-          </td>
-          {% else %}
-          <td class="cell-mono">{{ r.preview }}</td>
-          <td class="cell-wrap">{{ r.title_line }}</td>
-          {% endif %}
-          {% if sheet_code != "CONTEST-DATA" and sheet_code != "GROUP" and sheet_code != "REWARD-LINK" %}
-          <td class="cell-wrap cell-muted cell-relations-pre">{{ r.relations_line }}</td>
-          {% endif %}
+          {% endfor %}
           {% if sheet_code != "CONTEST-DATA" and sheet_code != "GROUP" %}
           <td class="col-flag">
             {% if r.ok %}

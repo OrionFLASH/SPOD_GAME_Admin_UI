@@ -2366,7 +2366,7 @@ body.spod-date-modal-open {
   right: calc(var(--spod-thumb-w) + var(--spod-yn-inset) + var(--spod-yn-text-gap));
   top: 50%;
   transform: translateY(-50%);
-  font-size: 0.52rem;
+  font-size: 0.55rem;
   font-weight: 800;
   letter-spacing: 0.02em;
   pointer-events: none;
@@ -2399,7 +2399,7 @@ body.spod-date-modal-open {
   word-break: break-word;
   line-height: 1.18;
   max-height: calc(3 * 1.18em);
-  font-size: 0.48rem;
+  font-size: 0.5rem;
   text-overflow: clip;
 }
 
