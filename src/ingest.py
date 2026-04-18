@@ -93,3 +93,67 @@ def import_all(
         counts[code] = len(data)
     conn.commit()
     return counts
+
+
+def reimport_sheet(conn: sqlite3.Connection, root: Path, cfg: Dict[str, Any], sheet_code: str) -> int:
+    """
+    Повторная загрузка CSV одного листа в физическую таблицу и запись реестра ``sheet``.
+
+    Нужна после ``ensure_sheet_table_matches_csv``: при смене ``json_columns`` таблица
+    пересоздаётся (DROP/CREATE) и остаётся пустой, а автоматический ``import_all`` при
+    старте срабатывает только при ``COUNT(sheet)=0``, поэтому без явного переимпорта
+    список листа в UI оказывается пустым.
+    """
+    now = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    spec = sheet_storage.sheet_spec_by_code(cfg, sheet_code)
+    if not spec:
+        return 0
+    in_dir = root / str(cfg.get("paths", {}).get("input_spod", "IN/SPOD"))
+    fn = str(spec.get("file") or "")
+    path = in_dir / fn
+    if not path.is_file():
+        return -1
+    headers, data = _read_csv_rows(path)
+    if not headers:
+        return 0
+    json_cols = list(spec.get("json_columns") or [])
+    flat_keys = sheet_storage.collect_flat_keys_from_rows(data, json_cols)
+    desired = sheet_storage.desired_physical_columns(headers, json_cols, flat_keys)
+    t = sheet_storage.physical_table_name(sheet_code)
+    cur = conn.cursor()
+    row = conn.execute("SELECT id FROM sheet WHERE code = ?", (sheet_code,)).fetchone()
+    if row is None:
+        # Реестра ещё нет: создаём таблицу и первую запись листа (как при фрагменте import_all).
+        sheet_storage.drop_physical_table(conn, sheet_code)
+        sheet_storage.create_physical_table(conn, sheet_code, desired)
+        cur.execute(
+            "INSERT INTO sheet (code, title, file_name, imported_at, headers_json) VALUES (?,?,?,?,?)",
+            (sheet_code, spec.get("title") or sheet_code, fn, now, json.dumps(headers, ensure_ascii=False)),
+        )
+        sid = int(cur.execute("SELECT last_insert_rowid()").fetchone()[0])
+    else:
+        sid = int(row[0])
+        # Очищаем строки этого импорта; DDL уже приведён к ``desired`` в ensure_*.
+        conn.execute(f"DELETE FROM {sheet_storage.quote_ident(t)} WHERE sheet_id = ?", (sid,))
+        cur.execute(
+            """
+            UPDATE sheet
+            SET title = ?, file_name = ?, imported_at = ?, headers_json = ?
+            WHERE id = ?
+            """,
+            (spec.get("title") or sheet_code, fn, now, json.dumps(headers, ensure_ascii=False), sid),
+        )
+    for idx, row_dict in enumerate(data):
+        sheet_storage.insert_data_row(
+            conn,
+            root,
+            cfg,
+            sheet_code,
+            sid,
+            idx,
+            float(idx),
+            row_dict,
+            now,
+            replaces_row_id=None,
+        )
+    return len(data)

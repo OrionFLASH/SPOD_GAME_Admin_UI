@@ -87,17 +87,18 @@
 | `["deliveryRequired"]` / `deliveryRequired` / `deliveryRequired` | **label:** `Требуется доставка`  **description:** `Флаг: награда требует оформления доставки.` |
 | `["fileName"]` / `fileName` / `fileName` | **label:** `Код медиа-файла`  **description:** `Идентификатор файла/ресурса награды в витрине.` |
 | `["getCondition","nonRewards"]` / `getCondition.nonRewards` | **label:** `Запрещающие награды`  **description:** `Список кодов наград, при наличии которых текущая награда не выдаётся.` |
-| `["getCondition","nonRewards",3,"nonRewardCode"]` / техничный path | **label:** `Код исключающей награды (элемент 4)`  **description:** `Код награды-исключения из условий получения.` |
+| `["getCondition","nonRewards","nonRewardCode"]` (канонический `path` в `editor_field_ui`; в JSON это `… nonRewards → <индекс> → nonRewardCode`) | **label:** `Код исключающей награды`  **description:** `Код награды-исключения из условий получения.` |
 | `["getCondition","rewards"]` / `getCondition.rewards` | **label:** `Требуемые награды`  **description:** `Список наград, необходимых для получения текущей.` |
-| `["getCondition","rewards",0,"amount"]` | **label:** `Количество требуемых наград (элемент 1)`  **description:** `Сколько единиц указанной награды требуется.` |
+| `["getCondition","rewards","rewardCode"]` (в JSON: `… rewards → <индекс> → rewardCode`) | **label:** `Код требуемой награды`  **description:** `Код награды, которую участник должен иметь для выдачи текущей.` |
+| `["getCondition","rewards","amount"]` (в JSON: `… rewards → <индекс> → amount`) | **label:** `Количество требуемых наград`  **description:** `Сколько единиц указанной награды требуется (в конфиге допустимые значения 1, 2, 3).` |
 | `["ignoreConditions",10]` / `ignoreConditions[10]` / `ignoreConditions[10]` | **label:** `Табельный номер без проверки условий (элемент 11)`  **description:** `Участник, для которого ограничения выдачи не применяются.` |
 | `["isGrouping"]` / `isGrouping` / `isGrouping` | **label:** `Групповая выдача`  **description:** `Флаг групповой механики выдачи награды.` |
 | `["isGroupingName"]` / `isGroupingName` / `isGroupingName` | **label:** `Название группировки`  **description:** `Подпись группировки для отображения в UI.` |
 | `["isGroupingTitle"]` / `isGroupingTitle` / `isGroupingTitle` | **label:** `Заголовок группировки`  **description:** `Заголовок секции группировки в интерфейсе награды.` |
 | `["isGroupingTultip"]` / `isGroupingTultip` / `isGroupingTultip` | **label:** `Подсказка группировки`  **description:** `Текст подсказки для блока групповой выдачи.` |
 | `["itemFeature",4]` / `itemFeature[4]` / `itemFeature[4]` | **label:** `Особенность товара (элемент 5)`  **description:** `Пояснение по характеристике награды-типа ITEM.` |
-| `["itemGroupAmount",3,"itemParam"]` / техничный path | **label:** `Параметр группового лимита (элемент 4)`  **description:** `Наименование параметра ограничения для групповой выдачи.` |
-| `["itemGroupAmount",3,"itemParamAmount"]` | **label:** `Значение группового лимита (элемент 4)`  **description:** `Числовое значение ограничения по выбранному параметру.` |
+| `["itemGroupAmount","itemParam"]` (в JSON: `itemGroupAmount → <индекс> → itemParam`) | **label:** `Параметр группового лимита`  **description:** `Наименование параметра ограничения для групповой выдачи (например, месяц).` |
+| `["itemGroupAmount","itemParamAmount"]` (в JSON: `itemGroupAmount → <индекс> → itemParamAmount`) | **label:** `Значение группового лимита`  **description:** `Числовое значение ограничения по выбранному параметру (ввод со сверкой по списку допустимых строк).` |
 | `["itemLimitPeriod"]` / `itemLimitPeriod` / `itemLimitPeriod` | **label:** `Период лимита выдачи`  **description:** `Период, в рамках которого действует лимит количества выдач.` |
 | `["masterBadge"]` / `masterBadge` / `masterBadge` | **label:** `Мастер-бейдж`  **description:** `Флаг принадлежности награды к мастер-бейджам.` |
 | `["newsType"]` / `Тип новости` / `newsType` | **label:** `Тип новости`  **description:** `Формат новости о награде (например, AIPROMPT/TEMPLATE).` |
@@ -165,4 +166,5 @@
 - Применено в `config.json`: нормализация `label/description` для вложенных `paths`.
 - Убраны основные техничные подписи вида `feature[2]`, `ignoreConditions[10]`, `itemGroupAmount[3].itemParam`.
 - Для индексных путей введены единые шаблоны «элемент N».
+- С версии приложения **0.2.47** для массивов объектов **`getCondition.nonRewards`**, **`getCondition.rewards`**, **`itemGroupAmount`** в **`editor_field_ui`** используются **канонические пути без фиксированного индекса** (см. таблицу в §**5.1** выше и **`README.md`**, §**4.5**): клиент сопоставляет их с реальным JSON, где между ключом массива и полем объекта стоит числовой индекс элемента.
 

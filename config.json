@@ -1,12 +1,6 @@
 {
-  "paths": {
-    "input_spod": "IN/SPOD",
-    "output_db_dir": "OUT/DB",
-    "logs": "log"
-  },
-  "database": {
-    "filename": "tournament_admin.sqlite"
-  },
+  "paths": {"input_spod": "IN/SPOD", "output_db_dir": "OUT/DB", "logs": "log"},
+  "database": {"filename": "tournament_admin.sqlite"},
   "database_model": {
     "comment_ru": "Схема SQLite задаётся в коде (src/db.py, src/sheet_storage.py). У каждого листа из sheets[] — своя таблица spod_sheet_<КОД> (дефисы в коде заменены на подчёркивание): колонки CSV как отдельные TEXT, JSON-колонки как TEXT с полным JSON, плюс денормализованные листья j__<JSON_колонка>__<путь>. Служебные поля: id, sheet_id, row_index, sort_key, consistency_*, updated_at, is_current, replaces_row_id. Логические связи между листами (CONTEST_CODE, REWARD_CODE и т.д.) индексируются для запросов; классические FOREIGN KEY между листами не используются из‑за версионирования строк (несколько версий с одним бизнес-ключом).",
     "registry_table": "sheet",
@@ -24,45 +18,15 @@
     ]
   },
   "sheet_bindings": [
-    {
-      "code": "CONTEST-DATA",
-      "title": "Конкурсы",
-      "csv_file": "CONTEST (PROM) 09-04 v1.csv"
-    },
-    {
-      "code": "GROUP",
-      "title": "Группы / уровни",
-      "csv_file": "GROUP (PROM) 09-04 v1.csv"
-    },
-    {
-      "code": "INDICATOR",
-      "title": "Показатели",
-      "csv_file": "INDICATOR (PROM) 09-04 v1.csv"
-    },
-    {
-      "code": "REWARD",
-      "title": "Награды",
-      "csv_file": "REWARD (PROM) 09-04 v1.csv"
-    },
-    {
-      "code": "REWARD-LINK",
-      "title": "Связи конкурс — группа — награда",
-      "csv_file": "REWARD-LINK (PROM) 09-04 v1.csv"
-    },
-    {
-      "code": "TOURNAMENT-SCHEDULE",
-      "title": "Расписание турниров",
-      "csv_file": "SCHEDULE (PROM) 09-04 v1.csv"
-    }
+    {"code": "CONTEST-DATA", "title": "Конкурсы"},
+    {"code": "GROUP", "title": "Группы / уровни"},
+    {"code": "INDICATOR", "title": "Показатели"},
+    {"code": "REWARD", "title": "Награды"},
+    {"code": "REWARD-LINK", "title": "Связи конкурс — группа — награда"},
+    {"code": "TOURNAMENT-SCHEDULE", "title": "Расписание турниров"}
   ],
-  "server": {
-    "host": "127.0.0.1",
-    "port": 8765
-  },
-  "logging": {
-    "level": "INFO",
-    "base_name": "admin"
-  },
+  "server": {"host": "127.0.0.1", "port": 8765},
+  "logging": {"level": "INFO", "base_name": "admin"},
   "consistency": {
     "mode": "warn",
     "comment": "strict — не сохранять при ошибках; warn — сохранять с флагом; soft — только подсветка"
@@ -72,96 +36,62 @@
     {
       "sheet_code": "CONTEST-DATA",
       "hints": [
-        {
-          "column": "CONTEST_DESCRIPTION",
-          "input_type": "text",
-          "min_rows": 6,
-          "max_rows": 18
-        },
-        {
-          "column": "FULL_NAME",
-          "input_type": "text",
-          "min_rows": 2,
-          "max_rows": 8
-        },
-        {
-          "column": "CREATE_DT",
-          "input_type": "date",
-          "storage_format": "YYYY-MM-DD"
-        },
-        {
-          "column": "CLOSE_DT",
-          "input_type": "date",
-          "storage_format": "YYYY-MM-DD"
-        },
+        {"column": "CONTEST_DESCRIPTION", "input_type": "text", "min_rows": 6, "max_rows": 18},
+        {"column": "FULL_NAME", "input_type": "text", "min_rows": 2, "max_rows": 8},
+        {"column": "CREATE_DT", "input_type": "date", "storage_format": "YYYY-MM-DD"},
+        {"column": "CLOSE_DT", "input_type": "date", "storage_format": "YYYY-MM-DD"},
         {
           "column": "CONTEST_FEATURE",
-          "json_path": [
-            "persomanNumberVisible"
-          ],
+          "json_path": ["persomanNumberVisible"],
           "json_scalar_array": true,
           "min_rows": 2,
           "max_rows": 8
         },
         {
           "column": "CONTEST_FEATURE",
-          "json_path": [
-            "persomanNumberHidden"
-          ],
+          "json_path": ["persomanNumberHidden"],
           "json_scalar_array": true,
           "min_rows": 2,
           "max_rows": 8
         },
         {
           "column": "CONTEST_FEATURE",
-          "json_path": [
-            "gosbVisible"
-          ],
+          "json_path": ["gosbVisible"],
           "json_scalar_array": true,
           "min_rows": 2,
           "max_rows": 8
         },
         {
           "column": "CONTEST_FEATURE",
-          "json_path": [
-            "gosbHidden"
-          ],
+          "json_path": ["gosbHidden"],
           "json_scalar_array": true,
           "min_rows": 2,
           "max_rows": 8
         },
         {
           "column": "CONTEST_FEATURE",
-          "json_path": [
-            "tbVisible"
-          ],
+          "json_path": ["tbVisible"],
           "json_scalar_array": true,
           "min_rows": 2,
           "max_rows": 8
         },
         {
           "column": "CONTEST_FEATURE",
-          "json_path": [
-            "tbHidden"
-          ],
+          "json_path": ["tbHidden"],
           "json_scalar_array": true,
           "min_rows": 2,
           "max_rows": 8
         },
         {
           "column": "CONTEST_FEATURE",
-          "json_path": [
-            "feature"
-          ],
+          "json_path": ["feature"],
           "json_scalar_array": true,
           "min_rows": 2,
           "max_rows": 10
         },
         {
           "column": "CONTEST_FEATURE",
-          "json_path": [
-            "businessBlock"
-          ],
+          "json_path": ["businessBlock"],
           "json_scalar_array": false,
           "min_rows": 2,
           "max_rows": 3
@@ -171,76 +101,68 @@
     {
       "sheet_code": "REWARD",
       "hints": [
-        {
-          "column": "REWARD_DESCRIPTION",
-          "min_rows": 6,
-          "max_rows": 20
-        },
-        {
-          "column": "FULL_NAME",
-          "min_rows": 2,
-          "max_rows": 10
-        },
+        {"column": "REWARD_DESCRIPTION", "min_rows": 6, "max_rows": 20},
+        {"column": "FULL_NAME", "min_rows": 2, "max_rows": 10},
         {
           "column": "REWARD_ADD_DATA",
-          "json_path": [
-            "tagEndDT"
-          ],
+          "json_path": ["tagEndDT"],
           "input_type": "date",
           "storage_format": "YYYY-MM-DD"
         },
         {
           "column": "REWARD_ADD_DATA",
-          "json_path": [
-            "feature"
-          ],
+          "json_path": ["feature"],
           "json_scalar_array": true,
           "min_rows": 2,
           "max_rows": 10
         },
         {
           "column": "REWARD_ADD_DATA",
-          "json_path": [
-            "itemFeature"
-          ],
+          "json_path": ["itemFeature"],
           "json_scalar_array": true,
           "min_rows": 2,
           "max_rows": 10
         },
         {
           "column": "REWARD_ADD_DATA",
-          "json_path": [
-            "persomanNumberVisible"
-          ],
+          "json_path": ["persomanNumberVisible"],
           "json_scalar_array": true,
           "min_rows": 2,
           "max_rows": 8
         },
         {
           "column": "REWARD_ADD_DATA",
-          "json_path": [
-            "getCondition",
-            "rewards"
-          ],
-          "json_scalar_array": true,
+          "json_path": ["getCondition", "rewards"],
+          "json_object_array": true,
+          "object_array_item_keys": ["rewardCode", "amount"],
+          "array_allows_empty": true,
+          "array_max_items": 32,
           "min_rows": 2,
           "max_rows": 12
         },
         {
           "column": "REWARD_ADD_DATA",
-          "json_path": [
-            "getCondition",
-            "nonRewards"
-          ],
-          "json_scalar_array": true,
+          "json_path": ["getCondition", "nonRewards"],
+          "json_object_array": true,
+          "object_array_item_keys": ["nonRewardCode"],
+          "array_allows_empty": true,
+          "array_max_items": 32,
           "min_rows": 2,
           "max_rows": 12
         },
         {
           "column": "REWARD_ADD_DATA",
-          "json_path": [
-            "ignoreConditions"
-          ],
+          "json_path": ["itemGroupAmount"],
+          "json_object_array": true,
+          "object_array_item_keys": ["itemParam", "itemParamAmount"],
+          "array_allows_empty": true,
+          "array_max_items": 32,
+          "min_rows": 2,
+          "max_rows": 12
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": ["ignoreConditions"],
           "json_scalar_array": true,
           "min_rows": 2,
           "max_rows": 12
@@ -249,32 +171,14 @@
     },
     {
       "sheet_code": "INDICATOR",
-      "hints": [
-        {
-          "column": "FULL_NAME",
-          "min_rows": 2,
-          "max_rows": 8
-        }
-      ]
+      "hints": [{"column": "FULL_NAME", "min_rows": 2, "max_rows": 8}]
     },
     {
       "sheet_code": "TOURNAMENT-SCHEDULE",
       "hints": [
-        {
-          "column": "START_DT",
-          "input_type": "date",
-          "storage_format": "YYYY-MM-DD"
-        },
-        {
-          "column": "END_DT",
-          "input_type": "date",
-          "storage_format": "YYYY-MM-DD"
-        },
-        {
-          "column": "RESULT_DT",
-          "input_type": "date",
-          "storage_format": "YYYY-MM-DD"
-        },
+        {"column": "START_DT", "input_type": "date", "storage_format": "YYYY-MM-DD"},
+        {"column": "END_DT", "input_type": "date", "storage_format": "YYYY-MM-DD"},
+        {"column": "RESULT_DT", "input_type": "date", "storage_format": "YYYY-MM-DD"},
         {
           "column": "PLAN_PERIOD_START_DT",
           "input_type": "date",
@@ -287,19 +191,13 @@
         },
         {
           "column": "FILTER_PERIOD_ARR",
-          "json_path": [
-            0,
-            "start_dt"
-          ],
+          "json_path": [0, "start_dt"],
           "input_type": "date",
           "storage_format": "YYYY-MM-DD"
         },
         {
           "column": "FILTER_PERIOD_ARR",
-          "json_path": [
-            0,
-            "end_dt"
-          ],
+          "json_path": [0, "end_dt"],
           "input_type": "date",
           "storage_format": "YYYY-MM-DD"
         }
@@ -313,139 +211,87 @@
         {
           "column": "BUSINESS_STATUS",
           "allow_custom": false,
-          "options": [
-            "АКТИВНЫЙ",
-            "АРХИВНЫЙ"
-          ]
+          "input_display": "toggle",
+          "options": ["АКТИВНЫЙ", "АРХИВНЫЙ"]
         },
         {
           "column": "CONTEST_TYPE",
           "allow_custom": false,
-          "options": [
-            "ИНДИВИДУАЛЬНЫЙ",
-            "ИНДИВИДУАЛЬНЫЙ НАКОПИТЕЛЬНЫЙ",
-            "ТУРНИРНЫЙ"
-          ]
+          "options": ["ИНДИВИДУАЛЬНЫЙ", "ИНДИВИДУАЛЬНЫЙ НАКОПИТЕЛЬНЫЙ", "ТУРНИРНЫЙ"]
         },
         {
           "column": "BUSINESS_BLOCK",
           "allow_custom": false,
           "options": [
-            {
-              "label": "(пусто)",
-              "value": "[]"
-            },
-            {
-              "label": "KMKKSB",
-              "value": "[\"\"\"KMKKSB\"\"\"]"
-            },
-            {
-              "label": "MNS",
-              "value": "[\"\"\"MNS\"\"\"]"
-            },
-            {
-              "label": "KMSB1",
-              "value": "[\"\"\"KMSB1\"\"\"]"
-            },
-            {
-              "label": "SERVICEMEN",
-              "value": "[\"\"\"SERVICEMEN\"\"\"]"
-            },
-            {
-              "label": "KMFACTORING",
-              "value": "[\"\"\"KMFACTORING\"\"\"]"
-            },
-            {
-              "label": "IMUB",
-              "value": "[\"\"\"IMUB\"\"\"]"
-            },
-            {
-              "label": "RNUB",
-              "value": "[\"\"\"RNUB\"\"\"]"
-            },
-            {
-              "label": "RSB1",
-              "value": "[\"\"\"RSB1\"\"\"]"
-            }
+            {"value": "[]", "label": "(пусто)"},
+            {"value": "[\"\"\"KMKKSB\"\"\"]", "label": "Клиентский менеджер"},
+            {"value": "[\"\"\"MNS\"\"\"]", "label": "Цифровой менеджер"},
+            {"value": "[\"\"\"KMSB1\"\"\"]", "label": "KMSB1"},
+            {"value": "[\"\"\"SERVICEMEN\"\"\"]", "label": "SERVICEMEN"},
+            {"value": "[\"\"\"KMFACTORING\"\"\"]", "label": "KMFACTORING"},
+            {"value": "[\"\"\"IMUB\"\"\"]", "label": "IMUB"},
+            {"value": "[\"\"\"RNUB\"\"\"]", "label": "RNUB"},
+            {"value": "[\"\"\"RSB1\"\"\"]", "label": "RSB1"}
           ]
         },
         {
           "column": "FACTOR_MARK_TYPE",
           "allow_custom": false,
-          "options": [
-            "CRITERION",
-            "RATING_MAX",
-            "RATING_MIN"
-          ]
+          "options": ["CRITERION", "RATING_MAX", "RATING_MIN"]
         },
         {
           "column": "CONTEST_INDICATOR_METHOD",
           "allow_custom": false,
           "options": [
-            "INTEGRAL",
-            "RELATION"
+            {"value": "INTEGRAL", "label": "Взвешенная сумма индикаторов"},
+            {"value": "RELATION", "label": "Отношение двух сумм (дробь)"}
           ]
         },
         {
           "column": "CONTEST_FACTOR_METHOD",
           "allow_custom": false,
           "options": [
-            "FACT",
-            "FACT0-FACT1",
-            "FACT0-RUN_RATE1_DOWN",
-            "RUN_RATE"
+            {"value": "FACT", "label": "Факт за период"},
+            {"value": "FACT0-FACT1", "label": "Прирост: текущий − прошлый период"},
+            {"value": "RUN_RATE", "label": "Run rate — линейный прогноз на конец турнира"},
+            {"value": "RUN_RATE-FACT1", "label": "Run rate (конец) − факт прошлого периода"},
+            {"value": "FACT0-RUN_RATE1_DOWN", "label": "Факт − тренд прошлого периода"},
+            {"value": "RUN_RATE/FACT1", "label": "Доля: run rate к факту прошлого"},
+            {"value": "FACT0/RUN_RATE1_DOWN", "label": "Доля: факт к отклонению от тренда"}
           ]
         },
         {
           "column": "PLAN_METHOD_CODE",
           "allow_custom": false,
           "options": [
-            "PRESET_VALUE",
-            "DEPENDS_PREVIOUS_PERIOD"
+            {"value": "NOT_USED", "label": "План не задан"},
+            {"value": "PRESET_VALUE", "label": "Предустановленное значение"},
+            {"value": "DEPENDS_PREVIOUS_PERIOD", "label": "Зависит от прошлого показателя"}
           ]
         },
         {
           "column": "PLAN_MOD_METOD",
           "allow_custom": false,
           "options": [
-            "",
-            "MULTIPLIER"
+            {"value": "", "label": "(пусто)"},
+            {"value": "MULTIPLIER", "label": "Умножить прошлый период на коэффициент"},
+            {"value": "APPEND", "label": "Добавить число к прошлому периоду"}
           ]
         },
-        {
-          "column": "FACTOR_MATCH",
-          "allow_custom": false,
-          "options": [
-            "=",
-            ">=",
-            ">",
-            "<",
-            "<="
-          ]
-        },
-        {
-          "column": "TARGET_TYPE",
-          "allow_custom": false,
-          "options": [
-            "ПРОМ",
-            "ТЕСТ"
-          ]
-        },
-        {
-          "column": "CONTEST_SUBJECT",
-          "allow_custom": false,
-          "options": [
-            "EMPLOYEE"
-          ]
-        },
+        {"column": "FACTOR_MATCH", "allow_custom": false, "options": ["=", ">=", ">", "<", "<="]},
+        {"column": "TARGET_TYPE", "allow_custom": false, "input_display": "toggle", "options": ["ПРОМ", "ТЕСТ"]},
+        {"column": "CONTEST_SUBJECT", "allow_custom": false, "options": ["EMPLOYEE"]},
         {
           "column": "FACT_POST_PROCESSING",
           "allow_custom": true,
           "options": [
-            "",
-            "PERCENTILE",
-            "PERCENTILE_UP",
-            "SPECIAL_INDICATOR_1"
+            {"value": "", "label": "(пусто)"},
+            {"value": "PERCENTILE", "label": "«Я лучше»: доля участников со строго меньшим фактом"},
+            {"value": "PERCENTILE_DOWN", "label": "«Попал в»: доля с фактом не выше моего"},
+            {"value": "PERCENTILE_UPEST", "label": "«Лучше меня»: доля со строго большим фактом"},
+            {"value": "PERCENTILE_UP", "label": "«Не хуже»: доля с фактом не ниже моего"},
+            {"value": "SPECIAL_INDICATOR_1", "label": "Уровень 1–6 по процентилю и сегменту участника"},
+            {"value": "COUNT_BIGGER", "label": "Сколько участников с фактом выше моего"}
           ]
         },
         {
@@ -548,279 +394,171 @@
         },
         {
           "column": "CONTEST_FEATURE",
-          "json_path": [
-            "vid"
-          ],
+          "json_path": ["vid"],
           "allow_custom": false,
-          "options": [
-            "ПРОМ",
-            "ТЕСТ"
-          ]
+          "input_display": "toggle",
+          "options": ["ПРОМ", "ТЕСТ"]
         },
         {
           "column": "CONTEST_FEATURE",
-          "json_path": [
-            "momentRewarding"
-          ],
+          "json_path": ["momentRewarding"],
           "allow_custom": false,
           "input_display": "toggle",
           "options": [
-            {
-              "label": "Вручаем в конце",
-              "value": "AFTER"
-            },
-            {
-              "label": "Вручаем сразу",
-              "value": "DURIN"
-            }
+            {"value": "AFTER", "label": "Вручаем в конце"},
+            {"value": "DURIN", "label": "Вручаем сразу"}
           ]
         },
         {
           "column": "CONTEST_FEATURE",
-          "json_path": [
-            "masking"
-          ],
+          "json_path": ["masking"],
           "allow_custom": false,
           "input_display": "toggle",
-          "options": [
-            {
-              "label": "Да",
-              "value": "Y"
-            },
-            {
-              "label": "Нет",
-              "value": "N"
-            }
-          ]
+          "options": [{"value": "Y", "label": "Да"}, {"value": "N", "label": "Нет"}]
         },
         {
           "column": "CONTEST_FEATURE",
-          "json_path": [
-            "capacity"
-          ],
+          "json_path": ["capacity"],
           "allow_custom": false,
           "options": [
-            {
-              "label": "В рублях",
-              "value": ""
-            },
-            {
-              "label": "В миллионах",
-              "value": "MILLIONS"
-            },
-            {
-              "label": "В тысячах",
-              "value": "THOUSANDS"
-            }
+            {"value": "", "label": "В рублях"},
+            {"value": "MILLIONS", "label": "В миллионах"},
+            {"value": "THOUSANDS", "label": "В тысячах"}
           ]
         },
         {
           "column": "CONTEST_FEATURE",
-          "json_path": [
-            "typeRewarding"
-          ],
-          "allow_custom": false,
-          "options": [
-            "all",
-            "one"
-          ]
-        },
-        {
-          "column": "CONTEST_FEATURE",
-          "json_path": [
-            "tournamentStartMailing"
-          ],
+          "json_path": ["typeRewarding"],
           "allow_custom": false,
           "input_display": "toggle",
-          "options": [
-            {
-              "label": "Да",
-              "value": "Y"
-            },
-            {
-              "label": "Нет",
-              "value": "N"
-            }
-          ]
+          "options": ["all", "one"]
         },
         {
           "column": "CONTEST_FEATURE",
-          "json_path": [
-            "tournamentEndMailing"
-          ],
+          "json_path": ["tournamentStartMailing"],
           "allow_custom": false,
           "input_display": "toggle",
-          "options": [
-            {
-              "label": "Да",
-              "value": "Y"
-            },
-            {
-              "label": "Нет",
-              "value": "N"
-            }
-          ]
+          "options": [{"value": "Y", "label": "Да"}, {"value": "N", "label": "Нет"}]
         },
         {
           "column": "CONTEST_FEATURE",
-          "json_path": [
-            "tournamentLikeMailing"
-          ],
+          "json_path": ["tournamentEndMailing"],
           "allow_custom": false,
           "input_display": "toggle",
-          "options": [
-            {
-              "label": "Да",
-              "value": "Y"
-            },
-            {
-              "label": "Нет",
-              "value": "N"
-            }
-          ]
+          "options": [{"value": "Y", "label": "Да"}, {"value": "N", "label": "Нет"}]
         },
         {
           "column": "CONTEST_FEATURE",
-          "json_path": [
-            "tournamentRewardingMailing"
-          ],
+          "json_path": ["tournamentLikeMailing"],
           "allow_custom": false,
           "input_display": "toggle",
-          "options": [
-            {
-              "label": "Да",
-              "value": "Y"
-            },
-            {
-              "label": "Нет",
-              "value": "N"
-            }
-          ]
+          "options": [{"value": "Y", "label": "Да"}, {"value": "N", "label": "Нет"}]
         },
         {
           "column": "CONTEST_FEATURE",
-          "json_path": [
-            "tournamentTeam"
-          ],
+          "json_path": ["tournamentRewardingMailing"],
           "allow_custom": false,
           "input_display": "toggle",
-          "options": [
-            {
-              "label": "Да",
-              "value": "Y"
-            },
-            {
-              "label": "Нет",
-              "value": "N"
-            }
-          ]
+          "options": [{"value": "Y", "label": "Да"}, {"value": "N", "label": "Нет"}]
         },
         {
           "column": "CONTEST_FEATURE",
-          "json_path": [
-            "avatarShow"
-          ],
+          "json_path": ["tournamentTeam"],
           "allow_custom": false,
           "input_display": "toggle",
-          "options": [
-            {
-              "label": "Да",
-              "value": "Y"
-            },
-            {
-              "label": "Нет",
-              "value": "N"
-            }
-          ]
+          "options": [{"value": "Y", "label": "Да"}, {"value": "N", "label": "Нет"}]
         },
         {
           "column": "CONTEST_FEATURE",
-          "json_path": [
-            "minNumber"
-          ],
+          "json_path": ["avatarShow"],
+          "allow_custom": false,
+          "input_display": "toggle",
+          "options": [{"value": "Y", "label": "Да"}, {"value": "N", "label": "Нет"}]
+        },
+        {
+          "column": "CONTEST_FEATURE",
+          "json_path": ["minNumber"],
+          "allow_custom": true,
+          "options": ["0", "1", "2", "3"]
+        },
+        {
+          "column": "CONTEST_FEATURE",
+          "json_path": ["accuracy"],
+          "allow_custom": false,
+          "options": ["0", "1", "2", "3", "5", "6", "7", "8"]
+        },
+        {
+          "column": "CONTEST_FEATURE",
+          "json_path": ["businessBlock"],
+          "allow_custom": false,
+          "options": [
+            {"value": "", "label": "(пусто)"},
+            {"value": "KMKKSB", "label": "Клиентский менеджер"},
+            {"value": "MNS", "label": "Цифровой менеджер"},
+            {"value": "KMSB1", "label": "KMSB1"},
+            {"value": "SERVICEMEN", "label": "SERVICEMEN"},
+            {"value": "KMFACTORING", "label": "Менеджер факторинга"},
+            {"value": "IMUB", "label": "IMUB"},
+            {"value": "RNUB", "label": "RNUB"},
+            {"value": "RSB1", "label": "RSB1"}
+          ]
+        },
+        {
+          "column": "CONTEST_PERIOD",
+          "json_path": [0, "period_code"],
+          "comment": "В выгрузке: JSON-массив объектов; ключи элемента — period_code, criterion_mark_type, criterion_mark_value. Частые period_code: −1, 0, 1.",
           "allow_custom": true,
           "options": [
-            "0",
-            "1",
-            "2",
-            "3"
+            {"value": "-1", "label": "Период −1 (особый)"},
+            {"value": "0", "label": "Текущий период (0)"},
+            {"value": "1", "label": "Доп. период 1"}
           ]
         },
         {
-          "column": "CONTEST_FEATURE",
-          "json_path": [
-            "accuracy"
-          ],
-          "allow_custom": false,
+          "column": "CONTEST_PERIOD",
+          "json_path": [1, "period_code"],
+          "allow_custom": true,
           "options": [
-            "0",
-            "1",
-            "2",
-            "3",
-            "5",
-            "6",
-            "7",
-            "8"
+            {"value": "0", "label": "Текущий период (0)"},
+            {"value": "1", "label": "Доп. период 1"}
           ]
         },
         {
-          "column": "CONTEST_FEATURE",
-          "json_path": [
-            "businessBlock"
-          ],
+          "column": "CONTEST_PERIOD",
+          "json_path": [0, "criterion_mark_type"],
           "allow_custom": false,
           "options": [
-            {
-              "label": "(пусто)",
-              "value": ""
-            },
-            {
-              "label": "Клиентский менеджер",
-              "value": "KMKKSB"
-            },
-            {
-              "label": "Цифровой менеджер",
-              "value": "MNS"
-            },
-            {
-              "label": "KMSB1",
-              "value": "KMSB1"
-            },
-            {
-              "label": "SERVICEMEN",
-              "value": "SERVICEMEN"
-            },
-            {
-              "label": "Менеджер факторинга",
-              "value": "KMFACTORING"
-            },
-            {
-              "label": "IMUB",
-              "value": "IMUB"
-            },
-            {
-              "label": "RNUB",
-              "value": "RNUB"
-            },
-            {
-              "label": "RSB1",
-              "value": "RSB1"
-            }
+            {"value": "", "label": "(пусто)"},
+            {"value": ">=", "label": "≥ не меньше"},
+            {"value": ">", "label": "> больше"},
+            {"value": "=", "label": "= равно"},
+            {"value": "<=", "label": "≤ не больше"},
+            {"value": "<", "label": "< меньше"},
+            {"value": "<>", "label": "≠ не равно"}
+          ]
+        },
+        {
+          "column": "CONTEST_PERIOD",
+          "json_path": [1, "criterion_mark_type"],
+          "allow_custom": false,
+          "options": [
+            {"value": "", "label": "(пусто)"},
+            {"value": ">=", "label": "≥ не меньше"},
+            {"value": ">", "label": "> больше"},
+            {"value": "=", "label": "= равно"},
+            {"value": "<=", "label": "≤ не больше"},
+            {"value": "<", "label": "< меньше"},
+            {"value": "<>", "label": "≠ не равно"}
           ]
         },
         {
           "column": "CALC_TYPE",
           "comment": "В БД — 0 или 1: подписи в UI, значения при сохранении как у businessBlock.",
           "allow_custom": false,
+          "input_display": "toggle",
           "options": [
-            {
-              "label": "Ручной расчет",
-              "value": "1"
-            },
-            {
-              "label": "Промышленный расчет",
-              "value": "0"
-            }
+            {"value": "1", "label": "Ручной расчет"},
+            {"value": "0", "label": "Промышленный расчет"}
           ]
         }
       ]
@@ -832,22 +570,10 @@
           "column": "GROUP_CODE",
           "allow_custom": false,
           "options": [
-            {
-              "label": "Страна",
-              "value": "BANK"
-            },
-            {
-              "label": "Тер.банк",
-              "value": "TB"
-            },
-            {
-              "label": "ГОСБ",
-              "value": "GOSB"
-            },
-            {
-              "label": "Группа",
-              "value": "GROUPING"
-            }
+            {"value": "BANK", "label": "Страна"},
+            {"value": "TB", "label": "Тер.банк"},
+            {"value": "GOSB", "label": "ГОСБ"},
+            {"value": "GROUPING", "label": "Группа"}
           ]
         },
         {
@@ -855,113 +581,48 @@
           "comment": "Подписи в UI: объекты { label, value }; сейчас label = value, позже можно задать человекочитаемые label.",
           "allow_custom": false,
           "options": [
-            {
-              "label": "Все",
-              "value": "*"
-            },
-            {
-              "label": "ЦЧБ",
-              "value": "[13]"
-            },
-            {
-              "label": "УБ",
-              "value": "[16]"
-            },
-            {
-              "label": "ББ",
-              "value": "[18]"
-            },
-            {
-              "label": "МБ",
-              "value": "[38]"
-            },
-            {
-              "label": "СРБ",
-              "value": "[40]"
-            },
-            {
-              "label": "ВВБ",
-              "value": "[42]"
-            },
-            {
-              "label": "СИБ",
-              "value": "[44]"
-            },
-            {
-              "label": "ЮЗБ",
-              "value": "[52]"
-            },
-            {
-              "label": "ПБ",
-              "value": "[54]"
-            },
-            {
-              "label": "СЗБ",
-              "value": "[55]"
-            },
-            {
-              "label": "ДВБ",
-              "value": "[70]"
-            }
+            {"value": "*", "label": "Все"},
+            {"value": "[13]", "label": "ЦЧБ"},
+            {"value": "[16]", "label": "УБ"},
+            {"value": "[18]", "label": "ББ"},
+            {"value": "[38]", "label": "МБ"},
+            {"value": "[40]", "label": "СРБ"},
+            {"value": "[42]", "label": "ВВБ"},
+            {"value": "[44]", "label": "СИБ"},
+            {"value": "[52]", "label": "ЮЗБ"},
+            {"value": "[54]", "label": "ПБ"},
+            {"value": "[55]", "label": "СЗБ"},
+            {"value": "[70]", "label": "ДВБ"}
           ]
         },
         {
           "column": "GET_CALC_METHOD",
           "allow_custom": false,
           "options": [
-            {
-              "label": "Процент от участников",
-              "value": "1"
-            },
-            {
-              "label": "TOP-X от участников",
-              "value": "2"
-            },
-            {
-              "label": "По критерию",
-              "value": "3"
-            }
+            {"value": "1", "label": "Процент от участников"},
+            {"value": "2", "label": "TOP-X от участников"},
+            {"value": "3", "label": "По критерию"}
           ]
         },
         {
           "column": "BASE_CALC_CODE",
           "allow_custom": false,
           "options": [
-            {
-              "label": "Страна",
-              "value": "BANK"
-            },
-            {
-              "label": "Тер.банк",
-              "value": "TB"
-            },
-            {
-              "label": "ГОСБ",
-              "value": "GOSB"
-            },
-            {
-              "label": "Группа",
-              "value": "GROUPING"
-            },
-            {
-              "label": "(пусто)",
-              "value": ""
-            }
+            {"value": "BANK", "label": "Страна"},
+            {"value": "TB", "label": "Тер.банк"},
+            {"value": "GOSB", "label": "ГОСБ"},
+            {"value": "GROUPING", "label": "Группа"},
+            {"value": "", "label": "(пусто)"}
           ]
         },
         {
           "column": "CALC_TYPE",
           "comment": "В БД — 0 или 1; в форме — подписи «Ручной расчет» / «Промышленный расчет».",
           "allow_custom": false,
+          "input_display": "toggle",
           "options": [
-            {
-              "label": "Ручной расчет",
-              "value": "1"
-            },
-            {
-              "label": "Промышленный расчет",
-              "value": "0"
-            }
+            {"value": "1", "label": "Ручной расчет"},
+            {"value": "0", "label": "Промышленный расчет"}
           ]
         }
       ]
@@ -973,22 +634,10 @@
           "column": "GROUP_CODE",
           "allow_custom": false,
           "options": [
-            {
-              "label": "Страна",
-              "value": "BANK"
-            },
-            {
-              "label": "Тер.банк",
-              "value": "TB"
-            },
-            {
-              "label": "ГОСБ",
-              "value": "GOSB"
-            },
-            {
-              "label": "Группа",
-              "value": "GROUPING"
-            }
+            {"value": "BANK", "label": "Страна"},
+            {"value": "TB", "label": "Тер.банк"},
+            {"value": "GOSB", "label": "ГОСБ"},
+            {"value": "GROUPING", "label": "Группа"}
           ]
         }
       ]
@@ -996,147 +645,228 @@
     {
       "sheet_code": "INDICATOR",
       "rules": [
-        {
-          "column": "INDICATOR_CALC_TYPE",
-          "allow_custom": false,
-          "options": [
-            "1"
-          ]
-        },
+        {"column": "INDICATOR_CALC_TYPE", "allow_custom": false, "options": ["1"]},
         {
           "column": "INDICATOR_ADD_CALC_TYPE",
           "allow_custom": true,
           "options": [
-            "",
-            "DIVIDER",
-            "NUMERATOR"
+            {"value": "", "label": "(пусто)"},
+            {"value": "NUMERATOR", "label": "Числитель"},
+            {"value": "DIVIDER", "label": "Знаменатель"}
           ]
         },
         {
           "column": "INDICATOR_CODE",
           "allow_custom": true,
           "options": [
-            "CC360_CLIENT_VOLUM_FOT_M",
-            "CC360_NKD_DETAIL_CHKD",
-            "COMPASARS_KKP_ID",
-            "EFFICIENCYARSKKSB_EFF",
-            "EFFICIENCYARSKKSB_OD_YEAR_GROWTH",
-            "EFFICIENCYARSKKSB_OD_YEAR_TEMP",
-            "FUNNELARS_ACTIVE_CUSTOMER_ID",
-            "FUNNELARS_ACTIVE_DEAL_ID",
-            "FUNNELARS_ACTIVE_DEAL_MARGIN",
-            "INCOME",
-            "INSURANCEMIS_BANK_COMMISION",
-            "LEAGUEDEL",
-            "PFIMIS_CUSTOMER_ID",
-            "PPO_ALL",
-            "PPO_IN",
-            "PULMIS_AGRMNT_AMT_RUB",
-            "PULMIS_BALANCE_OUT_RUB",
-            "PULMIS_SDO_IN_RUB",
-            "TRUSTLEVELCC360_LEVEL0_COUNT",
-            "TRUSTLEVELCC360_LEVEL3_COUNT",
-            "TRUSTLEVELCC360_LEVEL4_COUNT",
-            "TRUSTLEVELCC360_LEVEL5_COUNT",
-            "TRUSTLEVELCC360_STAR_COUNT",
-            "TRUSTLEVELCC360_STAR_START_COUNT",
-            "WAIT",
-            "WD"
+            {"value": "WAIT", "label": "Без источников (ручной)"},
+            {"value": "CC360_CLIENT_VOLUM_FOT_M", "label": "Объём ФОТ клиента (мес.)"},
+            {"value": "CC360_NKD_DETAIL_CHKD", "label": "ЧКД за месяц (факт)"},
+            {"value": "COMPASARS_KKP_ID", "label": "Идентификатор ККП"},
+            {"value": "EFFICIENCYARSKKSB_EFF", "label": "КМ эффективен · ККСБ"},
+            {"value": "EFFICIENCYARSKKSB_OD_YEAR_GROWTH", "label": "Прирост ОД АППГ · ККСБ"},
+            {"value": "EFFICIENCYARSKKSB_OD_YEAR_TEMP", "label": "Темп прироста ОД годовой · ККСБ"},
+            {"value": "FUNNELARS_ACTIVE_CUSTOMER_ID", "label": "Клиент (воронка, активные продукты)"},
+            {"value": "FUNNELARS_ACTIVE_DEAL_ID", "label": "Идентификатор сделки (воронка)"},
+            {"value": "FUNNELARS_ACTIVE_DEAL_MARGIN", "label": "Объём сделки (воронка)"},
+            {"value": "INCOME", "label": "Доход от конверсионных операций"},
+            {"value": "INSURANCEMIS_BANK_COMMISION", "label": "КВ банка без НДС"},
+            {"value": "LEAGUEDEL", "label": "Выбыл из лиги чемпионов"},
+            {"value": "PFIMIS_CUSTOMER_ID", "label": "Клиент (сделки с ПФИ)"},
+            {"value": "PPO_ALL", "label": "Все платежи ППО (знаменатель)"},
+            {"value": "PPO_IN", "label": "Входящие платежи ППО (руб.)"},
+            {"value": "PULMIS_AGRMNT_AMT_RUB", "label": "Сумма депозита (руб)"},
+            {"value": "PULMIS_BALANCE_OUT_RUB", "label": "Исходящий остаток"},
+            {"value": "PULMIS_SDO_IN_RUB", "label": "СДО (руб)"},
+            {"value": "TRUSTLEVELCC360_LEVEL0_COUNT", "label": "Количество Незнакомцев"},
+            {"value": "TRUSTLEVELCC360_LEVEL3_COUNT", "label": "Количество Товарищей"},
+            {"value": "TRUSTLEVELCC360_LEVEL4_COUNT", "label": "Количество Друзей"},
+            {"value": "TRUSTLEVELCC360_LEVEL5_COUNT", "label": "Количество Со Сбером навсегда"},
+            {"value": "TRUSTLEVELCC360_STAR_COUNT", "label": "Звезды КМа текущие"},
+            { "value": "TRUSTLEVELCC360_STAR_START_COUNT", "label": "Звезды КМа текущие на начало года"},
+            {"value": "WD", "label": "Условные сделки (платежи)"},
+            {"value": "PULMIS_BALANCE_OUT", "label": "Исходящий остаток в валюте"},
+            {"value": "PULMIS_SDO_IN", "label": "СДО в валюте"},
+            {"value": "PULMIS_INCOME", "label": "Доход в валюте"},
+            {"value": "PULMIS_INCOME_RUB", "label": "Доход (руб)"},
+            {"value": "PULMIS_CUSTOMER_ID", "label": "Клиент (пассивы ЮЛ)"},
+            {"value": "LEAGUE", "label": "Победитель в лиге чемпионов"},
+            {"value": "SUPERCUP", "label": "Победитель в суперкубке"},
+            {"value": "PFIMIS_INCOME", "label": "Доход (ПФИ)"},
+            {"value": "PFIMIS_VOLUME", "label": "Объём сделки в USD"},
+            {"value": "PFIMIS_INCOME_SOFT", "label": "Софт доход"},
+            {"value": "PFIMIS_DEAL_CNT", "label": "Количество операций"},
+            {"value": "PFIMIS_DEAL_ID", "label": "Идентификатор сделки (ПФИ)"},
+            {"value": "CC360_CLIENT_VOLUM_CHPDP_M", "label": "Доход по депозитам (мес.)"},
+            {"value": "INSURANCEMIS_AGENT_COMMISION", "label": "КВ агента с НДС"},
+            {"value": "INSURANCEMIS_COMMISION", "label": "Комиссия по страхованию"},
+            {"value": "INSURANCE_AMMOUNT", "label": "Сумма договора страхования"},
+            {"value": "EFFICIENCYARSKKSB_OD_YEAR", "label": "Сумма ОД годовая · ККСБ"},
+            {"value": "EFFICIENCYARSKKSB_OD_YEAR_APPG", "label": "Сумма АППГ · ККСБ"},
+            {"value": "EFFICIENCYARSKKSB_OD_QUARTER_APPG", "label": "Сумма за квартал АППГ · ККСБ"},
+            {"value": "EFFICIENCYARSKKSB_OD_QUARTER_GROWTH", "label": "Прирост ОД АППГ квартальный · ККСБ"},
+            {"value": "EFFICIENCYARSKKSB_OD_QUARTER_TEMP", "label": "Темп прироста ОД квартальный · ККСБ"},
+            {"value": "EFFICIENCYARS_OVERBONUS", "label": "КМ эффективен · сверхбонус"},
+            {"value": "EFFICIENCYARS_OVERBONUS_YEAR", "label": "Сумма ОД годовая · сверхбонус"},
+            {"value": "EFFICIENCYARS_OVERBONUS_YEAR_APPG", "label": "Сумма АППГ · сверхбонус"},
+            {"value": "EFFICIENCYARS_OVERBONUS_QUARTER_APPG", "label": "Сумма за квартал АППГ · сверхбонус"},
+            {"value": "EFFICIENCYARS_OVERBONUS_YEAR_GROWTH", "label": "Прирост ОД АППГ · сверхбонус"},
+            {"value": "EFFICIENCYARS_OVERBONUS_YEAR_TEMP", "label": "Темп прироста ОД годовой · сверхбонус"},
+            {"value": "EFFICIENCYARS_OVERBONUS_QUARTER_GROWTH", "label": "Прирост ОД АППГ квартальный · сверхбонус"},
+            {"value": "EFFICIENCYARS_OVERBONUS_QUARTER_TEMP", "label": "Темп прироста ОД квартальный · сверхбонус"},
+            {"value": "FUNNELARS_ACTIVE_DEAL_CHOD", "label": "ЧОД активной сделки (воронка)"},
+            {"value": "CC360_NKD_DETAIL_CHKD_PLAN", "label": "ЧКД за месяц (план)"},
+            {"value": "KANBANARS_OFFER_VALUE", "label": "Сумма сделки по оферте (ПрПр)"},
+            {"value": "KANBANARS_STAGE_VALUE", "label": "Объём стадии (показатель)"},
+            {"value": "KANBANARS_STAGE_INC", "label": "ЧОД стадии"},
+            {"value": "KANBANARS_OFFER_INC", "label": "ЧОД по оферте (ПрПр)"},
+            {"value": "KANBANARS_STAGE_AMOUNT", "label": "Объём стадии (сумма)"},
+            {"value": "KANBANARS_DEAL_AMOUNT", "label": "Сумма сделки в CRM"},
+            {"value": "KANBANARS_DEAL_NUM", "label": "Номер сделки в SCRM"},
+            {"value": "KANBANARS_OFFER_VALUE_VKS", "label": "Сумма сделки по оферте (ПрПр) · ВКС"},
+            {"value": "KANBANARS_STAGE_VALUE_VKS", "label": "Объём стадии (показатель) · ВКС"},
+            {"value": "KANBANARS_STAGE_INC_VKS", "label": "ЧОД стадии · ВКС"},
+            {"value": "KANBANARS_OFFER_INC_VKS", "label": "ЧОД по оферте (ПрПр) · ВКС"},
+            {"value": "KANBANARS_STAGE_AMOUNT_VKS", "label": "Объём стадии (сумма) · ВКС"},
+            {"value": "KANBANARS_DEAL_AMOUNT_VKS", "label": "Сумма сделки в CRM · ВКС"},
+            {"value": "KANBANARS_DEAL_NUM_VKS", "label": "Номер сделки в SCRM · ВКС"},
+            {"value": "KANBANARS_OFFER_VALUE_VKO", "label": "Сумма сделки по оферте (ПрПр) · ВКО"},
+            {"value": "KANBANARS_STAGE_VALUE_VKO", "label": "Объём стадии (показатель) · ВКО"},
+            {"value": "KANBANARS_STAGE_INC_VKO", "label": "ЧОД стадии · ВКО"},
+            {"value": "KANBANARS_OFFER_INC_VKO", "label": "ЧОД по оферте (ПрПр) · ВКО"},
+            {"value": "KANBANARS_STAGE_AMOUNT_VKO", "label": "Объём стадии (сумма) · ВКО"},
+            {"value": "KANBANARS_DEAL_AMOUNT_VKO", "label": "Сумма сделки в CRM · ВКО"},
+            {"value": "KANBANARS_DEAL_NUM_VKO", "label": "Номер сделки в SCRM · ВКО"}
           ]
         },
         {
           "column": "INDICATOR_AGG_FUNCTION",
           "allow_custom": true,
           "options": [
-            "",
-            "COUNT_DISTINCT",
-            "COUNT_DISTINCT_CUSTOMER",
-            "COUNT_DISTINCT_DEAL",
-            "MAX",
-            "SUM"
+            {"value": "", "label": "(пусто)"},
+            {"value": "SUM", "label": "Сумма"},
+            {"value": "MAX", "label": "Максимум"},
+            {"value": "MIN", "label": "Минимум"},
+            {"value": "AVG", "label": "Среднее"},
+            {"value": "COUNT", "label": "Количество записей"},
+            {"value": "COUNT_DISTINCT", "label": "Число уникальных значений показателя"},
+            {"value": "COUNT_DISTINCT_CUSTOMER", "label": "Число уникальных клиентов"},
+            {"value": "COUNT_DISTINCT_DEAL", "label": "Число уникальных договоров"},
+            {"value": "LAST_VALUE", "label": "Последнее значение по дате"}
           ]
         },
         {
           "column": "INDICATOR_MARK_TYPE",
           "allow_custom": false,
-          "options": [
-            "CRITERION",
-            "GAIN",
-            "RATING"
-          ]
+          "options": ["CRITERION", "GAIN", "RATING"]
         },
         {
           "column": "INDICATOR_MATCH",
           "allow_custom": true,
-          "options": [
-            "=",
-            ">=",
-            "MAX",
-            "MIN",
-            "X2",
-            "X3",
-            "X4"
-          ]
+          "options": ["=", ">=", "MAX", "MIN", "X2", "X3", "X4"]
         },
         {
           "column": "FULL_NAME",
           "allow_custom": true,
           "options": [
-            "CC360_CLIENT_VOLUM_FOT_M",
-            "CC360_NKD_DETAIL_CHKD",
-            "COMPASARS_KKP_ID",
-            "EFFICIENCYARSKKSB_EFF",
-            "EFFICIENCYARSKKSB_OD_YEAR_GROWTH",
-            "EFFICIENCYARSKKSB_OD_YEAR_TEMP",
-            "FUNNELARS_ACTIVE_CUSTOMER_ID",
-            "FUNNELARS_ACTIVE_DEAL_ID",
-            "FUNNELARS_ACTIVE_DEAL_MARGIN",
-            "INCOME",
-            "INSURANCEMIS_BANK_COMMISION",
-            "PFIMIS_CUSTOMER_ID",
-            "PPO_ALL",
-            "PPO_IN",
-            "PULMIS_AGRMNT_AMT_RUB",
-            "PULMIS_BALANCE_OUT_RUB",
-            "PULMIS_SDO_IN_RUB",
-            "TRUSTLEVELCC360_LEVEL0_COUNT",
-            "TRUSTLEVELCC360_LEVEL3_COUNT",
-            "TRUSTLEVELCC360_LEVEL4_COUNT",
-            "TRUSTLEVELCC360_LEVEL5_COUNT",
-            "TRUSTLEVELCC360_STAR_COUNT",
-            "TRUSTLEVELCC360_STAR_START_COUNT",
-            "WAIT",
-            "WD"
+            {"value": "WAIT", "label": "Без источников (ручной)"},
+            {"value": "CC360_CLIENT_VOLUM_FOT_M", "label": "Объём ФОТ клиента (мес.)"},
+            {"value": "CC360_NKD_DETAIL_CHKD", "label": "ЧКД за месяц (факт)"},
+            {"value": "COMPASARS_KKP_ID", "label": "Идентификатор ККП"},
+            {"value": "EFFICIENCYARSKKSB_EFF", "label": "КМ эффективен · ККСБ"},
+            {"value": "EFFICIENCYARSKKSB_OD_YEAR_GROWTH", "label": "Прирост ОД АППГ · ККСБ"},
+            {"value": "EFFICIENCYARSKKSB_OD_YEAR_TEMP", "label": "Темп прироста ОД годовой · ККСБ"},
+            {"value": "FUNNELARS_ACTIVE_CUSTOMER_ID", "label": "Клиент (воронка, активные продукты)"},
+            {"value": "FUNNELARS_ACTIVE_DEAL_ID", "label": "Идентификатор сделки (воронка)"},
+            {"value": "FUNNELARS_ACTIVE_DEAL_MARGIN", "label": "Объём сделки (воронка)"},
+            {"value": "INCOME", "label": "Доход от конверсионных операций"},
+            {"value": "INSURANCEMIS_BANK_COMMISION", "label": "КВ банка без НДС"},
+            {"value": "LEAGUEDEL", "label": "Выбыл из лиги чемпионов"},
+            {"value": "PFIMIS_CUSTOMER_ID", "label": "Клиент (сделки с ПФИ)"},
+            {"value": "PPO_ALL", "label": "Все платежи ППО (знаменатель)"},
+            {"value": "PPO_IN", "label": "Входящие платежи ППО (руб.)"},
+            {"value": "PULMIS_AGRMNT_AMT_RUB", "label": "Сумма депозита (руб)"},
+            {"value": "PULMIS_BALANCE_OUT_RUB", "label": "Исходящий остаток"},
+            {"value": "PULMIS_SDO_IN_RUB", "label": "СДО (руб)"},
+            {"value": "TRUSTLEVELCC360_LEVEL0_COUNT", "label": "Количество Незнакомцев"},
+            {"value": "TRUSTLEVELCC360_LEVEL3_COUNT", "label": "Количество Товарищей"},
+            {"value": "TRUSTLEVELCC360_LEVEL4_COUNT", "label": "Количество Друзей"},
+            {"value": "TRUSTLEVELCC360_LEVEL5_COUNT", "label": "Количество Со Сбером навсегда"},
+            {"value": "TRUSTLEVELCC360_STAR_COUNT", "label": "Звезды КМа текущие"},
+            {"value": "TRUSTLEVELCC360_STAR_START_COUNT", "label": "Звезды КМа текущие на начало года"}, 
+            {"value": "WD", "label": "Условные сделки (платежи)"},
+            {"value": "PULMIS_BALANCE_OUT", "label": "Исходящий остаток в валюте"},
+            {"value": "PULMIS_SDO_IN", "label": "СДО в валюте"},
+            {"value": "PULMIS_INCOME", "label": "Доход в валюте"},
+            {"value": "PULMIS_INCOME_RUB", "label": "Доход (руб)"},
+            {"value": "PULMIS_CUSTOMER_ID", "label": "Клиент (пассивы ЮЛ)"},
+            {"value": "LEAGUE", "label": "Победитель в лиге чемпионов"},
+            {"value": "SUPERCUP", "label": "Победитель в суперкубке"},
+            {"value": "PFIMIS_INCOME", "label": "Доход (ПФИ)"},
+            {"value": "PFIMIS_VOLUME", "label": "Объём сделки в USD"},
+            {"value": "PFIMIS_INCOME_SOFT", "label": "Софт доход"},
+            {"value": "PFIMIS_DEAL_CNT", "label": "Количество операций"},
+            {"value": "PFIMIS_DEAL_ID", "label": "Идентификатор сделки (ПФИ)"},
+            {"value": "CC360_CLIENT_VOLUM_CHPDP_M", "label": "Доход по депозитам (мес.)"},
+            {"value": "INSURANCEMIS_AGENT_COMMISION", "label": "КВ агента с НДС"},
+            {"value": "INSURANCEMIS_COMMISION", "label": "Комиссия по страхованию"},
+            {"value": "INSURANCE_AMMOUNT", "label": "Сумма договора страхования"},
+            {"value": "EFFICIENCYARSKKSB_OD_YEAR", "label": "Сумма ОД годовая · ККСБ"},
+            {"value": "EFFICIENCYARSKKSB_OD_YEAR_APPG", "label": "Сумма АППГ · ККСБ"},
+            {"value": "EFFICIENCYARSKKSB_OD_QUARTER_APPG", "label": "Сумма за квартал АППГ · ККСБ"},
+            {"value": "EFFICIENCYARSKKSB_OD_QUARTER_GROWTH", "label": "Прирост ОД АППГ квартальный · ККСБ"},
+            {"value": "EFFICIENCYARSKKSB_OD_QUARTER_TEMP", "label": "Темп прироста ОД квартальный · ККСБ"},
+            {"value": "EFFICIENCYARS_OVERBONUS", "label": "КМ эффективен · сверхбонус"},
+            {"value": "EFFICIENCYARS_OVERBONUS_YEAR", "label": "Сумма ОД годовая · сверхбонус"},
+            {"value": "EFFICIENCYARS_OVERBONUS_YEAR_APPG", "label": "Сумма АППГ · сверхбонус"},
+            {"value": "EFFICIENCYARS_OVERBONUS_QUARTER_APPG", "label": "Сумма за квартал АППГ · сверхбонус"},
+            {"value": "EFFICIENCYARS_OVERBONUS_YEAR_GROWTH", "label": "Прирост ОД АППГ · сверхбонус"},
+            {"value": "EFFICIENCYARS_OVERBONUS_YEAR_TEMP", "label": "Темп прироста ОД годовой · сверхбонус"},
+            {"value": "EFFICIENCYARS_OVERBONUS_QUARTER_GROWTH", "label": "Прирост ОД АППГ квартальный · сверхбонус"},
+            {"value": "EFFICIENCYARS_OVERBONUS_QUARTER_TEMP", "label": "Темп прироста ОД квартальный · сверхбонус"},
+            {"value": "FUNNELARS_ACTIVE_DEAL_CHOD", "label": "ЧОД активной сделки (воронка)"},
+            {"value": "CC360_NKD_DETAIL_CHKD_PLAN", "label": "ЧКД за месяц (план)"},
+            {"value": "KANBANARS_OFFER_VALUE", "label": "Сумма сделки по оферте (ПрПр)"},
+            {"value": "KANBANARS_STAGE_VALUE", "label": "Объём стадии (показатель)"},
+            {"value": "KANBANARS_STAGE_INC", "label": "ЧОД стадии"},
+            {"value": "KANBANARS_OFFER_INC", "label": "ЧОД по оферте (ПрПр)"},
+            {"value": "KANBANARS_STAGE_AMOUNT", "label": "Объём стадии (сумма)"},
+            {"value": "KANBANARS_DEAL_AMOUNT", "label": "Сумма сделки в CRM"},
+            {"value": "KANBANARS_DEAL_NUM", "label": "Номер сделки в SCRM"},
+            {"value": "KANBANARS_OFFER_VALUE_VKS", "label": "Сумма сделки по оферте (ПрПр) · ВКС"},
+            {"value": "KANBANARS_STAGE_VALUE_VKS", "label": "Объём стадии (показатель) · ВКС"},
+            {"value": "KANBANARS_STAGE_INC_VKS", "label": "ЧОД стадии · ВКС"},
+            {"value": "KANBANARS_OFFER_INC_VKS", "label": "ЧОД по оферте (ПрПр) · ВКС"},
+            {"value": "KANBANARS_STAGE_AMOUNT_VKS", "label": "Объём стадии (сумма) · ВКС"},
+            {"value": "KANBANARS_DEAL_AMOUNT_VKS", "label": "Сумма сделки в CRM · ВКС"},
+            {"value": "KANBANARS_DEAL_NUM_VKS", "label": "Номер сделки в SCRM · ВКС"},
+            {"value": "KANBANARS_OFFER_VALUE_VKO", "label": "Сумма сделки по оферте (ПрПр) · ВКО"},
+            {"value": "KANBANARS_STAGE_VALUE_VKO", "label": "Объём стадии (показатель) · ВКО"},
+            {"value": "KANBANARS_STAGE_INC_VKO", "label": "ЧОД стадии · ВКО"},
+            {"value": "KANBANARS_OFFER_INC_VKO", "label": "ЧОД по оферте (ПрПр) · ВКО"},
+            {"value": "KANBANARS_STAGE_AMOUNT_VKO", "label": "Объём стадии (сумма) · ВКО"},
+            {"value": "KANBANARS_DEAL_AMOUNT_VKO", "label": "Сумма сделки в CRM · ВКО"},
+            {"value": "KANBANARS_DEAL_NUM_VKO", "label": "Номер сделки в SCRM · ВКО"}
           ]
         },
         {
           "column": "CONTESTANT_SELECTION",
           "json_path": [],
           "allow_custom": false,
+          "input_display": "toggle",
           "options": [
-            {
-              "label": "ВКО на дату операции",
-              "value": "0"
-            },
-            {
-              "label": "ВКО на конец турнира",
-              "value": "1"
-            }
+            {"value": "0", "label": "ВКО на дату операции"},
+            {"value": "1", "label": "ВКО на конец турнира"}
           ]
         },
         {
           "column": "CALC_TYPE",
           "comment": "Только 0 или 1 в БД; подписи как у конкурса. Значения 3 в CSV/БД заменены на 1.",
           "allow_custom": false,
+          "input_display": "toggle",
           "options": [
-            {
-              "label": "Ручной расчет",
-              "value": "1"
-            },
-            {
-              "label": "Промышленный расчет",
-              "value": "0"
-            }
+            {"value": "1", "label": "Ручной расчет"},
+            {"value": "0", "label": "Промышленный расчет"}
           ]
         }
       ]
@@ -1147,372 +877,317 @@
         {
           "column": "REWARD_TYPE",
           "allow_custom": false,
-          "options": [
-            "BADGE",
-            "CRYSTAL",
-            "ITEM",
-            "LABEL"
-          ]
+          "options": ["BADGE", "CRYSTAL", "ITEM", "LABEL"]
         },
+        {"column": "REWARD_CONDITION", "allow_custom": false, "options": ["1", "2"]},
         {
-          "column": "REWARD_CONDITION",
+          "column": "REWARD_ADD_DATA",
+          "json_path": ["nftFlg"],
           "allow_custom": false,
-          "options": [
-            "1",
-            "2"
-          ]
+          "input_display": "toggle",
+          "options": [{"value": "Y", "label": "Да"}, {"value": "N", "label": "Нет"}]
         },
         {
           "column": "REWARD_ADD_DATA",
-          "json_path": [
-            "nftFlg"
-          ],
+          "json_path": ["outstanding"],
+          "allow_custom": false,
+          "input_display": "toggle",
+          "options": [{"value": "Y", "label": "Да"}, {"value": "N", "label": "Нет"}]
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": ["hidden"],
+          "allow_custom": false,
+          "input_display": "toggle",
+          "options": [{"value": "Y", "label": "Да"}, {"value": "N", "label": "Нет"}]
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": ["hiddenRewardList"],
+          "allow_custom": false,
+          "input_display": "toggle",
+          "options": [{"value": "Y", "label": "Да"}, {"value": "N", "label": "Нет"}]
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": ["masterBadge"],
+          "allow_custom": false,
+          "input_display": "toggle",
+          "options": [{"value": "Y", "label": "Да"}, {"value": "N", "label": "Нет"}]
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": ["bookingRequired"],
+          "allow_custom": false,
+          "input_display": "toggle",
+          "options": [{"value": "Y", "label": "Да"}, {"value": "N", "label": "Нет"}]
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": ["deliveryRequired"],
+          "allow_custom": false,
+          "input_display": "toggle",
+          "options": [{"value": "Y", "label": "Да"}, {"value": "N", "label": "Нет"}]
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": ["commingSoon"],
+          "allow_custom": false,
+          "input_display": "toggle",
+          "options": [{"value": "Y", "label": "Да"}, {"value": "N", "label": "Нет"}]
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": ["refreshOldNews"],
+          "allow_custom": false,
+          "input_display": "toggle",
+          "options": [{"value": "Y", "label": "Да"}, {"value": "N", "label": "Нет"}]
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": ["rewardAgainGlobal"],
+          "allow_custom": false,
+          "input_display": "toggle",
+          "options": [{"value": "Y", "label": "Да"}, {"value": "N", "label": "Нет"}]
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": ["rewardAgainTournament"],
+          "allow_custom": false,
+          "input_display": "toggle",
+          "options": [{"value": "Y", "label": "Да"}, {"value": "N", "label": "Нет"}]
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": ["isGrouping"],
+          "allow_custom": false,
+          "input_display": "toggle",
+          "options": [{"value": "Y", "label": "Да"}, {"value": "N", "label": "Нет"}]
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": ["newsType"],
           "allow_custom": false,
           "input_display": "toggle",
           "options": [
-            {
-              "label": "Да",
-              "value": "Y"
-            },
-            {
-              "label": "Нет",
-              "value": "N"
-            }
+            {"value": "AIPROMPT", "label": "AI-новость"},
+            {"value": "TEMPLATE", "label": "Новость по шаблону"}
           ]
         },
         {
           "column": "REWARD_ADD_DATA",
-          "json_path": [
-            "outstanding"
-          ],
+          "json_path": ["getCondition", "nonRewards", "nonRewardCode"],
+          "allow_custom": true,
+          "comment": "Варианты из таблицы REWARD: REWARD_CODE при REWARD_TYPE=ITEM; подпись в списке — FULL_NAME и код (label_template).",
+          "options": [],
+          "options_from_sheet": {
+            "source_sheet_code": "REWARD",
+            "value_column": "REWARD_CODE",
+            "label_template": "{FULL_NAME}: [\"{REWARD_CODE}\"]",
+            "where": [{ "column": "REWARD_TYPE", "equals": "ITEM" }],
+            "order_by": "REWARD_CODE"
+          }
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": ["getCondition", "rewards", "rewardCode"],
+          "allow_custom": true,
+          "whitelist_validated_input": true,
+          "comment": "Код BADGE из REWARD: ввод текста с проверкой по списку REWARD_CODE (не выпадающий список).",
+          "options": [],
+          "options_from_sheet": {
+            "source_sheet_code": "REWARD",
+            "value_column": "REWARD_CODE",
+            "label_template": "{FULL_NAME}: [\"{REWARD_CODE}\"]",
+            "where": [{ "column": "REWARD_TYPE", "equals": "BADGE" }],
+            "order_by": "REWARD_CODE"
+          }
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": ["getCondition", "rewards", "amount"],
           "allow_custom": false,
-          "input_display": "toggle",
+          "options": ["1", "2", "3"]
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": ["itemGroupAmount", "itemParam"],
+          "allow_custom": false,
+          "comment": "Месяц для группового лимита (лимит по месяцам в выдаче).",
           "options": [
-            {
-              "label": "Да",
-              "value": "Y"
-            },
-            {
-              "label": "Нет",
-              "value": "N"
-            }
+            {"value": "Январь", "label": "Январь"},
+            {"value": "Февраль", "label": "Февраль"},
+            {"value": "Март", "label": "Март"},
+            {"value": "Апрель", "label": "Апрель"},
+            {"value": "Май", "label": "Май"},
+            {"value": "Июнь", "label": "Июнь"},
+            {"value": "Июль", "label": "Июль"},
+            {"value": "Август", "label": "Август"},
+            {"value": "Сентябрь", "label": "Сентябрь"},
+            {"value": "Октябрь", "label": "Октябрь"},
+            {"value": "Ноябрь", "label": "Ноябрь"},
+            {"value": "Декабрь", "label": "Декабрь"}
           ]
         },
         {
           "column": "REWARD_ADD_DATA",
-          "json_path": [
-            "hidden"
-          ],
+          "json_path": ["itemGroupAmount", "itemParamAmount"],
           "allow_custom": false,
-          "input_display": "toggle",
+          "whitelist_validated_input": true,
+          "comment": "Число 0…100 в виде строки; ввод с подсветкой по допустимым значениям.",
           "options": [
-            {
-              "label": "Да",
-              "value": "Y"
-            },
-            {
-              "label": "Нет",
-              "value": "N"
-            }
-          ]
-        },
-        {
-          "column": "REWARD_ADD_DATA",
-          "json_path": [
-            "hiddenRewardList"
-          ],
-          "allow_custom": false,
-          "input_display": "toggle",
-          "options": [
-            {
-              "label": "Да",
-              "value": "Y"
-            },
-            {
-              "label": "Нет",
-              "value": "N"
-            }
-          ]
-        },
-        {
-          "column": "REWARD_ADD_DATA",
-          "json_path": [
-            "masterBadge"
-          ],
-          "allow_custom": false,
-          "input_display": "toggle",
-          "options": [
-            {
-              "label": "Да",
-              "value": "Y"
-            },
-            {
-              "label": "Нет",
-              "value": "N"
-            }
-          ]
-        },
-        {
-          "column": "REWARD_ADD_DATA",
-          "json_path": [
-            "bookingRequired"
-          ],
-          "allow_custom": false,
-          "input_display": "toggle",
-          "options": [
-            {
-              "label": "Да",
-              "value": "Y"
-            },
-            {
-              "label": "Нет",
-              "value": "N"
-            }
-          ]
-        },
-        {
-          "column": "REWARD_ADD_DATA",
-          "json_path": [
-            "deliveryRequired"
-          ],
-          "allow_custom": false,
-          "input_display": "toggle",
-          "options": [
-            {
-              "label": "Да",
-              "value": "Y"
-            },
-            {
-              "label": "Нет",
-              "value": "N"
-            }
-          ]
-        },
-        {
-          "column": "REWARD_ADD_DATA",
-          "json_path": [
-            "commingSoon"
-          ],
-          "allow_custom": false,
-          "input_display": "toggle",
-          "options": [
-            {
-              "label": "Да",
-              "value": "Y"
-            },
-            {
-              "label": "Нет",
-              "value": "N"
-            }
-          ]
-        },
-        {
-          "column": "REWARD_ADD_DATA",
-          "json_path": [
-            "refreshOldNews"
-          ],
-          "allow_custom": false,
-          "input_display": "toggle",
-          "options": [
-            {
-              "label": "Да",
-              "value": "Y"
-            },
-            {
-              "label": "Нет",
-              "value": "N"
-            }
-          ]
-        },
-        {
-          "column": "REWARD_ADD_DATA",
-          "json_path": [
-            "rewardAgainGlobal"
-          ],
-          "allow_custom": false,
-          "input_display": "toggle",
-          "options": [
-            {
-              "label": "Да",
-              "value": "Y"
-            },
-            {
-              "label": "Нет",
-              "value": "N"
-            }
-          ]
-        },
-        {
-          "column": "REWARD_ADD_DATA",
-          "json_path": [
-            "rewardAgainTournament"
-          ],
-          "allow_custom": false,
-          "input_display": "toggle",
-          "options": [
-            {
-              "label": "Да",
-              "value": "Y"
-            },
-            {
-              "label": "Нет",
-              "value": "N"
-            }
-          ]
-        },
-        {
-          "column": "REWARD_ADD_DATA",
-          "json_path": [
-            "isGrouping"
-          ],
-          "allow_custom": false,
-          "input_display": "toggle",
-          "options": [
-            {
-              "label": "Да",
-              "value": "Y"
-            },
-            {
-              "label": "Нет",
-              "value": "N"
-            }
-          ]
-        },
-        {
-          "column": "REWARD_ADD_DATA",
-          "json_path": [
-            "newsType"
-          ],
-          "allow_custom": false,
-          "options": [
-            {
-              "label": "AI-новость",
-              "value": "AIPROMPT"
-            },
-            {
-              "label": "Новость по шаблону",
-              "value": "TEMPLATE"
-            }
-          ]
-        },
-        {
-          "column": "REWARD_ADD_DATA",
-          "json_path": [
-            "priority"
-          ],
-          "allow_custom": false,
-          "options": [
+            "0",
             "1",
             "2",
-            "3"
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "10",
+            "11",
+            "12",
+            "13",
+            "14",
+            "15",
+            "16",
+            "17",
+            "18",
+            "19",
+            "20",
+            "21",
+            "22",
+            "23",
+            "24",
+            "25",
+            "26",
+            "27",
+            "28",
+            "29",
+            "30",
+            "31",
+            "32",
+            "33",
+            "34",
+            "35",
+            "36",
+            "37",
+            "38",
+            "39",
+            "40",
+            "41",
+            "42",
+            "43",
+            "44",
+            "45",
+            "46",
+            "47",
+            "48",
+            "49",
+            "50",
+            "51",
+            "52",
+            "53",
+            "54",
+            "55",
+            "56",
+            "57",
+            "58",
+            "59",
+            "60",
+            "61",
+            "62",
+            "63",
+            "64",
+            "65",
+            "66",
+            "67",
+            "68",
+            "69",
+            "70",
+            "71",
+            "72",
+            "73",
+            "74",
+            "75",
+            "76",
+            "77",
+            "78",
+            "79",
+            "80",
+            "81",
+            "82",
+            "83",
+            "84",
+            "85",
+            "86",
+            "87",
+            "88",
+            "89",
+            "90",
+            "91",
+            "92",
+            "93",
+            "94",
+            "95",
+            "96",
+            "97",
+            "98",
+            "99",
+            "100"
           ]
         },
         {
           "column": "REWARD_ADD_DATA",
-          "json_path": [
-            "recommendationLevel"
-          ],
+          "json_path": ["priority"],
+          "allow_custom": false,
+          "options": ["1", "2", "3"]
+        },
+        {
+          "column": "REWARD_ADD_DATA",
+          "json_path": ["recommendationLevel"],
           "allow_custom": false,
           "options": [
-            {
-              "label": "Страна",
-              "value": "BANK"
-            },
-            {
-              "label": "Тер.банк",
-              "value": "TB"
-            },
-            {
-              "label": "ГОСБ",
-              "value": "GOSB"
-            },
-            {
-              "label": "Общий (вне уровня)",
-              "value": "NON"
-            }
+            {"value": "BANK", "label": "Страна"},
+            {"value": "TB", "label": "Тер.банк"},
+            {"value": "GOSB", "label": "ГОСБ"},
+            {"value": "NON", "label": "Общий (вне уровня)"}
           ]
         },
         {
           "column": "REWARD_ADD_DATA",
-          "json_path": [
-            "itemLimitPeriod"
-          ],
+          "json_path": ["itemLimitPeriod"],
           "allow_custom": false,
-          "options": [
-            "once"
-          ]
+          "options": ["once"]
         },
         {
           "column": "REWARD_ADD_DATA",
-          "json_path": [
-            "tournamentTeam"
-          ],
+          "json_path": ["tournamentTeam"],
           "allow_custom": false,
           "input_display": "toggle",
-          "options": [
-            {
-              "label": "Да",
-              "value": "Y"
-            },
-            {
-              "label": "Нет",
-              "value": "N"
-            }
-          ]
+          "options": [{"value": "Y", "label": "Да"}, {"value": "N", "label": "Нет"}]
         },
         {
           "column": "REWARD_ADD_DATA",
-          "json_path": [
-            "businessBlock",
-            0
-          ],
+          "json_path": ["businessBlock", 0],
           "allow_custom": false,
           "options": [
-            {
-              "label": "(пусто)",
-              "value": ""
-            },
-            {
-              "label": "Клиентский менеджер",
-              "value": "KMKKSB"
-            },
-            {
-              "label": "Цифровой менеджер",
-              "value": "MNS"
-            },
-            {
-              "label": "KMSB1",
-              "value": "KMSB1"
-            },
-            {
-              "label": "SERVICEMEN",
-              "value": "SERVICEMEN"
-            },
-            {
-              "label": "Менеджер факторинга",
-              "value": "KMFACTORING"
-            },
-            {
-              "label": "IMUB",
-              "value": "IMUB"
-            },
-            {
-              "label": "RNUB",
-              "value": "RNUB"
-            },
-            {
-              "label": "RSB1",
-              "value": "RSB1"
-            }
+            {"value": "", "label": "(пусто)"},
+            {"value": "KMKKSB", "label": "Клиентский менеджер"},
+            {"value": "MNS", "label": "Цифровой менеджер"},
+            {"value": "KMSB1", "label": "KMSB1"},
+            {"value": "SERVICEMEN", "label": "SERVICEMEN"},
+            {"value": "KMFACTORING", "label": "Менеджер факторинга"},
+            {"value": "IMUB", "label": "IMUB"},
+            {"value": "RNUB", "label": "RNUB"},
+            {"value": "RSB1", "label": "RSB1"}
           ]
         },
         {
           "column": "REWARD_ADD_DATA",
-          "json_path": [
-            "getCondition",
-            "employeeRating",
-            "seasonCode"
-          ],
+          "json_path": ["getCondition", "employeeRating", "seasonCode"],
           "allow_custom": false,
           "options": [
             "",
@@ -1539,29 +1214,15 @@
         },
         {
           "column": "REWARD_ADD_DATA",
-          "json_path": [
-            "helpCodeList",
-            0
-          ],
+          "json_path": ["helpCodeList", 0],
           "allow_custom": true,
-          "options": [
-            "AST_1",
-            "NFT_1"
-          ]
+          "options": ["AST_1", "NFT_1"]
         },
         {
           "column": "REWARD_ADD_DATA",
-          "json_path": [
-            "tagColor"
-          ],
+          "json_path": ["tagColor"],
           "allow_custom": true,
-          "options": [
-            "green-70",
-            "light-blue-80",
-            "orange-80",
-            "pink-80",
-            "purple-80"
-          ]
+          "options": ["green-70", "light-blue-80", "orange-80", "pink-80", "purple-80"]
         }
       ]
     },
@@ -1571,52 +1232,39 @@
         {
           "column": "TOURNAMENT_STATUS",
           "allow_custom": false,
-          "options": [
-            "АКТИВНЫЙ",
-            "ЗАВЕРШЕН",
-            "ОТМЕНЕН",
-            "ПОДВЕДЕНИЕ ИТОГОВ",
-            "УДАЛЕН"
-          ]
+          "options": ["АКТИВНЫЙ", "ЗАВЕРШЕН", "ОТМЕНЕН", "ПОДВЕДЕНИЕ ИТОГОВ", "УДАЛЕН"]
         },
         {
           "column": "CRITERION_MARK_TYPE",
           "allow_custom": false,
           "options": [
-            "",
-            ">",
-            ">=",
-            "<",
-            "<=",
-            "="
+            {"value": "", "label": "(пусто)"},
+            {"value": ">=", "label": "≥ не меньше"},
+            {"value": ">", "label": "> больше"},
+            {"value": "=", "label": "= равно"},
+            {"value": "<=", "label": "≤ не больше"},
+            {"value": "<", "label": "< меньше"},
+            {"value": "<>", "label": "≠ не равно"}
           ]
         },
         {
           "column": "FILTER_PERIOD_ARR",
-          "json_path": [
-            0,
-            "period_code"
-          ],
+          "json_path": [0, "period_code"],
           "allow_custom": false,
-          "options": [
-            "0",
-            "1"
-          ]
+          "options": ["0", "1"]
         },
         {
           "column": "FILTER_PERIOD_ARR",
-          "json_path": [
-            0,
-            "criterion_mark_type"
-          ],
+          "json_path": [0, "criterion_mark_type"],
           "allow_custom": false,
           "options": [
-            "",
-            ">",
-            ">=",
-            "<",
-            "<=",
-            "="
+            {"value": "", "label": "(пусто)"},
+            {"value": ">=", "label": "≥ не меньше"},
+            {"value": ">", "label": "> больше"},
+            {"value": "=", "label": "= равно"},
+            {"value": "<=", "label": "≤ не больше"},
+            {"value": "<", "label": "< меньше"},
+            {"value": "<>", "label": "≠ не равно"}
           ]
         },
         {
@@ -1656,9 +1304,7 @@
         },
         {
           "column": "TARGET_TYPE",
-          "json_path": [
-            "seasonCode"
-          ],
+          "json_path": ["seasonCode"],
           "allow_custom": false,
           "options": [
             "",
@@ -1687,15 +1333,10 @@
           "column": "CALC_TYPE",
           "comment": "В БД — 0 или 1; в форме — подписи «Ручной расчет» / «Промышленный расчет».",
           "allow_custom": false,
+          "input_display": "toggle",
           "options": [
-            {
-              "label": "Ручной расчет",
-              "value": "1"
-            },
-            {
-              "label": "Промышленный расчет",
-              "value": "0"
-            }
+            {"value": "1", "label": "Ручной расчет"},
+            {"value": "0", "label": "Промышленный расчет"}
           ]
         }
       ]
@@ -1705,59 +1346,68 @@
     {
       "code": "CONTEST-DATA",
       "title": "Конкурсы",
-      "file": "CONTEST (PROM) 09-04 v1.csv",
-      "json_columns": [
-        "CONTEST_FEATURE"
-      ],
+      "file": "CONTEST (PROM) 17-04 v0.csv",
+      "json_columns": ["CONTEST_FEATURE", "CONTEST_PERIOD"],
       "primary_key_column": "CONTEST_CODE"
     },
     {
       "code": "GROUP",
       "title": "Группы / уровни",
-      "file": "GROUP (PROM) 09-04 v1.csv",
+      "file": "GROUP (PROM) 17-04 v0.csv",
       "json_columns": [],
       "primary_key_column": "GROUP_CODE"
     },
     {
       "code": "INDICATOR",
       "title": "Показатели",
-      "file": "INDICATOR (PROM) 09-04 v1.csv",
-      "json_columns": [
-        "INDICATOR_OBJECT",
-        "INDICATOR_FILTER",
-        "CONTESTANT_SELECTION"
-      ],
+      "file": "INDICATOR (PROM) 17-04 v0.csv",
+      "json_columns": ["INDICATOR_OBJECT", "INDICATOR_FILTER", "CONTESTANT_SELECTION"],
       "primary_key_column": "INDICATOR_CODE"
     },
     {
       "code": "REWARD",
       "title": "Награды",
-      "file": "REWARD (PROM) 09-04 v1.csv",
-      "json_columns": [
-        "REWARD_ADD_DATA"
-      ],
+      "file": "REWARD (PROM) 17-04 v0.csv",
+      "json_columns": ["REWARD_ADD_DATA"],
       "primary_key_column": "REWARD_CODE"
     },
     {
       "code": "REWARD-LINK",
       "title": "Связи конкурс — группа — награда",
-      "file": "REWARD-LINK (PROM) 09-04 v1.csv",
+      "file": "REWARD-LINK (PROM) 17-04 v0.csv",
       "json_columns": [],
       "primary_key_column": null
     },
     {
       "code": "TOURNAMENT-SCHEDULE",
       "title": "Расписание турниров",
-      "file": "SCHEDULE (PROM) 09-04 v1.csv",
-      "json_columns": [
-        "FILTER_PERIOD_ARR",
-        "TARGET_TYPE",
-        "TRN_INDICATOR_FILTER"
-      ],
+      "file": "SCHEDULE (PROM) 17-04 v0.csv",
+      "json_columns": ["FILTER_PERIOD_ARR", "TARGET_TYPE", "TRN_INDICATOR_FILTER"],
       "primary_key_column": "TOURNAMENT_CODE"
     }
   ],
   "editor_field_numeric": [
+    {
+      "sheet_code": "CONTEST-DATA",
+      "rules": [
+        {
+          "comment": "CONTEST_PERIOD[0].criterion_mark_value: порог для оператора criterion_mark_type (как CRITERION_MARK_VALUE в расписании).",
+          "column": "CONTEST_PERIOD",
+          "json_path": [0, "criterion_mark_value"],
+          "format": "integer",
+          "min": 0,
+          "max": 1000000
+        },
+        {
+          "comment": "CONTEST_PERIOD[1].criterion_mark_value: второй элемент массива (при двух периодах в правиле).",
+          "column": "CONTEST_PERIOD",
+          "json_path": [1, "criterion_mark_value"],
+          "format": "integer",
+          "min": 0,
+          "max": 1000000
+        }
+      ]
+    },
     {
       "sheet_code": "GROUP",
       "rules": [
@@ -1766,105 +1416,63 @@
           "column": "GET_CALC_CRITERION",
           "conditional_formats": [
             {
-              "when": {
-                "column": "GET_CALC_METHOD",
-                "equals": "1"
-              },
+              "when": {"column": "GET_CALC_METHOD", "equals": "1"},
               "format": "decimal",
               "min": 0,
               "max": 1,
               "decimal_places": 5
             },
             {
-              "when": {
-                "column": "GET_CALC_METHOD",
-                "equals": "2"
-              },
+              "when": {"column": "GET_CALC_METHOD", "equals": "2"},
               "format": "integer",
               "min": 0,
               "max": 50
             },
-            {
-              "when": {
-                "column": "GET_CALC_METHOD",
-                "equals": "3"
-              },
-              "format": "empty_only"
-            }
+            {"when": {"column": "GET_CALC_METHOD", "equals": "3"}, "format": "empty_only"}
           ],
-          "default_format": {
-            "format": "empty_only"
-          }
+          "default_format": {"format": "empty_only"}
         },
         {
           "comment": "ADD_CALC_CRITERION: метод 1 — дробь 0–1; метод 2 — целое 0–50; метод 3 — только пусто (empty_only).",
           "column": "ADD_CALC_CRITERION",
           "conditional_formats": [
             {
-              "when": {
-                "column": "GET_CALC_METHOD",
-                "equals": "1"
-              },
+              "when": {"column": "GET_CALC_METHOD", "equals": "1"},
               "format": "decimal",
               "min": 0,
               "max": 1,
               "decimal_places": 5
             },
             {
-              "when": {
-                "column": "GET_CALC_METHOD",
-                "equals": "2"
-              },
+              "when": {"column": "GET_CALC_METHOD", "equals": "2"},
               "format": "integer",
               "min": 0,
               "max": 50
             },
-            {
-              "when": {
-                "column": "GET_CALC_METHOD",
-                "equals": "3"
-              },
-              "format": "empty_only"
-            }
+            {"when": {"column": "GET_CALC_METHOD", "equals": "3"}, "format": "empty_only"}
           ],
-          "default_format": {
-            "format": "empty_only"
-          }
+          "default_format": {"format": "empty_only"}
         },
         {
           "comment": "ADD_CALC_CRITERION_2: те же ветки, что у ADD_CALC_CRITERION (метод 3 — empty_only).",
           "column": "ADD_CALC_CRITERION_2",
           "conditional_formats": [
             {
-              "when": {
-                "column": "GET_CALC_METHOD",
-                "equals": "1"
-              },
+              "when": {"column": "GET_CALC_METHOD", "equals": "1"},
               "format": "decimal",
               "min": 0,
               "max": 1,
               "decimal_places": 5
             },
             {
-              "when": {
-                "column": "GET_CALC_METHOD",
-                "equals": "2"
-              },
+              "when": {"column": "GET_CALC_METHOD", "equals": "2"},
               "format": "integer",
               "min": 0,
               "max": 50
             },
-            {
-              "when": {
-                "column": "GET_CALC_METHOD",
-                "equals": "3"
-              },
-              "format": "empty_only"
-            }
+            {"when": {"column": "GET_CALC_METHOD", "equals": "3"}, "format": "empty_only"}
           ],
-          "default_format": {
-            "format": "empty_only"
-          }
+          "default_format": {"format": "empty_only"}
         }
       ]
     },
@@ -1907,10 +1515,7 @@
         {
           "comment": "FILTER_PERIOD_ARR[0].criterion_mark_value: то же, что плоское CRITERION_MARK_VALUE (целое 0…1000000 или пусто).",
           "column": "FILTER_PERIOD_ARR",
-          "json_path": [
-            0,
-            "criterion_mark_value"
-          ],
+          "json_path": [0, "criterion_mark_value"],
           "format": "integer",
           "min": 0,
           "max": 1000000
@@ -1930,9 +1535,7 @@
         {
           "comment": "REWARD_ADD_DATA.itemMinShow: целое 1…10 в JSON-редакторе (без field_enums).",
           "column": "REWARD_ADD_DATA",
-          "json_path": [
-            "itemMinShow"
-          ],
+          "json_path": ["itemMinShow"],
           "format": "integer",
           "min": 1,
           "max": 10
@@ -1940,9 +1543,7 @@
         {
           "comment": "REWARD_ADD_DATA.itemLimitCount: целое 1…5 в JSON-редакторе (без field_enums).",
           "column": "REWARD_ADD_DATA",
-          "json_path": [
-            "itemLimitCount"
-          ],
+          "json_path": ["itemLimitCount"],
           "format": "integer",
           "min": 1,
           "max": 5
@@ -1950,11 +1551,7 @@
         {
           "comment": "REWARD_ADD_DATA.getCondition.employeeRating.minRatingBANK: целое 1…100 или пусто (allows_empty в editor_field_ui).",
           "column": "REWARD_ADD_DATA",
-          "json_path": [
-            "getCondition",
-            "employeeRating",
-            "minRatingBANK"
-          ],
+          "json_path": ["getCondition", "employeeRating", "minRatingBANK"],
           "format": "integer",
           "min": 1,
           "max": 100
@@ -1962,11 +1559,7 @@
         {
           "comment": "REWARD_ADD_DATA.getCondition.employeeRating.minRatingTB: целое 1…10 или пусто (allows_empty в editor_field_ui).",
           "column": "REWARD_ADD_DATA",
-          "json_path": [
-            "getCondition",
-            "employeeRating",
-            "minRatingTB"
-          ],
+          "json_path": ["getCondition", "employeeRating", "minRatingTB"],
           "format": "integer",
           "min": 1,
           "max": 10
@@ -1974,11 +1567,7 @@
         {
           "comment": "REWARD_ADD_DATA.getCondition.employeeRating.minRatingGOSB: целое 1…5 или пусто (allows_empty в editor_field_ui).",
           "column": "REWARD_ADD_DATA",
-          "json_path": [
-            "getCondition",
-            "employeeRating",
-            "minRatingGOSB"
-          ],
+          "json_path": ["getCondition", "employeeRating", "minRatingGOSB"],
           "format": "integer",
           "min": 1,
           "max": 5
@@ -1986,11 +1575,7 @@
         {
           "comment": "REWARD_ADD_DATA.getCondition.employeeRating.minCrystalEarnedTotal: целое 1…50 или пусто (allows_empty в editor_field_ui).",
           "column": "REWARD_ADD_DATA",
-          "json_path": [
-            "getCondition",
-            "employeeRating",
-            "minCrystalEarnedTotal"
-          ],
+          "json_path": ["getCondition", "employeeRating", "minCrystalEarnedTotal"],
           "format": "integer",
           "min": 1,
           "max": 50
@@ -2148,11 +1733,61 @@
         },
         {
           "column": "CONTEST_PERIOD",
-          "label": "Правила периодов",
-          "description": "Правила периодов и критериев конкурса (обычно JSON-массив).",
-          "show_description": false,
+          "label": "Периоды и критерии конкурса (JSON)",
+          "description": "Массив объектов: period_code (номер периода), criterion_mark_type (оператор), criterion_mark_value (порог). В данных встречаются [] и 1–2 элемента; типичные period_code: −1, 0, 1.",
+          "show_description": true,
           "required": false,
-          "allows_empty": true
+          "allows_empty": true,
+          "paths": [
+            {
+              "json_path": [0, "period_code"],
+              "label": "Код периода (элемент 0)",
+              "description": "Целое: −1 — особый период; 0 — текущий; 1+ — дополнительные периоды.",
+              "show_description": true,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [0, "criterion_mark_type"],
+              "label": "Оператор критерия (элемент 0)",
+              "description": "Сравнение для порога criterion_mark_value.",
+              "show_description": true,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [0, "criterion_mark_value"],
+              "label": "Порог критерия (элемент 0)",
+              "description": "Целое 0…1000000 или пусто (см. editor_field_numeric).",
+              "show_description": true,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [1, "period_code"],
+              "label": "Код периода (элемент 1)",
+              "description": "При втором объекте в массиве — обычно 0 или 1.",
+              "show_description": true,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [1, "criterion_mark_type"],
+              "label": "Оператор критерия (элемент 1)",
+              "description": "Сравнение для второго периода.",
+              "show_description": true,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": [1, "criterion_mark_value"],
+              "label": "Порог критерия (элемент 1)",
+              "description": "Целое 0…1000000 или пусто.",
+              "show_description": true,
+              "required": false,
+              "allows_empty": true
+            }
+          ]
         },
         {
           "column": "TARGET_TYPE",
@@ -2200,9 +1835,7 @@
           "description": "Настройки отображения и поведения конкурса: рассылки, видимость, награждение и др.",
           "paths": [
             {
-              "json_path": [
-                "accuracy"
-              ],
+              "json_path": ["accuracy"],
               "label": "Знак точности",
               "description": "Число знаков после запятой в карточке турнира",
               "show_description": false,
@@ -2210,9 +1843,7 @@
               "allows_empty": true
             },
             {
-              "json_path": [
-                "avatarShow"
-              ],
+              "json_path": ["avatarShow"],
               "label": "Показывать аватар",
               "description": "Флаг отображения аватара участника в карточке конкурса.",
               "show_description": false,
@@ -2220,9 +1851,7 @@
               "allows_empty": true
             },
             {
-              "json_path": [
-                "businessBlock"
-              ],
+              "json_path": ["businessBlock"],
               "label": "Бизнес-блок",
               "description": "businessBlock",
               "show_description": false,
@@ -2230,10 +1859,7 @@
               "allows_empty": true
             },
             {
-              "json_path": [
-                "businessBlock",
-                0
-              ],
+              "json_path": ["businessBlock", 0],
               "label": "Бизнес-блок",
               "description": "businessBlock[0]",
               "show_description": false,
@@ -2241,9 +1867,7 @@
               "allows_empty": true
             },
             {
-              "json_path": [
-                "capacity"
-              ],
+              "json_path": ["capacity"],
               "label": "Округление",
               "description": "Округление значения в карточке турнира",
               "show_description": false,
@@ -2251,9 +1875,7 @@
               "allows_empty": true
             },
             {
-              "json_path": [
-                "feature"
-              ],
+              "json_path": ["feature"],
               "label": "Особенности конкурса",
               "description": "Список коротких пояснений, которые показываются участнику.",
               "show_description": false,
@@ -2261,10 +1883,7 @@
               "allows_empty": true
             },
             {
-              "json_path": [
-                "feature",
-                0
-              ],
+              "json_path": ["feature", 0],
               "label": "Особенность конкурса (элемент 1)",
               "description": "Текст дополнительной особенности конкурса.",
               "show_description": false,
@@ -2272,10 +1891,7 @@
               "allows_empty": true
             },
             {
-              "json_path": [
-                "feature",
-                1
-              ],
+              "json_path": ["feature", 1],
               "label": "Особенность конкурса (элемент 2)",
               "description": "Текст дополнительной особенности конкурса.",
               "show_description": false,
@@ -2283,10 +1899,7 @@
               "allows_empty": true
             },
             {
-              "json_path": [
-                "feature",
-                2
-              ],
+              "json_path": ["feature", 2],
               "label": "Особенность конкурса (элемент 3)",
               "description": "Текст дополнительной особенности конкурса.",
               "show_description": false,
@@ -2294,10 +1907,7 @@
               "allows_empty": true
             },
             {
-              "json_path": [
-                "feature",
-                3
-              ],
+              "json_path": ["feature", 3],
               "label": "Особенность конкурса (элемент 4)",
               "description": "Текст дополнительной особенности конкурса.",
               "show_description": false,
@@ -2305,10 +1915,7 @@
               "allows_empty": true
             },
             {
-              "json_path": [
-                "feature",
-                4
-              ],
+              "json_path": ["feature", 4],
               "label": "Особенность конкурса (элемент 5)",
               "description": "Текст дополнительной особенности конкурса.",
               "show_description": false,
@@ -2316,10 +1923,7 @@
               "allows_empty": true
             },
             {
-              "json_path": [
-                "feature",
-                5
-              ],
+              "json_path": ["feature", 5],
               "label": "Особенность конкурса (элемент 6)",
               "description": "Текст дополнительной особенности конкурса.",
               "show_description": false,
@@ -2327,9 +1931,7 @@
               "allows_empty": true
             },
             {
-              "json_path": [
-                "gosbHidden"
-              ],
+              "json_path": ["gosbHidden"],
               "label": "Скрыть от ГОСБ",
               "description": "Видят все ГОСБ кроме указанных",
               "show_description": true,
@@ -2337,9 +1939,7 @@
               "allows_empty": true
             },
             {
-              "json_path": [
-                "gosbVisible"
-              ],
+              "json_path": ["gosbVisible"],
               "label": "Показать в ГОСБ",
               "description": "Видят только указанные ГОСБ",
               "show_description": true,
@@ -2347,10 +1947,7 @@
               "allows_empty": true
             },
             {
-              "json_path": [
-                "helpCodeList",
-                0
-              ],
+              "json_path": ["helpCodeList", 0],
               "label": "Код помощи (элемент 1)",
               "description": "Код справочного блока/подсказки для UI.",
               "show_description": false,
@@ -2358,10 +1955,7 @@
               "allows_empty": true
             },
             {
-              "json_path": [
-                "helpCodeList",
-                1
-              ],
+              "json_path": ["helpCodeList", 1],
               "label": "Код помощи (элемент 2)",
               "description": "Код справочного блока/подсказки для UI.",
               "show_description": false,
@@ -2369,9 +1963,7 @@
               "allows_empty": true
             },
             {
-              "json_path": [
-                "masking"
-              ],
+              "json_path": ["masking"],
               "label": "Скрытие персональных данных",
               "description": "Флаг маскирования персональных данных в витрине конкурса.",
               "show_description": false,
@@ -2379,9 +1971,7 @@
               "allows_empty": true
             },
             {
-              "json_path": [
-                "minNumber"
-              ],
+              "json_path": ["minNumber"],
               "label": "Минимум участников",
               "description": "Минимальное количество участников для формирования победителей",
               "show_description": false,
@@ -2389,9 +1979,7 @@
               "allows_empty": true
             },
             {
-              "json_path": [
-                "momentRewarding"
-              ],
+              "json_path": ["momentRewarding"],
               "label": "Момент награждения",
               "description": "DURIN - во время турнира; AFTER - по окончании турнира",
               "show_description": true,
@@ -2399,9 +1987,7 @@
               "allows_empty": true
             },
             {
-              "json_path": [
-                "persomanNumberHidden"
-              ],
+              "json_path": ["persomanNumberHidden"],
               "label": "Скрыть от участников",
               "description": "Видят все участники кроме указанных табельных номеров",
               "show_description": true,
@@ -2409,9 +1995,7 @@
               "allows_empty": true
             },
             {
-              "json_path": [
-                "persomanNumberVisible"
-              ],
+              "json_path": ["persomanNumberVisible"],
               "label": "Показать участникам",
               "description": "Видят только указанные табельные номера",
               "show_description": true,
@@ -2419,10 +2003,7 @@
               "allows_empty": true
             },
             {
-              "json_path": [
-                "persomanNumberVisible",
-                0
-              ],
+              "json_path": ["persomanNumberVisible", 0],
               "label": "Показать участникам",
               "description": "persomanNumberVisible[0]",
               "show_description": false,
@@ -2430,10 +2011,7 @@
               "allows_empty": true
             },
             {
-              "json_path": [
-                "persomanNumberVisible",
-                1
-              ],
+              "json_path": ["persomanNumberVisible", 1],
               "label": "Показать участникам",
               "description": "persomanNumberVisible[1]",
               "show_description": false,
@@ -2441,10 +2019,7 @@
               "allows_empty": true
             },
             {
-              "json_path": [
-                "persomanNumberVisible",
-                2
-              ],
+              "json_path": ["persomanNumberVisible", 2],
               "label": "Показать участникам",
               "description": "persomanNumberVisible[2]",
               "show_description": false,
@@ -2452,10 +2027,7 @@
               "allows_empty": true
             },
             {
-              "json_path": [
-                "persomanNumberVisible",
-                3
-              ],
+              "json_path": ["persomanNumberVisible", 3],
               "label": "Показать участникам",
               "description": "persomanNumberVisible[3]",
               "show_description": false,
@@ -2463,10 +2035,7 @@
               "allows_empty": true
             },
             {
-              "json_path": [
-                "persomanNumberVisible",
-                4
-              ],
+              "json_path": ["persomanNumberVisible", 4],
               "label": "Показать участникам",
               "description": "persomanNumberVisible[4]",
               "show_description": false,
@@ -2474,10 +2043,7 @@
               "allows_empty": true
             },
             {
-              "json_path": [
-                "persomanNumberVisible",
-                5
-              ],
+              "json_path": ["persomanNumberVisible", 5],
               "label": "Показать участникам",
               "description": "persomanNumberVisible[5]",
               "show_description": false,
@@ -2485,10 +2051,7 @@
               "allows_empty": true
             },
             {
-              "json_path": [
-                "persomanNumberVisible",
-                6
-              ],
+              "json_path": ["persomanNumberVisible", 6],
               "label": "Показать участникам",
               "description": "persomanNumberVisible[6]",
               "show_description": false,
@@ -2496,9 +2059,7 @@
               "allows_empty": true
             },
             {
-              "json_path": [
-                "preferences"
-              ],
+              "json_path": ["preferences"],
               "label": "Преференции",
               "description": "Список дополнительных преимуществ/условий для участника.",
               "show_description": false,
@@ -2506,10 +2067,7 @@
               "allows_empty": true
             },
             {
-              "json_path": [
-                "preferences",
-                0
-              ],
+              "json_path": ["preferences", 0],
               "label": "Преференция (элемент 1)",
               "description": "Текст конкретной преференции.",
               "show_description": false,
@@ -2517,10 +2075,7 @@
               "allows_empty": true
             },
             {
-              "json_path": [
-                "preferences",
-                1
-              ],
+              "json_path": ["preferences", 1],
               "label": "Преференция (элемент 2)",
               "description": "Текст конкретной преференции.",
               "show_description": false,
@@ -2528,10 +2083,7 @@
               "allows_empty": true
             },
             {
-              "json_path": [
-                "preferences",
-                2
-              ],
+              "json_path": ["preferences", 2],
               "label": "Преференция (элемент 3)",
               "description": "Текст конкретной преференции.",
               "show_description": false,
@@ -2539,10 +2091,7 @@
               "allows_empty": true
             },
             {
-              "json_path": [
-                "preferences",
-                3
-              ],
+              "json_path": ["preferences", 3],
               "label": "Преференция (элемент 4)",
               "description": "Текст конкретной преференции.",
               "show_description": false,
@@ -2550,9 +2099,7 @@
               "allows_empty": true
             },
             {
-              "json_path": [
-                "tbHidden"
-              ],
+              "json_path": ["tbHidden"],
               "label": "Скрыть от ТБ",
               "description": "Видят все ТБ кроме указанных",
               "show_description": true,
@@ -2560,9 +2107,7 @@
               "allows_empty": true
             },
             {
-              "json_path": [
-                "tbVisible"
-              ],
+              "json_path": ["tbVisible"],
               "label": "Показать в ТБ",
               "description": "Видят только указанные ТБ",
               "show_description": true,
@@ -2570,10 +2115,7 @@
               "allows_empty": true
             },
             {
-              "json_path": [
-                "tbVisible",
-                0
-              ],
+              "json_path": ["tbVisible", 0],
               "label": "Показать в ТБ",
               "description": "tbVisible[0]",
               "show_description": false,
@@ -2581,10 +2123,7 @@
               "allows_empty": true
             },
             {
-              "json_path": [
-                "tbVisible",
-                1
-              ],
+              "json_path": ["tbVisible", 1],
               "label": "Показать в ТБ",
               "description": "tbVisible[1]",
               "show_description": false,
@@ -2592,10 +2131,7 @@
               "allows_empty": true
             },
             {
-              "json_path": [
-                "tbVisible",
-                2
-              ],
+              "json_path": ["tbVisible", 2],
               "label": "Показать в ТБ",
               "description": "tbVisible[2]",
               "show_description": false,
@@ -2603,10 +2139,7 @@
               "allows_empty": true
             },
             {
-              "json_path": [
-                "tbVisible",
-                3
-              ],
+              "json_path": ["tbVisible", 3],
               "label": "Показать в ТБ",
               "description": "tbVisible[3]",
               "show_description": false,
@@ -2614,9 +2147,7 @@
               "allows_empty": true
             },
             {
-              "json_path": [
-                "tournamentEndMailing"
-              ],
+              "json_path": ["tournamentEndMailing"],
               "label": "Письмо о завершении турнира",
               "description": "tournamentEndMailing",
               "show_description": false,
@@ -2624,9 +2155,7 @@
               "allows_empty": true
             },
             {
-              "json_path": [
-                "tournamentLikeMailing"
-              ],
+              "json_path": ["tournamentLikeMailing"],
               "label": "Письмо о лайках",
               "description": "tournamentLikeMailing",
               "show_description": false,
@@ -2634,9 +2163,7 @@
               "allows_empty": true
             },
             {
-              "json_path": [
-                "tournamentListMailing"
-              ],
+              "json_path": ["tournamentListMailing"],
               "label": "Рассылка списка участников",
               "description": "Параметры рассылки списка участников турнира.",
               "show_description": false,
@@ -2644,9 +2171,7 @@
               "allows_empty": true
             },
             {
-              "json_path": [
-                "tournamentRewardingMailing"
-              ],
+              "json_path": ["tournamentRewardingMailing"],
               "label": "Рассылка о награждении",
               "description": "Параметры рассылки уведомлений о награждении.",
               "show_description": false,
@@ -2654,9 +2179,7 @@
               "allows_empty": true
             },
             {
-              "json_path": [
-                "tournamentStartMailing"
-              ],
+              "json_path": ["tournamentStartMailing"],
               "label": "Письмо о начале турнира",
               "description": "tournamentStartMailing",
               "show_description": false,
@@ -2664,9 +2187,7 @@
               "allows_empty": true
             },
             {
-              "json_path": [
-                "tournamentTeam"
-              ],
+              "json_path": ["tournamentTeam"],
               "label": "Командный турнир",
               "description": "tournamentTeam",
               "show_description": false,
@@ -2674,9 +2195,7 @@
               "allows_empty": true
             },
             {
-              "json_path": [
-                "typeRewarding"
-              ],
+              "json_path": ["typeRewarding"],
               "label": "Режим награждения",
               "description": "Тип выдачи наград (например, всем или одному лучшему).",
               "show_description": false,
@@ -2684,9 +2203,7 @@
               "allows_empty": true
             },
             {
-              "json_path": [
-                "vid"
-              ],
+              "json_path": ["vid"],
               "label": "Тип витрины",
               "description": "Тип витрины/режим отображения конкурса (например, ПРОМ/ТЕСТ).",
               "show_description": false,
@@ -2961,9 +2478,7 @@
           "description": "Расширенные параметры награды: правила выдачи, видимость, новости и ограничения.",
           "paths": [
             {
-              "json_path": [
-                "bookingRequired"
-              ],
+              "json_path": ["bookingRequired"],
               "label": "Требуется бронирование",
               "description": "Флаг: для награды необходимо предварительное бронирование.",
               "show_description": false,
@@ -2971,10 +2486,7 @@
               "allows_empty": true
             },
             {
-              "json_path": [
-                "businessBlock",
-                0
-              ],
+              "json_path": ["businessBlock", 0],
               "label": "Бизнес-блок",
               "description": "businessBlock[0]",
               "show_description": false,
@@ -2982,9 +2494,7 @@
               "allows_empty": true
             },
             {
-              "json_path": [
-                "commingSoon"
-              ],
+              "json_path": ["commingSoon"],
               "label": "Скоро будет",
               "description": "commingSoon",
               "show_description": false,
@@ -2992,9 +2502,7 @@
               "allows_empty": true
             },
             {
-              "json_path": [
-                "deliveryRequired"
-              ],
+              "json_path": ["deliveryRequired"],
               "label": "Требуется доставка",
               "description": "Флаг: награда требует оформления доставки.",
               "show_description": false,
@@ -3002,9 +2510,7 @@
               "allows_empty": true
             },
             {
-              "json_path": [
-                "feature"
-              ],
+              "json_path": ["feature"],
               "label": "feature",
               "description": "feature",
               "show_description": false,
@@ -3012,10 +2518,7 @@
               "allows_empty": true
             },
             {
-              "json_path": [
-                "feature",
-                0
-              ],
+              "json_path": ["feature", 0],
               "label": "Особенность награды (элемент 1)",
               "description": "Текст дополнительной особенности награды.",
               "show_description": false,
@@ -3023,10 +2526,7 @@
               "allows_empty": true
             },
             {
-              "json_path": [
-                "feature",
-                1
-              ],
+              "json_path": ["feature", 1],
               "label": "Особенность награды (элемент 2)",
               "description": "Текст дополнительной особенности награды.",
               "show_description": false,
@@ -3034,10 +2534,7 @@
               "allows_empty": true
             },
             {
-              "json_path": [
-                "feature",
-                2
-              ],
+              "json_path": ["feature", 2],
               "label": "Особенность награды (элемент 3)",
               "description": "Текст дополнительной особенности награды.",
               "show_description": false,
@@ -3045,10 +2542,7 @@
               "allows_empty": true
             },
             {
-              "json_path": [
-                "feature",
-                3
-              ],
+              "json_path": ["feature", 3],
               "label": "Особенность награды (элемент 4)",
               "description": "Текст дополнительной особенности награды.",
               "show_description": false,
@@ -3056,10 +2550,7 @@
               "allows_empty": true
             },
             {
-              "json_path": [
-                "feature",
-                4
-              ],
+              "json_path": ["feature", 4],
               "label": "Особенность награды (элемент 5)",
               "description": "Текст дополнительной особенности награды.",
               "show_description": false,
@@ -3067,10 +2558,7 @@
               "allows_empty": true
             },
             {
-              "json_path": [
-                "feature",
-                5
-              ],
+              "json_path": ["feature", 5],
               "label": "Особенность награды (элемент 6)",
               "description": "Текст дополнительной особенности награды.",
               "show_description": false,
@@ -3078,9 +2566,7 @@
               "allows_empty": true
             },
             {
-              "json_path": [
-                "fileName"
-              ],
+              "json_path": ["fileName"],
               "label": "Код медиа-файла",
               "description": "Идентификатор файла/ресурса награды в витрине.",
               "show_description": false,
@@ -3088,11 +2574,7 @@
               "allows_empty": true
             },
             {
-              "json_path": [
-                "getCondition",
-                "employeeRating",
-                "minCrystalEarnedTotal"
-              ],
+              "json_path": ["getCondition", "employeeRating", "minCrystalEarnedTotal"],
               "label": "Минимум кристаллов",
               "description": "Минимальное количество кристаллов для чтобы получить преференцию",
               "show_description": true,
@@ -3100,11 +2582,7 @@
               "allows_empty": true
             },
             {
-              "json_path": [
-                "getCondition",
-                "employeeRating",
-                "minRatingBANK"
-              ],
+              "json_path": ["getCondition", "employeeRating", "minRatingBANK"],
               "label": "Минимальный рейтинг в стране",
               "description": "Минимальный рейтинг в стране для чтобы получить преференцию",
               "show_description": true,
@@ -3112,11 +2590,7 @@
               "allows_empty": true
             },
             {
-              "json_path": [
-                "getCondition",
-                "employeeRating",
-                "minRatingGOSB"
-              ],
+              "json_path": ["getCondition", "employeeRating", "minRatingGOSB"],
               "label": "Минимальный рейтинг в ТБ",
               "description": "Минимальный рейтинг в ТБ для чтобы получить преференцию",
               "show_description": true,
@@ -3124,11 +2598,7 @@
               "allows_empty": true
             },
             {
-              "json_path": [
-                "getCondition",
-                "employeeRating",
-                "minRatingTB"
-              ],
+              "json_path": ["getCondition", "employeeRating", "minRatingTB"],
               "label": "Минимальный рейтинг в ГОСБ",
               "description": "Минимальный рейтинг в ГОСБ для чтобы получить преференцию",
               "show_description": true,
@@ -3136,11 +2606,7 @@
               "allows_empty": true
             },
             {
-              "json_path": [
-                "getCondition",
-                "employeeRating",
-                "seasonCode"
-              ],
+              "json_path": ["getCondition", "employeeRating", "seasonCode"],
               "label": "Сезон рейтинга",
               "description": "В каком сезоне надо занять минимальный рейтинг",
               "show_description": false,
@@ -3148,10 +2614,7 @@
               "allows_empty": true
             },
             {
-              "json_path": [
-                "getCondition",
-                "nonRewards"
-              ],
+              "json_path": ["getCondition", "nonRewards"],
               "label": "Запрещающие награды",
               "description": "Список кодов наград, при наличии которых текущая награда не выдаётся.",
               "show_description": false,
@@ -3159,177 +2622,39 @@
               "allows_empty": true
             },
             {
-              "json_path": [
-                "getCondition",
-                "nonRewards",
-                0,
-                "nonRewardCode"
-              ],
-              "label": "Код исключающей награды (элемент 1)",
-              "description": "Код награды-исключения из условий получения.",
+              "json_path": ["getCondition", "nonRewards", "nonRewardCode"],
+              "label": "Код исключающей награды",
+              "description": "Код награды-исключения (элементы массива добавляются и удаляются кнопками в форме).",
               "show_description": false,
               "required": false,
               "allows_empty": true
             },
             {
-              "json_path": [
-                "getCondition",
-                "nonRewards",
-                1,
-                "nonRewardCode"
-              ],
-              "label": "Код исключающей награды (элемент 2)",
-              "description": "Код награды-исключения из условий получения.",
-              "show_description": false,
-              "required": false,
-              "allows_empty": true
-            },
-            {
-              "json_path": [
-                "getCondition",
-                "nonRewards",
-                2,
-                "nonRewardCode"
-              ],
-              "label": "Код исключающей награды (элемент 3)",
-              "description": "Код награды-исключения из условий получения.",
-              "show_description": false,
-              "required": false,
-              "allows_empty": true
-            },
-            {
-              "json_path": [
-                "getCondition",
-                "nonRewards",
-                3,
-                "nonRewardCode"
-              ],
-              "label": "Код исключающей награды (элемент 4)",
-              "description": "Код награды-исключения из условий получения.",
-              "show_description": false,
-              "required": false,
-              "allows_empty": true
-            },
-            {
-              "json_path": [
-                "getCondition",
-                "nonRewards",
-                4,
-                "nonRewardCode"
-              ],
-              "label": "Код исключающей награды (элемент 5)",
-              "description": "Код награды-исключения из условий получения.",
-              "show_description": false,
-              "required": false,
-              "allows_empty": true
-            },
-            {
-              "json_path": [
-                "getCondition",
-                "nonRewards",
-                5,
-                "nonRewardCode"
-              ],
-              "label": "Код исключающей награды (элемент 6)",
-              "description": "Код награды-исключения из условий получения.",
-              "show_description": false,
-              "required": false,
-              "allows_empty": true
-            },
-            {
-              "json_path": [
-                "getCondition",
-                "nonRewards",
-                6,
-                "nonRewardCode"
-              ],
-              "label": "Код исключающей награды (элемент 7)",
-              "description": "Код награды-исключения из условий получения.",
-              "show_description": false,
-              "required": false,
-              "allows_empty": true
-            },
-            {
-              "json_path": [
-                "getCondition",
-                "nonRewards",
-                7,
-                "nonRewardCode"
-              ],
-              "label": "Код исключающей награды (элемент 8)",
-              "description": "Код награды-исключения из условий получения.",
-              "show_description": false,
-              "required": false,
-              "allows_empty": true
-            },
-            {
-              "json_path": [
-                "getCondition",
-                "rewards"
-              ],
+              "json_path": ["getCondition", "rewards"],
               "label": "Требуемые награды",
-              "description": "Список наград, необходимых для получения текущей.",
+              "description": "Пары «код награды (BADGE) — количество (1/2/3)»; элементы массива добавляются и удаляются кнопками.",
               "show_description": false,
               "required": false,
               "allows_empty": true
             },
             {
-              "json_path": [
-                "getCondition",
-                "rewards",
-                0,
-                "amount"
-              ],
-              "label": "Количество требуемых наград (элемент 1)",
+              "json_path": ["getCondition", "rewards", "rewardCode"],
+              "label": "Код требуемой награды (BADGE)",
+              "description": "Должен совпадать с REWARD_CODE строки с REWARD_TYPE=BADGE; подсветка при вводе.",
+              "show_description": true,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": ["getCondition", "rewards", "amount"],
+              "label": "Количество (1 / 2 / 3)",
               "description": "Сколько единиц указанной награды требуется.",
               "show_description": false,
               "required": false,
               "allows_empty": true
             },
             {
-              "json_path": [
-                "getCondition",
-                "rewards",
-                0,
-                "rewardCode"
-              ],
-              "label": "Код требуемой награды (элемент 1)",
-              "description": "Код награды, необходимой для получения текущей.",
-              "show_description": false,
-              "required": false,
-              "allows_empty": true
-            },
-            {
-              "json_path": [
-                "getCondition",
-                "rewards",
-                1,
-                "amount"
-              ],
-              "label": "Количество требуемых наград (элемент 2)",
-              "description": "Сколько единиц указанной награды требуется.",
-              "show_description": false,
-              "required": false,
-              "allows_empty": true
-            },
-            {
-              "json_path": [
-                "getCondition",
-                "rewards",
-                1,
-                "rewardCode"
-              ],
-              "label": "Код требуемой награды (элемент 2)",
-              "description": "Код награды, необходимой для получения текущей.",
-              "show_description": false,
-              "required": false,
-              "allows_empty": true
-            },
-            {
-              "json_path": [
-                "helpCodeList",
-                0
-              ],
+              "json_path": ["helpCodeList", 0],
               "label": "helpCodeList[0]",
               "description": "helpCodeList[0]",
               "show_description": false,
@@ -3337,10 +2662,7 @@
               "allows_empty": true
             },
             {
-              "json_path": [
-                "helpCodeList",
-                1
-              ],
+              "json_path": ["helpCodeList", 1],
               "label": "helpCodeList[1]",
               "description": "helpCodeList[1]",
               "show_description": false,
@@ -3348,9 +2670,7 @@
               "allows_empty": true
             },
             {
-              "json_path": [
-                "hidden"
-              ],
+              "json_path": ["hidden"],
               "label": "Скрыть",
               "description": "hidden",
               "show_description": false,
@@ -3358,9 +2678,7 @@
               "allows_empty": true
             },
             {
-              "json_path": [
-                "hiddenRewardList"
-              ],
+              "json_path": ["hiddenRewardList"],
               "label": "Скрыть в списках",
               "description": "hiddenRewardList",
               "show_description": false,
@@ -3368,9 +2686,7 @@
               "allows_empty": true
             },
             {
-              "json_path": [
-                "ignoreConditions"
-              ],
+              "json_path": ["ignoreConditions"],
               "label": "Доступность без условий",
               "description": "Перечисленные табельные номера не требуют выполнения условий",
               "show_description": true,
@@ -3378,10 +2694,7 @@
               "allows_empty": true
             },
             {
-              "json_path": [
-                "ignoreConditions",
-                0
-              ],
+              "json_path": ["ignoreConditions", 0],
               "label": "Табельный номер без проверки условий (элемент 1)",
               "description": "Участник, для которого ограничения выдачи не применяются.",
               "show_description": false,
@@ -3389,10 +2702,7 @@
               "allows_empty": true
             },
             {
-              "json_path": [
-                "ignoreConditions",
-                10
-              ],
+              "json_path": ["ignoreConditions", 10],
               "label": "Табельный номер без проверки условий (элемент 11)",
               "description": "Участник, для которого ограничения выдачи не применяются.",
               "show_description": false,
@@ -3400,10 +2710,7 @@
               "allows_empty": true
             },
             {
-              "json_path": [
-                "ignoreConditions",
-                11
-              ],
+              "json_path": ["ignoreConditions", 11],
               "label": "Табельный номер без проверки условий (элемент 12)",
               "description": "Участник, для которого ограничения выдачи не применяются.",
               "show_description": false,
@@ -3411,10 +2718,7 @@
               "allows_empty": true
             },
             {
-              "json_path": [
-                "ignoreConditions",
-                12
-              ],
+              "json_path": ["ignoreConditions", 12],
               "label": "Табельный номер без проверки условий (элемент 13)",
               "description": "Участник, для которого ограничения выдачи не применяются.",
               "show_description": false,
@@ -3422,10 +2726,7 @@
               "allows_empty": true
             },
             {
-              "json_path": [
-                "ignoreConditions",
-                13
-              ],
+              "json_path": ["ignoreConditions", 13],
               "label": "Табельный номер без проверки условий (элемент 14)",
               "description": "Участник, для которого ограничения выдачи не применяются.",
               "show_description": false,
@@ -3433,10 +2734,7 @@
               "allows_empty": true
             },
             {
-              "json_path": [
-                "ignoreConditions",
-                1
-              ],
+              "json_path": ["ignoreConditions", 1],
               "label": "Табельный номер без проверки условий (элемент 2)",
               "description": "Участник, для которого ограничения выдачи не применяются.",
               "show_description": false,
@@ -3444,10 +2742,7 @@
               "allows_empty": true
             },
             {
-              "json_path": [
-                "ignoreConditions",
-                2
-              ],
+              "json_path": ["ignoreConditions", 2],
               "label": "Табельный номер без проверки условий (элемент 3)",
               "description": "Участник, для которого ограничения выдачи не применяются.",
               "show_description": false,
@@ -3455,10 +2750,7 @@
               "allows_empty": true
             },
             {
-              "json_path": [
-                "ignoreConditions",
-                3
-              ],
+              "json_path": ["ignoreConditions", 3],
               "label": "Табельный номер без проверки условий (элемент 4)",
               "description": "Участник, для которого ограничения выдачи не применяются.",
               "show_description": false,
@@ -3466,10 +2758,7 @@
               "allows_empty": true
             },
             {
-              "json_path": [
-                "ignoreConditions",
-                4
-              ],
+              "json_path": ["ignoreConditions", 4],
               "label": "Табельный номер без проверки условий (элемент 5)",
               "description": "Участник, для которого ограничения выдачи не применяются.",
               "show_description": false,
@@ -3477,10 +2766,7 @@
               "allows_empty": true
             },
             {
-              "json_path": [
-                "ignoreConditions",
-                5
-              ],
+              "json_path": ["ignoreConditions", 5],
               "label": "Табельный номер без проверки условий (элемент 6)",
               "description": "Участник, для которого ограничения выдачи не применяются.",
               "show_description": false,
@@ -3488,10 +2774,7 @@
               "allows_empty": true
             },
             {
-              "json_path": [
-                "ignoreConditions",
-                6
-              ],
+              "json_path": ["ignoreConditions", 6],
               "label": "Табельный номер без проверки условий (элемент 7)",
               "description": "Участник, для которого ограничения выдачи не применяются.",
               "show_description": false,
@@ -3499,10 +2782,7 @@
               "allows_empty": true
             },
             {
-              "json_path": [
-                "ignoreConditions",
-                7
-              ],
+              "json_path": ["ignoreConditions", 7],
               "label": "Табельный номер без проверки условий (элемент 8)",
               "description": "Участник, для которого ограничения выдачи не применяются.",
               "show_description": false,
@@ -3510,10 +2790,7 @@
               "allows_empty": true
             },
             {
-              "json_path": [
-                "ignoreConditions",
-                8
-              ],
+              "json_path": ["ignoreConditions", 8],
               "label": "Табельный номер без проверки условий (элемент 9)",
               "description": "Участник, для которого ограничения выдачи не применяются.",
               "show_description": false,
@@ -3521,10 +2798,7 @@
               "allows_empty": true
             },
             {
-              "json_path": [
-                "ignoreConditions",
-                9
-              ],
+              "json_path": ["ignoreConditions", 9],
               "label": "Табельный номер без проверки условий (элемент 10)",
               "description": "Участник, для которого ограничения выдачи не применяются.",
               "show_description": false,
@@ -3532,9 +2806,7 @@
               "allows_empty": true
             },
             {
-              "json_path": [
-                "isGrouping"
-              ],
+              "json_path": ["isGrouping"],
               "label": "isGrouping",
               "description": "isGrouping",
               "show_description": false,
@@ -3542,9 +2814,7 @@
               "allows_empty": true
             },
             {
-              "json_path": [
-                "isGroupingName"
-              ],
+              "json_path": ["isGroupingName"],
               "label": "isGroupingName",
               "description": "isGroupingName",
               "show_description": false,
@@ -3552,9 +2822,7 @@
               "allows_empty": true
             },
             {
-              "json_path": [
-                "isGroupingTitle"
-              ],
+              "json_path": ["isGroupingTitle"],
               "label": "isGroupingTitle",
               "description": "isGroupingTitle",
               "show_description": false,
@@ -3562,9 +2830,7 @@
               "allows_empty": true
             },
             {
-              "json_path": [
-                "isGroupingTultip"
-              ],
+              "json_path": ["isGroupingTultip"],
               "label": "isGroupingTultip",
               "description": "isGroupingTultip",
               "show_description": false,
@@ -3572,9 +2838,7 @@
               "allows_empty": true
             },
             {
-              "json_path": [
-                "itemAmount"
-              ],
+              "json_path": ["itemAmount"],
               "label": "Количество товаров",
               "description": "itemAmount",
               "show_description": false,
@@ -3582,9 +2846,7 @@
               "allows_empty": true
             },
             {
-              "json_path": [
-                "itemFeature"
-              ],
+              "json_path": ["itemFeature"],
               "label": "itemFeature",
               "description": "itemFeature",
               "show_description": false,
@@ -3592,10 +2854,7 @@
               "allows_empty": true
             },
             {
-              "json_path": [
-                "itemFeature",
-                0
-              ],
+              "json_path": ["itemFeature", 0],
               "label": "Особенность товара (элемент 1)",
               "description": "Пояснение по характеристике награды типа ITEM.",
               "show_description": false,
@@ -3603,10 +2862,7 @@
               "allows_empty": true
             },
             {
-              "json_path": [
-                "itemFeature",
-                1
-              ],
+              "json_path": ["itemFeature", 1],
               "label": "Особенность товара (элемент 2)",
               "description": "Пояснение по характеристике награды типа ITEM.",
               "show_description": false,
@@ -3614,10 +2870,7 @@
               "allows_empty": true
             },
             {
-              "json_path": [
-                "itemFeature",
-                2
-              ],
+              "json_path": ["itemFeature", 2],
               "label": "Особенность товара (элемент 3)",
               "description": "Пояснение по характеристике награды типа ITEM.",
               "show_description": false,
@@ -3625,10 +2878,7 @@
               "allows_empty": true
             },
             {
-              "json_path": [
-                "itemFeature",
-                3
-              ],
+              "json_path": ["itemFeature", 3],
               "label": "Особенность товара (элемент 4)",
               "description": "Пояснение по характеристике награды типа ITEM.",
               "show_description": false,
@@ -3636,10 +2886,7 @@
               "allows_empty": true
             },
             {
-              "json_path": [
-                "itemFeature",
-                4
-              ],
+              "json_path": ["itemFeature", 4],
               "label": "Особенность товара (элемент 5)",
               "description": "Пояснение по характеристике награды типа ITEM.",
               "show_description": false,
@@ -3647,10 +2894,7 @@
               "allows_empty": true
             },
             {
-              "json_path": [
-                "itemFeature",
-                5
-              ],
+              "json_path": ["itemFeature", 5],
               "label": "Особенность товара (элемент 6)",
               "description": "Пояснение по характеристике награды типа ITEM.",
               "show_description": false,
@@ -3658,187 +2902,31 @@
               "allows_empty": true
             },
             {
-              "json_path": [
-                "itemGroupAmount"
-              ],
-              "label": "itemGroupAmount",
-              "description": "itemGroupAmount",
+              "json_path": ["itemGroupAmount"],
+              "label": "Групповые лимиты по месяцам",
+              "description": "Пары «месяц — лимит (0…100)»; строки массива добавляются и удаляются кнопками.",
+              "show_description": true,
+              "required": false,
+              "allows_empty": true
+            },
+            {
+              "json_path": ["itemGroupAmount", "itemParam"],
+              "label": "Месяц",
+              "description": "Календарный месяц для лимита выдачи.",
               "show_description": false,
               "required": false,
               "allows_empty": true
             },
             {
-              "json_path": [
-                "itemGroupAmount",
-                0,
-                "itemParam"
-              ],
-              "label": "Параметр группового лимита (элемент 1)",
-              "description": "Наименование параметра ограничения для групповой выдачи.",
-              "show_description": false,
+              "json_path": ["itemGroupAmount", "itemParamAmount"],
+              "label": "Лимит (0–100)",
+              "description": "Число от 0 до 100 в виде текста; подсветка при совпадении с допустимым значением.",
+              "show_description": true,
               "required": false,
               "allows_empty": true
             },
             {
-              "json_path": [
-                "itemGroupAmount",
-                0,
-                "itemParamAmount"
-              ],
-              "label": "Значение группового лимита (элемент 1)",
-              "description": "Числовое значение ограничения по выбранному параметру.",
-              "show_description": false,
-              "required": false,
-              "allows_empty": true
-            },
-            {
-              "json_path": [
-                "itemGroupAmount",
-                1,
-                "itemParam"
-              ],
-              "label": "Параметр группового лимита (элемент 2)",
-              "description": "Наименование параметра ограничения для групповой выдачи.",
-              "show_description": false,
-              "required": false,
-              "allows_empty": true
-            },
-            {
-              "json_path": [
-                "itemGroupAmount",
-                1,
-                "itemParamAmount"
-              ],
-              "label": "Значение группового лимита (элемент 2)",
-              "description": "Числовое значение ограничения по выбранному параметру.",
-              "show_description": false,
-              "required": false,
-              "allows_empty": true
-            },
-            {
-              "json_path": [
-                "itemGroupAmount",
-                2,
-                "itemParam"
-              ],
-              "label": "Параметр группового лимита (элемент 3)",
-              "description": "Наименование параметра ограничения для групповой выдачи.",
-              "show_description": false,
-              "required": false,
-              "allows_empty": true
-            },
-            {
-              "json_path": [
-                "itemGroupAmount",
-                2,
-                "itemParamAmount"
-              ],
-              "label": "Значение группового лимита (элемент 3)",
-              "description": "Числовое значение ограничения по выбранному параметру.",
-              "show_description": false,
-              "required": false,
-              "allows_empty": true
-            },
-            {
-              "json_path": [
-                "itemGroupAmount",
-                3,
-                "itemParam"
-              ],
-              "label": "Параметр группового лимита (элемент 4)",
-              "description": "Наименование параметра ограничения для групповой выдачи.",
-              "show_description": false,
-              "required": false,
-              "allows_empty": true
-            },
-            {
-              "json_path": [
-                "itemGroupAmount",
-                3,
-                "itemParamAmount"
-              ],
-              "label": "Значение группового лимита (элемент 4)",
-              "description": "Числовое значение ограничения по выбранному параметру.",
-              "show_description": false,
-              "required": false,
-              "allows_empty": true
-            },
-            {
-              "json_path": [
-                "itemGroupAmount",
-                4,
-                "itemParam"
-              ],
-              "label": "Параметр группового лимита (элемент 5)",
-              "description": "Наименование параметра ограничения для групповой выдачи.",
-              "show_description": false,
-              "required": false,
-              "allows_empty": true
-            },
-            {
-              "json_path": [
-                "itemGroupAmount",
-                4,
-                "itemParamAmount"
-              ],
-              "label": "Значение группового лимита (элемент 5)",
-              "description": "Числовое значение ограничения по выбранному параметру.",
-              "show_description": false,
-              "required": false,
-              "allows_empty": true
-            },
-            {
-              "json_path": [
-                "itemGroupAmount",
-                5,
-                "itemParam"
-              ],
-              "label": "Параметр группового лимита (элемент 6)",
-              "description": "Наименование параметра ограничения для групповой выдачи.",
-              "show_description": false,
-              "required": false,
-              "allows_empty": true
-            },
-            {
-              "json_path": [
-                "itemGroupAmount",
-                5,
-                "itemParamAmount"
-              ],
-              "label": "Значение группового лимита (элемент 6)",
-              "description": "Числовое значение ограничения по выбранному параметру.",
-              "show_description": false,
-              "required": false,
-              "allows_empty": true
-            },
-            {
-              "json_path": [
-                "itemGroupAmount",
-                6,
-                "itemParam"
-              ],
-              "label": "Параметр группового лимита (элемент 7)",
-              "description": "Наименование параметра ограничения для групповой выдачи.",
-              "show_description": false,
-              "required": false,
-              "allows_empty": true
-            },
-            {
-              "json_path": [
-                "itemGroupAmount",
-                6,
-                "itemParamAmount"
-              ],
-              "label": "Значение группового лимита (элемент 7)",
-              "description": "Числовое значение ограничения по выбранному параметру.",
-              "show_description": false,
-              "required": false,
-              "allows_empty": true
-            },
-            {
-              "json_path": [
-                "itemLimitCount"
-              ],
+              "json_path": ["itemLimitCount"],
               "label": "Лимит по количеству (itemLimitCount)",
               "description": "Целое число от 1 до 5 включительно (числовой ввод).",
               "show_description": true,
@@ -3846,9 +2934,7 @@
               "allows_empty": true
             },
             {
-              "json_path": [
-                "itemLimitPeriod"
-              ],
+              "json_path": ["itemLimitPeriod"],
               "label": "Период лимита выдачи",
               "description": "Период, в рамках которого действует лимит количества выдач.",
               "show_description": false,
@@ -3856,9 +2942,7 @@
               "allows_empty": true
             },
             {
-              "json_path": [
-                "itemMinShow"
-              ],
+              "json_path": ["itemMinShow"],
               "label": "Минимум показов (itemMinShow)",
               "description": "Целое число от 1 до 10 включительно (числовой ввод).",
               "show_description": true,
@@ -3866,9 +2950,7 @@
               "allows_empty": true
             },
             {
-              "json_path": [
-                "masterBadge"
-              ],
+              "json_path": ["masterBadge"],
               "label": "Мастер-бейдж",
               "description": "Флаг принадлежности награды к мастер-бейджам.",
               "show_description": false,
@@ -3876,9 +2958,7 @@
               "allows_empty": true
             },
             {
-              "json_path": [
-                "newsType"
-              ],
+              "json_path": ["newsType"],
               "label": "Тип новости",
               "description": "Формат новости о награде (например, AIPROMPT/TEMPLATE).",
               "show_description": false,
@@ -3886,9 +2966,7 @@
               "allows_empty": true
             },
             {
-              "json_path": [
-                "nftFlg"
-              ],
+              "json_path": ["nftFlg"],
               "label": "NFT-награда",
               "description": "Флаг NFT-формата награды.",
               "show_description": false,
@@ -3896,9 +2974,7 @@
               "allows_empty": true
             },
             {
-              "json_path": [
-                "outstanding"
-              ],
+              "json_path": ["outstanding"],
               "label": "Публиковать в ленте",
               "description": "Флаг публикации новости о получении награды в ленте.",
               "show_description": false,
@@ -3906,9 +2982,7 @@
               "allows_empty": true
             },
             {
-              "json_path": [
-                "parentRewardCode"
-              ],
+              "json_path": ["parentRewardCode"],
               "label": "Родительская награда",
               "description": "Код родительской награды в иерархии.",
               "show_description": false,
@@ -3916,9 +2990,7 @@
               "allows_empty": true
             },
             {
-              "json_path": [
-                "persomanNumberVisible"
-              ],
+              "json_path": ["persomanNumberVisible"],
               "label": "Показать участникам",
               "description": "Видят только указанные табельные номера",
               "show_description": false,
@@ -3926,10 +2998,7 @@
               "allows_empty": true
             },
             {
-              "json_path": [
-                "preferences",
-                0
-              ],
+              "json_path": ["preferences", 0],
               "label": "preferences[0]",
               "description": "preferences[0]",
               "show_description": false,
@@ -3937,9 +3006,7 @@
               "allows_empty": true
             },
             {
-              "json_path": [
-                "priority"
-              ],
+              "json_path": ["priority"],
               "label": "Приоритет награды",
               "description": "Приоритет отображения/обработки награды.",
               "show_description": false,
@@ -3947,9 +3014,7 @@
               "allows_empty": true
             },
             {
-              "json_path": [
-                "recommendationLevel"
-              ],
+              "json_path": ["recommendationLevel"],
               "label": "Уровень рекомендации",
               "description": "Рекомендуемый уровень применения награды (BANK/TB/GOSB/NON).",
               "show_description": false,
@@ -3957,9 +3022,7 @@
               "allows_empty": true
             },
             {
-              "json_path": [
-                "refreshOldNews"
-              ],
+              "json_path": ["refreshOldNews"],
               "label": "Обновлять старые новости",
               "description": "Флаг обновления ранее созданных новостей по награде.",
               "show_description": false,
@@ -3967,9 +3030,7 @@
               "allows_empty": true
             },
             {
-              "json_path": [
-                "rewardAgainGlobal"
-              ],
+              "json_path": ["rewardAgainGlobal"],
               "label": "Повторная выдача (глобально)",
               "description": "Разрешение на повторное получение награды в целом.",
               "show_description": false,
@@ -3977,9 +3038,7 @@
               "allows_empty": true
             },
             {
-              "json_path": [
-                "rewardAgainTournament"
-              ],
+              "json_path": ["rewardAgainTournament"],
               "label": "Повторная выдача (в турнире)",
               "description": "Разрешение на повторное получение награды в рамках одного турнира.",
               "show_description": false,
@@ -3987,9 +3046,7 @@
               "allows_empty": true
             },
             {
-              "json_path": [
-                "rewardRule"
-              ],
+              "json_path": ["rewardRule"],
               "label": "Правило выдачи",
               "description": "Текстовое правило получения награды.",
               "show_description": false,
@@ -3997,9 +3054,7 @@
               "allows_empty": true
             },
             {
-              "json_path": [
-                "seasonItem"
-              ],
+              "json_path": ["seasonItem"],
               "label": "Сезоны действия",
               "description": "Список сезонов, в которых действует награда.",
               "show_description": false,
@@ -4007,10 +3062,7 @@
               "allows_empty": true
             },
             {
-              "json_path": [
-                "seasonItem",
-                0
-              ],
+              "json_path": ["seasonItem", 0],
               "label": "seasonItem[0]",
               "description": "seasonItem[0]",
               "show_description": false,
@@ -4018,9 +3070,7 @@
               "allows_empty": true
             },
             {
-              "json_path": [
-                "singleNews"
-              ],
+              "json_path": ["singleNews"],
               "label": "Текст личной новости",
               "description": "Шаблон персональной новости о выдаче награды.",
               "show_description": false,
@@ -4028,9 +3078,7 @@
               "allows_empty": true
             },
             {
-              "json_path": [
-                "tagColor"
-              ],
+              "json_path": ["tagColor"],
               "label": "Цвет тега",
               "description": "Цветовой код тега (для наград типа LABEL).",
               "show_description": false,
@@ -4038,9 +3086,7 @@
               "allows_empty": true
             },
             {
-              "json_path": [
-                "tagEndDT"
-              ],
+              "json_path": ["tagEndDT"],
               "label": "Дата окончания тега",
               "description": "Дата, до которой тег активен.",
               "show_description": false,
@@ -4048,9 +3094,7 @@
               "allows_empty": true
             },
             {
-              "json_path": [
-                "teamNews"
-              ],
+              "json_path": ["teamNews"],
               "label": "Текст командной новости",
               "description": "Шаблон новости для командного формата.",
               "show_description": false,
@@ -4058,9 +3102,7 @@
               "allows_empty": true
             },
             {
-              "json_path": [
-                "tournamentTeam"
-              ],
+              "json_path": ["tournamentTeam"],
               "label": "Командный турнир",
               "description": "tournamentTeam",
               "show_description": false,
@@ -4068,9 +3110,7 @@
               "allows_empty": true
             },
             {
-              "json_path": [
-                "winCriterion"
-              ],
+              "json_path": ["winCriterion"],
               "label": "Критерий победы для новости",
               "description": "Формулировка критерия победы для генерации новости.",
               "show_description": false,
@@ -4218,10 +3258,7 @@
           "allows_empty": true,
           "paths": [
             {
-              "json_path": [
-                0,
-                "period_code"
-              ],
+              "json_path": [0, "period_code"],
               "label": "Код периода",
               "description": "Номер периода: 0 — текущий, 1..N — дополнительные.",
               "show_description": true,
@@ -4229,10 +3266,7 @@
               "allows_empty": true
             },
             {
-              "json_path": [
-                0,
-                "start_dt"
-              ],
+              "json_path": [0, "start_dt"],
               "label": "Дата начала периода (start_dt)",
               "description": "Формат YYYY-MM-DD.",
               "show_description": true,
@@ -4240,10 +3274,7 @@
               "allows_empty": true
             },
             {
-              "json_path": [
-                0,
-                "end_dt"
-              ],
+              "json_path": [0, "end_dt"],
               "label": "Дата окончания периода (end_dt)",
               "description": "Формат YYYY-MM-DD.",
               "show_description": true,
@@ -4251,10 +3282,7 @@
               "allows_empty": true
             },
             {
-              "json_path": [
-                0,
-                "criterion_mark_type"
-              ],
+              "json_path": [0, "criterion_mark_type"],
               "label": "Оператор критерия участия",
               "description": "Оператор сравнения для допуска участника.",
               "show_description": true,
@@ -4262,10 +3290,7 @@
               "allows_empty": true
             },
             {
-              "json_path": [
-                0,
-                "criterion_mark_value"
-              ],
+              "json_path": [0, "criterion_mark_value"],
               "label": "Порог критерия участия",
               "description": "Пороговое значение критерия участия.",
               "show_description": true,
@@ -4280,9 +3305,7 @@
           "description": "JSON-параметры цели турнира (в т.ч. сезонность).",
           "paths": [
             {
-              "json_path": [
-                "seasonCode"
-              ],
+              "json_path": ["seasonCode"],
               "label": "Сезон турнира",
               "description": "seasonCode",
               "show_description": false,

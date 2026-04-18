@@ -7,8 +7,9 @@
  * Списки допустимых значений и «Задать своё» задаются в config.json (field_enums по листам);
  * календарь для дат — `spod_date_picker.js` + подсказки в editor_textareas (`input_type` date / datepicker);
  * подписи и описания полей — editor_field_ui (развёртка в bootstrap.fieldUi);
- * массивы примитивов в JSON — подсказки editor_textareas с json_scalar_array и json_path на корень массива;
- * в bootstrap приходят плоские списки (развёртка на сервере).
+ * массивы примитивов в JSON — editor_textareas: json_scalar_array; массивы объектов { key: … } — json_object_array;
+ * в bootstrap приходят плоские списки (развёртка на сервере);
+ * field_enums: ``whitelist_validated_input`` — текстовое поле с подсветкой по списку ``options`` (в т.ч. из БД).
  */
 (function () {
   "use strict";
@@ -159,6 +160,24 @@
       }
       return false;
     }
+    if (leaf.vtype === "json-object-array") {
+      var oi = leaf.objectArrayItems || [];
+      var keysO = objectArrayItemKeysFromHint(leaf.objectArrayHint || {});
+      var zj = 0;
+      for (zj = 0; zj < oi.length; zj++) {
+        var ob = oi[zj];
+        if (!ob || typeof ob !== "object") {
+          continue;
+        }
+        var kk = 0;
+        for (kk = 0; kk < keysO.length; kk++) {
+          if (String(ob[keysO[kk]] != null ? ob[keysO[kk]] : "").trim() !== "") {
+            return true;
+          }
+        }
+      }
+      return false;
+    }
     if (leaf.vtype === "empty-array" || leaf.vtype === "empty-object") {
       return false;
     }
@@ -276,6 +295,14 @@
     if (jParts.length >= 2 && typeof jParts[jParts.length - 1] === "number") {
       hit = matchInList(jParts.slice(0, -1));
     }
+    /* Путь вида …, индекс массива, имя поля — сворачиваем индекс (например nonRewards.0.nonRewardCode → правило с …, nonRewardCode). */
+    if (!hit && jParts && jParts.length >= 3) {
+      var pen = jParts.length - 2;
+      if (typeof jParts[pen] === "number") {
+        var collapsed = jParts.slice(0, pen).concat(jParts.slice(pen + 1));
+        hit = matchInList(collapsed);
+      }
+    }
     return hit || null;
   }
 
@@ -294,6 +321,9 @@
         continue;
       }
       if (truthyJsonScalarArrayHint(h)) {
+        continue;
+      }
+      if (truthyJsonObjectArrayHint(h)) {
         continue;
       }
       if (!ruleHasJsonPath(h)) {
@@ -316,6 +346,94 @@
         h.json_scalar_array === "yes" ||
         h.json_scalar_array === "true")
     );
+  }
+
+  /** Массив объектов с фиксированным набором ключей (см. editor_textareas: json_object_array). */
+  function truthyJsonObjectArrayHint(h) {
+    return (
+      h &&
+      (h.json_object_array === true ||
+        h.json_object_array === 1 ||
+        h.json_object_array === "yes" ||
+        h.json_object_array === "true")
+    );
+  }
+
+  function objectArrayItemKeysFromHint(h) {
+    var raw = h && h.object_array_item_keys;
+    if (Array.isArray(raw) && raw.length) {
+      return raw.map(function (k) {
+        return String(k);
+      });
+    }
+    return ["nonRewardCode"];
+  }
+
+  /**
+   * Подсказка editor_textareas: массив объектов по json_path к корню массива.
+   */
+  function jsonObjectArrayHintForPath(bootstrap, column, pathToArray) {
+    if (!bootstrap || !pathToArray || !pathToArray.length) {
+      return null;
+    }
+    var list = bootstrap.editorTextareas || [];
+    var sc = bootstrap.sheetCode;
+    var j = 0;
+    for (j = 0; j < list.length; j++) {
+      var h = list[j];
+      if (h.sheet_code !== sc || h.column !== column || !ruleHasJsonPath(h)) {
+        continue;
+      }
+      if (!truthyJsonObjectArrayHint(h)) {
+        continue;
+      }
+      if (partsMatchJsonPath(pathToArray, h.json_path)) {
+        return h;
+      }
+    }
+    return null;
+  }
+
+  /**
+   * Массив пустой или каждый элемент — объект (не массив); недостающие ключи добиваются при нормализации.
+   * Иначе разбор как у обычного вложенного JSON (обратная совместимость).
+   */
+  function isObjectArrayValueForHint(arr, hint) {
+    if (!Array.isArray(arr) || !hint) {
+      return false;
+    }
+    if (arr.length === 0) {
+      return true;
+    }
+    var keys = objectArrayItemKeysFromHint(hint);
+    if (!keys.length) {
+      return false;
+    }
+    var i = 0;
+    for (i = 0; i < arr.length; i++) {
+      var it = arr[i];
+      if (it === null || typeof it !== "object" || Array.isArray(it)) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  /** Путь …, индекс, ключ — внутри массива с корнем, для которого задан json_object_array. */
+  function jsonPathIsIndexedUnderObjectArrayRoot(bootstrap, column, parts) {
+    if (!parts || parts.length < 3) {
+      return false;
+    }
+    var last = parts[parts.length - 1];
+    if (typeof last !== "string") {
+      return false;
+    }
+    var idxPos = parts.length - 2;
+    if (typeof parts[idxPos] !== "number") {
+      return false;
+    }
+    var rootParts = parts.slice(0, idxPos);
+    return !!jsonObjectArrayHintForPath(bootstrap, column, rootParts);
   }
 
   /**
@@ -663,6 +781,22 @@
         }
       } else if (partsMatchJsonPath(jParts || [], r.json_path)) {
         found = r;
+      }
+    }
+    if (!found && jParts && jParts.length >= 3) {
+      var penU = jParts.length - 2;
+      if (typeof jParts[penU] === "number") {
+        var collapsedU = jParts.slice(0, penU).concat(jParts.slice(penU + 1));
+        for (var j = 0; j < list.length; j++) {
+          var r2 = list[j];
+          if (r2.sheet_code !== sc || r2.column !== column || !ruleHasJsonPath(r2)) {
+            continue;
+          }
+          if (partsMatchJsonPath(collapsedU, r2.json_path)) {
+            found = r2;
+            break;
+          }
+        }
       }
     }
     return found;
@@ -1495,6 +1629,137 @@
     });
   }
 
+  /** Значения ``value`` из options правила field_enums (после merge с листом). */
+  function whitelistValuesFromEnumRule(enumRule) {
+    var opts = (enumRule && enumRule.options) || [];
+    var out = [];
+    var i;
+    for (i = 0; i < opts.length; i++) {
+      var o = opts[i];
+      var v = typeof o === "object" && o && !Array.isArray(o) ? o.value : o;
+      v = v != null ? String(v).trim() : "";
+      if (v) {
+        out.push(v);
+      }
+    }
+    return out;
+  }
+
+  /** Текстовый ввод с проверкой по whitelist (не select); список в ``options`` на сервере. */
+  function enumRuleUsesWhitelistValidatedText(enumRule) {
+    if (!enumRule) {
+      return false;
+    }
+    var v = enumRule.whitelist_validated_input;
+    return v === true || v === 1 || v === "yes" || v === "true" || v === "Y";
+  }
+
+  function syncWhitelistValidatedWrap(wrap, allowedSet) {
+    var inp = wrap.querySelector("input.json-leaf-input--whitelist");
+    if (!inp) {
+      return;
+    }
+    wrap.classList.remove("json-leaf-validated-wrap--valid", "json-leaf-validated-wrap--invalid");
+    var raw = String(inp.value || "").trim();
+    if (raw === "") {
+      return;
+    }
+    if (allowedSet && allowedSet.has(raw)) {
+      wrap.classList.add("json-leaf-validated-wrap--valid");
+    } else {
+      wrap.classList.add("json-leaf-validated-wrap--invalid");
+    }
+  }
+
+  function flushWhitelistValidatedLayouts(root) {
+    if (!root) {
+      return;
+    }
+    root.querySelectorAll(".json-leaf-validated-wrap").forEach(function (w) {
+      if (!w._whitelistSet) {
+        try {
+          var rawJ = w.getAttribute("data-whitelist-values");
+          var arr = rawJ ? JSON.parse(rawJ) : [];
+          w._whitelistSet = new Set(
+            arr.map(function (x) {
+              return String(x);
+            })
+          );
+        } catch (eWl) {
+          w._whitelistSet = new Set();
+        }
+      }
+      syncWhitelistValidatedWrap(w, w._whitelistSet);
+    });
+  }
+
+  /** Делегирование input/change с корня колонки JSON или сетки плоских полей. */
+  function wireWhitelistValidatedInputs(root) {
+    if (!root) {
+      return;
+    }
+    if (root.getAttribute("data-json-whitelist-delegation") === "1") {
+      return;
+    }
+    root.setAttribute("data-json-whitelist-delegation", "1");
+    function onWhitelist(ev) {
+      var t = ev.target;
+      if (!t || !t.classList || !t.classList.contains("json-leaf-input--whitelist")) {
+        return;
+      }
+      var wrap = t.closest(".json-leaf-validated-wrap");
+      if (!wrap) {
+        return;
+      }
+      if (!wrap._whitelistSet) {
+        try {
+          var rawJ2 = wrap.getAttribute("data-whitelist-values");
+          var arr2 = rawJ2 ? JSON.parse(rawJ2) : [];
+          wrap._whitelistSet = new Set(
+            arr2.map(function (x) {
+              return String(x);
+            })
+          );
+        } catch (eW2) {
+          wrap._whitelistSet = new Set();
+        }
+      }
+      syncWhitelistValidatedWrap(wrap, wrap._whitelistSet);
+      document.dispatchEvent(new Event("spod-editor-change"));
+    }
+    root.addEventListener("input", onWhitelist);
+    root.addEventListener("change", onWhitelist);
+  }
+
+  function appendWhitelistValidatedTextControl(rowContainer, enumRule, initialDisp) {
+    var vals = whitelistValuesFromEnumRule(enumRule);
+    var wrap = document.createElement("div");
+    wrap.className = "json-leaf-validated-wrap";
+    wrap.setAttribute("data-whitelist-values", JSON.stringify(vals));
+    var inp = document.createElement("input");
+    inp.type = "text";
+    inp.className = "json-leaf-input json-leaf-input--whitelist spod-leaf-control";
+    inp.setAttribute("spellcheck", "false");
+    inp.setAttribute("autocomplete", "off");
+    inp.value = initialDisp != null ? String(initialDisp) : "";
+    wrap.appendChild(inp);
+    rowContainer.appendChild(wrap);
+    wrap._whitelistSet = new Set(
+      vals.map(function (x) {
+        return String(x);
+      })
+    );
+    syncWhitelistValidatedWrap(wrap, wrap._whitelistSet);
+  }
+
+  /** После сборки DOM: enum, whitelist-подсветка, Y/N раскладка. */
+  function wireJsonLeafPostRender(root) {
+    wireEnumControls(root);
+    wireWhitelistValidatedInputs(root);
+    flushSpodYnToggleLayouts(root);
+    flushWhitelistValidatedLayouts(root);
+  }
+
   function flattenLeaves(value, pathParts, out, bootstrap, column) {
     var boot = bootstrap;
     var col = column;
@@ -1525,6 +1790,27 @@
           arrayItems: value.map(function (x) {
             return x;
           }),
+        });
+        return;
+      }
+      var oaHint =
+        boot && col && pathParts.length ? jsonObjectArrayHintForPath(boot, col, pathParts) : null;
+      if (oaHint && (value.length === 0 || isObjectArrayValueForHint(value, oaHint))) {
+        var keysNorm = objectArrayItemKeysFromHint(oaHint);
+        var normalizedObjs = value.map(function (it) {
+          var o = {};
+          var ki;
+          for (ki = 0; ki < keysNorm.length; ki++) {
+            var kk = keysNorm[ki];
+            o[kk] = it && Object.prototype.hasOwnProperty.call(it, kk) && it[kk] != null ? String(it[kk]) : "";
+          }
+          return o;
+        });
+        out.push({
+          parts: pathParts.slice(),
+          vtype: "json-object-array",
+          objectArrayItems: normalizedObjs,
+          objectArrayHint: oaHint,
         });
         return;
       }
@@ -1641,6 +1927,7 @@
    * — все json_path из field_enums для этой колонки (первое допустимое значение);
    * — json_path из editor_field_ui с required: true (если нет enum — пустая строка, setDeep создаст вложенность).
    * Пути — корни json_scalar_array из editor_textareas не дополняются из field_enums (перечисление задаётся по элементам).
+   * Корни json_object_array и пути «родитель массива + ключ элемента» (без индекса) из field_enums не дополняются шаблоном setDeep.
    * Длинные пути обрабатываются раньше коротких, чтобы массивы/объекты создавались корректно.
    */
   function mergeDeclaredJsonTemplate(parsed, column, bootstrap) {
@@ -1692,8 +1979,22 @@
       if (jsonPathIsIndexedUnderScalarArrayRoot(bootstrap, column, parts)) {
         continue;
       }
+      if (jsonPathIsIndexedUnderObjectArrayRoot(bootstrap, column, parts)) {
+        continue;
+      }
       /* Корень json_scalar_array: enum с json_path на массив задаёт варианты по элементам, не значение всего ключа. */
       if (jsonScalarArrayHintForPath(bootstrap, column, parts)) {
+        continue;
+      }
+      if (jsonObjectArrayHintForPath(bootstrap, column, parts)) {
+        continue;
+      }
+      if (
+        parts &&
+        parts.length >= 2 &&
+        jsonObjectArrayHintForPath(bootstrap, column, parts.slice(0, -1)) &&
+        typeof parts[parts.length - 1] === "string"
+      ) {
         continue;
       }
       if (getDeepValue(out, parts) !== undefined) {
@@ -1707,6 +2008,20 @@
         defL = "";
       }
       setDeep(out, parts, defL);
+    }
+    var taListInit = bootstrap.editorTextareas || [];
+    for (ii = 0; ii < taListInit.length; ii++) {
+      var hi = taListInit[ii];
+      if (!hi || hi.sheet_code !== sc || hi.column !== column || !ruleHasJsonPath(hi)) {
+        continue;
+      }
+      if (!truthyJsonObjectArrayHint(hi)) {
+        continue;
+      }
+      var jpi = hi.json_path;
+      if (jpi && getDeepValue(out, jpi) === undefined) {
+        setDeep(out, jpi, []);
+      }
     }
     return out;
   }
@@ -1815,7 +2130,8 @@
 
     var leaves = container.querySelectorAll(".json-leaf-row[data-json-path]");
     var scalarHosts = container.querySelectorAll(".json-leaf-row[data-json-scalar-array-host='1']");
-    if (leaves.length === 0 && scalarHosts.length === 0) {
+    var objectHosts = container.querySelectorAll(".json-leaf-row[data-json-object-array-host='1']");
+    if (leaves.length === 0 && scalarHosts.length === 0 && objectHosts.length === 0) {
       if (rk === "array") {
         return "[]";
       }
@@ -1892,6 +2208,49 @@
       }
     });
 
+    /* Массивы объектов (json_object_array): собираем из строк-хостов после поэлементных setDeep. */
+    objectHosts.forEach(function (host) {
+      var bp = host.getAttribute("data-json-base-path");
+      if (!bp) {
+        return;
+      }
+      var baseParts;
+      try {
+        baseParts = JSON.parse(bp);
+      } catch (eOb) {
+        return;
+      }
+      if (!baseParts || !baseParts.length) {
+        return;
+      }
+      var keysRaw = host.getAttribute("data-object-array-keys") || "[\"nonRewardCode\"]";
+      var keys;
+      try {
+        keys = JSON.parse(keysRaw);
+      } catch (eK) {
+        keys = ["nonRewardCode"];
+      }
+      var arr = [];
+      var bands = host.querySelectorAll(".json-object-array-line");
+      var bi;
+      for (bi = 0; bi < bands.length; bi++) {
+        var band = bands[bi];
+        var obj = {};
+        var ki;
+        for (ki = 0; ki < keys.length; ki++) {
+          var kk = String(keys[ki]);
+          var row = band.querySelector('.json-leaf-row[data-oa-key="' + kk + '"]');
+          if (!row) {
+            obj[kk] = "";
+            continue;
+          }
+          obj[kk] = coerceLeafValue(row);
+        }
+        arr.push(obj);
+      }
+      setDeep(root, baseParts, arr);
+    });
+
     return JSON.stringify(root);
   }
 
@@ -1932,7 +2291,7 @@
     };
     if (!jcNew.ok) {
       renderJsonColumn(container, jcNew, bootstrap);
-      wireEnumControls(container);
+      wireJsonLeafPostRender(container);
       return;
     }
     var parsed = pr.parsed === null || pr.parsed === undefined ? {} : pr.parsed;
@@ -1943,7 +2302,7 @@
       jcNew.parsed = parsed;
     }
     renderJsonColumn(container, jcNew, bootstrap);
-    wireEnumControls(container);
+    wireJsonLeafPostRender(container);
   }
 
   function refreshRewardAddDataJsonUi(bootstrap, container) {
@@ -1967,8 +2326,7 @@
     };
     if (!jcNew.ok) {
       renderJsonColumn(container, jcNew, bootstrap);
-      wireEnumControls(container);
-      flushSpodYnToggleLayouts(container);
+      wireJsonLeafPostRender(container);
       return;
     }
     if (rk === "object" && parsed !== null && !Array.isArray(parsed)) {
@@ -1977,8 +2335,7 @@
       jcNew.parsed = parsed;
     }
     renderJsonColumn(container, jcNew, bootstrap);
-    wireEnumControls(container);
-    flushSpodYnToggleLayouts(container);
+    wireJsonLeafPostRender(container);
   }
 
   function renderJsonColumn(container, jc, bootstrap) {
@@ -2254,7 +2611,10 @@
             itemRow.appendChild(buildDatePickerShell(disp, null, null, true));
           } else {
             var enumRule = findFieldEnum(bootstrapLocal, colLocal, pathPartsItem);
-            if (enumRule) {
+            if (enumRule && enumRuleUsesWhitelistValidatedText(enumRule)) {
+              itemRow.setAttribute("data-json-whitelist-text", "1");
+              appendWhitelistValidatedTextControl(itemRow, enumRule, disp != null ? String(disp) : "");
+            } else if (enumRule) {
               if (isYnBinaryEnumRule(enumRule)) {
                 itemRow.setAttribute("data-json-yn", "1");
                 itemRow.appendChild(
@@ -2345,8 +2705,7 @@
         reindexJsonScalarArrayItems(host);
         updateJsonScalarArrayAddButton(host);
         if (jsonColumnEl) {
-          wireEnumControls(jsonColumnEl);
-          flushSpodYnToggleLayouts(jsonColumnEl);
+          wireJsonLeafPostRender(jsonColumnEl);
         }
         document.dispatchEvent(new Event("spod-editor-change"));
       });
@@ -2366,6 +2725,290 @@
       });
     }
 
+    /** После добавления/удаления строк — обновляем индексы в data-json-path у вложенных полей массива объектов. */
+    function reindexJsonObjectArrayItems(host) {
+      var bpRaw = host.getAttribute("data-json-base-path");
+      if (!bpRaw) {
+        return;
+      }
+      var baseParts;
+      try {
+        baseParts = JSON.parse(bpRaw);
+      } catch (eReOb) {
+        return;
+      }
+      var bands = host.querySelectorAll(".json-object-array-line");
+      var bi;
+      for (bi = 0; bi < bands.length; bi++) {
+        var band = bands[bi];
+        var rows = band.querySelectorAll(".json-leaf-row[data-oa-key][data-json-path]");
+        var ri;
+        for (ri = 0; ri < rows.length; ri++) {
+          var rk = rows[ri].getAttribute("data-oa-key");
+          if (!rk) {
+            continue;
+          }
+          rows[ri].setAttribute("data-json-path", JSON.stringify(baseParts.concat(bi, rk)));
+        }
+      }
+    }
+
+    function jsonObjectArrayHostAllowsEmpty(host) {
+      return host.getAttribute("data-array-allows-empty") !== "0";
+    }
+
+    function jsonObjectArrayHostMaxItems(host) {
+      var m = host.getAttribute("data-array-max-items");
+      if (m == null || m === "") {
+        return null;
+      }
+      var n = parseInt(m, 10);
+      return isFinite(n) && n > 0 ? n : null;
+    }
+
+    function updateJsonObjectArrayAddButton(host) {
+      var btn = host.querySelector(".js-json-object-array-add");
+      if (!btn) {
+        return;
+      }
+      var maxN = jsonObjectArrayHostMaxItems(host);
+      var n = host.querySelectorAll(".json-object-array-line").length;
+      if (maxN != null && n >= maxN) {
+        btn.disabled = true;
+      } else {
+        btn.disabled = false;
+      }
+    }
+
+    /**
+     * Группа UI: массив однотипных объектов (json_object_array), например nonRewards: [{ nonRewardCode }].
+     * Каждая строка — один элемент массива; внутри — поля по object_array_item_keys.
+     */
+    function appendOneJsonObjectArrayHost(grid, leaf, bootstrapLocal, colLocal, thrLocal, jsonColumnEl) {
+      var basePath = leaf.parts || [];
+      var arrayHint = leaf.objectArrayHint || jsonObjectArrayHintForPath(bootstrapLocal, colLocal, basePath) || {};
+      var keys = objectArrayItemKeysFromHint(arrayHint);
+      var maxRaw = arrayHint.array_max_items;
+      var maxN =
+        typeof maxRaw === "number" && maxRaw > 0
+          ? maxRaw
+          : (function () {
+              var p = parseInt(maxRaw, 10);
+              return isFinite(p) && p > 0 ? p : null;
+            })();
+      var allowsEmpty = !(
+        arrayHint.array_allows_empty === false ||
+        arrayHint.array_allows_empty === 0 ||
+        arrayHint.array_allows_empty === "false" ||
+        arrayHint.array_allows_empty === "no"
+      );
+
+      var items = Array.isArray(leaf.objectArrayItems) ? leaf.objectArrayItems.slice() : [];
+      if (items.length === 0 && !allowsEmpty) {
+        var stub = {};
+        var si;
+        for (si = 0; si < keys.length; si++) {
+          stub[keys[si]] = "";
+        }
+        items.push(stub);
+      }
+
+      var pathDisp = formatPath(basePath);
+      var uiR = findFieldUi(bootstrapLocal, colLocal, basePath);
+      var labForFilter =
+        uiR && uiR.label != null && String(uiR.label).trim() !== "" ? String(uiR.label) : pathDisp;
+      var descJf =
+        uiR && showDescriptionEnabled(uiR) && uiR.description != null ? String(uiR.description) : "";
+      var filterText = (pathDisp + " " + labForFilter + " " + descJf).toLowerCase();
+
+      var host = document.createElement("div");
+      host.className = "json-leaf-row json-object-array-host grid-cell";
+      host.setAttribute("data-json-object-array-host", "1");
+      host.setAttribute("data-json-base-path", JSON.stringify(basePath));
+      host.setAttribute("data-object-array-keys", JSON.stringify(keys));
+      host.setAttribute("data-vtype", "json-object-array");
+      host.setAttribute("data-array-allows-empty", allowsEmpty ? "1" : "0");
+      if (maxN != null) {
+        host.setAttribute("data-array-max-items", String(maxN));
+      }
+      host.setAttribute("data-filter-text", filterText);
+
+      var lab = document.createElement("label");
+      lab.className = "json-path-label";
+      applyFieldUiLabel(bootstrapLocal, lab, colLocal, basePath, pathDisp);
+      host.appendChild(lab);
+
+      var body = document.createElement("div");
+      body.className = "json-object-array-body";
+      var lines = document.createElement("div");
+      lines.className = "json-object-array-lines";
+
+      function appendStringLeafControls(rowK, pathPartsItem, disp) {
+        var dateHj = findDatePickerHint(bootstrapLocal, colLocal, pathPartsItem);
+        if (dateHj) {
+          rowK.setAttribute("data-json-date", "1");
+          var fmtJ = dateHj.storage_format || "YYYY-MM-DD";
+          var fmtLab = document.createElement("span");
+          fmtLab.className = "muted spod-date-format-hint";
+          fmtLab.textContent = " · " + fmtJ;
+          var labEl = rowK.querySelector(".json-path-label");
+          var topJ = labEl ? fieldUiLabelTop(labEl) : null;
+          if (topJ) {
+            topJ.appendChild(fmtLab);
+          } else if (labEl) {
+            labEl.appendChild(fmtLab);
+          }
+          var dispLeaf = disp != null ? String(disp) : "";
+          rowK.appendChild(buildDatePickerShell(dispLeaf, null, null, true));
+          return;
+        }
+        var enumRule = findFieldEnum(bootstrapLocal, colLocal, pathPartsItem);
+        if (enumRule && enumRuleUsesWhitelistValidatedText(enumRule)) {
+          rowK.setAttribute("data-json-whitelist-text", "1");
+          appendWhitelistValidatedTextControl(rowK, enumRule, disp != null ? String(disp) : "");
+          return;
+        }
+        if (enumRule) {
+          if (isYnBinaryEnumRule(enumRule)) {
+            rowK.setAttribute("data-json-yn", "1");
+            rowK.appendChild(
+              buildSpodYnToggleDom({
+                safeId: "",
+                initialRaw: disp != null ? String(disp) : "",
+                flatColumn: "",
+                valueAttr: "",
+                jsonLeaf: true,
+                enumRule: enumRule,
+                enumBlockMod: "spod-enum-block--json",
+              })
+            );
+          } else {
+            rowK.setAttribute("data-json-enum", "1");
+            var wrapS = document.createElement("div");
+            wrapS.className = "spod-enum-block spod-enum-block--json";
+            var selS = document.createElement("select");
+            selS.className = "spod-enum-select spod-leaf-control";
+            var taS = document.createElement("textarea");
+            taS.className = "spod-enum-custom spod-leaf-control is-hidden";
+            taS.rows = 3;
+            fillSelectOptions(selS, enumRule.options, !!enumRule.allow_custom, disp);
+            initEnumSelectState(selS, taS, null, !!enumRule.allow_custom, disp);
+            wrapS.appendChild(selS);
+            wrapS.appendChild(taS);
+            rowK.appendChild(wrapS);
+          }
+          return;
+        }
+        var hintT = findTextareaHint(bootstrapLocal, colLocal, pathPartsItem);
+        var rows = textareaRows(disp, hintT, thrLocal);
+        if (rows > 0) {
+          var taStr = document.createElement("textarea");
+          taStr.className = "json-leaf-input spod-leaf-control";
+          taStr.rows = rows;
+          taStr.value = disp != null ? String(disp) : "";
+          rowK.appendChild(taStr);
+        } else {
+          var inpStr = document.createElement("input");
+          inpStr.type = "text";
+          inpStr.className = "json-leaf-input";
+          inpStr.value = disp != null ? String(disp) : "";
+          rowK.appendChild(inpStr);
+        }
+      }
+
+      function buildObjectLine(objVals, lineIndex) {
+        var obj = objVals && typeof objVals === "object" && !Array.isArray(objVals) ? objVals : {};
+        var line = document.createElement("div");
+        line.className = "json-object-array-line";
+        var fieldsCol = document.createElement("div");
+        fieldsCol.className = "json-object-array-line-fields";
+        var ki;
+        for (ki = 0; ki < keys.length; ki++) {
+          var keyK = keys[ki];
+          var disp = obj[keyK] != null ? String(obj[keyK]) : "";
+          var pathPartsItem = basePath.concat(lineIndex, keyK);
+          var rowK = document.createElement("div");
+          rowK.className = "json-leaf-row grid-cell";
+          rowK.setAttribute("data-json-path", JSON.stringify(pathPartsItem));
+          rowK.setAttribute("data-oa-key", keyK);
+          rowK.setAttribute("data-vtype", "string");
+          rowK.setAttribute("data-filter-text", filterText);
+          var labK = document.createElement("label");
+          labK.className = "json-path-label";
+          applyFieldUiLabel(
+            bootstrapLocal,
+            labK,
+            colLocal,
+            basePath.concat(keyK),
+            formatPath(basePath.concat(keyK))
+          );
+          rowK.appendChild(labK);
+          appendStringLeafControls(rowK, pathPartsItem, disp);
+          fieldsCol.appendChild(rowK);
+        }
+        var rm = document.createElement("button");
+        rm.type = "button";
+        rm.className = "btn btn-ghost btn-sm js-json-object-array-remove";
+        rm.textContent = "Удалить";
+        rm.addEventListener("click", function () {
+          var cnt = host.querySelectorAll(".json-object-array-line").length;
+          if (cnt <= 1 && !jsonObjectArrayHostAllowsEmpty(host)) {
+            return;
+          }
+          line.remove();
+          reindexJsonObjectArrayItems(host);
+          updateJsonObjectArrayAddButton(host);
+          document.dispatchEvent(new Event("spod-editor-change"));
+        });
+        line.appendChild(fieldsCol);
+        line.appendChild(rm);
+        return line;
+      }
+
+      var ii;
+      for (ii = 0; ii < items.length; ii++) {
+        lines.appendChild(buildObjectLine(items[ii], ii));
+      }
+
+      var addBtn = document.createElement("button");
+      addBtn.type = "button";
+      addBtn.className = "btn btn-ghost btn-sm js-json-object-array-add";
+      addBtn.textContent = "Добавить запись";
+      addBtn.addEventListener("click", function () {
+        var cnt0 = host.querySelectorAll(".json-object-array-line").length;
+        var max0 = jsonObjectArrayHostMaxItems(host);
+        if (max0 != null && cnt0 >= max0) {
+          return;
+        }
+        var emptyObj = {};
+        var ej;
+        for (ej = 0; ej < keys.length; ej++) {
+          emptyObj[keys[ej]] = "";
+        }
+        lines.appendChild(buildObjectLine(emptyObj, cnt0));
+        reindexJsonObjectArrayItems(host);
+        updateJsonObjectArrayAddButton(host);
+        if (jsonColumnEl) {
+          wireJsonLeafPostRender(jsonColumnEl);
+        }
+        document.dispatchEvent(new Event("spod-editor-change"));
+      });
+
+      body.appendChild(lines);
+      body.appendChild(addBtn);
+      host.appendChild(body);
+      grid.appendChild(host);
+      reindexJsonObjectArrayItems(host);
+      updateJsonObjectArrayAddButton(host);
+
+      lines.addEventListener("input", function () {
+        document.dispatchEvent(new Event("spod-editor-change"));
+      });
+      lines.addEventListener("change", function () {
+        document.dispatchEvent(new Event("spod-editor-change"));
+      });
+    }
+
     /**
      * Подряд идущие листья Y/N в одной JSON-колонке — общий блок с сеткой (одиночное Y/N тоже в том же стиле карточки).
      */
@@ -2374,7 +3017,7 @@
       var i = 0;
       while (i < seq.length) {
         var L = seq[i];
-        if (!L || L.vtype === "json-scalar-array") {
+        if (!L || L.vtype === "json-scalar-array" || L.vtype === "json-object-array") {
           out.push(L);
           i++;
           continue;
@@ -2390,7 +3033,7 @@
           var j = i + 1;
           while (j < seq.length) {
             var L2 = seq[j];
-            if (!L2 || L2.vtype === "json-scalar-array") {
+            if (!L2 || L2.vtype === "json-scalar-array" || L2.vtype === "json-object-array") {
               break;
             }
             var enumR2 = null;
@@ -2482,6 +3125,10 @@
         }
         if (leaf.vtype === "json-scalar-array") {
           appendOneJsonScalarArrayHost(grid, leaf, bootstrap, col, thr, jsonColumnEl);
+          return;
+        }
+        if (leaf.vtype === "json-object-array") {
+          appendOneJsonObjectArrayHost(grid, leaf, bootstrap, col, thr, jsonColumnEl);
           return;
         }
         var row = document.createElement("div");
@@ -2593,7 +3240,14 @@
             row.appendChild(buildDatePickerShell(dispLeaf, null, null, true));
           } else {
             var enumRule = findFieldEnum(bootstrap, col, leaf.parts);
-            if (enumRule) {
+            if (enumRule && enumRuleUsesWhitelistValidatedText(enumRule)) {
+              row.setAttribute("data-json-whitelist-text", "1");
+              appendWhitelistValidatedTextControl(
+                row,
+                enumRule,
+                leaf.display != null ? String(leaf.display) : ""
+              );
+            } else if (enumRule) {
               if (isYnBinaryEnumRule(enumRule)) {
                 row.setAttribute("data-json-yn", "1");
                 row.appendChild(
@@ -2650,7 +3304,7 @@
 
     fieldsWrap.appendChild(grid);
 
-    wireEnumControls(container);
+    wireJsonLeafPostRender(container);
 
     function syncRawTextareaFromFields() {
       var built = buildJsonFromFields(container);
@@ -2716,8 +3370,7 @@
       }
       appendJsonLeafRowsToGrid(newGrid, newLeaves, container);
       fieldsWrap.appendChild(newGrid);
-      wireEnumControls(container);
-      flushSpodYnToggleLayouts(container);
+      wireJsonLeafPostRender(container);
       container.setAttribute("data-edit-mode", "fields");
       syncRawTextareaFromFields();
       fieldsWrap.classList.remove("is-hidden");
@@ -3040,7 +3693,7 @@
       );
     }
 
-    wireEnumControls(grid);
+    wireJsonLeafPostRender(grid);
 
     var flt = document.getElementById("flat-field-filter");
     if (flt) {

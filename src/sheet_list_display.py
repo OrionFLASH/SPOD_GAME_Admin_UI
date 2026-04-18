@@ -3,25 +3,20 @@
 Дополнительные поля для таблицы списка строк: названия из связанных листов SQLite.
 Индексы строятся один раз на запрос страницы списка.
 
+Глобальные фильтры списков (параметры gf_*, пересечение по CONTEST_CODE) — в модуле global_sheet_filters и в app.sheet_list.
+
 Лист CONTEST-DATA (список «Конкурсы»): код конкурса, наименование, тип конкурса (CONTEST_TYPE); колонка «Связи» не показывается
-(текст турниров/наград остаётся в search_blob для поиска); фильтр по CONTEST_TYPE — множественный выбор как на других листах.
+(текст турниров/наград остаётся в search_blob для поиска).
 
-Лист INDICATOR: отдельная разметка в шаблоне — CONTEST_CODE, название конкурса из CONTEST-DATA,
-INDICATOR_ADD_CALC_TYPE, INDICATOR_CODE; в «Связи» — REWARD-LINK по группам и турниры TOURNAMENT-SCHEDULE.
+Лист INDICATOR: CONTEST_CODE, название конкурса из CONTEST-DATA, INDICATOR_ADD_CALC_TYPE, INDICATOR_CODE; в «Связи» — REWARD-LINK и турниры.
 
-Лист REWARD: колонка «Награда» — FULL_NAME строки REWARD; «Название / описание» — FULL_NAME конкурса(ов) из CONTEST-DATA
-по CONTEST_CODE из REWARD-LINK (цепочка REWARD → связи → конкурс); GROUP_CODE и коды конкурсов в «Связи» из тех же связей;
-фильтр по REWARD_TYPE — в шаблоне и маршруте списка.
+Лист REWARD: «Награда» — FULL_NAME награды; «Название / описание» — FULL_NAME конкурса(ов) по REWARD-LINK; GROUP_CODE в таблице.
 
-Лист REWARD-LINK: колонки по порядку — код награды (REWARD_CODE), уровень (GROUP_CODE), название награды (REWARD.FULL_NAME),
-название конкурса (CONTEST-DATA.FULL_NAME); код конкурса в таблице не выводится, но входит в поиск по строке; колонка «Связи» скрыта;
-фильтр по REWARD_TYPE — из строки REWARD по REWARD_CODE связи.
+Лист REWARD-LINK: код награды, GROUP_CODE, названия награды и конкурса; CONTEST_CODE в поиске.
 
-Лист TOURNAMENT-SCHEDULE: колонка «Период» (PERIOD_TYPE), название конкурса (CONTEST-DATA.FULL_NAME), «Сезон» (seasonCode из TARGET_TYPE);
-колонка «Код турнира» (TOURNAMENT_CODE); «Связанные награду» — только строки вида REWARD_CODE: GROUP_CODE из REWARD-LINK (без префиксов «Конкурс»/«Награды»). Фильтр по сезону — множественный выбор.
+Лист TOURNAMENT-SCHEDULE: период, конкурс, сезон из TARGET_TYPE, связанные награды из REWARD-LINK.
 
-Лист GROUP (список): одна строка таблицы на каждый уникальный CONTEST_CODE — «Код конкурса», название конкурса из CONTEST-DATA,
-в «Связи» — перечень уровней (GROUP_CODE : GROUP_VALUE); «Просмотр» открывает карточку со всеми строками GROUP этого конкурса.
+Лист GROUP (список): одна строка на CONTEST_CODE; «Связи» — уровни GROUP_CODE : GROUP_VALUE.
 """
 
 from __future__ import annotations

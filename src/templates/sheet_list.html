@@ -1,35 +1,49 @@
 {% extends "base.html" %}
-{# Кнопки «все / снять» слева от блока чекбоксов; чекбоксы в flex-wrap — в ряд до края окна, затем перенос. #}
-{% macro sheet_list_filter_icon_toolbar(filter_key) %}
-        <div class="sheet-list-filter-iconbar" role="group" aria-label="Быстрый выбор фильтра">
-          <button type="button" class="sheet-list-filter-iconbtn sheet-list-filter-iconbtn--all" data-sheet-list-select="{{ filter_key }}" title="Отметить все" aria-label="Отметить все">
-            <svg class="sheet-list-filter-iconsvg" viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" focusable="false">
-              <path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M3.5 8.2 6.5 11 12.5 4.5"/>
-            </svg>
-          </button>
-          <button type="button" class="sheet-list-filter-iconbtn sheet-list-filter-iconbtn--clear" data-sheet-list-clear="{{ filter_key }}" title="Снять все" aria-label="Снять все">
-            <svg class="sheet-list-filter-iconsvg" viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" focusable="false">
-              <path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="m4 4 8 8M12 4 4 12"/>
-            </svg>
-          </button>
-        </div>
+{# Глобальные фильтры gf_*: связь через CONTEST_CODE; взаимное сужение вариантов на сервере. #}
+{# Мини-крестик «снять все в блоке»: только если есть варианты и хотя бы одна отметка (иначе нечего снимать). #}
+{% macro sheet_list_filter_clear_heading_btn(filter_key) %}
+        <button type="button" class="sheet-list-filter-heading-clear" data-sheet-list-clear="{{ filter_key }}" title="Снять все отметки в этом фильтре" aria-label="Снять все отметки в этом фильтре">
+          <svg class="sheet-list-filter-heading-clear-svg" viewBox="0 0 16 16" width="12" height="12" aria-hidden="true" focusable="false">
+            <path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="m4.5 4.5 7 7M11.5 4.5l-7 7"/>
+          </svg>
+        </button>
 {% endmacro %}
-{# Множественный фильтр: подпись, строка [иконки | чипы checkboxes], подсказка. Имя поля в query — param_name (несколько значений). #}
-{% macro sheet_list_filter_checkbox_row(label, param_name, options, selected_list, filter_key, aria_label, hint) %}
-      <div class="sheet-list-filter-block">
-        <span class="reward-filter-caption">{{ label }}</span>
-        <div class="sheet-list-filter-row">
-          {{ sheet_list_filter_icon_toolbar(filter_key) }}
-          <div class="sheet-list-filter-chips-wrap" data-sheet-list-filter-target="{{ filter_key }}" role="group" aria-label="{{ aria_label }}">
+{% macro sheet_list_filter_checkbox_row_compact(label, param_name, options, selected_list, filter_key, aria_label) %}
+      <div class="sheet-list-filter-block sheet-list-filter-block--compact">
+        <div class="sheet-list-filter-heading">
+          <span class="reward-filter-caption reward-filter-caption--compact sheet-list-filter-heading-label">{{ label }}</span>
+          {% if options|length > 0 and selected_list|length > 0 %}
+          {{ sheet_list_filter_clear_heading_btn(filter_key) }}
+          {% endif %}
+        </div>
+        <div class="sheet-list-filter-row sheet-list-filter-row--chips-only">
+          <div class="sheet-list-filter-chips-wrap sheet-list-filter-chips-wrap--compact" data-sheet-list-filter-target="{{ filter_key }}" role="group" aria-label="{{ aria_label }}">
             {% for o in options %}
-            <label class="sheet-list-filter-chip">
+            <label class="sheet-list-filter-chip sheet-list-filter-chip--compact">
               <input type="checkbox" name="{{ param_name }}" value="{{ o.value }}" {% if o.value in selected_list %}checked{% endif %} />
               <span class="sheet-list-filter-chip-text">{{ o.label }}</span>
             </label>
             {% endfor %}
           </div>
         </div>
-        <p class="muted sheet-list-filter-hint">{{ hint }}</p>
+      </div>
+{% endmacro %}
+{% macro sheet_list_filter_toggle_row_compact(label, param_name, options, selected_list, filter_key, aria_label) %}
+      <div class="sheet-list-filter-block sheet-list-filter-block--compact sheet-list-filter-block--toggle">
+        <div class="sheet-list-filter-heading">
+          <span class="reward-filter-caption reward-filter-caption--compact sheet-list-filter-heading-label">{{ label }}</span>
+          {% if options|length > 0 and selected_list|length > 0 %}
+          {{ sheet_list_filter_clear_heading_btn(filter_key) }}
+          {% endif %}
+        </div>
+        <div class="sheet-list-toggle-wrap" data-sheet-list-filter-target="{{ filter_key }}" role="group" aria-label="{{ aria_label }}">
+          {% for o in options %}
+          <label class="sheet-list-toggle-chip{% if o.value in selected_list %} is-active{% endif %}">
+            <input type="checkbox" name="{{ param_name }}" value="{{ o.value }}" {% if o.value in selected_list %}checked{% endif %} />
+            <span class="sheet-list-toggle-chip-text">{{ o.label }}</span>
+          </label>
+          {% endfor %}
+        </div>
       </div>
 {% endmacro %}
 {% block title %}{{ sheet_title }} — строки{% endblock %}
@@ -37,69 +51,52 @@
 <section class="panel">
   <h1>{{ sheet_title }}</h1>
   {% if sheet_code == "INDICATOR" %}
-  <p class="muted">Код листа: <strong>{{ sheet_code }}</strong> · колонка «Название / описание»: полное имя конкурса из CONTEST-DATA по CONTEST_CODE; ниже — название показателя из строки. Связи: награды из REWARD-LINK по группам и турниры конкурса.</p>
+  <p class="muted">Код листа: <strong>{{ sheet_code }}</strong> · колонка «Название / описание»: полное имя конкурса из CONTEST-DATA по CONTEST_CODE; ниже — название показателя из строки. Связи: награды из REWARD-LINK по группам и турниры конкурса. Фильтры сверху действуют на все листы через <code>CONTEST_CODE</code>.</p>
   {% elif sheet_code == "REWARD" %}
-  <p class="muted">Код листа: <strong>{{ sheet_code }}</strong> · колонка «Награда» — <code>FULL_NAME</code> строки REWARD; «Название / описание» — <code>FULL_NAME</code> конкурса из CONTEST-DATA по <code>CONTEST_CODE</code> из REWARD-LINK (несколько конкурсов — через « · »). Фильтр <strong>REWARD_TYPE</strong> — множественный выбор. Пустой выбор — без фильтра по типу.</p>
+  <p class="muted">Код листа: <strong>{{ sheet_code }}</strong> · «Награда» — <code>FULL_NAME</code>; «Название / описание» — конкурсы по <code>REWARD-LINK</code>. Глобальные фильтры сужают строки по связанным конкурсам.</p>
   {% elif sheet_code == "REWARD-LINK" %}
-  <p class="muted">Код листа: <strong>{{ sheet_code }}</strong> · порядок колонок: код награды, уровень (<code>GROUP_CODE</code>), название награды и конкурса из REWARD и CONTEST-DATA. Фильтр <strong>REWARD_TYPE</strong> — по <code>REWARD_CODE</code>, множественный выбор. Колонка «Связи» скрыта; поиск по строке включает <code>CONTEST_CODE</code>.</p>
+  <p class="muted">Код листа: <strong>{{ sheet_code }}</strong> · код награды, уровень (<code>GROUP_CODE</code>), названия. Поиск по строке включает <code>CONTEST_CODE</code>. Фильтры — по полям связанных сущностей.</p>
   {% elif sheet_code == "TOURNAMENT-SCHEDULE" %}
-  <p class="muted">Код листа: <strong>{{ sheet_code }}</strong> · «Код турнира» — <code>TOURNAMENT_CODE</code>; «Период» — <code>PERIOD_TYPE</code>; название конкурса — <code>FULL_NAME</code> из CONTEST-DATA; «Сезон» — <code>seasonCode</code> из JSON <code>TARGET_TYPE</code>. Колонка «Связанные награду»: строки <code>REWARD_CODE: GROUP_CODE</code> по REWARD-LINK. Фильтры: по сезону и по типу расчёта (<code>CALC_TYPE</code>: 0 — автоматический, остальные — ручной).</p>
+  <p class="muted">Код листа: <strong>{{ sheet_code }}</strong> · «Сезон» — <code>seasonCode</code> из JSON <code>TARGET_TYPE</code> (также в фильтрах «Расписание · seasonCode»).</p>
   {% elif sheet_code == "CONTEST-DATA" %}
-  <p class="muted">Код листа: <strong>{{ sheet_code }}</strong> · «Код конкурса» — <code>CONTEST_CODE</code>; «Наименование» — <code>FULL_NAME</code>; «Тип конкурса» — <code>CONTEST_TYPE</code>. Фильтр по типу — множественный выбор (как на листах REWARD / расписание). Турниры и награды по конкурсу доступны через поиск по строке. «Консистентность» — перед «Просмотр».</p>
+  <p class="muted">Код листа: <strong>{{ sheet_code }}</strong> · «Консистентность» перед «Просмотр». Глобальные фильтры включают поля конкурса и связанных листов.</p>
   {% elif sheet_code == "GROUP" %}
-  <p class="muted">Код листа: <strong>{{ sheet_code }}</strong> · одна строка на конкурс: <code>CONTEST_CODE</code>; «Название конкурса» — <code>FULL_NAME</code> из CONTEST-DATA. «Связи» — все уровни GROUP (<code>GROUP_CODE : GROUP_VALUE</code>) для этого конкурса. «Просмотр» — карточка со всеми уровнями.</p>
+  <p class="muted">Код листа: <strong>{{ sheet_code }}</strong> · одна строка на конкурс. «Просмотр» — все уровни GROUP этого конкурса.</p>
   {% else %}
-  <p class="muted">Код листа: <strong>{{ sheet_code }}</strong> · в таблице: ключ, название из строки или связей, подтянутые турниры/конкурсы где применимо.</p>
+  <p class="muted">Код листа: <strong>{{ sheet_code }}</strong>.</p>
   {% endif %}
-  {% if sheet_code == "REWARD" or sheet_code == "REWARD-LINK" or sheet_code == "TOURNAMENT-SCHEDULE" or sheet_code == "CONTEST-DATA" %}
-  {# Класс search не используем: у него flex-row без column, из‑за этого поиск оказывался справа от фильтра (в т.ч. расписание). #}
-  <form class="sheet-list-form-reward" method="get" action="/sheet/{{ sheet_code }}">
-    <div class="sheet-list-filters">
-      {% if sheet_code == "CONTEST-DATA" %}
-      {{ sheet_list_filter_checkbox_row(
-        "Тип конкурса (CONTEST_TYPE)",
-        "contest_type",
-        contest_type_options,
-        contest_type_selected_list,
-        "contest_type",
-        "Фильтр по типу конкурса",
-        "Отметьте один или несколько типов. Без отметок показываются все конкурсы."
-      ) }}
-      {% endif %}
-      {% if sheet_code == "REWARD" or sheet_code == "REWARD-LINK" %}
-      {{ sheet_list_filter_checkbox_row(
-        "REWARD_TYPE",
-        "reward_type",
-        reward_type_options,
-        reward_type_selected_list,
-        "reward_type",
-        "Фильтр по типу награды",
-        "Отметьте один или несколько типов. Без отметок — все типы наград."
-      ) }}
-      {% endif %}
-      {% if sheet_code == "TOURNAMENT-SCHEDULE" %}
-      <div class="sheet-list-filters-grouped">
-        {{ sheet_list_filter_checkbox_row(
-          "Сезон (seasonCode)",
-          "season",
-          season_options,
-          season_selected_list,
-          "season",
-          "Фильтр по сезону из TARGET_TYPE",
-          "Отметьте один или несколько сезонов. Без отметок — все сезоны."
-        ) }}
-        {{ sheet_list_filter_checkbox_row(
-          "Тип турнира (CALC_TYPE)",
-          "calc_mode",
-          calc_mode_options,
-          calc_mode_selected_list,
-          "calc_mode",
-          "Фильтр по режиму расчета турнира",
-          "Автоматические: CALC_TYPE = 0. Ручные: все остальные значения CALC_TYPE."
-        ) }}
+  <form class="sheet-list-form-reward sheet-list-form-global" method="get" action="/sheet/{{ sheet_code }}">
+    <details class="global-filters-details" open>
+      <summary class="global-filters-summary">Фильтры по связям (конкурс <code>CONTEST_CODE</code>)</summary>
+      <p class="muted global-filters-lead">Пустые блоки не ограничивают. Внутри блока несколько отметок — логическое ИЛИ; между разными блоками — И. Варианты сужаются с учётом остальных выбранных фильтров.</p>
+      <div class="global-filters-toolbar">
+        <button type="button" class="btn btn-ghost global-filters-reset-all" data-global-filters-reset-all title="Снять все отметки во всех блоках фильтров (поле поиска не меняется)">Сбросить все фильтры</button>
       </div>
-      {% endif %}
-    </div>
+      <div class="global-filters-toggle-row">
+        {% for block in global_filter_blocks if block.is_toggle %}
+        {{ sheet_list_filter_toggle_row_compact(
+          block.label,
+          block.param,
+          block.options,
+          block.selected_list,
+          block.filter_key,
+          block.label
+        ) }}
+        {% endfor %}
+      </div>
+      <div class="global-filters-grid">
+        {% for block in global_filter_blocks if not block.is_toggle %}
+        {{ sheet_list_filter_checkbox_row_compact(
+          block.label,
+          block.param,
+          block.options,
+          block.selected_list,
+          block.filter_key,
+          block.label
+        ) }}
+        {% endfor %}
+      </div>
+    </details>
     <div class="search-row-inline sheet-list-search-full">
       <input type="search" name="q" value="{{ q }}" placeholder="Поиск по содержимому строки…" autocomplete="off" />
       <button type="submit" class="btn btn-primary">Найти</button>
@@ -110,17 +107,6 @@
     function sheetListFilterBoxByKey(key) {
       return document.querySelector('[data-sheet-list-filter-target="' + key + '"]');
     }
-    document.querySelectorAll("[data-sheet-list-select]").forEach(function (btn) {
-      btn.addEventListener("click", function () {
-        var key = btn.getAttribute("data-sheet-list-select");
-        var box = sheetListFilterBoxByKey(key);
-        if (!box) return;
-        var form = box.closest("form");
-        if (!form) return;
-        box.querySelectorAll('input[type="checkbox"]').forEach(function (cb) { cb.checked = true; });
-        form.submit();
-      });
-    });
     document.querySelectorAll("[data-sheet-list-clear]").forEach(function (btn) {
       btn.addEventListener("click", function () {
         var key = btn.getAttribute("data-sheet-list-clear");
@@ -132,21 +118,65 @@
         form.submit();
       });
     });
-    document.querySelectorAll("form.sheet-list-form-reward").forEach(function (form) {
+    document.querySelectorAll("form.sheet-list-form-global").forEach(function (form) {
       form.addEventListener("change", function (e) {
         var t = e.target;
-        if (!t || !t.matches || !t.matches('.sheet-list-filter-chips-wrap input[type="checkbox"]')) return;
+        if (!t || !t.matches || !t.matches('.sheet-list-filter-chips-wrap input[type="checkbox"], .sheet-list-toggle-wrap input[type="checkbox"]')) return;
         form.submit();
       });
     });
+    document.querySelectorAll("[data-global-filters-reset-all]").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        var form = btn.closest("form");
+        if (!form) return;
+        form.querySelectorAll('input[type="checkbox"][name^="gf_"]').forEach(function (cb) {
+          cb.checked = false;
+        });
+        form.submit();
+      });
+    });
+
+    /**
+     * Пока фильтры не тронуты — ширина/высота блоков задаётся CSS (max-content и т.д.).
+     * Если в URL уже есть отмеченные gf_* — после отрисовки фиксируем фактические px,
+     * чтобы смена отметок внутри блока не меняла габариты карточек.
+     * На узкой вёрстке не фиксируем (остаётся width: 100% из media query).
+     */
+    function spodLockGlobalFilterBlockSizes() {
+      document.querySelectorAll("form.sheet-list-form-global").forEach(function (form) {
+        var details = form.querySelector(".global-filters-details");
+        if (!details) return;
+        var narrow = window.matchMedia && window.matchMedia("(max-width: 540px)").matches;
+        var blocks = details.querySelectorAll(".sheet-list-filter-block--compact");
+        var hasSelection = !!form.querySelector('input[type="checkbox"][name^="gf_"]:checked');
+        blocks.forEach(function (blk) {
+          blk.style.width = "";
+          blk.style.minWidth = "";
+          blk.style.maxWidth = "";
+          blk.style.minHeight = "";
+          blk.style.height = "";
+        });
+        if (!hasSelection || narrow) return;
+        void form.offsetWidth;
+        blocks.forEach(function (blk) {
+          var r = blk.getBoundingClientRect();
+          var w = Math.ceil(r.width);
+          var h = Math.ceil(r.height);
+          if (w < 2 || h < 2) return;
+          blk.style.boxSizing = "border-box";
+          blk.style.width = w + "px";
+          blk.style.minWidth = w + "px";
+          blk.style.maxWidth = w + "px";
+          blk.style.minHeight = h + "px";
+          blk.style.height = h + "px";
+        });
+      });
+    }
+    requestAnimationFrame(function () {
+      requestAnimationFrame(spodLockGlobalFilterBlockSizes);
+    });
   })();
   </script>
-  {% else %}
-  <form class="search" method="get" action="/sheet/{{ sheet_code }}">
-    <input type="search" name="q" value="{{ q }}" placeholder="Поиск по содержимому строки…" />
-    <button type="submit" class="btn btn-primary">Найти</button>
-  </form>
-  {% endif %}
   <div class="table-scroll">
     <table class="data data-list-wide{% if sheet_code == 'CONTEST-DATA' %} data-list-contests data-list-contests--contest-data{% elif sheet_code == 'GROUP' %} data-list-contests{% elif sheet_code == 'REWARD-LINK' %} data-list-reward-link{% endif %}">
       <thead>

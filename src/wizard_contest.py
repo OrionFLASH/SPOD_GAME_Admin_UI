@@ -15,7 +15,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Set, Tuple
 
-from src import consistency, editor_config, ingest, sheet_storage
+from src import consistency, editor_config, field_enum_sheet_options, ingest, sheet_storage
 
 # Порядок шагов мастера (коды листов из config.json).
 WIZARD_SHEET_ORDER: Tuple[str, ...] = (
@@ -95,9 +95,12 @@ def _sheet_spec(cfg: Dict[str, Any], code: str) -> Dict[str, Any]:
     return {}
 
 
-def build_schema(root: Path, cfg: Dict[str, Any]) -> Dict[str, Any]:
+def build_schema(root: Path, cfg: Dict[str, Any], conn: Any) -> Dict[str, Any]:
     """
     Собирает метаданные для клиентского мастера: колонки по CSV, json_columns, развёрнутые списки редактора.
+
+    Параметр ``conn`` нужен для подстановки ``field_enums.options`` из актуальных строк листов
+    (см. ``field_enum_sheet_options.merge_field_enums_with_sheet_options``).
     """
     in_dir = root / (cfg.get("paths") or {}).get("input_spod", "IN/SPOD")
     sheets_out: Dict[str, Any] = {}
@@ -130,7 +133,7 @@ def build_schema(root: Path, cfg: Dict[str, Any]) -> Dict[str, Any]:
         "sheetOrder": list(WIZARD_SHEET_ORDER),
         "sheets": sheets_out,
         "fieldUi": editor_config.flatten_editor_field_ui(cfg),
-        "fieldEnums": editor_config.flatten_field_enums(cfg),
+        "fieldEnums": field_enum_sheet_options.merge_field_enums_with_sheet_options(conn, cfg),
         "editorTextareas": editor_config.flatten_editor_textareas(cfg),
         "fieldNumeric": editor_config.flatten_editor_field_numeric(cfg),
         "longTextThreshold": int(cfg.get("editor_long_text_threshold", 120)),

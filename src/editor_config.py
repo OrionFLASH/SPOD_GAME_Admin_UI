@@ -26,6 +26,13 @@ def flatten_field_enums(cfg: Dict[str, Any]) -> List[Dict[str, Any]]:
       "select" или отсутствие ключа — выпадающий список; если опций больше двух, всегда список.
     Размеры переключателя на клиенте рассчитываются в row_editor.js (applySpodYnToggleLayout, батч flushSpodYnToggleLayouts) — см. README раздел 4.4.
     Элемент options может быть строкой или объектом {"label": "подпись в UI", "value": "значение в ячейке CSV"}.
+    Для field_enums: ``whitelist_validated_input: true`` — не выпадающий список, а текстовое поле с подсветкой
+    по совпадению со списком ``options`` (в т.ч. после ``options_from_sheet``).
+    Опционально ``options_from_sheet``: динамический список из актуальных строк другого листа SQLite
+    (см. ``field_enum_sheet_options``): ``source_sheet_code``, ``value_column``,
+    подпись — либо ``label_column``, либо составная ``label_template`` с плейсхолдерами ``{КОЛОНКА}``,
+    необязательно ``where`` (``equals`` / ``in``) и ``order_by``. Итоговые ``options`` = строки из БД
+    плюс статические из конфига (без дубликатов по value).
     Для пути вида ["ключ", 0], ["ключ", 1], … в JSON-колонке правило с json_path ["ключ"] (без индекса)
     применяется к каждому элементу массива (select на каждую строку, в т.ч. внутри json_scalar_array).
     Устаревший (плоский):
@@ -64,6 +71,11 @@ def flatten_editor_textareas(cfg: Dict[str, Any]) -> List[Dict[str, Any]]:
     массиву (не к элементу с индексом); min_rows/max_rows — высота textarea для каждой строки элемента;
     array_allows_empty — можно ли сохранить [] (по умолчанию да); array_max_items — максимум элементов
     (если не задано — без ограничения).
+
+    Массив **однотипных объектов** (например ``[{ "nonRewardCode": "…" }, …]``): ``json_object_array`` true,
+    ``json_path`` — корень массива; обязательно ``object_array_item_keys`` — список ключей в каждом элементе;
+    те же ``array_allows_empty`` / ``array_max_items``. В UI — кнопки «Добавить элемент» / «Удалить» на строку
+    (см. ``row_editor.js``).
 
     Новый формат: sheet_code и массив hints с полями column, min_rows, input_type и т.д.
     Устаревший: один объект на строку с полем column без массива hints.

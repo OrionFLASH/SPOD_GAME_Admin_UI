@@ -18,13 +18,28 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from markupsafe import Markup, escape
 
-from src import config_validate, consistency, db, editor_config, export_csv, ingest, relations, server_stop, sheet_list_display, sheet_storage, spod_json, wizard_contest
+from src import (
+    config_validate,
+    consistency,
+    db,
+    editor_config,
+    export_csv,
+    field_enum_sheet_options,
+    global_sheet_filters,
+    ingest,
+    relations,
+    server_stop,
+    sheet_list_display,
+    sheet_storage,
+    spod_json,
+    wizard_contest,
+)
 
 ROOT = Path(__file__).resolve().parent.parent
 CFG: Dict[str, Any] = {}
 CONN: sqlite3.Connection | None = None
 DB_PATH: Path | None = None
-STATIC_ASSET_VERSION = "20260415_18"
+STATIC_ASSET_VERSION = "20260418_24"
 
 
 def _cells_canonical_json(cells: Dict[str, str]) -> str:
@@ -93,6 +108,7 @@ def _delete_row_edit_draft(conn: sqlite3.Connection, sheet_code: str, row_id: in
 
 
 def _editor_bootstrap_for_row_cells(
+    conn: sqlite3.Connection,
     code: str,
     row_id: int,
     cells: Dict[str, str],
@@ -122,7 +138,7 @@ def _editor_bootstrap_for_row_cells(
         "flat": {k: cells.get(k, "") for k in flat_columns},
         "jsonCols": json_cols_boot,
         "fullRow": dict(cells),
-        "fieldEnums": editor_config.flatten_field_enums(CFG),
+        "fieldEnums": field_enum_sheet_options.merge_field_enums_with_sheet_options(conn, CFG),
         "editorTextareas": editor_config.flatten_editor_textareas(CFG),
         "fieldUi": editor_config.flatten_editor_field_ui(CFG),
         "fieldNumeric": editor_config.flatten_editor_field_numeric(CFG),
@@ -165,6 +181,8 @@ async def lifespan(app: FastAPI):
     CFG = _load_config()
     _setup_logging()
     for msg in config_validate.validate_sheet_bindings(CFG):
+        logging.warning("%s", msg)
+    for msg in config_validate.validate_field_enum_sheet_options(CFG):
         logging.warning("%s", msg)
     DB_PATH = db.get_db_path(ROOT, CFG)
     CONN = db.open_connection(DB_PATH)
@@ -224,7 +242,7 @@ def index(request: Request):
 @app.get("/wizard/new-contest", response_class=HTMLResponse)
 def wizard_new_contest(request: Request):
     """Мастер пошагового создания конкурса без записи в БД до финального подтверждения."""
-    sch = wizard_contest.build_schema(ROOT, CFG)
+    sch = wizard_contest.build_schema(ROOT, CFG, get_conn())
     return templates.TemplateResponse(
         request,
         "wizard_new_contest.html",
@@ -334,38 +352,11 @@ def sheet_list(request: Request, code: str, q: str = ""):
     spec = next((s for s in CFG["sheets"] if s["code"] == code), None)
     ql = q.strip().lower() if q else ""
     lu = sheet_list_display.build_lookup_tables(conn)
-    reward_type_options: List[Dict[str, str]] = []
-    reward_type_selected_list: List[str] = []
-    season_options: List[Dict[str, str]] = []
-    season_selected_list: List[str] = []
-    calc_mode_options: List[Dict[str, str]] = []
-    calc_mode_selected_list: List[str] = []
-    contest_type_options: List[Dict[str, str]] = []
-    contest_type_selected_list: List[str] = []
-    if code in ("REWARD", "REWARD-LINK"):
-        reward_type_options = sheet_list_display.reward_type_filter_options(CFG, for_multiselect_list=True)
-        rt_allowed = {str(o.get("value", "")) for o in reward_type_options if str(o.get("value", "")).strip()}
-        reward_type_selected_list = [
-            x.strip() for x in request.query_params.getlist("reward_type") if x.strip() in rt_allowed
-        ]
-    if code == "CONTEST-DATA":
-        contest_type_options = sheet_list_display.contest_type_filter_options(CFG, for_multiselect_list=True)
-        ct_allowed = {str(o.get("value", "")) for o in contest_type_options if str(o.get("value", "")).strip()}
-        contest_type_selected_list = [
-            x.strip() for x in request.query_params.getlist("contest_type") if x.strip() in ct_allowed
-        ]
-    if code == "TOURNAMENT-SCHEDULE":
-        season_options = sheet_list_display.season_filter_options(lu)
-        season_allowed = {str(o.get("value", "")) for o in season_options}
-        season_selected_list = [x.strip() for x in request.query_params.getlist("season") if x.strip() in season_allowed]
-        calc_mode_options = [
-            {"label": "Автоматические", "value": "AUTO"},
-            {"label": "Ручные", "value": "MANUAL"},
-        ]
-        calc_mode_allowed = {str(o.get("value", "")) for o in calc_mode_options}
-        calc_mode_selected_list = [
-            x.strip() for x in request.query_params.getlist("calc_mode") if x.strip() in calc_mode_allowed
-        ]
+    gf_ix = global_sheet_filters.build_filter_index(conn)
+    gf_sel = global_sheet_filters.selection_from_request(request, gf_ix)
+    apply_gf = any(bool(gf_sel[k]) for k in gf_sel)
+    allowed_cc = global_sheet_filters.matching_contests(gf_ix, gf_sel) if apply_gf else None
+    global_filter_blocks = global_sheet_filters.filter_blocks_for_template(gf_ix, gf_sel, CFG)
     if code == "GROUP":
         # Одна строка списка на конкурс: код + название из CONTEST-DATA; «Связи» — все уровни GROUP (GROUP_CODE : GROUP_VALUE).
         contest_full: Dict[str, str] = lu.get("contest_full") or {}
@@ -382,32 +373,48 @@ def sheet_list(request: Request, code: str, q: str = ""):
             if not cc:
                 continue
             if cc not in buckets:
-                buckets[cc] = {"ids": [], "members": [], "any_bad": False}
+                buckets[cc] = {"ids": [], "members": [], "ok_flags": [], "any_bad": False}
                 order_cc.append(cc)
             b = buckets[cc]
             b["ids"].append(int(r["id"]))
             b["members"].append(dict(cells))
+            b["ok_flags"].append(int(r["consistency_ok"]))
             if not int(r["consistency_ok"]):
                 b["any_bad"] = True
-        for idx, cc in enumerate(order_cc):
+        if apply_gf:
+            order_cc = [cc for cc in order_cc if cc in allowed_cc]
+        agg_row_index = 0
+        for cc in order_cc:
             b = buckets[cc]
+            triples = list(zip(b["ids"], b["members"], b["ok_flags"]))
+            if apply_gf:
+                triples = [
+                    (rid, m, ok_f)
+                    for rid, m, ok_f in triples
+                    if global_sheet_filters.row_matches_native_global_filters("GROUP", m, gf_sel)
+                ]
+            if not triples:
+                continue
+            members_f = [m for _, m, _ in triples]
             title = (contest_full.get(cc) or "").strip()
-            levels_line = sheet_list_display.group_list_levels_relation_line(b["members"])
-            blob_agg = sheet_list_display.group_list_aggregate_search_blob(cc, title, levels_line, b["members"])
+            levels_line = sheet_list_display.group_list_levels_relation_line(members_f)
+            blob_agg = sheet_list_display.group_list_aggregate_search_blob(cc, title, levels_line, members_f)
             if ql and ql not in blob_agg:
                 continue
-            rep_id = min(b["ids"])
+            rep_id = min(rid for rid, _, _ in triples)
+            any_bad_f = any(int(ok_f) == 0 for _, _, ok_f in triples)
             rows_out.append(
                 {
                     "id": rep_id,
-                    "row_index": idx,
+                    "row_index": agg_row_index,
                     "preview": cc,
                     "title_line": title,
                     "relations_line": levels_line,
-                    "ok": 0 if b["any_bad"] else 1,
+                    "ok": 0 if any_bad_f else 1,
                     "errors": [],
                 }
             )
+            agg_row_index += 1
     else:
         for r in cur.fetchall():
             cur2 = conn.execute(
@@ -416,26 +423,18 @@ def sheet_list(request: Request, code: str, q: str = ""):
             )
             full = cur2.fetchone()
             cells = sheet_storage.row_to_cells(full, headers) if full else {}
-            if code == "TOURNAMENT-SCHEDULE" and season_selected_list:
-                s_val = sheet_list_display.target_type_season_code(cells.get("TARGET_TYPE") or "")
-                if s_val not in season_selected_list:
+            cc_row = (cells.get("CONTEST_CODE") or "").strip()
+            if apply_gf and allowed_cc is not None:
+                if not global_sheet_filters.row_matches_native_global_filters(code, cells, gf_sel):
                     continue
-            if code == "TOURNAMENT-SCHEDULE" and calc_mode_selected_list:
-                calc_type = (cells.get("CALC_TYPE") or "").strip()
-                calc_mode = "AUTO" if calc_type == "0" else "MANUAL"
-                if calc_mode not in calc_mode_selected_list:
-                    continue
-            if code == "REWARD" and reward_type_selected_list:
-                if (cells.get("REWARD_TYPE") or "").strip() not in reward_type_selected_list:
-                    continue
-            if code == "REWARD-LINK" and reward_type_selected_list:
-                rc_f = (cells.get("REWARD_CODE") or "").strip()
-                rt_link = (lu.get("reward_type_by_reward") or {}).get(rc_f, "")
-                if rt_link not in reward_type_selected_list:
-                    continue
-            if code == "CONTEST-DATA" and contest_type_selected_list:
-                if (cells.get("CONTEST_TYPE") or "").strip() not in contest_type_selected_list:
-                    continue
+                if global_sheet_filters.has_foreign_active_global_dimensions(code, gf_sel):
+                    if code == "REWARD":
+                        rc_f = (cells.get("REWARD_CODE") or "").strip()
+                        if not global_sheet_filters.reward_row_matches_contests(gf_ix, rc_f, allowed_cc):
+                            continue
+                    elif code in ("CONTEST-DATA", "INDICATOR", "REWARD-LINK", "TOURNAMENT-SCHEDULE"):
+                        if cc_row not in allowed_cc:
+                            continue
             disp = sheet_list_display.display_for_sheet_row(code, cells, lu)
             blob = sheet_list_display.search_blob(cells, disp)
             if ql and ql not in blob:
@@ -478,14 +477,7 @@ def sheet_list(request: Request, code: str, q: str = ""):
             "sheet_title": spec.get("title") if spec else code,
             "rows": rows_out,
             "q": q,
-            "reward_type_options": reward_type_options,
-            "reward_type_selected_list": reward_type_selected_list,
-            "season_options": season_options,
-            "season_selected_list": season_selected_list,
-            "calc_mode_options": calc_mode_options,
-            "calc_mode_selected_list": calc_mode_selected_list,
-            "contest_type_options": contest_type_options,
-            "contest_type_selected_list": contest_type_selected_list,
+            "global_filter_blocks": global_filter_blocks,
         },
     )
 
@@ -563,9 +555,9 @@ def row_detail(request: Request, code: str, row_id: int):
                 }
             )
             group_editor_bootstraps.append(
-                _editor_bootstrap_for_row_cells(code, int(sibl["id"]), dict(c), json_cols)
+                _editor_bootstrap_for_row_cells(conn, code, int(sibl["id"]), dict(c), json_cols)
             )
-    editor_bootstrap = _editor_bootstrap_for_row_cells(code, row_id, cells, json_cols)
+    editor_bootstrap = _editor_bootstrap_for_row_cells(conn, code, row_id, cells, json_cols)
     row_edit_draft = _fetch_row_edit_draft(conn, code, row_id)
     sheet_title = str(spec.get("title") or code)
     return templates.TemplateResponse(

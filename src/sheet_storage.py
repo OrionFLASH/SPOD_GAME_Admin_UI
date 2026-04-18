@@ -503,12 +503,33 @@ def fetch_row_for_update(
     return cur.fetchone()
 
 
-def rebuild_all_sheet_tables_from_config(conn: sqlite3.Connection, root: Path, cfg: Dict[str, Any]) -> None:
-    """Проверяет DDL каждого листа по текущим CSV (может пересоздать таблицу)."""
+def rebuild_all_sheet_tables_from_config(conn: sqlite3.Connection, root: Path, cfg: Dict[str, Any]) -> bool:
+    """
+    Проверяет DDL каждого листа по текущим CSV (может пересоздать таблицу).
+
+    Если таблица пересоздана, сразу выполняется переимпорт CSV этого листа (иначе
+    остаётся пустая таблица при непустом реестре ``sheet`` — списки в UI пустые).
+
+    Возвращает True, если хотя бы один лист был пересоздан и переимпортирован.
+    """
+    recreated: List[str] = []
     for spec in cfg.get("sheets") or []:
-        if spec.get("code"):
-            ensure_sheet_table_matches_csv(conn, root, cfg, spec)
+        code = spec.get("code")
+        if code and ensure_sheet_table_matches_csv(conn, root, cfg, spec):
+            recreated.append(str(code))
     conn.commit()
+    for code in recreated:
+        ingest.reimport_sheet(conn, root, cfg, code)
+    conn.commit()
+    if recreated:
+        logging.info(
+            "Переимпорт CSV после пересоздания таблиц (смена колонок / json_columns): %s",
+            ", ".join(recreated),
+        )
+        from src import consistency
+
+        consistency.run_all_checks(conn)
+    return bool(recreated)
 
 
 def relation_doc_lines(cfg: Dict[str, Any]) -> List[str]:

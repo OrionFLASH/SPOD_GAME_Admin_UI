@@ -33,9 +33,9 @@
 ## 2. Описание решения
 
 - **Стек:** Python 3, FastAPI, Uvicorn, Jinja2, стандартный `sqlite3`, статика и шаблоны в `src/`.
-- **Конфигурация:** `config.json` — пути, порт, список листов `sheets` (импорт и UI), справочник соответствий `sheet_bindings` (код листа ↔ название ↔ CSV), пояснение модели БД `database_model`, перечисления для редактора `field_enums` (по листам с массивом `rules`), подсказки высоты textarea `editor_textareas` (по листам с массивом `hints`), **числовые форматы** `editor_field_numeric` (плоские колонки и при необходимости **`json_path`** для листьев внутри JSON-колонки: целое / дробное, диапазон, условные ветки), порог длинного текста `editor_long_text_threshold`, режим консистентности.
+- **Конфигурация:** `config.json` — пути, порт, список листов `sheets` (импорт и UI: в т.ч. **`file`** — имя CSV в `IN/SPOD`), справочник **`sheet_bindings`** (код листа и при необходимости **`title`** для согласованности с `sheets`; имя файла **не** дублируется), пояснение модели БД `database_model`, перечисления для редактора `field_enums` (по листам с массивом `rules`), подсказки высоты textarea `editor_textareas` (по листам с массивом `hints`), **числовые форматы** `editor_field_numeric` (плоские колонки и при необходимости **`json_path`** для листьев внутри JSON-колонки: целое / дробное, диапазон, условные ветки), порог длинного текста `editor_long_text_threshold`, режим консистентности.
 - **Развёртка настроек редактора:** `src/editor_config.py` — превращает сгруппированные `field_enums` / `editor_textareas` / `editor_field_ui` / **`editor_field_numeric`** в плоские списки для `row_editor.js` и мастера.
-- **Проверка конфига:** `src/config_validate.py` — при старте сравнивает `sheet_bindings` с `sheets` (код и имя файла) и пишет предупреждения в лог при расхождении.
+- **Проверка конфига:** `src/config_validate.py` — при старте сверяет `sheet_bindings` с `sheets` (коды и опционально `title`; устаревший `csv_file` в привязке — только предупреждение при расхождении с `sheets.file`); предупреждения по блокам **`field_enums.options_from_sheet`** (**`validate_field_enum_sheet_options`**).
 - **БД:** файл `OUT/DB/tournament_admin.sqlite`; реестр листов **`sheet`** (в т.ч. `headers_json` — порядок колонок CSV); для каждого листа — отдельная таблица **`spod_sheet_<КОД>`** (`src/sheet_storage.py`, `src/db.py`): колонки как в CSV, JSON-колонки как TEXT с полным JSON, плюс денормализованные листья **`j__<имя_JSON_колонки>__<путь>`** для SQL-запросов по отдельным полям. Версионирование: `is_current`, `replaces_row_id`, `sort_key`, `row_index`, `sheet_id` — как раньше по смыслу, но на физической таблице листа. Повторное сохранение без изменений — HTTP 400. **`wizard_draft`** не участвует в импорте CSV. При обнаружении устаревшей таблицы **`data_row`** она удаляется, данные листов нужно снова загрузить импортом (автоматически при пустом `sheet`).
 - **Импорт:** `src/ingest.py` читает CSV, создаёт/пересоздаёт таблицу листа и вставляет строки с денормализацией JSON.
 - **JSON SPOD:** `src/spod_json.py` — нормализация тройных кавычек и попытка `json.loads` для отображения в редакторе; на клиенте ту же логику повторяет **`SpodJsonEditor.tryParseSpodJsonCell`** в `row_editor.js` (сравнение «грязного» JSON и мастер при копии из БД).
@@ -46,7 +46,7 @@
 - **Остановка сервера из UI:** `src/server_stop.py` + маршрут `POST /admin/stop` — после ответа браузеру планируется `SIGTERM` дочерним процессам текущего PID (если есть), затем процессу панели; на POSIX через ~2.5 с при необходимости повторно отправляется `SIGKILL` самому процессу. **Без пароля:** рассчитано на локальный `127.0.0.1`; не выставляйте панель в открытую сеть без прокси с авторизацией.
 - **Экспорт:** `src/export_csv.py` — восстановление CSV по заголовкам из первой строки данных листа.
 - **Мастер «Создать конкурс»:** кнопка на главной → `GET /wizard/new-contest` (`wizard_new_contest.html`, `wizard_contest.js`); подключается **`row_editor.js`** для общего UI JSON-колонок (`window.SpodJsonEditor`), бейджей ограничений (`window.SpodFieldUiSignals`), **числовых плоских полей** (`window.SpodNumericField`, те же правила `fieldNumeric`, что на карточке строки) и **двухпозиционных перечислений** (`window.SpodYnField` — см. **раздел 4.4**). Порядок шагов: CONTEST-DATA → … → предпросмотр; **`POST /wizard/new-contest/commit`** — вставка строк в таблицы листов `spod_sheet_*`; ответ **303** с `Location` на карточку конкурса; на клиенте переход отложен (`setTimeout` + `location.assign`), чтобы не ловить ложный **AbortError** у `fetch`; ошибки разбираются из `response.text()` (JSON с `detail` или текст). **Коды:** `REWARD_CODE` в шаге REWARD-LINK — префикс `r_<CONTEST_CODE>` и поле суффикса (при нескольких связях суффикс обязателен и уникален); `TOURNAMENT_CODE` — префикс `t_<CONTEST_CODE>_` и **ровно четыре цифры**; проверки дублируются в `wizard_contest.validate_payload`. **Черновик:** `wizard_draft`, `PUT`/`GET`/`DELETE` draft API; при commit передаётся `draft_uuid` — черновик удаляется в транзакции. **Уход:** модалка и `beforeunload` при несохранённом относительно сервера состоянии.
-- **Редактор строки (клиент):** `row_editor.js` — карточка строки из `#row-editor-bootstrap`; плоские поля и JSON-колонки с режимами **«По полям»** / **«Сырой JSON»**; пустой JSON и `{}` дополняются шаблоном из `field_enums` и обязательных `json_path` в `editor_field_ui` (`mergeDeclaredJsonTemplate`); `field_enums` — select и «Задать своё…», при **`input_display`** и двух опциях — **двухпозиционный переключатель** (см. **раздел 4.4**); элементы **`options`** могут быть строками (значение = подпись) или объектами **`{ "label": "…", "value": "…" }`** для русских подписей при неизменном значении в БД (см. **раздел 4.3**); `editor_textareas` — высота textarea, явный тип **`input_type: "text"`** для обычного многострочного текста и **поля дат** (в т.ч. с `json_path` внутри JSON-колонки); **`fieldNumeric`** (`editor_field_numeric`) — отдельные `<input>` с проверкой диапазона, для дробных — нормализация при потере фокуса (запятая как разделитель, фиксированное число знаков после запятой, дополнение нулями, округление при усечении), предупреждения при недопустимом вводе; порог длинного текста; ограничения полей — бейджи **«Обязательно»** / **«Не пусто»**; экспорт **`SpodJsonEditor`** / **`SpodFieldUiSignals`** / **`SpodNumericField`** / **`SpodYnField`** для мастера. Для **`REWARD` / `REWARD_ADD_DATA`** по **`REWARD_TYPE`** (плоское поле / мастер): тип задан — в «По полям» только ключи каталога `Docs/JSON/SPOD_INPUT_DATA_CATALOG.md`, разрешённые для этого типа (в т.ч. после смены типа блок пересобирается); тип пуст — только ключи, входящие во **все** типы из матрицы (пересечение); ключи **вне** каталога при непустых данных по-прежнему видны; шаблон merge не создаёт пути, не проходящие эти правила. **Разбор JSON в мастере:** перед развёрткой вызывается **`tryParseSpodJsonCell`** (та же нормализация SPOD, что и `spod_json.try_parse_cell`), чтобы при загрузке копии конкурса из БД работал режим «По полям» для колонок вроде `CONTEST_FEATURE`. **Защита ухода (`installLeaveGuard`):** перехват ссылок, модалка, `beforeunload`; флаг `leaveGuardSuspended`; `spod_edit_trail`; стили `.spod-leave-modal-overlay` в `app.css`.
+- **Редактор строки (клиент):** `row_editor.js` — карточка строки из `#row-editor-bootstrap`; плоские поля и JSON-колонки с режимами **«По полям»** / **«Сырой JSON»**; пустой JSON и `{}` дополняются шаблоном из `field_enums` и обязательных `json_path` в `editor_field_ui` (`mergeDeclaredJsonTemplate`); `field_enums` — select и «Задать своё…», при **`input_display`** и двух опциях — **двухпозиционный переключатель** (см. **раздел 4.4**); опционально **`whitelist_validated_input`** — текстовый ввод со списком допустимых значений из **`options`** и цветовой подсветкой (см. **раздел 4.5**); элементы **`options`** могут быть строками (значение = подпись) или объектами **`{ "label": "…", "value": "…" }`** для русских подписей при неизменном значении в БД (см. **раздел 4.3**); `editor_textareas` — высота textarea, явный тип **`input_type: "text"`** для обычного многострочного текста и **поля дат** (в т.ч. с `json_path` внутри JSON-колонки); для массива **однотипных объектов** в JSON — **`json_object_array`** + **`object_array_item_keys`** (см. **раздел 4.5**); **`fieldNumeric`** (`editor_field_numeric`) — отдельные `<input>` с проверкой диапазона, для дробных — нормализация при потере фокуса (запятая как разделитель, фиксированное число знаков после запятой, дополнение нулями, округление при усечении), предупреждения при недопустимом вводе; порог длинного текста; ограничения полей — бейджи **«Обязательно»** / **«Не пусто»**; экспорт **`SpodJsonEditor`** / **`SpodFieldUiSignals`** / **`SpodNumericField`** / **`SpodYnField`** для мастера. Для **`REWARD` / `REWARD_ADD_DATA`** по **`REWARD_TYPE`** (плоское поле / мастер): тип задан — в «По полям» только ключи каталога `Docs/JSON/SPOD_INPUT_DATA_CATALOG.md`, разрешённые для этого типа (в т.ч. после смены типа блок пересобирается); тип пуст — только ключи, входящие во **все** типы из матрицы (пересечение); ключи **вне** каталога при непустых данных по-прежнему видны; шаблон merge не создаёт пути, не проходящие эти правила. **Разбор JSON в мастере:** перед развёрткой вызывается **`tryParseSpodJsonCell`** (та же нормализация SPOD, что и `spod_json.try_parse_cell`), чтобы при загрузке копии конкурса из БД работал режим «По полям» для колонок вроде `CONTEST_FEATURE`. **Защита ухода (`installLeaveGuard`):** перехват ссылок, модалка, `beforeunload`; флаг `leaveGuardSuspended`; `spod_edit_trail`; стили `.spod-leave-modal-overlay` в `app.css`.
 
 Точка входа: `main.py` или **`run.sh`** поднимают Uvicorn на `host`/`port` из конфига (по умолчанию `http://127.0.0.1:8765/`).
 
@@ -72,7 +72,7 @@
 | `src/db.py` | Схема и путь к БД (`init_schema`, миграции, `ensure_wizard_draft_table` для черновиков мастера) |
 | `src/sheet_storage.py` | Имена таблиц листов, DDL, денормализация JSON в колонки `j__*`, вставка/чтение версий строк |
 | `src/editor_config.py` | Развёртка `field_enums`, `editor_textareas`, `editor_field_ui` и **`editor_field_numeric`** для bootstrap редактора и схемы мастера; в **`flatten_editor_field_numeric`** в докстринге описан опциональный **`json_path`** у правила |
-| `src/config_validate.py` | Согласованность `sheet_bindings` и `sheets` |
+| `src/config_validate.py` | **`validate_sheet_bindings`**, **`validate_field_enum_sheet_options`** (`options_from_sheet`) |
 | `src/ingest.py` | Импорт CSV |
 | `src/spod_json.py` | Разбор/формат JSON SPOD |
 | `src/consistency.py` | Проверки и флаги строк |
@@ -102,19 +102,19 @@
 | `logging.level`, `logging.base_name` | Уровень и префикс имени файла лога |
 | `consistency.mode` | `warn` — сохранять и помечать ошибки; `strict` — откат при ошибках на сохраняемой строке; `soft` зарезервировано как синоним мягкого поведения |
 | `database_model` | Справка: `sheet`, префикс таблиц `spod_sheet_*`, ограничения FK между листами; массив **`logical_relationships_ru`** — зафиксированная логика связей сущностей (дублирует доменную модель для людей и для согласования с `consistency.py`) |
-| `sheet_bindings[]` | Для каждого листа: `code`, `title`, `csv_file` — должно совпадать с `sheets` (проверка при старте) |
+| `sheet_bindings[]` | Для каждого листа: `code`, опционально `title` — каждый `sheets[].code` должен быть перечислен; имя CSV только в `sheets[].file` |
 | `editor_long_text_threshold` | Минимальная длина строки (символы), после которой в JSON-редакторе показывается textarea вместо однострочного поля |
-| `field_enums[]` | Блоки по листу: `sheet_code` + массив `rules` (`column`, `options`, `allow_custom`, опционально `json_path`, опционально **`input_display`** — см. **раздел 4.4**). Для **ограниченного набора** строк (справочники, коды перечислений). Каждый элемент **`options`** — либо **строка** (и в UI, и в ячейке одно и то же), либо объект **`{ "label": "<подпись>", "value": "<значение в CSV/БД>" }`** — подпись в select, в БД уходит **`value`**. Если для той же **плоской** колонки или для того же **`column` + `json_path`** задано правило **`editor_field_numeric`**, в карточке строки и в мастере для этого поля используется **числовой ввод**, а не выпадающий список из `field_enums` (примеры: **INDICATOR** — **`INDICATOR_VALUE`**, **`INDICATOR_WEIGHT`**; **REWARD** — листья **`REWARD_ADD_DATA`**; **TOURNAMENT-SCHEDULE** — **`CRITERION_MARK_VALUE`**, лист **`FILTER_PERIOD_ARR` / `criterion_mark_value`**). Если `json_path` задаёт **корень массива** (без числового индекса в конце), то же правило используется для элементов с путём `…, 0`, `…, 1` и т.д. (в т.ч. строки **json_scalar_array**). Свободные даты в формате ISO задаются через **`editor_textareas`** с типом даты, а не длинным списком дат в `options`. Примеры подписанных перечислений — **раздел 4.3**; режим отображения двух вариантов — **раздел 4.4**. |
-| `editor_textareas[]` | Блоки по листу: `sheet_code` + массив `hints` (`column`, `min_rows`, `max_rows`, опционально **`json_path`** для листа внутри JSON-колонки, напр. `REWARD_ADD_DATA` → `tagEndDT`). Для **обычного многострочного текста** в плоской колонке рекомендуется явно задавать **`"input_type": "text"`** (семантика «не дата и не спец-режим»; высота по `min_rows` / `max_rows`). Для дат: `input_type` `date` / `datepicker` или `date_picker`, либо `storage_format` с `YYYY`/`MM`/`DD` — календарь `spod_date_picker.js` на карточке строки и в мастере для **плоских** колонок; примеры в конфиге: `PLAN_PERIOD_START_DT`, `PLAN_PERIOD_END_DT` (TOURNAMENT-SCHEDULE), дата в `REWARD_ADD_DATA.tagEndDT`. Для **массива строк/чисел/boolean** в JSON: **`json_scalar_array`: true** и `json_path` на **корень массива** (не на индекс); опционально **`array_allows_empty`**, **`array_max_items`**; каждый элемент — отдельная строка ввода в редакторе. |
+| `field_enums[]` | Блоки по листу: `sheet_code` + массив `rules` (`column`, `options`, `allow_custom`, опционально `json_path`, опционально **`input_display`** — см. **раздел 4.4**, опционально **`whitelist_validated_input`** — см. **раздел 4.5**). Для **ограниченного набора** строк (справочники, коды перечислений). Каждый элемент **`options`** — либо **строка** (и в UI, и в ячейке одно и то же), либо объект **`{ "label": "<подпись>", "value": "<значение в CSV/БД>" }`** — подпись в select, в БД уходит **`value`**. Если для той же **плоской** колонки или для того же **`column` + `json_path`** задано правило **`editor_field_numeric`**, в карточке строки и в мастере для этого поля используется **числовой ввод**, а не выпадающий список из `field_enums` (примеры: **INDICATOR** — **`INDICATOR_VALUE`**, **`INDICATOR_WEIGHT`**; **REWARD** — листья **`REWARD_ADD_DATA`**; **TOURNAMENT-SCHEDULE** — **`CRITERION_MARK_VALUE`**, лист **`FILTER_PERIOD_ARR` / `criterion_mark_value`**). Если `json_path` задаёт **корень массива** (без числового индекса в конце), то же правило используется для элементов с путём `…, 0`, `…, 1` и т.д. (в т.ч. строки **json_scalar_array**). Свободные даты в формате ISO задаются через **`editor_textareas`** с типом даты, а не длинным списком дат в `options`. Примеры подписанных перечислений — **раздел 4.3**; режим отображения двух вариантов — **раздел 4.4**; динамические опции и шаблон подписи — **раздел 4.5**. |
+| `editor_textareas[]` | Блоки по листу: `sheet_code` + массив `hints` (`column`, `min_rows`, `max_rows`, опционально **`json_path`** для листа внутри JSON-колонки, напр. `REWARD_ADD_DATA` → `tagEndDT`). Для **обычного многострочного текста** в плоской колонке рекомендуется явно задавать **`"input_type": "text"`** (семантика «не дата и не спец-режим»; высота по `min_rows` / `max_rows`). Для дат: `input_type` `date` / `datepicker` или `date_picker`, либо `storage_format` с `YYYY`/`MM`/`DD` — календарь `spod_date_picker.js` на карточке строки и в мастере для **плоских** колонок; примеры в конфиге: `PLAN_PERIOD_START_DT`, `PLAN_PERIOD_END_DT` (TOURNAMENT-SCHEDULE), дата в `REWARD_ADD_DATA.tagEndDT`. Для **массива строк/чисел/boolean** в JSON: **`json_scalar_array`: true** и `json_path` на **корень массива** (не на индекс); опционально **`array_allows_empty`**, **`array_max_items`**; каждый элемент — отдельная строка ввода в редакторе. Для **массива объектов** с фиксированным набором ключей в каждом элементе: **`json_object_array`: true**, **`object_array_item_keys`**: массив имён полей, опционально те же **`array_allows_empty`** / **`array_max_items`** — см. **раздел 4.5**. |
 | `editor_field_numeric[]` | Блоки по листу: `sheet_code` + массив **`rules`** — числовой ввод на карточке строки и в мастере для **плоской** колонки (только `column`) или для **одного листа JSON** (тот же **`column`**, что имя JSON-колонки, плюс **`json_path`** — массив ключей и/или индексов, точное совпадение с путём листа в развёртке). Подробная схема — **раздел 4.2**. После развёртки в bootstrap и в схеме мастера ключ **`fieldNumeric`** — плоский список правил (каждый элемент содержит `sheet_code`). |
 | `editor_field_ui[]` | Блоки по листу: `sheet_code` + массив `rules` — для каждого редактируемого поля: `column`; опционально `json_path` (как в `field_enums`) для листа внутри JSON-колонки; `label` — подпись в форме (по умолчанию на клиенте — имя колонки или путь); `description` — пояснение; `show_description` — если `true`, текст `description` выводится сразу под подписью поля мелким приглушённым шрифтом; `required` — рядом с подписью бейдж **«Обязательно»** (подсказка по наведению); `allows_empty` — при `false` бейдж **«Не пусто»** (пустое значение недопустимо; независимо от `required`). Чтобы не повторять `column` для множества путей в одной JSON-колонке, допускается одно правило с полями `column` и **`paths`** (массив объектов с `json_path`, `label`, `description` и т.д.); **`flatten_editor_field_ui`** в `editor_config.py` разворачивает такие записи в плоский список для `row_editor.js` и мастера. Флаги для плоских колонок задаёт скрипт `scripts/generate_editor_field_ui.py` по анализу CSV. |
 | `sheets[].code` | Внутренний код листа (URL); источник правды для импорта |
 | `sheets[].title` | Заголовок в UI |
-| `sheets[].file` | Имя файла в `IN/SPOD` (должно совпадать с `sheet_bindings[].csv_file`) |
+| `sheets[].file` | Имя файла в `IN/SPOD` (единственное место в конфиге для имени CSV листа) |
 | `sheets[].json_columns` | Колонки, выносимые в JSON-редактор |
 | `sheets[].primary_key_column` | Колонка для превью в таблице списка |
 
-**Пример:** после правок JSON перезапуск не обязателен; смена `config.json` требует перезапуска. При смене имени CSV обновите и `sheets[].file`, и `sheet_bindings[].csv_file`.
+**Пример:** после правок JSON перезапуск не обязателен; смена `config.json` требует перезапуска. При смене имени CSV достаточно обновить **`sheets[].file`**.
 
 ### 4.1. Логическая модель связей между листами
 
@@ -198,6 +198,8 @@
 | **TOURNAMENT-SCHEDULE** | **`PERIOD_TYPE`** | Длинный список строковых значений (типы периодов турнира); в **`options`** порядок задан для удобства: **календарные месяцы** («турнир января» … «турнир декабря»), затем связанные с длительностью (**«март-июль»**, «турнир месяца», «турнир 2/3/4 месяца», «турнир 2/3 недели»), затем **кварталы**, **полугодия**, **год** («турнир года»), в конце — **«произвольный»**. |
 
 Для путей внутри JSON-колонок (например **`REWARD_ADD_DATA`**, **`CONTEST_FEATURE`**) те же **`options`** могут быть привязаны к **`json_path`** в правиле **`field_enums`**; структура **`editor_field_ui`** с группой **`paths`** описана в таблице ключа **`editor_field_ui[]`** выше. Если для того же пути добавлено **`editor_field_numeric`**, выпадающий список **`field_enums`** для этого листа не используется.
+
+**Динамические варианты из БД (`options_from_sheet`):** в том же правиле **`field_enums`** можно задать объект **`options_from_sheet`**: логический код листа **`source_sheet_code`** (из **`sheets`**), колонка **`value_column`**, подпись в списке — либо **`label_column`** (одна колонка), либо **`label_template`** — строка с плейсхолдерами **`{ИМЯ_КОЛОНКИ}`** как в Python **`str.format`** (литеральные **`{` / `}`** в тексте — **`{{`** / **`}}`**). Нужны **`value_column`** и **либо** **`label_column`**, **либо** **`label_template`** с хотя бы одним плейсхолдером. Необязательный список условий **`where`** (объект с **`equals`** — одно значение; с **`in`** — список), сортировка **`order_by`** (по умолчанию — по **`value_column`**). В выборку попадают только актуальные строки (**`is_current = 1`**). Серверный модуль **`field_enum_sheet_options.merge_field_enums_with_sheet_options`** подмешивает строки в **`options`** перед отдачей bootstrap и схемы мастера; блок **`options_from_sheet`** в JSON для клиента не передаётся. Статические элементы **`options`** из конфига добавляются после строк из БД, без дубликатов по **`value`**. Примеры: **`nonRewardCode`** — **`REWARD_CODE`** при **`REWARD_TYPE=ITEM`**, **`label_template`**: `"{FULL_NAME}: [\"{REWARD_CODE}\"]"`; **`rewardCode`** (в **`getCondition.rewards`**) — выборка при **`REWARD_TYPE=BADGE`** с тем же шаблоном подписи, плюс **`whitelist_validated_input`** (**раздел 4.5**). Валидация: **`config_validate.validate_field_enum_sheet_options`**.
 
 ### 4.4. Режим отображения перечисления: `input_display` и двухпозиционный переключатель
 
@@ -288,6 +290,91 @@
 
 Стили переключателя: **`src/static/app.css`** (классы **`.spod-yn-wrap`**, **`.spod-yn-track`**, **`.spod-yn-thumb`**, **`.spod-yn-state-label`**); логика — **`src/static/row_editor.js`**. Версия подключаемых скриптов/стилей задаётся **`STATIC_ASSET_VERSION`** в **`src/app.py`**.
 
+### 4.5. Массивы объектов в JSON (`json_object_array`) и расширения перечислений
+
+#### `editor_textareas`: `json_object_array`
+
+В **`hints`** для JSON-колонки (например **`REWARD_ADD_DATA`**) задаётся:
+
+| Ключ | Назначение |
+|------|------------|
+| **`json_path`** | Путь к **корню массива** объектов, например `["getCondition", "nonRewards"]`. |
+| **`json_object_array`** | **`true`** — массив обрабатывается как список однотипных объектов, а не как вложенное дерево по индексам. |
+| **`object_array_item_keys`** | Список строк — **имена полей в каждом элементе** (порядок = порядок полей в форме), например `["nonRewardCode"]` или `["rewardCode", "amount"]`. |
+| **`array_allows_empty`** | Если **`false`**, нельзя удалить последнюю строку (остаётся минимум одна запись). |
+| **`array_max_items`** | Верхняя граница числа элементов (кнопка «Добавить» блокируется при достижении). |
+
+**Клиент (`row_editor.js`):** один блок-хост на корень массива; внутри — строки «одна запись = один объект» с кнопками **«Удалить»** и **«Добавить запись»**; после добавления/удаления пересчитываются пути **`data-json-path`** с числовым индексом. Сборка JSON в **`buildJsonFromFields`** сначала заполняет листья по путям, затем **перезаписывает** весь массив по данным хоста (**`data-json-object-array-host`**), чтобы в БД уходил корректный **`[]`**. Пустой массив в данных и объекты **без части ключей** допускаются: недостающие ключи нормализуются в пустые строки при развёртке.
+
+**Примеры фрагментов `config.json`:**
+
+```json
+{
+  "column": "REWARD_ADD_DATA",
+  "json_path": ["getCondition", "nonRewards"],
+  "json_object_array": true,
+  "object_array_item_keys": ["nonRewardCode"],
+  "array_allows_empty": true,
+  "array_max_items": 32,
+  "min_rows": 2,
+  "max_rows": 12
+}
+```
+
+```json
+{
+  "column": "REWARD_ADD_DATA",
+  "json_path": ["getCondition", "rewards"],
+  "json_object_array": true,
+  "object_array_item_keys": ["rewardCode", "amount"],
+  "array_allows_empty": true,
+  "array_max_items": 32,
+  "min_rows": 2,
+  "max_rows": 12
+}
+```
+
+```json
+{
+  "column": "REWARD_ADD_DATA",
+  "json_path": ["itemGroupAmount"],
+  "json_object_array": true,
+  "object_array_item_keys": ["itemParam", "itemParamAmount"],
+  "array_allows_empty": true,
+  "array_max_items": 32,
+  "min_rows": 2,
+  "max_rows": 12
+}
+```
+
+**`editor_field_ui`:** для подписей достаточно **одного** правила на поле **без индекса** в пути, например `["getCondition", "nonRewards", "nonRewardCode"]` — клиент **`findFieldUi`** сопоставляет пути вида `…, 0, nonRewardCode` со свёрткой индекса.
+
+#### `field_enums`: `whitelist_validated_input`
+
+Если в правиле задано **`"whitelist_validated_input": true`** (и в **`options`** есть допустимые значения — в т.ч. после **`options_from_sheet`**), в режиме **«По полям»** для этого листа JSON показывается **однострочный `<input type="text">`**, а не `<select>`. Поведение подсветки (классы в **`app.css`**, обёртка **`.json-leaf-validated-wrap`**):
+
+| Состояние ввода | Внешний вид |
+|-----------------|-------------|
+| Пусто (после **`trim`**) | Обычный нейтральный вид. |
+| Непусто, значение **нет** в множестве **`value`** из **`options`** | Серый фон, **красный** текст (частичный ввод или опечатка). |
+| Непусто, значение **совпало** с одним из **`value`** | Светло-зелёный фон, **зелёный** текст. |
+
+Сервер **не** блокирует сохранение «красного» значения — только визуальная подсказка оператору.
+
+**Примеры:**
+
+1. **`getCondition.rewards.rewardCode`** — список кодов из БД (**`REWARD_TYPE=BADGE`**), **`whitelist_validated_input`**: true — ввод кода бейджа с подсветкой.
+
+2. **`itemGroupAmount.itemParamAmount`** — статический список строк **`"0"` … `"100"`** + **`whitelist_validated_input`**: true — ввод лимита 0…100 как текста с той же подсветкой.
+
+Для **`getCondition.rewards.amount`** используется обычный **`field_enums`** без whitelist — **`select`** с вариантами **`1`**, **`2`**, **`3`**.
+
+#### Связка модулей
+
+- **`src/field_enum_sheet_options.py`** — **`label_template_placeholders`**, **`format_label_from_template`**, выборка **`label_column`** или шаблона в **`_fetch_options_from_sheet`**.
+- **`src/config_validate.py`** — для **`options_from_sheet`** требуется **`value_column`** и пара **`label_column` / `label_template`**.
+- **`src/editor_config.py`** — в докстрингах упомянуты **`json_object_array`**, **`whitelist_validated_input`**.
+
 ---
 
 ## 5. Основные функции модулей
@@ -306,7 +393,7 @@
 | `relations.build_context_for_row` | Словарь блоков «Связи» для шаблона |
 | `relations._link_item`, `_preview_for_item`, `_group_link_preview`, **`_reward_link_preview`** | Одна связанная строка: `sheet_code`, `row_id`, `cells`, подпись `preview` (**GROUP** — **`GROUP_CODE : GROUP_VALUE`**; **REWARD-LINK** — **`GROUP_CODE : REWARD_CODE`**; иначе — первое известное поле ключа из `_PREVIEW_KEYS`, **«: значение»**) |
 | `static/trail_nav.js` | Цепочка возврата в `sessionStorage` (ключ `spod_edit_trail`), обработка `?from_list=1`, крошки, «Шаг назад», сброс при переходе на главную |
-| `static/row_editor.js` (фрагмент) | `canonicalPayload` / `isRowDirty` — снимок полей для сравнения с начальным; `installLeaveGuard` — модалка ухода, `beforeunload`, перехват навигации; `saveRowThenExecutePending` — сохранение из модалки и затем переход; `executePendingAfterNavigate` — выполнение отложенного действия после выбора в модалке; `refreshDirtyState` — баннер, блокировка кнопок дока; **`useToggleForEnumRule`**, **`applySpodYnToggleLayout`**, **`buildSpodYnToggleDom`**, **`flushSpodYnToggleLayouts`**, **`bindSpodYnToggleResizeGuard`** — переключатель для **`field_enums`** с двумя опциями (**раздел 4.4**); **`window.SpodYnField`** — то же для мастера |
+| `static/row_editor.js` (фрагмент) | `canonicalPayload` / `isRowDirty` — снимок полей для сравнения с начальным; `installLeaveGuard` — модалка ухода, `beforeunload`, перехват навигации; `saveRowThenExecutePending` — сохранение из модалки и затем переход; `executePendingAfterNavigate` — выполнение отложенного действия после выбора в модалке; `refreshDirtyState` — баннер, блокировка кнопок дока; **`useToggleForEnumRule`**, **`applySpodYnToggleLayout`**, **`buildSpodYnToggleDom`**, **`flushSpodYnToggleLayouts`**, **`bindSpodYnToggleResizeGuard`** — переключатель для **`field_enums`** с двумя опциями (**раздел 4.4**); **`json_object_array`** / **`appendOneJsonObjectArrayHost`**, **`buildJsonFromFields`** по **`data-json-object-array-host`**; **`whitelist_validated_input`**, **`wireWhitelistValidatedInputs`**, **`flushWhitelistValidatedLayouts`** (**раздел 4.5**); **`wireJsonLeafPostRender`** — enum + whitelist + Y/N после пересборки DOM; **`window.SpodYnField`** — то же для мастера |
 | `server_stop.schedule_local_shutdown` | Фоновый поток: задержка, завершение дочерних процессов (POSIX), SIGTERM/SIGKILL процессу панели |
 | `app.admin_stop` | POST `/admin/stop`: логирование, вызов `schedule_local_shutdown`, HTML «Сервер останавливается» |
 | `app.index`, `sheet_list`, `row_detail` | HTML-страницы; **`sheet_list`** — для **GROUP** строки списка по **`CONTEST_CODE`**; фильтры **`contest_type`** (CONTEST-DATA), **`reward_type`** (REWARD / REWARD-LINK), **`season`** (TOURNAMENT-SCHEDULE); **`sheet_list_display`** + **`search_blob`** / **`group_list_aggregate_search_blob`** и **`q`**; **`row_detail`** — `editor_bootstrap_json`, для **GROUP** — несколько блоков и **`row-editor-group-blocks`** |
@@ -325,7 +412,9 @@
 | `wizard_contest.upsert_wizard_draft`, `list_wizard_drafts`, `get_wizard_draft`, `delete_wizard_draft` | CRUD черновиков в таблице `wizard_draft` |
 | `db.ensure_wizard_draft_table` | Создание таблицы `wizard_draft` при старте приложения |
 | `static/spod_date_picker.js` | `SpodDatePicker.buildShell`, `hintIsDate`, модальное окно даты (год до 4000, кнопка **4000-01-01**) |
-| `editor_config.flatten_field_enums`, `flatten_editor_textareas`, `flatten_editor_field_ui`, **`flatten_editor_field_numeric`** | Подготовка списков для клиента из сгруппированного JSON; в **`flatten_field_enums`** правило перечисления передаётся целиком (включая опциональный **`input_display`** — **раздел 4.4**); числовые правила попадают в **`fieldNumeric`** bootstrap и в схему мастера |
+| `editor_config.flatten_field_enums`, `flatten_editor_textareas`, `flatten_editor_field_ui`, **`flatten_editor_field_numeric`** | Подготовка списков для клиента из сгруппированного JSON; в **`flatten_field_enums`** правило перечисления передаётся целиком (включая опциональный **`input_display`** — **раздел 4.4**, **`whitelist_validated_input`** — **раздел 4.5**); в **`flatten_editor_textareas`** описаны **`json_object_array`** / **`object_array_item_keys`**; числовые правила попадают в **`fieldNumeric`** bootstrap и в схему мастера |
+| `field_enum_sheet_options.merge_field_enums_with_sheet_options`, **`label_template_placeholders`**, **`format_label_from_template`** | Подмешивание **`options_from_sheet`** в **`field_enums`**; опциональная составная подпись **`label_template`** вместо **`label_column`** |
+| `config_validate.validate_field_enum_sheet_options` | Проверка **`options_from_sheet`**: лист, **`value_column`**, **`label_column`** или **`label_template`** с плейсхолдерами **`{COLUMN}`** |
 | `config_validate.validate_sheet_bindings` | Предупреждения в лог при несовпадении `sheet_bindings` и `sheets` |
 | `app._json_for_script_tag` | Безопасная вставка JSON внутрь `<script type="application/json">` |
 | `app.row_save` | POST JSON тела «колонка → значение»; при отличии — новая версия в таблице листа (`is_current`, `replaces_row_id`), редирект на новый `id`; при отсутствии изменений — 400 |
@@ -357,7 +446,7 @@ curl -X PUT "http://127.0.0.1:8765/wizard/new-contest/draft" \
 | Метод | Путь | Описание |
 |--------|------|----------|
 | GET | `/` | Главная, карточки листов |
-| GET | `/sheet/{code}` | Список актуальных строк; **`q`** — подстрока по `search_blob`; **`contest_type`** (повторяющийся) — для **CONTEST-DATA** по **`CONTEST_TYPE`**; **`reward_type`** — для **REWARD** / **REWARD-LINK** по типу награды; **`season`** — для **TOURNAMENT-SCHEDULE** по **`seasonCode`** в **TARGET_TYPE**; пустой набор отмеченных значений в query = без фильтра по соответствующему полю |
+| GET | `/sheet/{code}` | Список актуальных строк; **`q`** — подстрока по `search_blob`; глобальные фильтры **`gf_*`** (модуль **`global_sheet_filters`**, см. **раздел 6c**) — сужение по **`CONTEST_CODE`** и связанным листам; пустой набор отмеченных значений для параметра = без ограничения по этому параметру |
 | GET | `/sheet/{code}/row/{id}` | Карточка строки; опционально `?from_list=1` — задать начало цепочки «назад» со списка этого листа (обрабатывает `trail_nav.js`) |
 | POST | `/sheet/{code}/row/{id}/save` | Сохранение (JSON): при изменениях — новая версия строки, ответ **303** с `Location` на новый `id`; без изменений — **400** |
 | POST | `/admin/reimport` | Переимпорт CSV |
@@ -373,9 +462,11 @@ curl -X PUT "http://127.0.0.1:8765/wizard/new-contest/draft" \
 
 ---
 
-## 6c. Списки CONTEST-DATA, REWARD, REWARD-LINK и TOURNAMENT-SCHEDULE: колонки, фильтры и поиск
+## 6c. Списки листов: колонки, глобальные фильтры по связям и поиск
 
-Страницы **`GET /sheet/CONTEST-DATA`**, **`GET /sheet/REWARD`**, **`GET /sheet/REWARD-LINK`** и **`GET /sheet/TOURNAMENT-SCHEDULE`** используют общий обработчик **`sheet_list`** (`src/app.py`) и общий фрагмент формы в **`src/templates/sheet_list.html`**: класс **`sheet-list-form-reward`** на **`<form>`** (без класса **`search`**, чтобы не срабатывал горизонтальный `flex` у глобального `.search` — иначе поле поиска оказывалось справа от фильтра). Для **CONTEST-DATA** — фильтр по **`contest_type`** (колонка **`CONTEST_TYPE`**); для **REWARD** и **REWARD-LINK** — по **`reward_type`**; для **TOURNAMENT-SCHEDULE** — по **`season`** (коды из **`season_filter_options`**). Все эти фильтры — **несколько одноимённых параметров в query** при отправке формы **GET** (отмеченные чекбоксы).
+**С версии 0.2.42** все листы со списком (**CONTEST-DATA**, **GROUP**, **INDICATOR**, **REWARD**, **REWARD-LINK**, **TOURNAMENT-SCHEDULE**) используют один обработчик **`sheet_list`** и одну форму в **`sheet_list.html`**: классы **`sheet-list-form-reward sheet-list-form-global`** на **`<form>`** (без класса **`search`** — иначе поле поиска уезжает вправо). Фильтры — параметры **`gf_*`** (несколько одноимённых значений на измерение); логика пересечения множеств **`CONTEST_CODE`** и взаимного сужения вариантов — в **`src/global_sheet_filters.py`** (план: **`Docs/ПЛАН_ГЛОБАЛЬНЫЕ_ФИЛЬТРЫ_СПИСКОВ_ПО_СВЯЗЯМ.md`**). Ранее использовавшиеся отдельные query-параметры **`contest_type`**, **`reward_type`**, **`season`**, **`calc_mode`** **не** используются.
+
+Блок фильтров в **`<details>`** (по умолчанию раскрыт): компактная сетка чипов (**`app.css`**: **`.global-filters-*`**, **`.sheet-list-filter-*--compact`**).
 
 ### 6c.1. Порядок обработки запроса
 
@@ -388,17 +479,7 @@ curl -X PUT "http://127.0.0.1:8765/wizard/new-contest/draft" \
    - **`reward_links_by_contest`** — все записи REWARD-LINK по `CONTEST_CODE` (в т.ч. для списка INDICATOR);
    - **`reward_links_by_reward`** — записи REWARD-LINK, сгруппированные по **`REWARD_CODE`**: для каждой награды — список словарей с **`CONTEST_CODE`**, **`GROUP_CODE`**, **`REWARD_CODE`**.
 
-3. **Фильтр по типу конкурса (`contest_type`).** Только для **`CONTEST-DATA`**:
-   - **`contest_type_filter_options(CFG, for_multiselect_list=True)`** — уникальные значения **`CONTEST_TYPE`** из **`field_enums`** (лист **CONTEST-DATA**, без **`json_path`**), каждая опция — **`{ "label", "value" }`**.
-   - **`getlist("contest_type")`**; в выборку попадают только значения из белого списка; **ни один** отмеченный чекбокс — без фильтра по типу.
-
-3a. **Фильтр по типу награды (`reward_type`).** Для листов **`REWARD`** и **`REWARD-LINK`**:
-   - **`reward_type_filter_options(CFG, for_multiselect_list=True)`** возвращает только реальные типы (без пункта «ВСЕ»): уникальные значения из **`field_enums`** с **`sheet_code`: "REWARD"**, **`column`: "REWARD_TYPE"**, без **`json_path`**. Подписи — из **`label`**, если опция задана объектом.
-   - Из запроса читается **`request.query_params.getlist("reward_type")`**; в выборку попадают только значения из белого списка опций.
-   - Если список выбранных типов **непустой**, строка остаётся только если тип награды входит в выбор: для **REWARD** — **`REWARD_TYPE`** строки; для **REWARD-LINK** — тип награды из справочника **`reward_type_by_reward`** по **`REWARD_CODE`** связи.
-   - **Пустой** набор выбранных значений в query — **без фильтра** по типу (показываются все строки, далее только **`q`**).
-
-3b. **Фильтр по сезону (`season`).** Только для **`TOURNAMENT-SCHEDULE`**: **`season_filter_options(lu)`** по уникальным **`seasonCode`** из **`TARGET_TYPE`**; **`getlist("season")`**; непустой список — строка проходит, если **`target_type_season_code(TARGET_TYPE)`** входит в выбор; пустой список — без фильтра по сезону.
+3. **Глобальные фильтры (`gf_*`).** На каждый запрос строится **`GlobalFilterIndex`**: плоские поля и JSON-фрагменты **CONTEST-DATA**, уровни **GROUP**, показатели **INDICATOR**, поля и **TARGET_TYPE.seasonCode** у **TOURNAMENT-SCHEDULE**, тип и **REWARD_ADD_DATA** у наград, связанных с конкурсом через **REWARD-LINK**. Выбор читается **`selection_from_request`** (whitelist по universe из данных). Множество допустимых **`CONTEST_CODE`** — пересечение условий по всем измерениям с непустым выбором (**И** между параметрами, **ИЛИ** внутри одного параметра). Строка **REWARD** проходит, если награда связана хотя бы с одним конкурсом из этого множества. Варианты чипов для измерения **X** пересчитываются по конкурсам, уже удовлетворяющим **всем фильтрам кроме X** (взаимное сужение). Подписи для **`gf_contest_type`** и **`gf_reward_type`** подтягиваются из **`field_enums`** через **`contest_type_filter_options`** / **`reward_type_filter_options`**.
 
 4. **Подписи и колонки для таблицы.** Для каждой строки, прошедшей фильтры листа, вызывается **`sheet_list_display.display_for_sheet_row(code, cells, lu)`**. Для **CONTEST-DATA** в объекте отображения есть **`contest_type_col`** — значение **`CONTEST_TYPE`** из ячеек (колонка «Тип конкурса»). Для **REWARD** функция возвращает в т.ч.:
    - **`primary_key`** — **`REWARD_CODE`** (колонка «Ключ» в таблице);
@@ -416,13 +497,13 @@ curl -X PUT "http://127.0.0.1:8765/wizard/new-contest/draft" \
 
 5. **Поиск по подстроке `q`.** Функция **`search_blob(cells, disp)`** собирает одну строку в **нижнем регистре**: сериализованный JSON всех ячеек строки плюс текстовые поля из результата **`display_for_sheet_row`**, включая **`title_line`**, **`reward_name_col`**, **`group_codes_col`**, а для **REWARD-LINK** — в том числе **`reward_link_contest_code`**, **`reward_link_reward_code`**, **`reward_link_group_code`**, названия награды и конкурса. Строка попадает в итоговый список, только если после **`strip()`** параметр **`q`**, приведённый к нижнему регистру, **входит как подстрока** в **`search_blob`**. Для **REWARD** в подписи попадают и названия конкурсов из **`title_line`**, и полный JSON награды (в т.ч. **`REWARD_DESCRIPTION`** в ячейках).
 
-6. **Ответ шаблону.** В **`sheet_list.html`** передаются **`sheet_code`**, **`sheet_title`**, **`rows`**, **`q`**, а также **`contest_type_options`**, **`contest_type_selected_list`** (для CONTEST-DATA; иначе пустые), **`reward_type_options`**, **`reward_type_selected_list`** (для REWARD и REWARD-LINK; иначе пустые) и **`season_options`**, **`season_selected_list`** (для TOURNAMENT-SCHEDULE; иначе пустые).
+6. **Ответ шаблону.** В **`sheet_list.html`** передаются **`sheet_code`**, **`sheet_title`**, **`rows`**, **`q`**, **`global_filter_blocks`** (список блоков с **`label`**, **`param`**, **`options`**, **`selected_list`**) и флаг **`apply_global_filters`**.
 
-### 6c.2. Интерфейс: фильтр и поиск (CONTEST-DATA, REWARD, REWARD-LINK, TOURNAMENT-SCHEDULE)
+### 6c.2. Интерфейс: фильтр и поиск
 
-- Под заголовком листа — краткая подсказка по колонкам и фильтру.
-- **Форма** только с классом **`sheet-list-form-reward`** (не смешивать с **`search`**): вертикальный **`flex`**: сверху блок **`sheet-list-filters`**, под ним строка **`sheet-list-search-full`** на **всю ширину** панели (поле **`q`** + кнопка «Найти»).
-- **Мультивыбор:** для каждого фильтра — строка **`sheet-list-filter-row`**: слева панель **`sheet-list-filter-iconbar`** (две кнопки: отметить все / снять все), справа **`sheet-list-filter-chips-wrap`** с **`flex-wrap`** на всю оставшуюся ширину; внутри — **`label.sheet-list-filter-chip`** + **`input type="checkbox"`** с **`name="contest_type"`** / **`reward_type`** / **`season`** и **`value`** из опции. Вертикальное выравнивание иконбара — по центру относительно первой строки чипов (**`align-items: center`** у **`sheet-list-filter-row`**). При изменении любого чекбокса — **`change`** на форме → **`form.submit()`** (**GET**).
+- Под заголовком листа — краткая подсказка по колонкам.
+- **Форма** с классами **`sheet-list-form-reward sheet-list-form-global`**: сверху **`<details class="global-filters-details">`** с сеткой **`global-filters-grid`** из компактных блоков чипов, под ним строка **`sheet-list-search-full`** (поле **`q`** + «Найти»).
+- **Мультивыбор:** для каждого измерения — **`sheet-list-filter-row`** с иконками «все / снять» и **`sheet-list-filter-chips-wrap--compact`**; **`name`** = соответствующий **`gf_*`**. При изменении чекбокса — **`form.submit()`** (**GET**). Кнопка **«Сбросить все фильтры»** снимает отметки со **всех** чекбоксов **`gf_*`** и снова отправляет форму (текст в поле **`q`** сохраняется).
 - **Кнопки «все / снять»** выделяют или снимают все чекбоксы в соответствующем **`data-sheet-list-filter-target`**, затем отправляют форму. «Снять все» даёт пустой набор параметров в query — без фильтра.
 - Стили: **`src/static/app.css`** — блок списков с фильтрами-чипами (`.sheet-list-form-reward`, `.sheet-list-filter-row`, `.sheet-list-filter-chip`, `.sheet-list-search-full` и т.д.).
 - Таблица списка **REWARD-LINK**: на элемент **`<table>`** добавляется класс **`.data-list-reward-link`** (рядом с **`.data-list-wide`**). Задано **`table-layout: fixed`**, **`min-width: 0`** у ячеек; колонки **«Код награды»** и **«Уровень»** — ограниченная ширина в **`ch`**, **`text-overflow: ellipsis`** для длинных кодов; **«Название награды»** и **«Название турнира»** — доли ширины (~**36%** каждая) с **`min-width`**, перенос длинного текста (**`overflow-wrap`**, **`word-break`**). Для **`.data-list-reward-link .cell-mono`** снят избыточный потолок **`max-width`**, заданный у общего **`.data-list-wide .cell-mono`**, чтобы узкие колонки не разъезжались.
@@ -601,7 +682,7 @@ python main.py
 
 Откройте в браузере адрес из консоли (по умолчанию `http://127.0.0.1:8765/`).
 
-**Старт приложения и БД:** при поднятии FastAPI выполняются `init_schema`, при необходимости добавление `sheet.headers_json`, миграция удаления устаревшей `data_row`, создание/синхронизация таблиц `spod_sheet_*` с текущими CSV (`sheet_storage.rebuild_all_sheet_tables_from_config`). Если таблица `sheet` пуста — автоматический полный импорт из `IN/SPOD` и пересчёт консистентности.
+**Старт приложения и БД:** при поднятии FastAPI выполняются `init_schema`, при необходимости добавление `sheet.headers_json`, миграция удаления устаревшей `data_row`, создание/синхронизация таблиц `spod_sheet_*` с текущими CSV (`sheet_storage.rebuild_all_sheet_tables_from_config`). Если набор колонок листа изменился (в т.ч. из‑за `json_columns`), таблица пересоздаётся и **сразу** подгружается CSV этого листа (`ingest.reimport_sheet`), иначе при непустом реестре `sheet` списки остались бы пустыми. Если таблица `sheet` пуста — автоматический полный импорт из `IN/SPOD` и пересчёт консистентности.
 
 Проверки: `python -m unittest discover -s src/Tests -p "test_*.py"`
 
@@ -667,6 +748,12 @@ python main.py
 | 0.2.39 | **`field_enums`**: добавлен опциональный ключ **`input_display`** (`"toggle"` | `"select"` | отсутствует) — управление видом поля с двумя вариантами: переключатель с подписями из **`options`** или принудительный `<select>`; при **трёх и более** опциях всегда список. В **`config.json`** для всех текущих пар **«Да»/«Нет»** (`Y`/`N`) задано **`"input_display": "toggle"`**. Клиент **`row_editor.js`**: **`useToggleForEnumRule`**, нормализация значений двух опций, **`buildSpodYnToggleDom`** / **`syncSpodYnToggleVisual`**, **`applySpodYnToggleLayout`** (измерение ширины текста в px, потолок **50%** ширины блока поля, многострочный режим до **трёх** строк при нехватке места, **`ResizeObserver`** на контейнере); экспорт **`window.SpodYnField`** для **`wizard_contest.js`**. Стили **`app.css`**: **`.spod-yn-wrap`**, **`.spod-yn-track`**, бегунок, **`data-spod-yn-multiline`**. **`editor_config.py`**: в докстринге **`flatten_field_enums`** описан **`input_display`**. Версия статики **`STATIC_ASSET_VERSION`** в **`app.py`**. Документация: **раздел 4.4** README, обновлены **разделы 2, 3, 4, 5, 8**. |
 | 0.2.40 | Переключатель **`input_display`: `"toggle"`**: исправлена **`--spod-yn-text-px`** — значение задаётся **в пикселях с суффиксом `px`** (валидный **`calc()`** в CSS). Размеры фиксируются **батчем** **`flushSpodYnToggleLayouts`**, без отдельных циклов **`fonts.ready` / rAF на каждый toggle**; **`ResizeObserver`** с порогом **24 px** по ширине блока поля и debounce. Точки вызова батча: **`activateDraftVariant`**, пересборка **`REWARD_ADD_DATA`**, **`wizard_contest.js`** после **`render()`**, сценарии JSON-редактора и **`json_scalar_array`**, мультистраничный **GROUP**. Экспорт **`SpodYnField.flushSpodYnToggleLayouts`**. Обновлены **`README.md`** (**раздел 4.4**), история версий. |
 | 0.2.41 | Документация и UI-метаданные полей: в **`config.json`** (блок **`editor_field_ui`**) обновлены `label`/`description` для листов **CONTEST-DATA/GROUP/REWARD/REWARD-LINK/INDICATOR/TOURNAMENT-SCHEDULE** и выполнен второй проход нормализации вложенных `paths` для **`CONTEST_FEATURE`**, **`REWARD_ADD_DATA`**, **`FILTER_PERIOD_ARR`**, **`INDICATOR_FILTER`** (убраны техничные подписи вида `feature[2]`, `ignoreConditions[10]`, `itemGroupAmount[3].itemParam`, введён единый формат «элемент N»). В **`row_editor.js`** hover-подсказки для JSON полей теперь показывают путь ключа внутри JSON (`json_path: COLUMN.key...`) вместо только имени колонки. В **`relations.py`** добавлен блок связей **«Награды»** через цепочку **CONTEST_CODE → REWARD-LINK → REWARD_CODE → REWARD**. Обновлены документы **`Docs/GAMIFICATION_FIELD_LABELS_PROPOSAL.md`**, **`Docs/GAMIFICATION_PATHS_LABELS_PLAN.md`**, **`Docs/JSON/SPOD_INPUT_DATA_CATALOG.md`**. |
+| 0.2.42 | Списки всех листов: **единый блок глобальных фильтров** по связям через **`CONTEST_CODE`** (параметры запроса **`gf_*`**), заменяющий разрозненные **`contest_type`**, **`reward_type`**, **`season`**, **`calc_mode`**. Реализация: **`src/global_sheet_filters.py`** (индекс по данным, пересечение множеств конкурсов, взаимное сужение вариантов без текущего измерения), **`app.py`** → **`sheet_list`**, **`sheet_list.html`**, стили **`.global-filters-*`** в **`app.css`**. Компактная сетка чипов внутри сворачиваемого **`<details>`**; пустой набор отметок = без ограничения по параметру. Тесты: **`src/Tests/test_global_sheet_filters.py`**. План: **`Docs/ПЛАН_ГЛОБАЛЬНЫЕ_ФИЛЬТРЫ_СПИСКОВ_ПО_СВЯЗЯМ.md`**. |
+| 0.2.43 | Список листов: кнопка **«Сбросить все фильтры»** — снимает все чекбоксы **`gf_*`** одним действием и перезагружает страницу (**`sheet_list.html`**, скрипт **`data-global-filters-reset-all`**, стили **`.global-filters-toolbar`** в **`app.css`**); строка поиска **`q`** не сбрасывается. Версия статики **`STATIC_ASSET_VERSION`**. README **раздел 6c.2**. |
+| 0.2.44 | Исправление пустых списков после смены **`json_columns`** (например добавление **`CONTEST_PERIOD`** у **CONTEST-DATA**): при пересоздании **`spod_sheet_*`** автоматический **`import_all`** не вызывался, если реестр **`sheet`** уже был заполнен — строки не вставлялись заново. Добавлен **`ingest.reimport_sheet`**, вызов из **`rebuild_all_sheet_tables_from_config`** для каждого пересозданного листа и **`consistency.run_all_checks`** после переимпорта. Обновлён абзац про старт в README. |
+| 0.2.45 | **Глобальные фильтры (`gf_*`):** если измерение привязано к тому же листу, что и список (**`DIM_ENUM_RULE_BINDINGS`**), строка отбирается **по значению поля в строке** (плоское или JSON-путь), с **ИЛИ** внутри одного параметра; пересечение по **`CONTEST_CODE`** (**`matching_contests`**) остаётся для измерений **с других листов**. Лист **GROUP** (агрегат по конкурсу): в «Связи» попадают только уровни, прошедшие нативные фильтры. Реализация: **`row_matches_native_global_filters`**, **`has_foreign_active_global_dimensions`**, **`_tokens_from_row_binding`** в **`global_sheet_filters.py`**, **`sheet_list`** в **`app.py`**; тесты в **`test_global_sheet_filters.py`**. |
+| 0.2.46 | **`field_enums.options_from_sheet`:** динамические варианты выпадающих списков из актуальных строк листа SQLite (`source_sheet_code`, `value_column`, `label_column`, опционально `where` с `equals` / `in`, `order_by`). Подмешивание при отдаче **`fieldEnums`** в карточке строки и мастере (**`field_enum_sheet_options.py`**, **`app.py`**, **`wizard_contest.py`**). Пример: **`nonRewardCode`** — все **`REWARD_CODE`** с **`REWARD_TYPE=ITEM`**, подпись **`FULL_NAME`** (`config.json`). В **`row_editor.js`** — сопоставление пути **`…, индекс массива, nonRewardCode`** с правилом **`json_path`** без индекса. Валидация конфига — **`config_validate.validate_field_enum_sheet_options`**. Тесты **`test_field_enum_sheet_options.py`**, версия статики **`STATIC_ASSET_VERSION`**. |
+| 0.2.47 | **JSON «массив объектов» и расширения перечислений:** в **`editor_textareas`** для **`REWARD_ADD_DATA`** заданы **`json_object_array`** + **`object_array_item_keys`** для **`getCondition.nonRewards`** (исключающие ITEM-коды), **`getCondition.rewards`** (пары **`rewardCode`** + **`amount`** 1/2/3), **`itemGroupAmount`** (пары **`itemParam`** — месяцы из **`field_enums`**, **`itemParamAmount`** — строка 0…100 с **`whitelist_validated_input`**). **`field_enums`:** **`label_template`** в **`options_from_sheet`** (составная подпись **`{FULL_NAME}: ["{REWARD_CODE}"]`**); **`whitelist_validated_input`** для **`rewardCode`** (BADGE из БД) и **`itemParamAmount`** (статический список **0…100**) — текстовое поле с подсветкой (нейтрально / неверно / верно), стили **`.json-leaf-validated-wrap-*`** в **`app.css`**. Клиент **`row_editor.js`**: хост **`appendOneJsonObjectArrayHost`**, **`wireJsonLeafPostRender`**, ослабленная проверка **`isObjectArrayValueForHint`** для неполных объектов в массиве; **`findFieldUi`** для путей с индексом. Сервер: **`field_enum_sheet_options`** (`label_template_placeholders`, **`format_label_from_template`**), **`config_validate`**. **`editor_field_ui`:** единые пути без фиксированных индексов для вложенных полей массивов. Документация: **README раздел 4.5**, **`Docs/GAMIFICATION_PATHS_LABELS_PLAN.md`**, **`Docs/JSON/SPOD_INPUT_DATA_CATALOG.md`**. Версия статики **`STATIC_ASSET_VERSION`**. |
 
 ---
 
