@@ -59,7 +59,7 @@
   {% elif sheet_code == "TOURNAMENT-SCHEDULE" %}
   <p class="muted">Код листа: <strong>{{ sheet_code }}</strong> · «Сезон» — <code>seasonCode</code> из JSON <code>TARGET_TYPE</code> (также в фильтрах «Расписание · seasonCode»).</p>
   {% elif sheet_code == "CONTEST-DATA" %}
-  <p class="muted">Код листа: <strong>{{ sheet_code }}</strong> · «Консистентность» перед «Просмотр». Глобальные фильтры включают поля конкурса и связанных листов.</p>
+  <p class="muted">Код листа: <strong>{{ sheet_code }}</strong> · колонка консистентности в таблице списка отключена (<code>consistency_column.show</code> в конфиге). Глобальные фильтры включают поля конкурса и связанных листов.</p>
   {% elif sheet_code == "GROUP" %}
   <p class="muted">Код листа: <strong>{{ sheet_code }}</strong> · одна строка на конкурс. «Просмотр» — все уровни GROUP этого конкурса.</p>
   {% else %}
