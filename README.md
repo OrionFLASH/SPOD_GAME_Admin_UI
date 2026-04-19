@@ -18,6 +18,8 @@
   - [4.3. Подписи в `field_enums` (`label` / `value`)](#readme-43)
   - [4.4. Режим отображения перечисления: `input_display`](#readme-44)
   - [4.5. Массивы объектов в JSON и расширения перечислений](#readme-45)
+  - [4.6. Структура `editor_field_definitions` (объединённый формат)](#readme-46)
+  - [4.7. Служебное форматирование массивов `options` в `config.json`](#readme-47)
 - [5. Основные функции модулей](#readme-5)
 - [6. HTTP-маршруты](#readme-6-http)
 
@@ -86,7 +88,7 @@
 
 - **Стек:** Python 3, FastAPI, Uvicorn, Jinja2, стандартный `sqlite3`, статика и шаблоны в `src/`.
 - **Конфигурация:** `config.json` — пути, порт, список листов `sheets` (импорт и UI: в т.ч. **`file`** — имя CSV в `IN/SPOD`), справочник **`sheet_bindings`**, пояснение модели БД `database_model`, объединённое описание полей редактора **`editor_field_definitions`** (или отдельно legacy: **`field_enums`**, **`editor_textareas`**, **`editor_field_numeric`**, **`editor_field_ui`**), порог длинного текста **`editor_long_text_threshold`**, режим **`consistency`**. Списки листов: **`sheet_list_lookups`** (справочники для колонок), **`sheet_list_columns`** по каждому листу — **`rules`** (колонки данных, **`value`** — откуда брать значение), **`consistency_column`** (показ / подпись / класс колонки консистентности) — см. **разделы 6c.6** и **6c.7** (пошаговое добавление колонки).
-- **Развёртка настроек редактора:** `src/editor_config.py` — из **`editor_field_definitions`** (объединённые секции по полю) или из legacy-ключей **`field_enums`** / **`editor_textareas`** / **`editor_field_ui`** / **`editor_field_numeric`** собирает плоские списки для `row_editor.js` и мастера.
+- **Развёртка настроек редактора:** `src/editor_config.py` — из **`editor_field_definitions`** (объединённые секции по полю; см. **раздел 4.6**) или из legacy-ключей **`field_enums`** / **`editor_textareas`** / **`editor_field_ui`** / **`editor_field_numeric`** собирает плоские списки для `row_editor.js` и мастера. Оформление длинных массивов **`options`** в **`config.json`** (читаемость в Git) — **раздел 4.7**, скрипт **`scripts/format_config_options_lines.py`**.
 - **Проверка конфига:** `src/config_validate.py` — при старте: **`validate_editor_field_definitions`**, **`validate_sheet_bindings`**, **`validate_field_enum_sheet_options`**, **`validate_sheet_list_lookups`**, **`validate_global_filter_labels`**, **`validate_sheet_list_column_values`** (предупреждения в лог).
 - **БД:** файл `OUT/DB/tournament_admin.sqlite`; реестр листов **`sheet`** (в т.ч. `headers_json` — порядок колонок CSV); для каждого листа — отдельная таблица **`spod_sheet_<КОД>`** (`src/sheet_storage.py`, `src/db.py`): колонки как в CSV, JSON-колонки как TEXT с полным JSON, плюс денормализованные листья **`j__<имя_JSON_колонки>__<путь>`** для SQL-запросов по отдельным полям. Версионирование: `is_current`, `replaces_row_id`, `sort_key`, `row_index`, `sheet_id` — как раньше по смыслу, но на физической таблице листа. Повторное сохранение без изменений — HTTP 400. **`wizard_draft`** не участвует в импорте CSV. При обнаружении устаревшей таблицы **`data_row`** она удаляется, данные листов нужно снова загрузить импортом (автоматически при пустом `sheet`).
 - **Импорт:** `src/ingest.py` читает CSV, создаёт/пересоздаёт таблицу листа и вставляет строки с денормализацией JSON.
@@ -142,6 +144,7 @@
 | `src/templates/` | Шаблоны Jinja2; **`sheet_list.html`** — таблица списка: **`list_columns`**, **`consistency_column`** (показ / подпись / класс) |
 | `src/Tests/` | Модульные проверки (unittest) |
 | `scripts/generate_editor_field_ui.py` | Заполнение/обновление подписей полей в `config.json` по CSV (исторически блок **`editor_field_ui`**). В репозитории метаданные редактора собраны в **`editor_field_definitions`**; после прогона перенесите сгенерированные правила в секции **`ui`** объединённого блока или выполните пересборку через **`build_editor_field_definitions_from_legacy`** / миграцию. Сервер отдаёт клиенту плоский список через **`flatten_editor_field_ui`**. |
+| `scripts/format_config_options_lines.py` | Служебное переформатирование **`config.json`**: компактная запись массивов по ключу **`options`** (см. **раздел 4.7**). Не изменяет смысл данных; перезаписывает файл целиком своим сериализатором. |
 
 ---
 
@@ -160,7 +163,7 @@
 | `database_model` | Справка: `sheet`, префикс таблиц `spod_sheet_*`, ограничения FK между листами; массив **`logical_relationships_ru`** — зафиксированная логика связей сущностей (дублирует доменную модель для людей и для согласования с `consistency.py`) |
 | `sheet_bindings[]` | Для каждого листа: `code`, опционально `title` — каждый `sheets[].code` должен быть перечислен; имя CSV только в `sheets[].file` |
 | `editor_long_text_threshold` | Минимальная длина строки (символы), после которой в JSON-редакторе показывается textarea вместо однострочного поля |
-| `editor_field_definitions[]` | **Объединённое описание полей редактора** по листам: `sheet_code` + массив **`rules`**. Каждое правило — **`column`**, опционально **`json_path`**, опционально секции **`ui`**, **`enum`**, **`numeric`**, **`textarea`** (содержимое соответствует бывшим ключам **`editor_field_ui`**, **`field_enums`**, **`editor_field_numeric`**, **`editor_textareas`**). Допускается **`paths`** (группировка путей для UI, как раньше у **`editor_field_ui`**). В памяти **`src/editor_config.py`** разворачивает в те же плоские списки для **`row_editor.js`**. Если **`editor_field_definitions`** отсутствует или пустой массив, используются отдельно заданные четыре legacy-ключа (см. строку ниже). Валидация: **`validate_editor_field_definitions`**. Скрипт миграции из legacy: **`scripts/migrate_editor_field_definitions.py`**. Семантика секций — **разделы 4.2–4.5**. |
+| `editor_field_definitions[]` | **Объединённое описание полей редактора** по листам: `sheet_code` + массив **`rules`**. Каждое правило — **`column`**, опционально **`json_path`**, опционально секции **`ui`**, **`enum`**, **`numeric`**, **`textarea`** (содержимое соответствует бывшим ключам **`editor_field_ui`**, **`field_enums`**, **`editor_field_numeric`**, **`editor_textareas`**). Допускается **`paths`** (группировка путей для UI, как раньше у **`editor_field_ui`**). В памяти **`src/editor_config.py`** разворачивает в те же плоские списки для **`row_editor.js`**. Если **`editor_field_definitions`** отсутствует или пустой массив, используются отдельно заданные четыре legacy-ключа (см. строку ниже). Валидация: **`validate_editor_field_definitions`**. Скрипт миграции из legacy: **`scripts/migrate_editor_field_definitions.py`**. Полная схема правил и вложенности — **раздел 4.6**; семантика секций по смыслу — **разделы 4.2–4.5**. |
 | *(legacy, опционально)* | Вместо объединённого блока можно задать отдельно **`field_enums`**, **`editor_field_ui`**, **`editor_field_numeric`**, **`editor_textareas`** — те же **`flatten_*`** в **`editor_config.py`**. Перечисления: **`field_enums`** — `options`, `allow_custom`, **`input_display`** (**раздел 4.4**), **`whitelist_validated_input`** (**раздел 4.5**), **`options_from_sheet`**; при **`editor_field_numeric`** на том же пути число имеет приоритет над enum. **`editor_textareas`** — `hints`: `min_rows`, даты, **`json_scalar_array`** / **`json_object_array`**. **`editor_field_numeric`** — `rules`: integer/decimal, `conditional_formats`. **`editor_field_ui`** — **`label`**, **`description`**, **`paths`**, wildcard в **`json_path`** — см. **раздел 4.5** и скрипт **`scripts/generate_editor_field_ui.py`**. |
 | `sheets[].code` | Внутренний код листа (URL); источник правды для импорта |
 | `sheets[].title` | Заголовок в UI |
@@ -436,6 +439,75 @@
 - **`src/field_enum_sheet_options.py`** — **`label_template_placeholders`**, **`format_label_from_template`**, выборка **`label_column`** или шаблона в **`_fetch_options_from_sheet`**.
 - **`src/config_validate.py`** — для **`options_from_sheet`** требуется **`value_column`** и пара **`label_column` / `label_template`**.
 - **`src/editor_config.py`** — в докстрингах упомянуты **`json_object_array`**, **`whitelist_validated_input`**.
+
+<a id="readme-46"></a>
+### 4.6. Структура `editor_field_definitions` (объединённый формат)
+
+Цель формата — хранить **все метаданные одного логического поля** (одна пара **`column`** + опционально **`json_path`**) в **одном объекте правила**, вместо четырёх разрозненных записей в **`field_enums`**, **`editor_field_ui`**, **`editor_field_numeric`**, **`editor_textareas`**.
+
+#### Верхний уровень
+
+| Элемент | Описание |
+|---------|----------|
+| **`editor_field_definitions`** | Массив блоков по листам. |
+| **`sheet_code`** | Код листа из **`sheets[].code`** (например **`CONTEST-DATA`**, **`REWARD`**). |
+| **`rules`** | Массив правил; порядок в массиве задаёт порядок обхода при сборке legacy-списков и удобство чтения человеком. |
+
+#### Одно правило (`rules[]`)
+
+| Поле | Обязательность | Содержание |
+|------|------------------|------------|
+| **`column`** | Да | Имя колонки CSV: плоское поле или имя JSON-колонки. |
+| **`json_path`** | Нет | Массив сегментов пути внутри JSON (строки и/или числа — индексы массивов). Отсутствие пути означает **плоскую** колонку с именем **`column`**. |
+| **`paths`** | Нет | Альтернатива множеству атомарных правил под одной JSON-колонкой: массив подобъектов с собственными **`json_path`** / полями UI — как сокращённая запись **`editor_field_ui`**; при развёртке каждый элемент **`paths`** превращается в отдельное правило с объединением полей родителя (**`expand_editor_field_definitions_to_legacy_dict`** → **`_append_atomic_rule_parts`**). |
+| **`ui`** | Нет* | Объект с полями подписи и ограничений UI: **`label`**, **`description`**, **`show_description`**, **`required`**, **`allows_empty`** и т.д. (см. **раздел 2**, **4.5** про wildcard и **`paths`** в legacy). |
+| **`enum`** | Нет* | Объект перечисления: **`options`**, **`allow_custom`**, **`input_display`**, **`options_from_sheet`**, **`whitelist_validated_input`** — семантика как у **`field_enums`** (**разделы 4.3–4.5**). |
+| **`numeric`** | Нет* | Объект числового формата: **`format`**, **`min`**, **`max`**, **`conditional_formats`**, **`decimal_places`** — как **`editor_field_numeric`** (**раздел 4.2**). |
+| **`textarea`** | Нет* | Объект подсказок многострочного ввода и массивов: **`min_rows`**, **`input_type`**, **`json_scalar_array`**, **`json_object_array`**, **`object_array_item_keys`** и др. — как **`editor_textareas`** (**раздел 4.5**). |
+
+\* У каждого правила должна быть заполнена **хотя бы одна** из секций **`ui`**, **`enum`**, **`numeric`**, **`textarea`**, либо задано **`paths`** (проверка **`validate_editor_field_definitions`** в **`config_validate.py`**). Пустой объект секции не считается содержимым — секцию нужно опустить или заполнить полями.
+
+#### Развёртка в runtime
+
+1. **`_effective_editor_cfg`** в **`editor_config.py`**: если **`editor_field_definitions`** — непустой массив, вызывается **`expand_editor_field_definitions_to_legacy_dict`**, в конфиг подставляются синтетические **`field_enums`**, **`editor_field_ui`**, **`editor_field_numeric`**, **`editor_textareas`**; исходный ключ **`editor_field_definitions`** в возвращаемом словаре **не удаляется** (он остаётся в файле на диске).
+2. Дальше работают прежние **`flatten_*`**: **`flatten_field_enums`**, **`flatten_editor_field_ui`**, **`flatten_editor_field_numeric`**, **`flatten_editor_textareas`** — результат уходит в bootstrap страницы строки и в схему мастера.
+
+#### Обратная сборка (миграция и сравнение)
+
+- **`build_editor_field_definitions_from_legacy`**: из четырёх legacy-ключей (или из развёрнутого объединённого конфига) строит массив **`editor_field_definitions`**. Ключ поля: **`(sheet_code, column, json_path)`**. Порядок полей в выходе — порядок **первого** появления ключа при обходе **`field_enums` → `editor_field_ui` → `editor_field_numeric` → `editor_textareas`**.
+- **`scripts/migrate_editor_field_definitions.py`**: однократная миграция файла конфигурации в объединённый формат (по необходимости).
+
+#### Связь с остальным `config.json`
+
+Объединённый формат **не заменяет** ключи вроде **`sheets`**, **`sheet_list_columns`**, **`global_filter_labels`** — они задают импорт, таблицы списков и глобальные фильтры независимо. Пересечение по смыслу: подписи из **`ui.label`** могут использоваться в заголовках глобальных фильтров (**`global_sheet_filters`**, **раздел 4** таблица **`global_filter_labels`**).
+
+<a id="readme-47"></a>
+### 4.7. Служебное форматирование массивов `options` в `config.json`
+
+Массивы **`options`** (внутри секции **`enum`** объединённого формата или в legacy **`field_enums`**) могут быть **длинными**; для удобства ревью в Git и навигации в редакторе принято:
+
+- каждый элемент-массива записывать **компактно в одну строку** (объекты **`{"label":"…","value":"…"}`** без лишних пробелов внутри, через **`json.dumps(..., separators=(',', ':'))`**);
+- если **вся** конструкция от отступа до закрывающей **`]`** при **удалении всех пробельных символов** даёт строку **не длиннее 120 символов**, выводить **`"options": [ … ]` на одной строке** вместе с ключом;
+- иначе — строка **`"options": [`**, затем **каждый элемент с новой строки** с отступом, запятые в конце строк элементов.
+
+Реализация: скрипт **`scripts/format_config_options_lines.py`**. Запуск из корня репозитория:
+
+```bash
+.venv/bin/python scripts/format_config_options_lines.py
+```
+
+Скрипт читает **`config.json`**, парсит JSON, перезаписывает файл **своим сериализатором** **`write_json`**: специальные правила применяются **только** к парам ключ-значение с именем ключа **`options`** и типом значения **массив**; прочие массивы в объекте записываются обычным многострочным видом с отступами. Семантика данных **не меняется** (это переформатирование текста). После правок рекомендуется прогнать **`python -m json.tool config.json`** или тесты загрузки конфига (**`validate_editor_field_definitions`** и др. при старте приложения).
+
+**Переменные и функции скрипта** (для сопровождения):
+
+| Имя | Назначение |
+|-----|------------|
+| **`ROOT`** | Корень репозитория (родитель каталога **`scripts/`**). |
+| **`MAX_NO_SPACE_LEN`** | Порог длины строки без пробелов (**120**). |
+| **`_compact(x)`** | Компактная JSON-строка для элемента **`options`** (объекты без пробелов после **`:`**). |
+| **`_line_len_no_spaces(s)`** | Длина строки после удаления всех пробельных символов (регулярное выражение «пробел» в широком смысле). |
+| **`write_json(obj, fp, indent_level)`** | Рекурсивная запись JSON с веткой для **`options`**. |
+| **`main()`** | Загрузка **`config.json`**, запись во временный файл, атомарная замена. |
 
 ---
 
@@ -1094,6 +1166,7 @@ python main.py
 | 0.2.65 | Заголовок блока глобального фильтра: **приоритет** **`editor_field_ui.label`** (то же поле, что **`DIM_ENUM_RULE_BINDINGS`**) над **`global_filter_labels`** и **`DIM_LABEL_RU`** (**`_editor_field_ui_label_for_binding`**, **`_dim_label_ru_from_cfg`** в **`global_sheet_filters.py`**). Тест **`test_dim_label_prefers_editor_field_ui_over_global_filter_labels`**. README **разделы 4, 6c.1, 8**. |
 | 0.2.66 | В скобках заголовка блока **`gf_*`** для полей внутри JSON: только путь по ключам (**`hidden`**, **`seasonItem`**, …), без префикса имени колонки (**`_column_ref_from_binding`**). Тест **`test_filter_heading_json_field_shows_inner_keys_in_parens`**. README **раздел 8**. |
 | 0.2.67 | **`config.json`:** объединённый ключ **`editor_field_definitions`** (секции **`ui`**, **`enum`**, **`numeric`**, **`textarea`** на поле); развёртка в прежние плоские списки в **`editor_config.py`** (**`_effective_editor_cfg`**). Legacy четыре ключа поддерживаются, если объединённый блок отсутствует или пуст. Валидация **`validate_editor_field_definitions`**, тесты **`test_editor_config_definitions`**, скрипт **`scripts/migrate_editor_field_definitions.py`**. README **раздел 4**, таблица ключей. |
+| 0.2.68 | Документация полей конфигурации: добавлены **раздел 4.6** (детальная структура **`editor_field_definitions`**: уровни **`sheet_code` / `rules`**, секции **`ui` / `enum` / `numeric` / `textarea`**, **`paths`**, правила валидации, развёртка **`_effective_editor_cfg`**, обратная сборка **`build_editor_field_definitions_from_legacy`**) и **раздел 4.7** (оформление массивов **`options`** в файле, порог **120** символов без пробелов, скрипт **`scripts/format_config_options_lines.py`**, таблица функций скрипта). Обновлены **оглавление**, таблица ключей **`config.json`** (ссылка на 4.6), **раздел 3** (строка про **`format_config_options_lines.py`**). Расширены комментарии в **`scripts/format_config_options_lines.py`**. |
 
 ---
 

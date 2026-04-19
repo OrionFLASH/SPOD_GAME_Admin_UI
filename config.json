@@ -478,10 +478,7 @@
           "enum": {
             "allow_custom": false,
             "input_display": "toggle",
-            "options": [
-              "АКТИВНЫЙ",
-              "АРХИВНЫЙ"
-            ]
+            "options": ["АКТИВНЫЙ","АРХИВНЫЙ"]
           }
         },
         {
@@ -495,11 +492,7 @@
           },
           "enum": {
             "allow_custom": false,
-            "options": [
-              "ИНДИВИДУАЛЬНЫЙ",
-              "ИНДИВИДУАЛЬНЫЙ НАКОПИТЕЛЬНЫЙ",
-              "ТУРНИРНЫЙ"
-            ]
+            "options": ["ИНДИВИДУАЛЬНЫЙ","ИНДИВИДУАЛЬНЫЙ НАКОПИТЕЛЬНЫЙ","ТУРНИРНЫЙ"]
           }
         },
         {
@@ -514,42 +507,15 @@
           "enum": {
             "allow_custom": false,
             "options": [
-              {
-                "value": "[]",
-                "label": "(пусто)"
-              },
-              {
-                "value": "[\"\"\"KMKKSB\"\"\"]",
-                "label": "Клиентский менеджер"
-              },
-              {
-                "value": "[\"\"\"MNS\"\"\"]",
-                "label": "Цифровой менеджер"
-              },
-              {
-                "value": "[\"\"\"KMSB1\"\"\"]",
-                "label": "KMSB1"
-              },
-              {
-                "value": "[\"\"\"SERVICEMEN\"\"\"]",
-                "label": "SERVICEMEN"
-              },
-              {
-                "value": "[\"\"\"KMFACTORING\"\"\"]",
-                "label": "Менеджер факторинга"
-              },
-              {
-                "value": "[\"\"\"IMUB\"\"\"]",
-                "label": "IMUB"
-              },
-              {
-                "value": "[\"\"\"RNUB\"\"\"]",
-                "label": "RNUB"
-              },
-              {
-                "value": "[\"\"\"RSB1\"\"\"]",
-                "label": "RSB1"
-              }
+              {"value":"[]","label":"(пусто)"},
+              {"value":"[\"\"\"KMKKSB\"\"\"]","label":"Клиентский менеджер"},
+              {"value":"[\"\"\"MNS\"\"\"]","label":"Цифровой менеджер"},
+              {"value":"[\"\"\"KMSB1\"\"\"]","label":"KMSB1"},
+              {"value":"[\"\"\"SERVICEMEN\"\"\"]","label":"SERVICEMEN"},
+              {"value":"[\"\"\"KMFACTORING\"\"\"]","label":"Менеджер факторинга"},
+              {"value":"[\"\"\"IMUB\"\"\"]","label":"IMUB"},
+              {"value":"[\"\"\"RNUB\"\"\"]","label":"RNUB"},
+              {"value":"[\"\"\"RSB1\"\"\"]","label":"RSB1"}
             ]
           }
         },
@@ -564,11 +530,7 @@
           },
           "enum": {
             "allow_custom": false,
-            "options": [
-              "CRITERION",
-              "RATING_MAX",
-              "RATING_MIN"
-            ]
+            "options": ["CRITERION","RATING_MAX","RATING_MIN"]
           }
         },
         {
@@ -583,14 +545,8 @@
           "enum": {
             "allow_custom": false,
             "options": [
-              {
-                "value": "INTEGRAL",
-                "label": "Взвешенная сумма индикаторов"
-              },
-              {
-                "value": "RELATION",
-                "label": "Отношение двух сумм (дробь)"
-              }
+              {"value":"INTEGRAL","label":"Взвешенная сумма индикаторов"},
+              {"value":"RELATION","label":"Отношение двух сумм (дробь)"}
             ]
           }
         },
@@ -606,34 +562,13 @@
           "enum": {
             "allow_custom": false,
             "options": [
-              {
-                "value": "FACT",
-                "label": "Факт за период"
-              },
-              {
-                "value": "FACT0-FACT1",
-                "label": "Прирост: текущий − прошлый период"
-              },
-              {
-                "value": "RUN_RATE",
-                "label": "Run rate — линейный прогноз на конец турнира"
-              },
-              {
-                "value": "RUN_RATE-FACT1",
-                "label": "Run rate (конец) − факт прошлого периода"
-              },
-              {
-                "value": "FACT0-RUN_RATE1_DOWN",
-                "label": "Факт − тренд прошлого периода"
-              },
-              {
-                "value": "RUN_RATE/FACT1",
-                "label": "Доля: run rate к факту прошлого"
-              },
-              {
-                "value": "FACT0/RUN_RATE1_DOWN",
-                "label": "Доля: факт к отклонению от тренда"
-              }
+              {"value":"FACT","label":"Факт за период"},
+              {"value":"FACT0-FACT1","label":"Прирост: текущий − прошлый период"},
+              {"value":"RUN_RATE","label":"Run rate — линейный прогноз на конец турнира"},
+              {"value":"RUN_RATE-FACT1","label":"Run rate (конец) − факт прошлого периода"},
+              {"value":"FACT0-RUN_RATE1_DOWN","label":"Факт − тренд прошлого периода"},
+              {"value":"RUN_RATE/FACT1","label":"Доля: run rate к факту прошлого"},
+              {"value":"FACT0/RUN_RATE1_DOWN","label":"Доля: факт к отклонению от тренда"}
             ]
           }
         },
@@ -649,18 +584,9 @@
           "enum": {
             "allow_custom": false,
             "options": [
-              {
-                "value": "NOT_USED",
-                "label": "План не задан"
-              },
-              {
-                "value": "PRESET_VALUE",
-                "label": "Предустановленное значение"
-              },
-              {
-                "value": "DEPENDS_PREVIOUS_PERIOD",
-                "label": "Зависит от прошлого показателя"
-              }
+              {"value":"NOT_USED","label":"План не задан"},
+              {"value":"PRESET_VALUE","label":"Предустановленное значение"},
+              {"value":"DEPENDS_PREVIOUS_PERIOD","label":"Зависит от прошлого показателя"}
             ]
           }
         },
@@ -676,18 +602,9 @@
           "enum": {
             "allow_custom": false,
             "options": [
-              {
-                "value": "",
-                "label": "(пусто)"
-              },
-              {
-                "value": "MULTIPLIER",
-                "label": "Умножить прошлый период на коэффициент"
-              },
-              {
-                "value": "APPEND",
-                "label": "Добавить число к прошлому периоду"
-              }
+              {"value":"","label":"(пусто)"},
+              {"value":"MULTIPLIER","label":"Умножить прошлый период на коэффициент"},
+              {"value":"APPEND","label":"Добавить число к прошлому периоду"}
             ]
           }
         },
@@ -702,13 +619,7 @@
           },
           "enum": {
             "allow_custom": false,
-            "options": [
-              "=",
-              ">=",
-              ">",
-              "<",
-              "<="
-            ]
+            "options": ["=",">=",">","<","<="]
           }
         },
         {
@@ -723,10 +634,7 @@
           "enum": {
             "allow_custom": false,
             "input_display": "toggle",
-            "options": [
-              "ПРОМ",
-              "ТЕСТ"
-            ]
+            "options": ["ПРОМ","ТЕСТ"]
           }
         },
         {
@@ -740,9 +648,7 @@
           },
           "enum": {
             "allow_custom": false,
-            "options": [
-              "EMPLOYEE"
-            ]
+            "options": ["EMPLOYEE"]
           }
         },
         {
@@ -757,34 +663,13 @@
           "enum": {
             "allow_custom": true,
             "options": [
-              {
-                "value": "",
-                "label": "(пусто)"
-              },
-              {
-                "value": "PERCENTILE",
-                "label": "«Я лучше»: доля участников со строго меньшим фактом"
-              },
-              {
-                "value": "PERCENTILE_DOWN",
-                "label": "«Попал в»: доля с фактом не выше моего"
-              },
-              {
-                "value": "PERCENTILE_UPEST",
-                "label": "«Лучше меня»: доля со строго большим фактом"
-              },
-              {
-                "value": "PERCENTILE_UP",
-                "label": "«Не хуже»: доля с фактом не ниже моего"
-              },
-              {
-                "value": "SPECIAL_INDICATOR_1",
-                "label": "Уровень 1–6 по процентилю и сегменту участника"
-              },
-              {
-                "value": "COUNT_BIGGER",
-                "label": "Сколько участников с фактом выше моего"
-              }
+              {"value":"","label":"(пусто)"},
+              {"value":"PERCENTILE","label":"«Я лучше»: доля участников со строго меньшим фактом"},
+              {"value":"PERCENTILE_DOWN","label":"«Попал в»: доля с фактом не выше моего"},
+              {"value":"PERCENTILE_UPEST","label":"«Лучше меня»: доля со строго большим фактом"},
+              {"value":"PERCENTILE_UP","label":"«Не хуже»: доля с фактом не ниже моего"},
+              {"value":"SPECIAL_INDICATOR_1","label":"Уровень 1–6 по процентилю и сегменту участника"},
+              {"value":"COUNT_BIGGER","label":"Сколько участников с фактом выше моего"}
             ]
           }
         },
@@ -919,10 +804,7 @@
           "enum": {
             "allow_custom": false,
             "input_display": "toggle",
-            "options": [
-              "ПРОМ",
-              "ТЕСТ"
-            ]
+            "options": ["ПРОМ","ТЕСТ"]
           }
         },
         {
@@ -940,16 +822,7 @@
           "enum": {
             "allow_custom": false,
             "input_display": "toggle",
-            "options": [
-              {
-                "value": "AFTER",
-                "label": "Вручаем в конце"
-              },
-              {
-                "value": "DURIN",
-                "label": "Вручаем сразу"
-              }
-            ]
+            "options": [{"value":"AFTER","label":"Вручаем в конце"},{"value":"DURIN","label":"Вручаем сразу"}]
           }
         },
         {
@@ -967,16 +840,7 @@
           "enum": {
             "allow_custom": false,
             "input_display": "toggle",
-            "options": [
-              {
-                "value": "Y",
-                "label": "Да"
-              },
-              {
-                "value": "N",
-                "label": "Нет"
-              }
-            ]
+            "options": [{"value":"Y","label":"Да"},{"value":"N","label":"Нет"}]
           }
         },
         {
@@ -994,18 +858,9 @@
           "enum": {
             "allow_custom": false,
             "options": [
-              {
-                "value": "",
-                "label": "В рублях"
-              },
-              {
-                "value": "MILLIONS",
-                "label": "В миллионах"
-              },
-              {
-                "value": "THOUSANDS",
-                "label": "В тысячах"
-              }
+              {"value":"","label":"В рублях"},
+              {"value":"MILLIONS","label":"В миллионах"},
+              {"value":"THOUSANDS","label":"В тысячах"}
             ]
           }
         },
@@ -1024,10 +879,7 @@
           "enum": {
             "allow_custom": false,
             "input_display": "toggle",
-            "options": [
-              "all",
-              "one"
-            ]
+            "options": ["all","one"]
           }
         },
         {
@@ -1045,16 +897,7 @@
           "enum": {
             "allow_custom": false,
             "input_display": "toggle",
-            "options": [
-              {
-                "value": "Y",
-                "label": "Да"
-              },
-              {
-                "value": "N",
-                "label": "Нет"
-              }
-            ]
+            "options": [{"value":"Y","label":"Да"},{"value":"N","label":"Нет"}]
           }
         },
         {
@@ -1072,16 +915,7 @@
           "enum": {
             "allow_custom": false,
             "input_display": "toggle",
-            "options": [
-              {
-                "value": "Y",
-                "label": "Да"
-              },
-              {
-                "value": "N",
-                "label": "Нет"
-              }
-            ]
+            "options": [{"value":"Y","label":"Да"},{"value":"N","label":"Нет"}]
           }
         },
         {
@@ -1099,16 +933,7 @@
           "enum": {
             "allow_custom": false,
             "input_display": "toggle",
-            "options": [
-              {
-                "value": "Y",
-                "label": "Да"
-              },
-              {
-                "value": "N",
-                "label": "Нет"
-              }
-            ]
+            "options": [{"value":"Y","label":"Да"},{"value":"N","label":"Нет"}]
           }
         },
         {
@@ -1126,16 +951,7 @@
           "enum": {
             "allow_custom": false,
             "input_display": "toggle",
-            "options": [
-              {
-                "value": "Y",
-                "label": "Да"
-              },
-              {
-                "value": "N",
-                "label": "Нет"
-              }
-            ]
+            "options": [{"value":"Y","label":"Да"},{"value":"N","label":"Нет"}]
           }
         },
         {
@@ -1153,16 +969,7 @@
           "enum": {
             "allow_custom": false,
             "input_display": "toggle",
-            "options": [
-              {
-                "value": "Y",
-                "label": "Да"
-              },
-              {
-                "value": "N",
-                "label": "Нет"
-              }
-            ]
+            "options": [{"value":"Y","label":"Да"},{"value":"N","label":"Нет"}]
           }
         },
         {
@@ -1180,16 +987,7 @@
           "enum": {
             "allow_custom": false,
             "input_display": "toggle",
-            "options": [
-              {
-                "value": "Y",
-                "label": "Да"
-              },
-              {
-                "value": "N",
-                "label": "Нет"
-              }
-            ]
+            "options": [{"value":"Y","label":"Да"},{"value":"N","label":"Нет"}]
           }
         },
         {
@@ -1207,42 +1005,15 @@
           "enum": {
             "allow_custom": false,
             "options": [
-              {
-                "value": "",
-                "label": "(пусто)"
-              },
-              {
-                "value": "KMKKSB",
-                "label": "Клиентский менеджер"
-              },
-              {
-                "value": "MNS",
-                "label": "Цифровой менеджер"
-              },
-              {
-                "value": "KMSB1",
-                "label": "KMSB1"
-              },
-              {
-                "value": "SERVICEMEN",
-                "label": "SERVICEMEN"
-              },
-              {
-                "value": "KMFACTORING",
-                "label": "Менеджер факторинга"
-              },
-              {
-                "value": "IMUB",
-                "label": "IMUB"
-              },
-              {
-                "value": "RNUB",
-                "label": "RNUB"
-              },
-              {
-                "value": "RSB1",
-                "label": "RSB1"
-              }
+              {"value":"","label":"(пусто)"},
+              {"value":"KMKKSB","label":"Клиентский менеджер"},
+              {"value":"MNS","label":"Цифровой менеджер"},
+              {"value":"KMSB1","label":"KMSB1"},
+              {"value":"SERVICEMEN","label":"SERVICEMEN"},
+              {"value":"KMFACTORING","label":"Менеджер факторинга"},
+              {"value":"IMUB","label":"IMUB"},
+              {"value":"RNUB","label":"RNUB"},
+              {"value":"RSB1","label":"RSB1"}
             ]
           },
           "textarea": {
@@ -1268,18 +1039,9 @@
             "comment": "В выгрузке: JSON-массив объектов; ключи элемента — period_code, criterion_mark_type, criterion_mark_value. Частые period_code: −1, 0, 1.",
             "allow_custom": true,
             "options": [
-              {
-                "value": "-1",
-                "label": "Период −1 (особый)"
-              },
-              {
-                "value": "0",
-                "label": "Текущий период (0)"
-              },
-              {
-                "value": "1",
-                "label": "Доп. период 1"
-              }
+              {"value":"-1","label":"Период −1 (особый)"},
+              {"value":"0","label":"Текущий период (0)"},
+              {"value":"1","label":"Доп. период 1"}
             ]
           }
         },
@@ -1298,16 +1060,7 @@
           },
           "enum": {
             "allow_custom": true,
-            "options": [
-              {
-                "value": "0",
-                "label": "Текущий период (0)"
-              },
-              {
-                "value": "1",
-                "label": "Доп. период 1"
-              }
-            ]
+            "options": [{"value":"0","label":"Текущий период (0)"},{"value":"1","label":"Доп. период 1"}]
           }
         },
         {
@@ -1326,34 +1079,13 @@
           "enum": {
             "allow_custom": false,
             "options": [
-              {
-                "value": "",
-                "label": "(пусто)"
-              },
-              {
-                "value": ">=",
-                "label": "≥ не меньше"
-              },
-              {
-                "value": ">",
-                "label": "> больше"
-              },
-              {
-                "value": "=",
-                "label": "= равно"
-              },
-              {
-                "value": "<=",
-                "label": "≤ не больше"
-              },
-              {
-                "value": "<",
-                "label": "< меньше"
-              },
-              {
-                "value": "<>",
-                "label": "≠ не равно"
-              }
+              {"value":"","label":"(пусто)"},
+              {"value":">=","label":"≥ не меньше"},
+              {"value":">","label":"> больше"},
+              {"value":"=","label":"= равно"},
+              {"value":"<=","label":"≤ не больше"},
+              {"value":"<","label":"< меньше"},
+              {"value":"<>","label":"≠ не равно"}
             ]
           }
         },
@@ -1373,34 +1105,13 @@
           "enum": {
             "allow_custom": false,
             "options": [
-              {
-                "value": "",
-                "label": "(пусто)"
-              },
-              {
-                "value": ">=",
-                "label": "≥ не меньше"
-              },
-              {
-                "value": ">",
-                "label": "> больше"
-              },
-              {
-                "value": "=",
-                "label": "= равно"
-              },
-              {
-                "value": "<=",
-                "label": "≤ не больше"
-              },
-              {
-                "value": "<",
-                "label": "< меньше"
-              },
-              {
-                "value": "<>",
-                "label": "≠ не равно"
-              }
+              {"value":"","label":"(пусто)"},
+              {"value":">=","label":"≥ не меньше"},
+              {"value":">","label":"> больше"},
+              {"value":"=","label":"= равно"},
+              {"value":"<=","label":"≤ не больше"},
+              {"value":"<","label":"< меньше"},
+              {"value":"<>","label":"≠ не равно"}
             ]
           }
         },
@@ -1417,16 +1128,7 @@
             "comment": "В БД — 0 или 1: подписи в UI, значения при сохранении как у businessBlock.",
             "allow_custom": false,
             "input_display": "toggle",
-            "options": [
-              {
-                "value": "1",
-                "label": "Ручной расчет"
-              },
-              {
-                "value": "0",
-                "label": "Промышленный расчет"
-              }
-            ]
+            "options": [{"value":"1","label":"Ручной расчет"},{"value":"0","label":"Промышленный расчет"}]
           }
         },
         {
@@ -1914,22 +1616,10 @@
           "enum": {
             "allow_custom": false,
             "options": [
-              {
-                "value": "BANK",
-                "label": "Страна"
-              },
-              {
-                "value": "TB",
-                "label": "Тер.банк"
-              },
-              {
-                "value": "GOSB",
-                "label": "ГОСБ"
-              },
-              {
-                "value": "GROUPING",
-                "label": "Группа"
-              }
+              {"value":"BANK","label":"Страна"},
+              {"value":"TB","label":"Тер.банк"},
+              {"value":"GOSB","label":"ГОСБ"},
+              {"value":"GROUPING","label":"Группа"}
             ]
           }
         },
@@ -1946,54 +1636,18 @@
             "comment": "Подписи в UI: объекты { label, value }; сейчас label = value, позже можно задать человекочитаемые label.",
             "allow_custom": false,
             "options": [
-              {
-                "value": "*",
-                "label": "Все"
-              },
-              {
-                "value": "[13]",
-                "label": "ЦЧБ"
-              },
-              {
-                "value": "[16]",
-                "label": "УБ"
-              },
-              {
-                "value": "[18]",
-                "label": "ББ"
-              },
-              {
-                "value": "[38]",
-                "label": "МБ"
-              },
-              {
-                "value": "[40]",
-                "label": "СРБ"
-              },
-              {
-                "value": "[42]",
-                "label": "ВВБ"
-              },
-              {
-                "value": "[44]",
-                "label": "СИБ"
-              },
-              {
-                "value": "[52]",
-                "label": "ЮЗБ"
-              },
-              {
-                "value": "[54]",
-                "label": "ПБ"
-              },
-              {
-                "value": "[55]",
-                "label": "СЗБ"
-              },
-              {
-                "value": "[70]",
-                "label": "ДВБ"
-              }
+              {"value":"*","label":"Все"},
+              {"value":"[13]","label":"ЦЧБ"},
+              {"value":"[16]","label":"УБ"},
+              {"value":"[18]","label":"ББ"},
+              {"value":"[38]","label":"МБ"},
+              {"value":"[40]","label":"СРБ"},
+              {"value":"[42]","label":"ВВБ"},
+              {"value":"[44]","label":"СИБ"},
+              {"value":"[52]","label":"ЮЗБ"},
+              {"value":"[54]","label":"ПБ"},
+              {"value":"[55]","label":"СЗБ"},
+              {"value":"[70]","label":"ДВБ"}
             ]
           }
         },
@@ -2009,18 +1663,9 @@
           "enum": {
             "allow_custom": false,
             "options": [
-              {
-                "value": "1",
-                "label": "Процент от участников"
-              },
-              {
-                "value": "2",
-                "label": "TOP-X от участников"
-              },
-              {
-                "value": "3",
-                "label": "По критерию"
-              }
+              {"value":"1","label":"Процент от участников"},
+              {"value":"2","label":"TOP-X от участников"},
+              {"value":"3","label":"По критерию"}
             ]
           }
         },
@@ -2036,26 +1681,11 @@
           "enum": {
             "allow_custom": false,
             "options": [
-              {
-                "value": "BANK",
-                "label": "Страна"
-              },
-              {
-                "value": "TB",
-                "label": "Тер.банк"
-              },
-              {
-                "value": "GOSB",
-                "label": "ГОСБ"
-              },
-              {
-                "value": "GROUPING",
-                "label": "Группа"
-              },
-              {
-                "value": "",
-                "label": "(пусто)"
-              }
+              {"value":"BANK","label":"Страна"},
+              {"value":"TB","label":"Тер.банк"},
+              {"value":"GOSB","label":"ГОСБ"},
+              {"value":"GROUPING","label":"Группа"},
+              {"value":"","label":"(пусто)"}
             ]
           }
         },
@@ -2065,16 +1695,7 @@
             "comment": "В БД — 0 или 1; в форме — подписи «Ручной расчет» / «Промышленный расчет».",
             "allow_custom": false,
             "input_display": "toggle",
-            "options": [
-              {
-                "value": "1",
-                "label": "Ручной расчет"
-              },
-              {
-                "value": "0",
-                "label": "Промышленный расчет"
-              }
-            ]
+            "options": [{"value":"1","label":"Ручной расчет"},{"value":"0","label":"Промышленный расчет"}]
           }
         },
         {
@@ -2236,22 +1857,10 @@
           "enum": {
             "allow_custom": false,
             "options": [
-              {
-                "value": "BANK",
-                "label": "Страна"
-              },
-              {
-                "value": "TB",
-                "label": "Тер.банк"
-              },
-              {
-                "value": "GOSB",
-                "label": "ГОСБ"
-              },
-              {
-                "value": "GROUPING",
-                "label": "Группа"
-              }
+              {"value":"BANK","label":"Страна"},
+              {"value":"TB","label":"Тер.банк"},
+              {"value":"GOSB","label":"ГОСБ"},
+              {"value":"GROUPING","label":"Группа"}
             ]
           }
         },
@@ -2291,9 +1900,7 @@
           },
           "enum": {
             "allow_custom": false,
-            "options": [
-              "1"
-            ]
+            "options": ["1"]
           }
         },
         {
@@ -2308,18 +1915,9 @@
           "enum": {
             "allow_custom": true,
             "options": [
-              {
-                "value": "",
-                "label": "(пусто)"
-              },
-              {
-                "value": "NUMERATOR",
-                "label": "Числитель"
-              },
-              {
-                "value": "DIVIDER",
-                "label": "Знаменатель"
-              }
+              {"value":"","label":"(пусто)"},
+              {"value":"NUMERATOR","label":"Числитель"},
+              {"value":"DIVIDER","label":"Знаменатель"}
             ]
           }
         },
@@ -2335,318 +1933,84 @@
           "enum": {
             "allow_custom": true,
             "options": [
-              {
-                "value": "WAIT",
-                "label": "Без источников (ручной)"
-              },
-              {
-                "value": "CC360_CLIENT_VOLUM_FOT_M",
-                "label": "Объём ФОТ клиента (мес.)"
-              },
-              {
-                "value": "CC360_NKD_DETAIL_CHKD",
-                "label": "ЧКД за месяц (факт)"
-              },
-              {
-                "value": "COMPASARS_KKP_ID",
-                "label": "Идентификатор ККП"
-              },
-              {
-                "value": "EFFICIENCYARSKKSB_EFF",
-                "label": "КМ эффективен · ККСБ"
-              },
-              {
-                "value": "EFFICIENCYARSKKSB_OD_YEAR_GROWTH",
-                "label": "Прирост ОД АППГ · ККСБ"
-              },
-              {
-                "value": "EFFICIENCYARSKKSB_OD_YEAR_TEMP",
-                "label": "Темп прироста ОД годовой · ККСБ"
-              },
-              {
-                "value": "FUNNELARS_ACTIVE_CUSTOMER_ID",
-                "label": "Клиент (воронка, активные продукты)"
-              },
-              {
-                "value": "FUNNELARS_ACTIVE_DEAL_ID",
-                "label": "Идентификатор сделки (воронка)"
-              },
-              {
-                "value": "FUNNELARS_ACTIVE_DEAL_MARGIN",
-                "label": "Объём сделки (воронка)"
-              },
-              {
-                "value": "INCOME",
-                "label": "Доход от конверсионных операций"
-              },
-              {
-                "value": "INSURANCEMIS_BANK_COMMISION",
-                "label": "КВ банка без НДС"
-              },
-              {
-                "value": "LEAGUEDEL",
-                "label": "Выбыл из лиги чемпионов"
-              },
-              {
-                "value": "PFIMIS_CUSTOMER_ID",
-                "label": "Клиент (сделки с ПФИ)"
-              },
-              {
-                "value": "PPO_ALL",
-                "label": "Все платежи ППО (знаменатель)"
-              },
-              {
-                "value": "PPO_IN",
-                "label": "Входящие платежи ППО (руб.)"
-              },
-              {
-                "value": "PULMIS_AGRMNT_AMT_RUB",
-                "label": "Сумма депозита (руб)"
-              },
-              {
-                "value": "PULMIS_BALANCE_OUT_RUB",
-                "label": "Исходящий остаток"
-              },
-              {
-                "value": "PULMIS_SDO_IN_RUB",
-                "label": "СДО (руб)"
-              },
-              {
-                "value": "TRUSTLEVELCC360_LEVEL0_COUNT",
-                "label": "Количество Незнакомцев"
-              },
-              {
-                "value": "TRUSTLEVELCC360_LEVEL3_COUNT",
-                "label": "Количество Товарищей"
-              },
-              {
-                "value": "TRUSTLEVELCC360_LEVEL4_COUNT",
-                "label": "Количество Друзей"
-              },
-              {
-                "value": "TRUSTLEVELCC360_LEVEL5_COUNT",
-                "label": "Количество Со Сбером навсегда"
-              },
-              {
-                "value": "TRUSTLEVELCC360_STAR_COUNT",
-                "label": "Звезды КМа текущие"
-              },
-              {
-                "value": "TRUSTLEVELCC360_STAR_START_COUNT",
-                "label": "Звезды КМа текущие на начало года"
-              },
-              {
-                "value": "WD",
-                "label": "Условные сделки (платежи)"
-              },
-              {
-                "value": "PULMIS_BALANCE_OUT",
-                "label": "Исходящий остаток в валюте"
-              },
-              {
-                "value": "PULMIS_SDO_IN",
-                "label": "СДО в валюте"
-              },
-              {
-                "value": "PULMIS_INCOME",
-                "label": "Доход в валюте"
-              },
-              {
-                "value": "PULMIS_INCOME_RUB",
-                "label": "Доход (руб)"
-              },
-              {
-                "value": "PULMIS_CUSTOMER_ID",
-                "label": "Клиент (пассивы ЮЛ)"
-              },
-              {
-                "value": "LEAGUE",
-                "label": "Победитель в лиге чемпионов"
-              },
-              {
-                "value": "SUPERCUP",
-                "label": "Победитель в суперкубке"
-              },
-              {
-                "value": "PFIMIS_INCOME",
-                "label": "Доход (ПФИ)"
-              },
-              {
-                "value": "PFIMIS_VOLUME",
-                "label": "Объём сделки в USD"
-              },
-              {
-                "value": "PFIMIS_INCOME_SOFT",
-                "label": "Софт доход"
-              },
-              {
-                "value": "PFIMIS_DEAL_CNT",
-                "label": "Количество операций"
-              },
-              {
-                "value": "PFIMIS_DEAL_ID",
-                "label": "Идентификатор сделки (ПФИ)"
-              },
-              {
-                "value": "CC360_CLIENT_VOLUM_CHPDP_M",
-                "label": "Доход по депозитам (мес.)"
-              },
-              {
-                "value": "INSURANCEMIS_AGENT_COMMISION",
-                "label": "КВ агента с НДС"
-              },
-              {
-                "value": "INSURANCEMIS_COMMISION",
-                "label": "Комиссия по страхованию"
-              },
-              {
-                "value": "INSURANCE_AMMOUNT",
-                "label": "Сумма договора страхования"
-              },
-              {
-                "value": "EFFICIENCYARSKKSB_OD_YEAR",
-                "label": "Сумма ОД годовая · ККСБ"
-              },
-              {
-                "value": "EFFICIENCYARSKKSB_OD_YEAR_APPG",
-                "label": "Сумма АППГ · ККСБ"
-              },
-              {
-                "value": "EFFICIENCYARSKKSB_OD_QUARTER_APPG",
-                "label": "Сумма за квартал АППГ · ККСБ"
-              },
-              {
-                "value": "EFFICIENCYARSKKSB_OD_QUARTER_GROWTH",
-                "label": "Прирост ОД АППГ квартальный · ККСБ"
-              },
-              {
-                "value": "EFFICIENCYARSKKSB_OD_QUARTER_TEMP",
-                "label": "Темп прироста ОД квартальный · ККСБ"
-              },
-              {
-                "value": "EFFICIENCYARS_OVERBONUS",
-                "label": "КМ эффективен · сверхбонус"
-              },
-              {
-                "value": "EFFICIENCYARS_OVERBONUS_YEAR",
-                "label": "Сумма ОД годовая · сверхбонус"
-              },
-              {
-                "value": "EFFICIENCYARS_OVERBONUS_YEAR_APPG",
-                "label": "Сумма АППГ · сверхбонус"
-              },
-              {
-                "value": "EFFICIENCYARS_OVERBONUS_QUARTER_APPG",
-                "label": "Сумма за квартал АППГ · сверхбонус"
-              },
-              {
-                "value": "EFFICIENCYARS_OVERBONUS_YEAR_GROWTH",
-                "label": "Прирост ОД АППГ · сверхбонус"
-              },
-              {
-                "value": "EFFICIENCYARS_OVERBONUS_YEAR_TEMP",
-                "label": "Темп прироста ОД годовой · сверхбонус"
-              },
-              {
-                "value": "EFFICIENCYARS_OVERBONUS_QUARTER_GROWTH",
-                "label": "Прирост ОД АППГ квартальный · сверхбонус"
-              },
-              {
-                "value": "EFFICIENCYARS_OVERBONUS_QUARTER_TEMP",
-                "label": "Темп прироста ОД квартальный · сверхбонус"
-              },
-              {
-                "value": "FUNNELARS_ACTIVE_DEAL_CHOD",
-                "label": "ЧОД активной сделки (воронка)"
-              },
-              {
-                "value": "CC360_NKD_DETAIL_CHKD_PLAN",
-                "label": "ЧКД за месяц (план)"
-              },
-              {
-                "value": "KANBANARS_OFFER_VALUE",
-                "label": "Сумма сделки по оферте (ПрПр)"
-              },
-              {
-                "value": "KANBANARS_STAGE_VALUE",
-                "label": "Объём стадии (показатель)"
-              },
-              {
-                "value": "KANBANARS_STAGE_INC",
-                "label": "ЧОД стадии"
-              },
-              {
-                "value": "KANBANARS_OFFER_INC",
-                "label": "ЧОД по оферте (ПрПр)"
-              },
-              {
-                "value": "KANBANARS_STAGE_AMOUNT",
-                "label": "Объём стадии (сумма)"
-              },
-              {
-                "value": "KANBANARS_DEAL_AMOUNT",
-                "label": "Сумма сделки в CRM"
-              },
-              {
-                "value": "KANBANARS_DEAL_NUM",
-                "label": "Номер сделки в SCRM"
-              },
-              {
-                "value": "KANBANARS_OFFER_VALUE_VKS",
-                "label": "Сумма сделки по оферте (ПрПр) · ВКС"
-              },
-              {
-                "value": "KANBANARS_STAGE_VALUE_VKS",
-                "label": "Объём стадии (показатель) · ВКС"
-              },
-              {
-                "value": "KANBANARS_STAGE_INC_VKS",
-                "label": "ЧОД стадии · ВКС"
-              },
-              {
-                "value": "KANBANARS_OFFER_INC_VKS",
-                "label": "ЧОД по оферте (ПрПр) · ВКС"
-              },
-              {
-                "value": "KANBANARS_STAGE_AMOUNT_VKS",
-                "label": "Объём стадии (сумма) · ВКС"
-              },
-              {
-                "value": "KANBANARS_DEAL_AMOUNT_VKS",
-                "label": "Сумма сделки в CRM · ВКС"
-              },
-              {
-                "value": "KANBANARS_DEAL_NUM_VKS",
-                "label": "Номер сделки в SCRM · ВКС"
-              },
-              {
-                "value": "KANBANARS_OFFER_VALUE_VKO",
-                "label": "Сумма сделки по оферте (ПрПр) · ВКО"
-              },
-              {
-                "value": "KANBANARS_STAGE_VALUE_VKO",
-                "label": "Объём стадии (показатель) · ВКО"
-              },
-              {
-                "value": "KANBANARS_STAGE_INC_VKO",
-                "label": "ЧОД стадии · ВКО"
-              },
-              {
-                "value": "KANBANARS_OFFER_INC_VKO",
-                "label": "ЧОД по оферте (ПрПр) · ВКО"
-              },
-              {
-                "value": "KANBANARS_STAGE_AMOUNT_VKO",
-                "label": "Объём стадии (сумма) · ВКО"
-              },
-              {
-                "value": "KANBANARS_DEAL_AMOUNT_VKO",
-                "label": "Сумма сделки в CRM · ВКО"
-              },
-              {
-                "value": "KANBANARS_DEAL_NUM_VKO",
-                "label": "Номер сделки в SCRM · ВКО"
-              }
+              {"value":"WAIT","label":"Без источников (ручной)"},
+              {"value":"CC360_CLIENT_VOLUM_FOT_M","label":"Объём ФОТ клиента (мес.)"},
+              {"value":"CC360_NKD_DETAIL_CHKD","label":"ЧКД за месяц (факт)"},
+              {"value":"COMPASARS_KKP_ID","label":"Идентификатор ККП"},
+              {"value":"EFFICIENCYARSKKSB_EFF","label":"КМ эффективен · ККСБ"},
+              {"value":"EFFICIENCYARSKKSB_OD_YEAR_GROWTH","label":"Прирост ОД АППГ · ККСБ"},
+              {"value":"EFFICIENCYARSKKSB_OD_YEAR_TEMP","label":"Темп прироста ОД годовой · ККСБ"},
+              {"value":"FUNNELARS_ACTIVE_CUSTOMER_ID","label":"Клиент (воронка, активные продукты)"},
+              {"value":"FUNNELARS_ACTIVE_DEAL_ID","label":"Идентификатор сделки (воронка)"},
+              {"value":"FUNNELARS_ACTIVE_DEAL_MARGIN","label":"Объём сделки (воронка)"},
+              {"value":"INCOME","label":"Доход от конверсионных операций"},
+              {"value":"INSURANCEMIS_BANK_COMMISION","label":"КВ банка без НДС"},
+              {"value":"LEAGUEDEL","label":"Выбыл из лиги чемпионов"},
+              {"value":"PFIMIS_CUSTOMER_ID","label":"Клиент (сделки с ПФИ)"},
+              {"value":"PPO_ALL","label":"Все платежи ППО (знаменатель)"},
+              {"value":"PPO_IN","label":"Входящие платежи ППО (руб.)"},
+              {"value":"PULMIS_AGRMNT_AMT_RUB","label":"Сумма депозита (руб)"},
+              {"value":"PULMIS_BALANCE_OUT_RUB","label":"Исходящий остаток"},
+              {"value":"PULMIS_SDO_IN_RUB","label":"СДО (руб)"},
+              {"value":"TRUSTLEVELCC360_LEVEL0_COUNT","label":"Количество Незнакомцев"},
+              {"value":"TRUSTLEVELCC360_LEVEL3_COUNT","label":"Количество Товарищей"},
+              {"value":"TRUSTLEVELCC360_LEVEL4_COUNT","label":"Количество Друзей"},
+              {"value":"TRUSTLEVELCC360_LEVEL5_COUNT","label":"Количество Со Сбером навсегда"},
+              {"value":"TRUSTLEVELCC360_STAR_COUNT","label":"Звезды КМа текущие"},
+              {"value":"TRUSTLEVELCC360_STAR_START_COUNT","label":"Звезды КМа текущие на начало года"},
+              {"value":"WD","label":"Условные сделки (платежи)"},
+              {"value":"PULMIS_BALANCE_OUT","label":"Исходящий остаток в валюте"},
+              {"value":"PULMIS_SDO_IN","label":"СДО в валюте"},
+              {"value":"PULMIS_INCOME","label":"Доход в валюте"},
+              {"value":"PULMIS_INCOME_RUB","label":"Доход (руб)"},
+              {"value":"PULMIS_CUSTOMER_ID","label":"Клиент (пассивы ЮЛ)"},
+              {"value":"LEAGUE","label":"Победитель в лиге чемпионов"},
+              {"value":"SUPERCUP","label":"Победитель в суперкубке"},
+              {"value":"PFIMIS_INCOME","label":"Доход (ПФИ)"},
+              {"value":"PFIMIS_VOLUME","label":"Объём сделки в USD"},
+              {"value":"PFIMIS_INCOME_SOFT","label":"Софт доход"},
+              {"value":"PFIMIS_DEAL_CNT","label":"Количество операций"},
+              {"value":"PFIMIS_DEAL_ID","label":"Идентификатор сделки (ПФИ)"},
+              {"value":"CC360_CLIENT_VOLUM_CHPDP_M","label":"Доход по депозитам (мес.)"},
+              {"value":"INSURANCEMIS_AGENT_COMMISION","label":"КВ агента с НДС"},
+              {"value":"INSURANCEMIS_COMMISION","label":"Комиссия по страхованию"},
+              {"value":"INSURANCE_AMMOUNT","label":"Сумма договора страхования"},
+              {"value":"EFFICIENCYARSKKSB_OD_YEAR","label":"Сумма ОД годовая · ККСБ"},
+              {"value":"EFFICIENCYARSKKSB_OD_YEAR_APPG","label":"Сумма АППГ · ККСБ"},
+              {"value":"EFFICIENCYARSKKSB_OD_QUARTER_APPG","label":"Сумма за квартал АППГ · ККСБ"},
+              {"value":"EFFICIENCYARSKKSB_OD_QUARTER_GROWTH","label":"Прирост ОД АППГ квартальный · ККСБ"},
+              {"value":"EFFICIENCYARSKKSB_OD_QUARTER_TEMP","label":"Темп прироста ОД квартальный · ККСБ"},
+              {"value":"EFFICIENCYARS_OVERBONUS","label":"КМ эффективен · сверхбонус"},
+              {"value":"EFFICIENCYARS_OVERBONUS_YEAR","label":"Сумма ОД годовая · сверхбонус"},
+              {"value":"EFFICIENCYARS_OVERBONUS_YEAR_APPG","label":"Сумма АППГ · сверхбонус"},
+              {"value":"EFFICIENCYARS_OVERBONUS_QUARTER_APPG","label":"Сумма за квартал АППГ · сверхбонус"},
+              {"value":"EFFICIENCYARS_OVERBONUS_YEAR_GROWTH","label":"Прирост ОД АППГ · сверхбонус"},
+              {"value":"EFFICIENCYARS_OVERBONUS_YEAR_TEMP","label":"Темп прироста ОД годовой · сверхбонус"},
+              {"value":"EFFICIENCYARS_OVERBONUS_QUARTER_GROWTH","label":"Прирост ОД АППГ квартальный · сверхбонус"},
+              {"value":"EFFICIENCYARS_OVERBONUS_QUARTER_TEMP","label":"Темп прироста ОД квартальный · сверхбонус"},
+              {"value":"FUNNELARS_ACTIVE_DEAL_CHOD","label":"ЧОД активной сделки (воронка)"},
+              {"value":"CC360_NKD_DETAIL_CHKD_PLAN","label":"ЧКД за месяц (план)"},
+              {"value":"KANBANARS_OFFER_VALUE","label":"Сумма сделки по оферте (ПрПр)"},
+              {"value":"KANBANARS_STAGE_VALUE","label":"Объём стадии (показатель)"},
+              {"value":"KANBANARS_STAGE_INC","label":"ЧОД стадии"},
+              {"value":"KANBANARS_OFFER_INC","label":"ЧОД по оферте (ПрПр)"},
+              {"value":"KANBANARS_STAGE_AMOUNT","label":"Объём стадии (сумма)"},
+              {"value":"KANBANARS_DEAL_AMOUNT","label":"Сумма сделки в CRM"},
+              {"value":"KANBANARS_DEAL_NUM","label":"Номер сделки в SCRM"},
+              {"value":"KANBANARS_OFFER_VALUE_VKS","label":"Сумма сделки по оферте (ПрПр) · ВКС"},
+              {"value":"KANBANARS_STAGE_VALUE_VKS","label":"Объём стадии (показатель) · ВКС"},
+              {"value":"KANBANARS_STAGE_INC_VKS","label":"ЧОД стадии · ВКС"},
+              {"value":"KANBANARS_OFFER_INC_VKS","label":"ЧОД по оферте (ПрПр) · ВКС"},
+              {"value":"KANBANARS_STAGE_AMOUNT_VKS","label":"Объём стадии (сумма) · ВКС"},
+              {"value":"KANBANARS_DEAL_AMOUNT_VKS","label":"Сумма сделки в CRM · ВКС"},
+              {"value":"KANBANARS_DEAL_NUM_VKS","label":"Номер сделки в SCRM · ВКС"},
+              {"value":"KANBANARS_OFFER_VALUE_VKO","label":"Сумма сделки по оферте (ПрПр) · ВКО"},
+              {"value":"KANBANARS_STAGE_VALUE_VKO","label":"Объём стадии (показатель) · ВКО"},
+              {"value":"KANBANARS_STAGE_INC_VKO","label":"ЧОД стадии · ВКО"},
+              {"value":"KANBANARS_OFFER_INC_VKO","label":"ЧОД по оферте (ПрПр) · ВКО"},
+              {"value":"KANBANARS_STAGE_AMOUNT_VKO","label":"Объём стадии (сумма) · ВКО"},
+              {"value":"KANBANARS_DEAL_AMOUNT_VKO","label":"Сумма сделки в CRM · ВКО"},
+              {"value":"KANBANARS_DEAL_NUM_VKO","label":"Номер сделки в SCRM · ВКО"}
             ]
           }
         },
@@ -2662,46 +2026,16 @@
           "enum": {
             "allow_custom": true,
             "options": [
-              {
-                "value": "",
-                "label": "(пусто)"
-              },
-              {
-                "value": "SUM",
-                "label": "Сумма"
-              },
-              {
-                "value": "MAX",
-                "label": "Максимум"
-              },
-              {
-                "value": "MIN",
-                "label": "Минимум"
-              },
-              {
-                "value": "AVG",
-                "label": "Среднее"
-              },
-              {
-                "value": "COUNT",
-                "label": "Количество записей"
-              },
-              {
-                "value": "COUNT_DISTINCT",
-                "label": "Число уникальных значений показателя"
-              },
-              {
-                "value": "COUNT_DISTINCT_CUSTOMER",
-                "label": "Число уникальных клиентов"
-              },
-              {
-                "value": "COUNT_DISTINCT_DEAL",
-                "label": "Число уникальных договоров"
-              },
-              {
-                "value": "LAST_VALUE",
-                "label": "Последнее значение по дате"
-              }
+              {"value":"","label":"(пусто)"},
+              {"value":"SUM","label":"Сумма"},
+              {"value":"MAX","label":"Максимум"},
+              {"value":"MIN","label":"Минимум"},
+              {"value":"AVG","label":"Среднее"},
+              {"value":"COUNT","label":"Количество записей"},
+              {"value":"COUNT_DISTINCT","label":"Число уникальных значений показателя"},
+              {"value":"COUNT_DISTINCT_CUSTOMER","label":"Число уникальных клиентов"},
+              {"value":"COUNT_DISTINCT_DEAL","label":"Число уникальных договоров"},
+              {"value":"LAST_VALUE","label":"Последнее значение по дате"}
             ]
           }
         },
@@ -2716,11 +2050,7 @@
           },
           "enum": {
             "allow_custom": false,
-            "options": [
-              "CRITERION",
-              "GAIN",
-              "RATING"
-            ]
+            "options": ["CRITERION","GAIN","RATING"]
           }
         },
         {
@@ -2734,15 +2064,7 @@
           },
           "enum": {
             "allow_custom": true,
-            "options": [
-              "=",
-              ">=",
-              "MAX",
-              "MIN",
-              "X2",
-              "X3",
-              "X4"
-            ]
+            "options": ["=",">=","MAX","MIN","X2","X3","X4"]
           }
         },
         {
@@ -2757,318 +2079,84 @@
           "enum": {
             "allow_custom": true,
             "options": [
-              {
-                "value": "WAIT",
-                "label": "Без источников (ручной)"
-              },
-              {
-                "value": "CC360_CLIENT_VOLUM_FOT_M",
-                "label": "Объём ФОТ клиента (мес.)"
-              },
-              {
-                "value": "CC360_NKD_DETAIL_CHKD",
-                "label": "ЧКД за месяц (факт)"
-              },
-              {
-                "value": "COMPASARS_KKP_ID",
-                "label": "Идентификатор ККП"
-              },
-              {
-                "value": "EFFICIENCYARSKKSB_EFF",
-                "label": "КМ эффективен · ККСБ"
-              },
-              {
-                "value": "EFFICIENCYARSKKSB_OD_YEAR_GROWTH",
-                "label": "Прирост ОД АППГ · ККСБ"
-              },
-              {
-                "value": "EFFICIENCYARSKKSB_OD_YEAR_TEMP",
-                "label": "Темп прироста ОД годовой · ККСБ"
-              },
-              {
-                "value": "FUNNELARS_ACTIVE_CUSTOMER_ID",
-                "label": "Клиент (воронка, активные продукты)"
-              },
-              {
-                "value": "FUNNELARS_ACTIVE_DEAL_ID",
-                "label": "Идентификатор сделки (воронка)"
-              },
-              {
-                "value": "FUNNELARS_ACTIVE_DEAL_MARGIN",
-                "label": "Объём сделки (воронка)"
-              },
-              {
-                "value": "INCOME",
-                "label": "Доход от конверсионных операций"
-              },
-              {
-                "value": "INSURANCEMIS_BANK_COMMISION",
-                "label": "КВ банка без НДС"
-              },
-              {
-                "value": "LEAGUEDEL",
-                "label": "Выбыл из лиги чемпионов"
-              },
-              {
-                "value": "PFIMIS_CUSTOMER_ID",
-                "label": "Клиент (сделки с ПФИ)"
-              },
-              {
-                "value": "PPO_ALL",
-                "label": "Все платежи ППО (знаменатель)"
-              },
-              {
-                "value": "PPO_IN",
-                "label": "Входящие платежи ППО (руб.)"
-              },
-              {
-                "value": "PULMIS_AGRMNT_AMT_RUB",
-                "label": "Сумма депозита (руб)"
-              },
-              {
-                "value": "PULMIS_BALANCE_OUT_RUB",
-                "label": "Исходящий остаток"
-              },
-              {
-                "value": "PULMIS_SDO_IN_RUB",
-                "label": "СДО (руб)"
-              },
-              {
-                "value": "TRUSTLEVELCC360_LEVEL0_COUNT",
-                "label": "Количество Незнакомцев"
-              },
-              {
-                "value": "TRUSTLEVELCC360_LEVEL3_COUNT",
-                "label": "Количество Товарищей"
-              },
-              {
-                "value": "TRUSTLEVELCC360_LEVEL4_COUNT",
-                "label": "Количество Друзей"
-              },
-              {
-                "value": "TRUSTLEVELCC360_LEVEL5_COUNT",
-                "label": "Количество Со Сбером навсегда"
-              },
-              {
-                "value": "TRUSTLEVELCC360_STAR_COUNT",
-                "label": "Звезды КМа текущие"
-              },
-              {
-                "value": "TRUSTLEVELCC360_STAR_START_COUNT",
-                "label": "Звезды КМа текущие на начало года"
-              },
-              {
-                "value": "WD",
-                "label": "Условные сделки (платежи)"
-              },
-              {
-                "value": "PULMIS_BALANCE_OUT",
-                "label": "Исходящий остаток в валюте"
-              },
-              {
-                "value": "PULMIS_SDO_IN",
-                "label": "СДО в валюте"
-              },
-              {
-                "value": "PULMIS_INCOME",
-                "label": "Доход в валюте"
-              },
-              {
-                "value": "PULMIS_INCOME_RUB",
-                "label": "Доход (руб)"
-              },
-              {
-                "value": "PULMIS_CUSTOMER_ID",
-                "label": "Клиент (пассивы ЮЛ)"
-              },
-              {
-                "value": "LEAGUE",
-                "label": "Победитель в лиге чемпионов"
-              },
-              {
-                "value": "SUPERCUP",
-                "label": "Победитель в суперкубке"
-              },
-              {
-                "value": "PFIMIS_INCOME",
-                "label": "Доход (ПФИ)"
-              },
-              {
-                "value": "PFIMIS_VOLUME",
-                "label": "Объём сделки в USD"
-              },
-              {
-                "value": "PFIMIS_INCOME_SOFT",
-                "label": "Софт доход"
-              },
-              {
-                "value": "PFIMIS_DEAL_CNT",
-                "label": "Количество операций"
-              },
-              {
-                "value": "PFIMIS_DEAL_ID",
-                "label": "Идентификатор сделки (ПФИ)"
-              },
-              {
-                "value": "CC360_CLIENT_VOLUM_CHPDP_M",
-                "label": "Доход по депозитам (мес.)"
-              },
-              {
-                "value": "INSURANCEMIS_AGENT_COMMISION",
-                "label": "КВ агента с НДС"
-              },
-              {
-                "value": "INSURANCEMIS_COMMISION",
-                "label": "Комиссия по страхованию"
-              },
-              {
-                "value": "INSURANCE_AMMOUNT",
-                "label": "Сумма договора страхования"
-              },
-              {
-                "value": "EFFICIENCYARSKKSB_OD_YEAR",
-                "label": "Сумма ОД годовая · ККСБ"
-              },
-              {
-                "value": "EFFICIENCYARSKKSB_OD_YEAR_APPG",
-                "label": "Сумма АППГ · ККСБ"
-              },
-              {
-                "value": "EFFICIENCYARSKKSB_OD_QUARTER_APPG",
-                "label": "Сумма за квартал АППГ · ККСБ"
-              },
-              {
-                "value": "EFFICIENCYARSKKSB_OD_QUARTER_GROWTH",
-                "label": "Прирост ОД АППГ квартальный · ККСБ"
-              },
-              {
-                "value": "EFFICIENCYARSKKSB_OD_QUARTER_TEMP",
-                "label": "Темп прироста ОД квартальный · ККСБ"
-              },
-              {
-                "value": "EFFICIENCYARS_OVERBONUS",
-                "label": "КМ эффективен · сверхбонус"
-              },
-              {
-                "value": "EFFICIENCYARS_OVERBONUS_YEAR",
-                "label": "Сумма ОД годовая · сверхбонус"
-              },
-              {
-                "value": "EFFICIENCYARS_OVERBONUS_YEAR_APPG",
-                "label": "Сумма АППГ · сверхбонус"
-              },
-              {
-                "value": "EFFICIENCYARS_OVERBONUS_QUARTER_APPG",
-                "label": "Сумма за квартал АППГ · сверхбонус"
-              },
-              {
-                "value": "EFFICIENCYARS_OVERBONUS_YEAR_GROWTH",
-                "label": "Прирост ОД АППГ · сверхбонус"
-              },
-              {
-                "value": "EFFICIENCYARS_OVERBONUS_YEAR_TEMP",
-                "label": "Темп прироста ОД годовой · сверхбонус"
-              },
-              {
-                "value": "EFFICIENCYARS_OVERBONUS_QUARTER_GROWTH",
-                "label": "Прирост ОД АППГ квартальный · сверхбонус"
-              },
-              {
-                "value": "EFFICIENCYARS_OVERBONUS_QUARTER_TEMP",
-                "label": "Темп прироста ОД квартальный · сверхбонус"
-              },
-              {
-                "value": "FUNNELARS_ACTIVE_DEAL_CHOD",
-                "label": "ЧОД активной сделки (воронка)"
-              },
-              {
-                "value": "CC360_NKD_DETAIL_CHKD_PLAN",
-                "label": "ЧКД за месяц (план)"
-              },
-              {
-                "value": "KANBANARS_OFFER_VALUE",
-                "label": "Сумма сделки по оферте (ПрПр)"
-              },
-              {
-                "value": "KANBANARS_STAGE_VALUE",
-                "label": "Объём стадии (показатель)"
-              },
-              {
-                "value": "KANBANARS_STAGE_INC",
-                "label": "ЧОД стадии"
-              },
-              {
-                "value": "KANBANARS_OFFER_INC",
-                "label": "ЧОД по оферте (ПрПр)"
-              },
-              {
-                "value": "KANBANARS_STAGE_AMOUNT",
-                "label": "Объём стадии (сумма)"
-              },
-              {
-                "value": "KANBANARS_DEAL_AMOUNT",
-                "label": "Сумма сделки в CRM"
-              },
-              {
-                "value": "KANBANARS_DEAL_NUM",
-                "label": "Номер сделки в SCRM"
-              },
-              {
-                "value": "KANBANARS_OFFER_VALUE_VKS",
-                "label": "Сумма сделки по оферте (ПрПр) · ВКС"
-              },
-              {
-                "value": "KANBANARS_STAGE_VALUE_VKS",
-                "label": "Объём стадии (показатель) · ВКС"
-              },
-              {
-                "value": "KANBANARS_STAGE_INC_VKS",
-                "label": "ЧОД стадии · ВКС"
-              },
-              {
-                "value": "KANBANARS_OFFER_INC_VKS",
-                "label": "ЧОД по оферте (ПрПр) · ВКС"
-              },
-              {
-                "value": "KANBANARS_STAGE_AMOUNT_VKS",
-                "label": "Объём стадии (сумма) · ВКС"
-              },
-              {
-                "value": "KANBANARS_DEAL_AMOUNT_VKS",
-                "label": "Сумма сделки в CRM · ВКС"
-              },
-              {
-                "value": "KANBANARS_DEAL_NUM_VKS",
-                "label": "Номер сделки в SCRM · ВКС"
-              },
-              {
-                "value": "KANBANARS_OFFER_VALUE_VKO",
-                "label": "Сумма сделки по оферте (ПрПр) · ВКО"
-              },
-              {
-                "value": "KANBANARS_STAGE_VALUE_VKO",
-                "label": "Объём стадии (показатель) · ВКО"
-              },
-              {
-                "value": "KANBANARS_STAGE_INC_VKO",
-                "label": "ЧОД стадии · ВКО"
-              },
-              {
-                "value": "KANBANARS_OFFER_INC_VKO",
-                "label": "ЧОД по оферте (ПрПр) · ВКО"
-              },
-              {
-                "value": "KANBANARS_STAGE_AMOUNT_VKO",
-                "label": "Объём стадии (сумма) · ВКО"
-              },
-              {
-                "value": "KANBANARS_DEAL_AMOUNT_VKO",
-                "label": "Сумма сделки в CRM · ВКО"
-              },
-              {
-                "value": "KANBANARS_DEAL_NUM_VKO",
-                "label": "Номер сделки в SCRM · ВКО"
-              }
+              {"value":"WAIT","label":"Без источников (ручной)"},
+              {"value":"CC360_CLIENT_VOLUM_FOT_M","label":"Объём ФОТ клиента (мес.)"},
+              {"value":"CC360_NKD_DETAIL_CHKD","label":"ЧКД за месяц (факт)"},
+              {"value":"COMPASARS_KKP_ID","label":"Идентификатор ККП"},
+              {"value":"EFFICIENCYARSKKSB_EFF","label":"КМ эффективен · ККСБ"},
+              {"value":"EFFICIENCYARSKKSB_OD_YEAR_GROWTH","label":"Прирост ОД АППГ · ККСБ"},
+              {"value":"EFFICIENCYARSKKSB_OD_YEAR_TEMP","label":"Темп прироста ОД годовой · ККСБ"},
+              {"value":"FUNNELARS_ACTIVE_CUSTOMER_ID","label":"Клиент (воронка, активные продукты)"},
+              {"value":"FUNNELARS_ACTIVE_DEAL_ID","label":"Идентификатор сделки (воронка)"},
+              {"value":"FUNNELARS_ACTIVE_DEAL_MARGIN","label":"Объём сделки (воронка)"},
+              {"value":"INCOME","label":"Доход от конверсионных операций"},
+              {"value":"INSURANCEMIS_BANK_COMMISION","label":"КВ банка без НДС"},
+              {"value":"LEAGUEDEL","label":"Выбыл из лиги чемпионов"},
+              {"value":"PFIMIS_CUSTOMER_ID","label":"Клиент (сделки с ПФИ)"},
+              {"value":"PPO_ALL","label":"Все платежи ППО (знаменатель)"},
+              {"value":"PPO_IN","label":"Входящие платежи ППО (руб.)"},
+              {"value":"PULMIS_AGRMNT_AMT_RUB","label":"Сумма депозита (руб)"},
+              {"value":"PULMIS_BALANCE_OUT_RUB","label":"Исходящий остаток"},
+              {"value":"PULMIS_SDO_IN_RUB","label":"СДО (руб)"},
+              {"value":"TRUSTLEVELCC360_LEVEL0_COUNT","label":"Количество Незнакомцев"},
+              {"value":"TRUSTLEVELCC360_LEVEL3_COUNT","label":"Количество Товарищей"},
+              {"value":"TRUSTLEVELCC360_LEVEL4_COUNT","label":"Количество Друзей"},
+              {"value":"TRUSTLEVELCC360_LEVEL5_COUNT","label":"Количество Со Сбером навсегда"},
+              {"value":"TRUSTLEVELCC360_STAR_COUNT","label":"Звезды КМа текущие"},
+              {"value":"TRUSTLEVELCC360_STAR_START_COUNT","label":"Звезды КМа текущие на начало года"},
+              {"value":"WD","label":"Условные сделки (платежи)"},
+              {"value":"PULMIS_BALANCE_OUT","label":"Исходящий остаток в валюте"},
+              {"value":"PULMIS_SDO_IN","label":"СДО в валюте"},
+              {"value":"PULMIS_INCOME","label":"Доход в валюте"},
+              {"value":"PULMIS_INCOME_RUB","label":"Доход (руб)"},
+              {"value":"PULMIS_CUSTOMER_ID","label":"Клиент (пассивы ЮЛ)"},
+              {"value":"LEAGUE","label":"Победитель в лиге чемпионов"},
+              {"value":"SUPERCUP","label":"Победитель в суперкубке"},
+              {"value":"PFIMIS_INCOME","label":"Доход (ПФИ)"},
+              {"value":"PFIMIS_VOLUME","label":"Объём сделки в USD"},
+              {"value":"PFIMIS_INCOME_SOFT","label":"Софт доход"},
+              {"value":"PFIMIS_DEAL_CNT","label":"Количество операций"},
+              {"value":"PFIMIS_DEAL_ID","label":"Идентификатор сделки (ПФИ)"},
+              {"value":"CC360_CLIENT_VOLUM_CHPDP_M","label":"Доход по депозитам (мес.)"},
+              {"value":"INSURANCEMIS_AGENT_COMMISION","label":"КВ агента с НДС"},
+              {"value":"INSURANCEMIS_COMMISION","label":"Комиссия по страхованию"},
+              {"value":"INSURANCE_AMMOUNT","label":"Сумма договора страхования"},
+              {"value":"EFFICIENCYARSKKSB_OD_YEAR","label":"Сумма ОД годовая · ККСБ"},
+              {"value":"EFFICIENCYARSKKSB_OD_YEAR_APPG","label":"Сумма АППГ · ККСБ"},
+              {"value":"EFFICIENCYARSKKSB_OD_QUARTER_APPG","label":"Сумма за квартал АППГ · ККСБ"},
+              {"value":"EFFICIENCYARSKKSB_OD_QUARTER_GROWTH","label":"Прирост ОД АППГ квартальный · ККСБ"},
+              {"value":"EFFICIENCYARSKKSB_OD_QUARTER_TEMP","label":"Темп прироста ОД квартальный · ККСБ"},
+              {"value":"EFFICIENCYARS_OVERBONUS","label":"КМ эффективен · сверхбонус"},
+              {"value":"EFFICIENCYARS_OVERBONUS_YEAR","label":"Сумма ОД годовая · сверхбонус"},
+              {"value":"EFFICIENCYARS_OVERBONUS_YEAR_APPG","label":"Сумма АППГ · сверхбонус"},
+              {"value":"EFFICIENCYARS_OVERBONUS_QUARTER_APPG","label":"Сумма за квартал АППГ · сверхбонус"},
+              {"value":"EFFICIENCYARS_OVERBONUS_YEAR_GROWTH","label":"Прирост ОД АППГ · сверхбонус"},
+              {"value":"EFFICIENCYARS_OVERBONUS_YEAR_TEMP","label":"Темп прироста ОД годовой · сверхбонус"},
+              {"value":"EFFICIENCYARS_OVERBONUS_QUARTER_GROWTH","label":"Прирост ОД АППГ квартальный · сверхбонус"},
+              {"value":"EFFICIENCYARS_OVERBONUS_QUARTER_TEMP","label":"Темп прироста ОД квартальный · сверхбонус"},
+              {"value":"FUNNELARS_ACTIVE_DEAL_CHOD","label":"ЧОД активной сделки (воронка)"},
+              {"value":"CC360_NKD_DETAIL_CHKD_PLAN","label":"ЧКД за месяц (план)"},
+              {"value":"KANBANARS_OFFER_VALUE","label":"Сумма сделки по оферте (ПрПр)"},
+              {"value":"KANBANARS_STAGE_VALUE","label":"Объём стадии (показатель)"},
+              {"value":"KANBANARS_STAGE_INC","label":"ЧОД стадии"},
+              {"value":"KANBANARS_OFFER_INC","label":"ЧОД по оферте (ПрПр)"},
+              {"value":"KANBANARS_STAGE_AMOUNT","label":"Объём стадии (сумма)"},
+              {"value":"KANBANARS_DEAL_AMOUNT","label":"Сумма сделки в CRM"},
+              {"value":"KANBANARS_DEAL_NUM","label":"Номер сделки в SCRM"},
+              {"value":"KANBANARS_OFFER_VALUE_VKS","label":"Сумма сделки по оферте (ПрПр) · ВКС"},
+              {"value":"KANBANARS_STAGE_VALUE_VKS","label":"Объём стадии (показатель) · ВКС"},
+              {"value":"KANBANARS_STAGE_INC_VKS","label":"ЧОД стадии · ВКС"},
+              {"value":"KANBANARS_OFFER_INC_VKS","label":"ЧОД по оферте (ПрПр) · ВКС"},
+              {"value":"KANBANARS_STAGE_AMOUNT_VKS","label":"Объём стадии (сумма) · ВКС"},
+              {"value":"KANBANARS_DEAL_AMOUNT_VKS","label":"Сумма сделки в CRM · ВКС"},
+              {"value":"KANBANARS_DEAL_NUM_VKS","label":"Номер сделки в SCRM · ВКС"},
+              {"value":"KANBANARS_OFFER_VALUE_VKO","label":"Сумма сделки по оферте (ПрПр) · ВКО"},
+              {"value":"KANBANARS_STAGE_VALUE_VKO","label":"Объём стадии (показатель) · ВКО"},
+              {"value":"KANBANARS_STAGE_INC_VKO","label":"ЧОД стадии · ВКО"},
+              {"value":"KANBANARS_OFFER_INC_VKO","label":"ЧОД по оферте (ПрПр) · ВКО"},
+              {"value":"KANBANARS_STAGE_AMOUNT_VKO","label":"Объём стадии (сумма) · ВКО"},
+              {"value":"KANBANARS_DEAL_AMOUNT_VKO","label":"Сумма сделки в CRM · ВКО"},
+              {"value":"KANBANARS_DEAL_NUM_VKO","label":"Номер сделки в SCRM · ВКО"}
             ]
           },
           "textarea": {
@@ -3088,16 +2176,7 @@
           "enum": {
             "allow_custom": false,
             "input_display": "toggle",
-            "options": [
-              {
-                "value": "0",
-                "label": "ВКО на дату операции"
-              },
-              {
-                "value": "1",
-                "label": "ВКО на конец турнира"
-              }
-            ]
+            "options": [{"value":"0","label":"ВКО на дату операции"},{"value":"1","label":"ВКО на конец турнира"}]
           }
         },
         {
@@ -3113,16 +2192,7 @@
             "comment": "Только 0 или 1 в БД; подписи как у конкурса. Значения 3 в CSV/БД заменены на 1.",
             "allow_custom": false,
             "input_display": "toggle",
-            "options": [
-              {
-                "value": "1",
-                "label": "Ручной расчет"
-              },
-              {
-                "value": "0",
-                "label": "Промышленный расчет"
-              }
-            ]
+            "options": [{"value":"1","label":"Ручной расчет"},{"value":"0","label":"Промышленный расчет"}]
           }
         },
         {
@@ -3232,12 +2302,7 @@
           },
           "enum": {
             "allow_custom": false,
-            "options": [
-              "BADGE",
-              "CRYSTAL",
-              "ITEM",
-              "LABEL"
-            ]
+            "options": ["BADGE","CRYSTAL","ITEM","LABEL"]
           }
         },
         {
@@ -3251,10 +2316,7 @@
           },
           "enum": {
             "allow_custom": false,
-            "options": [
-              "1",
-              "2"
-            ]
+            "options": ["1","2"]
           }
         },
         {
@@ -3272,16 +2334,7 @@
           "enum": {
             "allow_custom": false,
             "input_display": "toggle",
-            "options": [
-              {
-                "value": "Y",
-                "label": "Да"
-              },
-              {
-                "value": "N",
-                "label": "Нет"
-              }
-            ]
+            "options": [{"value":"Y","label":"Да"},{"value":"N","label":"Нет"}]
           }
         },
         {
@@ -3299,16 +2352,7 @@
           "enum": {
             "allow_custom": false,
             "input_display": "toggle",
-            "options": [
-              {
-                "value": "Y",
-                "label": "Да"
-              },
-              {
-                "value": "N",
-                "label": "Нет"
-              }
-            ]
+            "options": [{"value":"Y","label":"Да"},{"value":"N","label":"Нет"}]
           }
         },
         {
@@ -3326,16 +2370,7 @@
           "enum": {
             "allow_custom": false,
             "input_display": "toggle",
-            "options": [
-              {
-                "value": "Y",
-                "label": "Да"
-              },
-              {
-                "value": "N",
-                "label": "Нет"
-              }
-            ]
+            "options": [{"value":"Y","label":"Да"},{"value":"N","label":"Нет"}]
           }
         },
         {
@@ -3353,16 +2388,7 @@
           "enum": {
             "allow_custom": false,
             "input_display": "toggle",
-            "options": [
-              {
-                "value": "Y",
-                "label": "Да"
-              },
-              {
-                "value": "N",
-                "label": "Нет"
-              }
-            ]
+            "options": [{"value":"Y","label":"Да"},{"value":"N","label":"Нет"}]
           }
         },
         {
@@ -3380,16 +2406,7 @@
           "enum": {
             "allow_custom": false,
             "input_display": "toggle",
-            "options": [
-              {
-                "value": "Y",
-                "label": "Да"
-              },
-              {
-                "value": "N",
-                "label": "Нет"
-              }
-            ]
+            "options": [{"value":"Y","label":"Да"},{"value":"N","label":"Нет"}]
           }
         },
         {
@@ -3407,16 +2424,7 @@
           "enum": {
             "allow_custom": false,
             "input_display": "toggle",
-            "options": [
-              {
-                "value": "Y",
-                "label": "Да"
-              },
-              {
-                "value": "N",
-                "label": "Нет"
-              }
-            ]
+            "options": [{"value":"Y","label":"Да"},{"value":"N","label":"Нет"}]
           }
         },
         {
@@ -3434,16 +2442,7 @@
           "enum": {
             "allow_custom": false,
             "input_display": "toggle",
-            "options": [
-              {
-                "value": "Y",
-                "label": "Да"
-              },
-              {
-                "value": "N",
-                "label": "Нет"
-              }
-            ]
+            "options": [{"value":"Y","label":"Да"},{"value":"N","label":"Нет"}]
           }
         },
         {
@@ -3461,16 +2460,7 @@
           "enum": {
             "allow_custom": false,
             "input_display": "toggle",
-            "options": [
-              {
-                "value": "Y",
-                "label": "Да"
-              },
-              {
-                "value": "N",
-                "label": "Нет"
-              }
-            ]
+            "options": [{"value":"Y","label":"Да"},{"value":"N","label":"Нет"}]
           }
         },
         {
@@ -3488,16 +2478,7 @@
           "enum": {
             "allow_custom": false,
             "input_display": "toggle",
-            "options": [
-              {
-                "value": "Y",
-                "label": "Да"
-              },
-              {
-                "value": "N",
-                "label": "Нет"
-              }
-            ]
+            "options": [{"value":"Y","label":"Да"},{"value":"N","label":"Нет"}]
           }
         },
         {
@@ -3515,16 +2496,7 @@
           "enum": {
             "allow_custom": false,
             "input_display": "toggle",
-            "options": [
-              {
-                "value": "Y",
-                "label": "Да"
-              },
-              {
-                "value": "N",
-                "label": "Нет"
-              }
-            ]
+            "options": [{"value":"Y","label":"Да"},{"value":"N","label":"Нет"}]
           }
         },
         {
@@ -3542,16 +2514,7 @@
           "enum": {
             "allow_custom": false,
             "input_display": "toggle",
-            "options": [
-              {
-                "value": "Y",
-                "label": "Да"
-              },
-              {
-                "value": "N",
-                "label": "Нет"
-              }
-            ]
+            "options": [{"value":"Y","label":"Да"},{"value":"N","label":"Нет"}]
           }
         },
         {
@@ -3569,16 +2532,7 @@
           "enum": {
             "allow_custom": false,
             "input_display": "toggle",
-            "options": [
-              {
-                "value": "Y",
-                "label": "Да"
-              },
-              {
-                "value": "N",
-                "label": "Нет"
-              }
-            ]
+            "options": [{"value":"Y","label":"Да"},{"value":"N","label":"Нет"}]
           }
         },
         {
@@ -3596,16 +2550,7 @@
           "enum": {
             "allow_custom": false,
             "input_display": "toggle",
-            "options": [
-              {
-                "value": "AIPROMPT",
-                "label": "AI-новость"
-              },
-              {
-                "value": "TEMPLATE",
-                "label": "Новость по шаблону"
-              }
-            ]
+            "options": [{"value":"AIPROMPT","label":"AI-новость"},{"value":"TEMPLATE","label":"Новость по шаблону"}]
           }
         },
         {
@@ -3689,11 +2634,7 @@
           },
           "enum": {
             "allow_custom": false,
-            "options": [
-              "1",
-              "2",
-              "3"
-            ]
+            "options": ["1","2","3"]
           }
         },
         {
@@ -3713,54 +2654,18 @@
             "allow_custom": false,
             "comment": "Месяц для группового лимита (лимит по месяцам в выдаче).",
             "options": [
-              {
-                "value": "Январь",
-                "label": "Январь"
-              },
-              {
-                "value": "Февраль",
-                "label": "Февраль"
-              },
-              {
-                "value": "Март",
-                "label": "Март"
-              },
-              {
-                "value": "Апрель",
-                "label": "Апрель"
-              },
-              {
-                "value": "Май",
-                "label": "Май"
-              },
-              {
-                "value": "Июнь",
-                "label": "Июнь"
-              },
-              {
-                "value": "Июль",
-                "label": "Июль"
-              },
-              {
-                "value": "Август",
-                "label": "Август"
-              },
-              {
-                "value": "Сентябрь",
-                "label": "Сентябрь"
-              },
-              {
-                "value": "Октябрь",
-                "label": "Октябрь"
-              },
-              {
-                "value": "Ноябрь",
-                "label": "Ноябрь"
-              },
-              {
-                "value": "Декабрь",
-                "label": "Декабрь"
-              }
+              {"value":"Январь","label":"Январь"},
+              {"value":"Февраль","label":"Февраль"},
+              {"value":"Март","label":"Март"},
+              {"value":"Апрель","label":"Апрель"},
+              {"value":"Май","label":"Май"},
+              {"value":"Июнь","label":"Июнь"},
+              {"value":"Июль","label":"Июль"},
+              {"value":"Август","label":"Август"},
+              {"value":"Сентябрь","label":"Сентябрь"},
+              {"value":"Октябрь","label":"Октябрь"},
+              {"value":"Ноябрь","label":"Ноябрь"},
+              {"value":"Декабрь","label":"Декабрь"}
             ]
           }
         },
@@ -3778,11 +2683,7 @@
           },
           "enum": {
             "allow_custom": false,
-            "options": [
-              "1",
-              "2",
-              "3"
-            ]
+            "options": ["1","2","3"]
           }
         },
         {
@@ -3800,22 +2701,10 @@
           "enum": {
             "allow_custom": false,
             "options": [
-              {
-                "value": "BANK",
-                "label": "Страна"
-              },
-              {
-                "value": "TB",
-                "label": "Тер.банк"
-              },
-              {
-                "value": "GOSB",
-                "label": "ГОСБ"
-              },
-              {
-                "value": "NON",
-                "label": "Общий (вне уровня)"
-              }
+              {"value":"BANK","label":"Страна"},
+              {"value":"TB","label":"Тер.банк"},
+              {"value":"GOSB","label":"ГОСБ"},
+              {"value":"NON","label":"Общий (вне уровня)"}
             ]
           }
         },
@@ -3833,9 +2722,7 @@
           },
           "enum": {
             "allow_custom": false,
-            "options": [
-              "once"
-            ]
+            "options": ["once"]
           }
         },
         {
@@ -3853,16 +2740,7 @@
           "enum": {
             "allow_custom": false,
             "input_display": "toggle",
-            "options": [
-              {
-                "value": "Y",
-                "label": "Да"
-              },
-              {
-                "value": "N",
-                "label": "Нет"
-              }
-            ]
+            "options": [{"value":"Y","label":"Да"},{"value":"N","label":"Нет"}]
           }
         },
         {
@@ -3881,42 +2759,15 @@
           "enum": {
             "allow_custom": false,
             "options": [
-              {
-                "value": "",
-                "label": "(пусто)"
-              },
-              {
-                "value": "KMKKSB",
-                "label": "Клиентский менеджер"
-              },
-              {
-                "value": "MNS",
-                "label": "Цифровой менеджер"
-              },
-              {
-                "value": "KMSB1",
-                "label": "KMSB1"
-              },
-              {
-                "value": "SERVICEMEN",
-                "label": "SERVICEMEN"
-              },
-              {
-                "value": "KMFACTORING",
-                "label": "Менеджер факторинга"
-              },
-              {
-                "value": "IMUB",
-                "label": "IMUB"
-              },
-              {
-                "value": "RNUB",
-                "label": "RNUB"
-              },
-              {
-                "value": "RSB1",
-                "label": "RSB1"
-              }
+              {"value":"","label":"(пусто)"},
+              {"value":"KMKKSB","label":"Клиентский менеджер"},
+              {"value":"MNS","label":"Цифровой менеджер"},
+              {"value":"KMSB1","label":"KMSB1"},
+              {"value":"SERVICEMEN","label":"SERVICEMEN"},
+              {"value":"KMFACTORING","label":"Менеджер факторинга"},
+              {"value":"IMUB","label":"IMUB"},
+              {"value":"RNUB","label":"RNUB"},
+              {"value":"RSB1","label":"RSB1"}
             ]
           }
         },
@@ -3937,86 +2788,26 @@
           "enum": {
             "allow_custom": false,
             "options": [
-              {
-                "value": "",
-                "label": "(пусто)"
-              },
-              {
-                "value": "NON",
-                "label": "Без сезона"
-              },
-              {
-                "value": "SEASON_2024",
-                "label": "Сезон 2024"
-              },
-              {
-                "value": "SEASON_2025_1",
-                "label": "Сезон 1ПГ 2025"
-              },
-              {
-                "value": "SEASON_2025_2",
-                "label": "Сезон 2ПГ 2025"
-              },
-              {
-                "value": "SEASON_2026_1",
-                "label": "Сезон 1ПГ 2026"
-              },
-              {
-                "value": "SEASON_2026_2",
-                "label": "Сезон 2ПГ 2026"
-              },
-              {
-                "value": "SEASON_f_2025",
-                "label": "Сезон 2025 (Факторинг)"
-              },
-              {
-                "value": "SEASON_f_2026",
-                "label": "Сезон 2026 (Факторинг)"
-              },
-              {
-                "value": "SEASON_imub_2025",
-                "label": "Сезон 2025 (IMUB)"
-              },
-              {
-                "value": "SEASON_kmsb1_2025",
-                "label": "Сезон 2025 (KMSB1)"
-              },
-              {
-                "value": "SEASON_m_2024",
-                "label": "Сезон 2024 (МНС)"
-              },
-              {
-                "value": "SEASON_m_2025_1",
-                "label": "Сезон 1ПГ 2025 (МНС)"
-              },
-              {
-                "value": "SEASON_m_2025_2",
-                "label": "Сезон 2ПГ 2025 (МНС)"
-              },
-              {
-                "value": "SEASON_m_2026_1",
-                "label": "Сезон 1ПГ 2026 (МНС)"
-              },
-              {
-                "value": "SEASON_m_2026_2",
-                "label": "Сезон 2ПГ 2026 (МНС)"
-              },
-              {
-                "value": "SEASON_rnub_2025",
-                "label": "Сезон 2025 (RNUB)"
-              },
-              {
-                "value": "SEASON_rsb1_2025",
-                "label": "Сезон 2025 (RSB1)"
-              },
-              {
-                "value": "SEASON_s_2024",
-                "label": "Сезон 2024 (S)"
-              },
-              {
-                "value": "SEASON_s_2025",
-                "label": "Сезон 2025 (S)"
-              }
+              {"value":"","label":"(пусто)"},
+              {"value":"NON","label":"Без сезона"},
+              {"value":"SEASON_2024","label":"Сезон 2024"},
+              {"value":"SEASON_2025_1","label":"Сезон 1ПГ 2025"},
+              {"value":"SEASON_2025_2","label":"Сезон 2ПГ 2025"},
+              {"value":"SEASON_2026_1","label":"Сезон 1ПГ 2026"},
+              {"value":"SEASON_2026_2","label":"Сезон 2ПГ 2026"},
+              {"value":"SEASON_f_2025","label":"Сезон 2025 (Факторинг)"},
+              {"value":"SEASON_f_2026","label":"Сезон 2026 (Факторинг)"},
+              {"value":"SEASON_imub_2025","label":"Сезон 2025 (IMUB)"},
+              {"value":"SEASON_kmsb1_2025","label":"Сезон 2025 (KMSB1)"},
+              {"value":"SEASON_m_2024","label":"Сезон 2024 (МНС)"},
+              {"value":"SEASON_m_2025_1","label":"Сезон 1ПГ 2025 (МНС)"},
+              {"value":"SEASON_m_2025_2","label":"Сезон 2ПГ 2025 (МНС)"},
+              {"value":"SEASON_m_2026_1","label":"Сезон 1ПГ 2026 (МНС)"},
+              {"value":"SEASON_m_2026_2","label":"Сезон 2ПГ 2026 (МНС)"},
+              {"value":"SEASON_rnub_2025","label":"Сезон 2025 (RNUB)"},
+              {"value":"SEASON_rsb1_2025","label":"Сезон 2025 (RSB1)"},
+              {"value":"SEASON_s_2024","label":"Сезон 2024 (S)"},
+              {"value":"SEASON_s_2025","label":"Сезон 2025 (S)"}
             ]
           }
         },
@@ -4035,86 +2826,26 @@
           "enum": {
             "allow_custom": false,
             "options": [
-              {
-                "value": "",
-                "label": "(пусто)"
-              },
-              {
-                "value": "NON",
-                "label": "Без сезона"
-              },
-              {
-                "value": "SEASON_2024",
-                "label": "Сезон 2024"
-              },
-              {
-                "value": "SEASON_2025_1",
-                "label": "Сезон 1ПГ 2025"
-              },
-              {
-                "value": "SEASON_2025_2",
-                "label": "Сезон 2ПГ 2025"
-              },
-              {
-                "value": "SEASON_2026_1",
-                "label": "Сезон 1ПГ 2026"
-              },
-              {
-                "value": "SEASON_2026_2",
-                "label": "Сезон 2ПГ 2026"
-              },
-              {
-                "value": "SEASON_f_2025",
-                "label": "Сезон 2025 (Факторинг)"
-              },
-              {
-                "value": "SEASON_f_2026",
-                "label": "Сезон 2026 (Факторинг)"
-              },
-              {
-                "value": "SEASON_imub_2025",
-                "label": "Сезон 2025 (IMUB)"
-              },
-              {
-                "value": "SEASON_kmsb1_2025",
-                "label": "Сезон 2025 (KMSB1)"
-              },
-              {
-                "value": "SEASON_m_2024",
-                "label": "Сезон 2024 (МНС)"
-              },
-              {
-                "value": "SEASON_m_2025_1",
-                "label": "Сезон 1ПГ 2025 (МНС)"
-              },
-              {
-                "value": "SEASON_m_2025_2",
-                "label": "Сезон 2ПГ 2025 (МНС)"
-              },
-              {
-                "value": "SEASON_m_2026_1",
-                "label": "Сезон 1ПГ 2026 (МНС)"
-              },
-              {
-                "value": "SEASON_m_2026_2",
-                "label": "Сезон 2ПГ 2026 (МНС)"
-              },
-              {
-                "value": "SEASON_rnub_2025",
-                "label": "Сезон 2025 (RNUB)"
-              },
-              {
-                "value": "SEASON_rsb1_2025",
-                "label": "Сезон 2025 (RSB1)"
-              },
-              {
-                "value": "SEASON_s_2024",
-                "label": "Сезон 2024 (S)"
-              },
-              {
-                "value": "SEASON_s_2025",
-                "label": "Сезон 2025 (S)"
-              }
+              {"value":"","label":"(пусто)"},
+              {"value":"NON","label":"Без сезона"},
+              {"value":"SEASON_2024","label":"Сезон 2024"},
+              {"value":"SEASON_2025_1","label":"Сезон 1ПГ 2025"},
+              {"value":"SEASON_2025_2","label":"Сезон 2ПГ 2025"},
+              {"value":"SEASON_2026_1","label":"Сезон 1ПГ 2026"},
+              {"value":"SEASON_2026_2","label":"Сезон 2ПГ 2026"},
+              {"value":"SEASON_f_2025","label":"Сезон 2025 (Факторинг)"},
+              {"value":"SEASON_f_2026","label":"Сезон 2026 (Факторинг)"},
+              {"value":"SEASON_imub_2025","label":"Сезон 2025 (IMUB)"},
+              {"value":"SEASON_kmsb1_2025","label":"Сезон 2025 (KMSB1)"},
+              {"value":"SEASON_m_2024","label":"Сезон 2024 (МНС)"},
+              {"value":"SEASON_m_2025_1","label":"Сезон 1ПГ 2025 (МНС)"},
+              {"value":"SEASON_m_2025_2","label":"Сезон 2ПГ 2025 (МНС)"},
+              {"value":"SEASON_m_2026_1","label":"Сезон 1ПГ 2026 (МНС)"},
+              {"value":"SEASON_m_2026_2","label":"Сезон 2ПГ 2026 (МНС)"},
+              {"value":"SEASON_rnub_2025","label":"Сезон 2025 (RNUB)"},
+              {"value":"SEASON_rsb1_2025","label":"Сезон 2025 (RSB1)"},
+              {"value":"SEASON_s_2024","label":"Сезон 2024 (S)"},
+              {"value":"SEASON_s_2025","label":"Сезон 2025 (S)"}
             ]
           },
           "textarea": {
@@ -4133,10 +2864,7 @@
           ],
           "enum": {
             "allow_custom": true,
-            "options": [
-              "AST_1",
-              "NFT_1"
-            ]
+            "options": ["AST_1","NFT_1"]
           }
         },
         {
@@ -4153,13 +2881,7 @@
           },
           "enum": {
             "allow_custom": true,
-            "options": [
-              "green-70",
-              "light-blue-80",
-              "orange-80",
-              "pink-80",
-              "purple-80"
-            ]
+            "options": ["green-70","light-blue-80","orange-80","pink-80","purple-80"]
           }
         },
         {
@@ -4730,13 +3452,7 @@
           },
           "enum": {
             "allow_custom": false,
-            "options": [
-              "АКТИВНЫЙ",
-              "ПОДВЕДЕНИЕ ИТОГОВ",
-              "ЗАВЕРШЕН",
-              "ОТМЕНЕН",
-              "УДАЛЕН"
-            ]
+            "options": ["АКТИВНЫЙ","ПОДВЕДЕНИЕ ИТОГОВ","ЗАВЕРШЕН","ОТМЕНЕН","УДАЛЕН"]
           }
         },
         {
@@ -4751,34 +3467,13 @@
           "enum": {
             "allow_custom": false,
             "options": [
-              {
-                "value": "",
-                "label": "(пусто)"
-              },
-              {
-                "value": ">=",
-                "label": "≥ не меньше"
-              },
-              {
-                "value": ">",
-                "label": "> больше"
-              },
-              {
-                "value": "=",
-                "label": "= равно"
-              },
-              {
-                "value": "<=",
-                "label": "≤ не больше"
-              },
-              {
-                "value": "<",
-                "label": "< меньше"
-              },
-              {
-                "value": "<>",
-                "label": "≠ не равно"
-              }
+              {"value":"","label":"(пусто)"},
+              {"value":">=","label":"≥ не меньше"},
+              {"value":">","label":"> больше"},
+              {"value":"=","label":"= равно"},
+              {"value":"<=","label":"≤ не больше"},
+              {"value":"<","label":"< меньше"},
+              {"value":"<>","label":"≠ не равно"}
             ]
           }
         },
@@ -4797,10 +3492,7 @@
           },
           "enum": {
             "allow_custom": false,
-            "options": [
-              "0",
-              "1"
-            ]
+            "options": ["0","1"]
           }
         },
         {
@@ -4819,34 +3511,13 @@
           "enum": {
             "allow_custom": false,
             "options": [
-              {
-                "value": "",
-                "label": "(пусто)"
-              },
-              {
-                "value": ">=",
-                "label": "≥ не меньше"
-              },
-              {
-                "value": ">",
-                "label": "> больше"
-              },
-              {
-                "value": "=",
-                "label": "= равно"
-              },
-              {
-                "value": "<=",
-                "label": "≤ не больше"
-              },
-              {
-                "value": "<",
-                "label": "< меньше"
-              },
-              {
-                "value": "<>",
-                "label": "≠ не равно"
-              }
+              {"value":"","label":"(пусто)"},
+              {"value":">=","label":"≥ не меньше"},
+              {"value":">","label":"> больше"},
+              {"value":"=","label":"= равно"},
+              {"value":"<=","label":"≤ не больше"},
+              {"value":"<","label":"< меньше"},
+              {"value":"<>","label":"≠ не равно"}
             ]
           }
         },
@@ -4909,86 +3580,26 @@
           "enum": {
             "allow_custom": false,
             "options": [
-              {
-                "value": "",
-                "label": "(пусто)"
-              },
-              {
-                "value": "NON",
-                "label": "Без сезона"
-              },
-              {
-                "value": "SEASON_2024",
-                "label": "Сезон 2024"
-              },
-              {
-                "value": "SEASON_2025_1",
-                "label": "Сезон 1ПГ 2025"
-              },
-              {
-                "value": "SEASON_2025_2",
-                "label": "Сезон 2ПГ 2025"
-              },
-              {
-                "value": "SEASON_2026_1",
-                "label": "Сезон 1ПГ 2026"
-              },
-              {
-                "value": "SEASON_2026_2",
-                "label": "Сезон 2ПГ 2026"
-              },
-              {
-                "value": "SEASON_f_2025",
-                "label": "Сезон 2025 (Факторинг)"
-              },
-              {
-                "value": "SEASON_f_2026",
-                "label": "Сезон 2026 (Факторинг)"
-              },
-              {
-                "value": "SEASON_imub_2025",
-                "label": "Сезон 2025 (IMUB)"
-              },
-              {
-                "value": "SEASON_kmsb1_2025",
-                "label": "Сезон 2025 (KMSB1)"
-              },
-              {
-                "value": "SEASON_m_2024",
-                "label": "Сезон 2024 (МНС)"
-              },
-              {
-                "value": "SEASON_m_2025_1",
-                "label": "Сезон 1ПГ 2025 (МНС)"
-              },
-              {
-                "value": "SEASON_m_2025_2",
-                "label": "Сезон 2ПГ 2025 (МНС)"
-              },
-              {
-                "value": "SEASON_m_2026_1",
-                "label": "Сезон 1ПГ 2026 (МНС)"
-              },
-              {
-                "value": "SEASON_m_2026_2",
-                "label": "Сезон 2ПГ 2026 (МНС)"
-              },
-              {
-                "value": "SEASON_rnub_2025",
-                "label": "Сезон 2025 (RNUB)"
-              },
-              {
-                "value": "SEASON_rsb1_2025",
-                "label": "Сезон 2025 (RSB1)"
-              },
-              {
-                "value": "SEASON_s_2024",
-                "label": "Сезон 2024 (S)"
-              },
-              {
-                "value": "SEASON_s_2025",
-                "label": "Сезон 2025 (S)"
-              }
+              {"value":"","label":"(пусто)"},
+              {"value":"NON","label":"Без сезона"},
+              {"value":"SEASON_2024","label":"Сезон 2024"},
+              {"value":"SEASON_2025_1","label":"Сезон 1ПГ 2025"},
+              {"value":"SEASON_2025_2","label":"Сезон 2ПГ 2025"},
+              {"value":"SEASON_2026_1","label":"Сезон 1ПГ 2026"},
+              {"value":"SEASON_2026_2","label":"Сезон 2ПГ 2026"},
+              {"value":"SEASON_f_2025","label":"Сезон 2025 (Факторинг)"},
+              {"value":"SEASON_f_2026","label":"Сезон 2026 (Факторинг)"},
+              {"value":"SEASON_imub_2025","label":"Сезон 2025 (IMUB)"},
+              {"value":"SEASON_kmsb1_2025","label":"Сезон 2025 (KMSB1)"},
+              {"value":"SEASON_m_2024","label":"Сезон 2024 (МНС)"},
+              {"value":"SEASON_m_2025_1","label":"Сезон 1ПГ 2025 (МНС)"},
+              {"value":"SEASON_m_2025_2","label":"Сезон 2ПГ 2025 (МНС)"},
+              {"value":"SEASON_m_2026_1","label":"Сезон 1ПГ 2026 (МНС)"},
+              {"value":"SEASON_m_2026_2","label":"Сезон 2ПГ 2026 (МНС)"},
+              {"value":"SEASON_rnub_2025","label":"Сезон 2025 (RNUB)"},
+              {"value":"SEASON_rsb1_2025","label":"Сезон 2025 (RSB1)"},
+              {"value":"SEASON_s_2024","label":"Сезон 2024 (S)"},
+              {"value":"SEASON_s_2025","label":"Сезон 2025 (S)"}
             ]
           }
         },
@@ -5005,16 +3616,7 @@
             "comment": "В БД — 0 или 1; в форме — подписи «Ручной расчет» / «Промышленный расчет».",
             "allow_custom": false,
             "input_display": "toggle",
-            "options": [
-              {
-                "value": "1",
-                "label": "Ручной расчет"
-              },
-              {
-                "value": "0",
-                "label": "Промышленный расчет"
-              }
-            ]
+            "options": [{"value":"1","label":"Ручной расчет"},{"value":"0","label":"Промышленный расчет"}]
           }
         },
         {
