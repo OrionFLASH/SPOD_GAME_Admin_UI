@@ -1375,7 +1375,7 @@
         {
           "column": "TOURNAMENT_STATUS",
           "allow_custom": false,
-          "options": ["АКТИВНЫЙ", "ЗАВЕРШЕН", "ОТМЕНЕН", "ПОДВЕДЕНИЕ ИТОГОВ", "УДАЛЕН"]
+          "options": ["АКТИВНЫЙ", "ПОДВЕДЕНИЕ ИТОГОВ", "ЗАВЕРШЕН", "ОТМЕНЕН", "УДАЛЕН"]
         },
         {
           "column": "CRITERION_MARK_TYPE",
