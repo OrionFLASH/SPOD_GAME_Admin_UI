@@ -719,6 +719,14 @@ curl -X PUT "http://127.0.0.1:8765/wizard/new-contest/draft" \
 - Горизонтальное выравнивание регулируется классами `cell-h-left` / `cell-h-center` / `cell-h-right`; если класс не задан — применяется базовое выравнивание таблицы.
 - Для списка **REWARD-LINK** используется авто-раскладка без наложений (`table-layout: auto`, `width: max-content`, `min-width: 100%`): при нехватке ширины контент не перекрывает соседние колонки, а включается горизонтальный скролл контейнера.
 
+#### Какие новые классы применены по листам (текущее состояние)
+
+- **CONTEST-DATA / GROUP**: коды конкурса — `cell-code ... cell-h-left cell-w-strong`; текстовые колонки — `cell-wrap` + `cell-shrink-wrap`/`cell-shrink-ellipsis` + `cell-w-medium`; связи — `cell-w-thin`.
+- **INDICATOR**: `contest_code` — `cell-code ... cell-w-strong`; `title_line`/`add_calc_type` — `cell-wrap` с управляемым сжатием; `relations_line` — тонкий вес `cell-w-thin`.
+- **REWARD**: `REWARD_CODE` — `cell-code cell-code-noshrink ... cell-w-strong` (код не сокращается); текстовые поля — `cell-w-medium`; связи — `cell-w-thin`.
+- **REWARD-LINK**: `REWARD_CODE` — `cell-code cell-code-noshrink col-reward-link-code`; `CONTEST_CODE` — `cell-code cell-shrink-ellipsis col-reward-link-contest-code`; названия — `cell-wrap cell-shrink-wrap`; уровень — `cell-mono`.
+- **TOURNAMENT-SCHEDULE**: `TOURNAMENT_CODE`/`CONTEST_CODE` — `cell-code ... cell-w-strong`; статус/период — `cell-shrink-ellipsis`; название конкурса — `cell-shrink-wrap`.
+
 #### Как выбирать класс для новой колонки
 
 1. **Код/идентификатор**: `cell-code` (главные коды) или `cell-mono` (вторичные коды).
@@ -1074,6 +1082,7 @@ python main.py
 | 0.2.55 | **README раздел 6c.7:** явно описано, где задаются **`key`** и **`cell_class`**, что **нигде не регистрируется**; таблицы существующих CSS-классов списков (**`cell-mono`**, **`cell-wrap`**, **`col-contest-*`**, **`col-reward-link-*`** и др.) и сокращён дублирующий подпункт про стили. |
 | 0.2.56 | **README раздел 6c.7:** добавлен полный справочник фактически используемых классов `cell_class` (включая новые `cell-code`, `cell-shrink-wrap`, `cell-shrink-ellipsis`) с описанием влияния на шрифт, переносы, обрезку, выравнивание и ширину колонок; отдельно задокументированы тонкие пунктирные разделители между колонками. |
 | 0.2.57 | **README раздел 6c.7:** задокументированы новые классы выравнивания и насыщенности (`cell-h-*`, `cell-w-*`), `cell-code-noshrink`, `col-reward-link-contest-code`; добавлен блок про глобальное вертикальное центрирование всех списков и авто-раскладку REWARD-LINK без наложений. |
+| 0.2.58 | **README раздел 6c.7:** добавлена матрица применения новых классов по каждому листу (CONTEST-DATA, GROUP, INDICATOR, REWARD, REWARD-LINK, TOURNAMENT-SCHEDULE), чтобы было видно, где включены `cell-code-noshrink`, `cell-h-*`, `cell-w-*`, `cell-shrink-*` и `col-reward-link-contest-code`. |
 
 ---
 
