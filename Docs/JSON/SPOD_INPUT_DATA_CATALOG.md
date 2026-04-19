@@ -8,6 +8,7 @@
 
 ## Оглавление
 
+- [Актуализация по `config.json` (названия полей в UI)](#актуализация-по-configjson-названия-полей-в-ui)
 - [REWARD (PROM) 23-03 v3.csv](#reward-prom-23-03-v3)
 - [CONTEST (PROM) 23-03 v3.csv](#contest-prom-23-03-v3)
 - [employee (PROM) 13-03 v0.csv](#employee-prom-13-03-v0)
@@ -29,6 +30,30 @@
 - Для `INDICATOR` поле `INDICATOR_ADD_CALC_TYPE` фактически задаёт роль в формуле (`NUMERATOR`/`DIVIDER`).
 - Для `SCHEDULE` поле `FILTER_PERIOD_ARR` соответствует модели дополнительных периодов из `contestscheme_v0.json` (`tournament_period`), а `CRITERION_MARK_TYPE`/`CRITERION_MARK_VALUE` задают порог допуска участника.
 - Для `CONTEST` поля `PLAN_METHOD_CODE`, `PLAN_MOD_METOD`, `CONTEST_INDICATOR_METHOD`, `CONTEST_FACTOR_METHOD`, `FACT_POST_PROCESSING` лучше трактовать как ссылки на справочник методов `dm_gamification_method_dic`.
+
+---
+## Актуализация по `config.json` (названия полей в UI)
+
+Ниже — краткая выжимка по текущим пользовательским названиям и ограничениям из `config.json` (блоки `editor_field_ui`, `field_enums`, `editor_textareas`) для ключевых JSON-полей. Этот блок нужен как «мост» между техничными JSON-ключами и тем, как поле подписано/валидируется в интерфейсе редактирования.
+
+| Лист / колонка | JSON-путь / поле | Текущее имя в UI | Значения / поведение (актуально по `config.json`) |
+|---|---|---|---|
+| `CONTEST-DATA.CONTEST_FEATURE` | `vid` | «Вид конкурса» | toggle: `ПРОМ` / `ТЕСТ` |
+| `CONTEST-DATA.CONTEST_FEATURE` | `momentRewarding` | «Момент вручения награды» | `AFTER` («Вручаем в конце») / `DURIN` («Вручаем сразу») |
+| `CONTEST-DATA.CONTEST_FEATURE` | `masking` | «Маскировка» | `Y` («Да») / `N` («Нет») |
+| `CONTEST-DATA.CONTEST_PERIOD` | `[i].period_code`, `[i].criterion_mark_type`, `[i].criterion_mark_value` | «Периоды и критерии конкурса (JSON)» | массив объектов с периодом, оператором и порогом |
+| `REWARD.REWARD_ADD_DATA` | `newsType` | «Тип новости» | `AIPROMPT` («AI-новость») / `TEMPLATE` («Новость по шаблону») |
+| `REWARD.REWARD_ADD_DATA` | `getCondition.nonRewards[].nonRewardCode` | «Код исключающей награды» | варианты подтягиваются из листа `REWARD` c фильтром `REWARD_TYPE=ITEM`, подпись: `{FULL_NAME}: ["{REWARD_CODE}"]` |
+| `REWARD.REWARD_ADD_DATA` | `getCondition.rewards[].rewardCode` | «Код требуемой награды (BADGE)» | whitelist-ввод; проверка по кодам `REWARD` c фильтром `REWARD_TYPE=BADGE` |
+| `REWARD.REWARD_ADD_DATA` | `getCondition.rewards[].amount` | «Количество (1 / 2 / 3)» | фиксированные значения: `1`, `2`, `3` |
+| `REWARD.REWARD_ADD_DATA` | `itemGroupAmount[].itemParam` | «Месяц группового лимита» | перечисление месяцев `Январь`…`Декабрь` |
+| `TOURNAMENT-SCHEDULE.FILTER_PERIOD_ARR` | `[0].period_code` | «Код периода» | значения: `0`, `1` |
+| `TOURNAMENT-SCHEDULE.FILTER_PERIOD_ARR` | `[0].criterion_mark_type` | «Оператор критерия участия» | `>=`, `>`, `=`, `<=`, `<`, `<>`, `(пусто)` |
+| `TOURNAMENT-SCHEDULE.TARGET_TYPE` | `seasonCode` | «Сезон турнира» | enum с человекочитаемыми подписями (`SEASON_2025_1`, `SEASON_f_2025` и др.) |
+| `TOURNAMENT-SCHEDULE` | `TOURNAMENT_STATUS` | «Статус турнира» | `АКТИВНЫЙ`, `ПОДВЕДЕНИЕ ИТОГОВ`, `ЗАВЕРШЕН`, `ОТМЕНЕН`, `УДАЛЕН` |
+| `TOURNAMENT-SCHEDULE` | `PERIOD_TYPE` | «Тип периода» | упорядоченный enum (месяцы → кварталы/полугодия → год → `произвольный`) |
+
+Примечание: полные деревья JSON, статистика встречаемости и примеры значений по выгрузке остаются в соответствующих разделах ниже; таблица выше фиксирует именно актуальные «человеческие» названия/ограничения из текущей конфигурации редактора.
 
 ---
 <a id="reward-prom-23-03-v3"></a>

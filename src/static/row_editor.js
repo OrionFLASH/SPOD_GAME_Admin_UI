@@ -770,36 +770,84 @@
     var sc = bootstrap.sheetCode;
     var jParts = jsonParts === undefined ? null : jsonParts;
     var found = null;
-    for (var i = 0; i < list.length; i++) {
-      var r = list[i];
-      if (r.sheet_code !== sc || r.column !== column) {
-        continue;
-      }
-      if (!ruleHasJsonPath(r)) {
-        if (jParts === null) {
-          found = r;
+    function tryMatchPath(pathToTry) {
+      var localFound = null;
+      for (var i = 0; i < list.length; i++) {
+        var r = list[i];
+        if (r.sheet_code !== sc || r.column !== column) {
+          continue;
         }
-      } else if (partsMatchJsonPath(jParts || [], r.json_path)) {
-        found = r;
+        if (!ruleHasJsonPath(r)) {
+          if (pathToTry === null) {
+            localFound = r;
+          }
+        } else if (partsMatchJsonPath(pathToTry || [], r.json_path)) {
+          localFound = r;
+        }
+      }
+      return localFound;
+    }
+    found = tryMatchPath(jParts);
+    if (found || jParts === null) {
+      return found;
+    }
+    if (Array.isArray(jParts) && jParts.length >= 2 && typeof jParts[jParts.length - 1] === "number") {
+      var wildcardLast = jParts.slice();
+      wildcardLast[wildcardLast.length - 1] = "*";
+      found = tryMatchPath(wildcardLast);
+      if (found) {
+        return found;
       }
     }
     if (!found && jParts && jParts.length >= 3) {
       var penU = jParts.length - 2;
       if (typeof jParts[penU] === "number") {
         var collapsedU = jParts.slice(0, penU).concat(jParts.slice(penU + 1));
-        for (var j = 0; j < list.length; j++) {
-          var r2 = list[j];
-          if (r2.sheet_code !== sc || r2.column !== column || !ruleHasJsonPath(r2)) {
-            continue;
-          }
-          if (partsMatchJsonPath(collapsedU, r2.json_path)) {
-            found = r2;
-            break;
-          }
+        found = tryMatchPath(collapsedU);
+        if (found) {
+          return found;
+        }
+        var wildcardMid = jParts.slice();
+        wildcardMid[penU] = "*";
+        found = tryMatchPath(wildcardMid);
+        if (found) {
+          return found;
         }
       }
     }
     return found;
+  }
+
+  function jsonPathArrayIndexForTemplate(jsonParts) {
+    if (!Array.isArray(jsonParts) || !jsonParts.length) {
+      return null;
+    }
+    var last = jsonParts[jsonParts.length - 1];
+    if (typeof last === "number") {
+      return last;
+    }
+    if (jsonParts.length >= 2) {
+      var prev = jsonParts[jsonParts.length - 2];
+      if (typeof prev === "number") {
+        return prev;
+      }
+    }
+    return null;
+  }
+
+  function applyIndexedTemplateText(rawText, jsonParts) {
+    if (rawText == null) {
+      return "";
+    }
+    var txt = String(rawText);
+    if (txt.indexOf("{index}") < 0 && txt.indexOf("{index1}") < 0) {
+      return txt;
+    }
+    var idx = jsonPathArrayIndexForTemplate(jsonParts);
+    if (idx == null) {
+      return txt.replace(/\{index1\}/g, "?").replace(/\{index\}/g, "?");
+    }
+    return txt.replace(/\{index1\}/g, String(idx + 1)).replace(/\{index\}/g, String(idx));
   }
 
   function showDescriptionEnabled(r) {
@@ -897,10 +945,10 @@
     var hoverTitle = fieldUiHoverTitle(r, column, jsonParts);
     if (r) {
       if (r.label != null && String(r.label).trim() !== "") {
-        display = String(r.label);
+        display = applyIndexedTemplateText(r.label, jsonParts);
       }
       if (r.description != null) {
-        desc = String(r.description);
+        desc = applyIndexedTemplateText(r.description, jsonParts);
       }
     }
     labEl.textContent = "";
@@ -2013,6 +2061,14 @@
     for (ii = 0; ii < taListInit.length; ii++) {
       var hi = taListInit[ii];
       if (!hi || hi.sheet_code !== sc || hi.column !== column || !ruleHasJsonPath(hi)) {
+        continue;
+      }
+      if (truthyJsonScalarArrayHint(hi)) {
+        var jps = hi.json_path;
+        if (jps && getDeepValue(out, jps) === undefined) {
+          /* Для json_scalar_array всегда создаём корень []: поле видно в UI даже если ключа ещё нет в JSON. */
+          setDeep(out, jps, []);
+        }
         continue;
       }
       if (!truthyJsonObjectArrayHint(hi)) {

@@ -2003,9 +2003,9 @@
               "allows_empty": true
             },
             {
-              "json_path": ["businessBlock", 0],
+              "json_path": ["businessBlock", "*"],
               "label": "Бизнес-блок",
-              "description": "businessBlock[0]",
+              "description": "businessBlock[{index}]",
               "show_description": false,
               "required": false,
               "allows_empty": true
@@ -2027,48 +2027,8 @@
               "allows_empty": true
             },
             {
-              "json_path": ["feature", 0],
-              "label": "Особенность конкурса (элемент 1)",
-              "description": "Текст дополнительной особенности конкурса.",
-              "show_description": false,
-              "required": false,
-              "allows_empty": true
-            },
-            {
-              "json_path": ["feature", 1],
-              "label": "Особенность конкурса (элемент 2)",
-              "description": "Текст дополнительной особенности конкурса.",
-              "show_description": false,
-              "required": false,
-              "allows_empty": true
-            },
-            {
-              "json_path": ["feature", 2],
-              "label": "Особенность конкурса (элемент 3)",
-              "description": "Текст дополнительной особенности конкурса.",
-              "show_description": false,
-              "required": false,
-              "allows_empty": true
-            },
-            {
-              "json_path": ["feature", 3],
-              "label": "Особенность конкурса (элемент 4)",
-              "description": "Текст дополнительной особенности конкурса.",
-              "show_description": false,
-              "required": false,
-              "allows_empty": true
-            },
-            {
-              "json_path": ["feature", 4],
-              "label": "Особенность конкурса (элемент 5)",
-              "description": "Текст дополнительной особенности конкурса.",
-              "show_description": false,
-              "required": false,
-              "allows_empty": true
-            },
-            {
-              "json_path": ["feature", 5],
-              "label": "Особенность конкурса (элемент 6)",
+              "json_path": ["feature", "*"],
+              "label": "Особенность конкурса (элемент {index1})",
               "description": "Текст дополнительной особенности конкурса.",
               "show_description": false,
               "required": false,
@@ -2083,6 +2043,14 @@
               "allows_empty": true
             },
             {
+              "json_path": ["gosbHidden", "*"],
+              "label": "Скрыть от ГОСБ",
+              "description": "gosbHidden[{index}]",
+              "show_description": false,
+              "required": false,
+              "allows_empty": true
+            },
+            {
               "json_path": ["gosbVisible"],
               "label": "Показать в ГОСБ",
               "description": "Видят только указанные ГОСБ",
@@ -2091,16 +2059,16 @@
               "allows_empty": true
             },
             {
-              "json_path": ["helpCodeList", 0],
-              "label": "Код помощи (элемент 1)",
-              "description": "Код справочного блока/подсказки для UI.",
+              "json_path": ["gosbVisible", "*"],
+              "label": "Показать в ГОСБ",
+              "description": "gosbVisible[{index}]",
               "show_description": false,
               "required": false,
               "allows_empty": true
             },
             {
-              "json_path": ["helpCodeList", 1],
-              "label": "Код помощи (элемент 2)",
+              "json_path": ["helpCodeList", "*"],
+              "label": "Код помощи (элемент {index1})",
               "description": "Код справочного блока/подсказки для UI.",
               "show_description": false,
               "required": false,
@@ -2139,6 +2107,14 @@
               "allows_empty": true
             },
             {
+              "json_path": ["persomanNumberHidden", "*"],
+              "label": "Скрыть от участников",
+              "description": "persomanNumberHidden[{index}]",
+              "show_description": false,
+              "required": false,
+              "allows_empty": true
+            },
+            {
               "json_path": ["persomanNumberVisible"],
               "label": "Показать участникам",
               "description": "Видят только указанные табельные номера",
@@ -2147,57 +2123,9 @@
               "allows_empty": true
             },
             {
-              "json_path": ["persomanNumberVisible", 0],
+              "json_path": ["persomanNumberVisible", "*"],
               "label": "Показать участникам",
-              "description": "persomanNumberVisible[0]",
-              "show_description": true,
-              "required": false,
-              "allows_empty": true
-            },
-            {
-              "json_path": ["persomanNumberVisible", 1],
-              "label": "Показать участникам",
-              "description": "persomanNumberVisible[1]",
-              "show_description": true,
-              "required": false,
-              "allows_empty": true
-            },
-            {
-              "json_path": ["persomanNumberVisible", 2],
-              "label": "Показать участникам",
-              "description": "persomanNumberVisible[2]",
-              "show_description": true,
-              "required": false,
-              "allows_empty": true
-            },
-            {
-              "json_path": ["persomanNumberVisible", 3],
-              "label": "Показать участникам",
-              "description": "persomanNumberVisible[3]",
-              "show_description": true,
-              "required": false,
-              "allows_empty": true
-            },
-            {
-              "json_path": ["persomanNumberVisible", 4],
-              "label": "Показать участникам",
-              "description": "persomanNumberVisible[4]",
-              "show_description": true,
-              "required": false,
-              "allows_empty": true
-            },
-            {
-              "json_path": ["persomanNumberVisible", 5],
-              "label": "Показать участникам",
-              "description": "persomanNumberVisible[5]",
-              "show_description": true,
-              "required": false,
-              "allows_empty": true
-            },
-            {
-              "json_path": ["persomanNumberVisible", 6],
-              "label": "Показать участникам",
-              "description": "persomanNumberVisible[6]",
+              "description": "persomanNumberVisible[{index}]",
               "show_description": true,
               "required": false,
               "allows_empty": true
@@ -2211,32 +2139,8 @@
               "allows_empty": true
             },
             {
-              "json_path": ["preferences", 0],
-              "label": "Преференция (элемент 1)",
-              "description": "Текст конкретной преференции.",
-              "show_description": false,
-              "required": false,
-              "allows_empty": true
-            },
-            {
-              "json_path": ["preferences", 1],
-              "label": "Преференция (элемент 2)",
-              "description": "Текст конкретной преференции.",
-              "show_description": false,
-              "required": false,
-              "allows_empty": true
-            },
-            {
-              "json_path": ["preferences", 2],
-              "label": "Преференция (элемент 3)",
-              "description": "Текст конкретной преференции.",
-              "show_description": false,
-              "required": false,
-              "allows_empty": true
-            },
-            {
-              "json_path": ["preferences", 3],
-              "label": "Преференция (элемент 4)",
+              "json_path": ["preferences", "*"],
+              "label": "Преференция (элемент {index1})",
               "description": "Текст конкретной преференции.",
               "show_description": false,
               "required": false,
@@ -2251,6 +2155,14 @@
               "allows_empty": true
             },
             {
+              "json_path": ["tbHidden", "*"],
+              "label": "Скрыть от ТБ",
+              "description": "tbHidden[{index}]",
+              "show_description": false,
+              "required": false,
+              "allows_empty": true
+            },
+            {
               "json_path": ["tbVisible"],
               "label": "Показать в ТБ",
               "description": "Видят только указанные ТБ",
@@ -2259,33 +2171,9 @@
               "allows_empty": true
             },
             {
-              "json_path": ["tbVisible", 0],
+              "json_path": ["tbVisible", "*"],
               "label": "Показать в ТБ",
-              "description": "tbVisible[0]",
-              "show_description": false,
-              "required": false,
-              "allows_empty": true
-            },
-            {
-              "json_path": ["tbVisible", 1],
-              "label": "Показать в ТБ",
-              "description": "tbVisible[1]",
-              "show_description": false,
-              "required": false,
-              "allows_empty": true
-            },
-            {
-              "json_path": ["tbVisible", 2],
-              "label": "Показать в ТБ",
-              "description": "tbVisible[2]",
-              "show_description": false,
-              "required": false,
-              "allows_empty": true
-            },
-            {
-              "json_path": ["tbVisible", 3],
-              "label": "Показать в ТБ",
-              "description": "tbVisible[3]",
+              "description": "tbVisible[{index}]",
               "show_description": false,
               "required": false,
               "allows_empty": true
@@ -2662,48 +2550,8 @@
               "allows_empty": true
             },
             {
-              "json_path": ["feature", 0],
-              "label": "Особенность награды (элемент 1)",
-              "description": "Текст дополнительной особенности награды.",
-              "show_description": false,
-              "required": false,
-              "allows_empty": true
-            },
-            {
-              "json_path": ["feature", 1],
-              "label": "Особенность награды (элемент 2)",
-              "description": "Текст дополнительной особенности награды.",
-              "show_description": false,
-              "required": false,
-              "allows_empty": true
-            },
-            {
-              "json_path": ["feature", 2],
-              "label": "Особенность награды (элемент 3)",
-              "description": "Текст дополнительной особенности награды.",
-              "show_description": false,
-              "required": false,
-              "allows_empty": true
-            },
-            {
-              "json_path": ["feature", 3],
-              "label": "Особенность награды (элемент 4)",
-              "description": "Текст дополнительной особенности награды.",
-              "show_description": false,
-              "required": false,
-              "allows_empty": true
-            },
-            {
-              "json_path": ["feature", 4],
-              "label": "Особенность награды (элемент 5)",
-              "description": "Текст дополнительной особенности награды.",
-              "show_description": false,
-              "required": false,
-              "allows_empty": true
-            },
-            {
-              "json_path": ["feature", 5],
-              "label": "Особенность награды (элемент 6)",
+              "json_path": ["feature", "*"],
+              "label": "Особенность награды (элемент {index1})",
               "description": "Текст дополнительной особенности награды.",
               "show_description": false,
               "required": false,
@@ -2798,17 +2646,9 @@
               "allows_empty": true
             },
             {
-              "json_path": ["helpCodeList", 0],
-              "label": "helpCodeList[0]",
-              "description": "helpCodeList[0]",
-              "show_description": false,
-              "required": false,
-              "allows_empty": true
-            },
-            {
-              "json_path": ["helpCodeList", 1],
-              "label": "helpCodeList[1]",
-              "description": "helpCodeList[1]",
+              "json_path": ["helpCodeList", "*"],
+              "label": "helpCodeList[{index}]",
+              "description": "helpCodeList[{index}]",
               "show_description": false,
               "required": false,
               "allows_empty": true
@@ -2838,112 +2678,8 @@
               "allows_empty": true
             },
             {
-              "json_path": ["ignoreConditions", 0],
-              "label": "Табельный номер без проверки условий (элемент 1)",
-              "description": "Участник, для которого ограничения выдачи не применяются.",
-              "show_description": false,
-              "required": false,
-              "allows_empty": true
-            },
-            {
-              "json_path": ["ignoreConditions", 10],
-              "label": "Табельный номер без проверки условий (элемент 11)",
-              "description": "Участник, для которого ограничения выдачи не применяются.",
-              "show_description": false,
-              "required": false,
-              "allows_empty": true
-            },
-            {
-              "json_path": ["ignoreConditions", 11],
-              "label": "Табельный номер без проверки условий (элемент 12)",
-              "description": "Участник, для которого ограничения выдачи не применяются.",
-              "show_description": false,
-              "required": false,
-              "allows_empty": true
-            },
-            {
-              "json_path": ["ignoreConditions", 12],
-              "label": "Табельный номер без проверки условий (элемент 13)",
-              "description": "Участник, для которого ограничения выдачи не применяются.",
-              "show_description": false,
-              "required": false,
-              "allows_empty": true
-            },
-            {
-              "json_path": ["ignoreConditions", 13],
-              "label": "Табельный номер без проверки условий (элемент 14)",
-              "description": "Участник, для которого ограничения выдачи не применяются.",
-              "show_description": false,
-              "required": false,
-              "allows_empty": true
-            },
-            {
-              "json_path": ["ignoreConditions", 1],
-              "label": "Табельный номер без проверки условий (элемент 2)",
-              "description": "Участник, для которого ограничения выдачи не применяются.",
-              "show_description": false,
-              "required": false,
-              "allows_empty": true
-            },
-            {
-              "json_path": ["ignoreConditions", 2],
-              "label": "Табельный номер без проверки условий (элемент 3)",
-              "description": "Участник, для которого ограничения выдачи не применяются.",
-              "show_description": false,
-              "required": false,
-              "allows_empty": true
-            },
-            {
-              "json_path": ["ignoreConditions", 3],
-              "label": "Табельный номер без проверки условий (элемент 4)",
-              "description": "Участник, для которого ограничения выдачи не применяются.",
-              "show_description": false,
-              "required": false,
-              "allows_empty": true
-            },
-            {
-              "json_path": ["ignoreConditions", 4],
-              "label": "Табельный номер без проверки условий (элемент 5)",
-              "description": "Участник, для которого ограничения выдачи не применяются.",
-              "show_description": false,
-              "required": false,
-              "allows_empty": true
-            },
-            {
-              "json_path": ["ignoreConditions", 5],
-              "label": "Табельный номер без проверки условий (элемент 6)",
-              "description": "Участник, для которого ограничения выдачи не применяются.",
-              "show_description": false,
-              "required": false,
-              "allows_empty": true
-            },
-            {
-              "json_path": ["ignoreConditions", 6],
-              "label": "Табельный номер без проверки условий (элемент 7)",
-              "description": "Участник, для которого ограничения выдачи не применяются.",
-              "show_description": false,
-              "required": false,
-              "allows_empty": true
-            },
-            {
-              "json_path": ["ignoreConditions", 7],
-              "label": "Табельный номер без проверки условий (элемент 8)",
-              "description": "Участник, для которого ограничения выдачи не применяются.",
-              "show_description": false,
-              "required": false,
-              "allows_empty": true
-            },
-            {
-              "json_path": ["ignoreConditions", 8],
-              "label": "Табельный номер без проверки условий (элемент 9)",
-              "description": "Участник, для которого ограничения выдачи не применяются.",
-              "show_description": false,
-              "required": false,
-              "allows_empty": true
-            },
-            {
-              "json_path": ["ignoreConditions", 9],
-              "label": "Табельный номер без проверки условий (элемент 10)",
+              "json_path": ["ignoreConditions", "*"],
+              "label": "Табельный номер без проверки условий (элемент {index1})",
               "description": "Участник, для которого ограничения выдачи не применяются.",
               "show_description": false,
               "required": false,
@@ -2998,48 +2734,8 @@
               "allows_empty": true
             },
             {
-              "json_path": ["itemFeature", 0],
-              "label": "Особенность товара (элемент 1)",
-              "description": "Пояснение по характеристике награды типа ITEM.",
-              "show_description": false,
-              "required": false,
-              "allows_empty": true
-            },
-            {
-              "json_path": ["itemFeature", 1],
-              "label": "Особенность товара (элемент 2)",
-              "description": "Пояснение по характеристике награды типа ITEM.",
-              "show_description": false,
-              "required": false,
-              "allows_empty": true
-            },
-            {
-              "json_path": ["itemFeature", 2],
-              "label": "Особенность товара (элемент 3)",
-              "description": "Пояснение по характеристике награды типа ITEM.",
-              "show_description": false,
-              "required": false,
-              "allows_empty": true
-            },
-            {
-              "json_path": ["itemFeature", 3],
-              "label": "Особенность товара (элемент 4)",
-              "description": "Пояснение по характеристике награды типа ITEM.",
-              "show_description": false,
-              "required": false,
-              "allows_empty": true
-            },
-            {
-              "json_path": ["itemFeature", 4],
-              "label": "Особенность товара (элемент 5)",
-              "description": "Пояснение по характеристике награды типа ITEM.",
-              "show_description": false,
-              "required": false,
-              "allows_empty": true
-            },
-            {
-              "json_path": ["itemFeature", 5],
-              "label": "Особенность товара (элемент 6)",
+              "json_path": ["itemFeature", "*"],
+              "label": "Особенность товара (элемент {index1})",
               "description": "Пояснение по характеристике награды типа ITEM.",
               "show_description": false,
               "required": false,
