@@ -786,7 +786,7 @@ curl -X PUT "http://127.0.0.1:8765/wizard/new-contest/draft" \
 |------|-----------------------------------------------|
 | **CONTEST-DATA** | **`primary_key`**, **`title_line`**, **`relations_line`**, **`contest_type_col`** |
 | **GROUP** (в т.ч. до агрегата в списке) | **`primary_key`**, **`title_line`**, **`relations_line`** — для **агрегированного** списка GROUP см. вариант F |
-| **INDICATOR** | **`title_line`**, **`subtitle_line`**, **`relations_line`**, **`contest_code`**, **`add_calc_type`**, **`indicator_code_col`**, … |
+| **INDICATOR** | **`title_line`**, **`subtitle_line`**, **`relations_line`**, **`contest_code`**, **`indicator_contest_name_col`**, **`add_calc_type`**, **`indicator_code_col`**, … |
 | **REWARD** | **`reward_name_col`**, **`reward_contest_codes_col`**, **`title_line`** (названия конкурсов через **REWARD-LINK**), **`group_codes_col`**, **`relations_line`**, … |
 | **REWARD-LINK** | **`reward_link_reward_code`**, **`reward_link_group_code`**, **`reward_link_reward_name`**, **`reward_link_contest_code`**, **`reward_link_contest_name`**, … |
 | **TOURNAMENT-SCHEDULE** | **`schedule_tournament_status_col`**, **`schedule_contest_code_col`**, **`schedule_period_col`**, **`schedule_contest_name_col`**, **`schedule_season_col`**, **`relations_line`**, … |
@@ -810,7 +810,7 @@ curl -X PUT "http://127.0.0.1:8765/wizard/new-contest/draft" \
 
 #### Особенности шаблона **`sheet_list.html`**
 
-- Для колонки с **`key`** **`title_line`**, если у строки есть **`subtitle_line`** (лист **INDICATOR**), выводятся две строки в одной ячейке (основной текст + приглушённая подстрока). Для **других** **`key`** — только **`r.get(c.key)`**.
+- Для листа **INDICATOR** колонки с **`key`** **`title_line`** при наличии **`subtitle_line`** выводятся в две строки в одной ячейке (основной текст + приглушённая подстрока). Для остальных листов и для **других** **`key`** (например `indicator_contest_name_col`) — только **`r.get(c.key)`**.
 - Колонка **«Просмотр»** и колонка **консистентности** задаются **не** через **`rules`**, а через шаблон и **`consistency_column`**.
 
 #### Стили: **`cell_class`**, модификаторы таблицы и **`STATIC_ASSET_VERSION`**
@@ -1090,6 +1090,7 @@ python main.py
 | 0.2.60 | Редактор JSON: `editor_field_ui` поддерживает wildcard `json_path` (`["...", "*"]`) и шаблоны `{index}`/`{index1}` в `label`/`description`; в `config.json` убраны дубли индексных правил для массивов (`ignoreConditions`, `itemFeature`, `feature`, `preferences`, `persomanNumber*`, `gosb*`, `tb*`, `helpCodeList`, `businessBlock`). В `row_editor.js` для `json_scalar_array` корень массива инициализируется как `[]`, поэтому поля массивов всегда доступны в UI с кнопками «Добавить/Удалить», даже если ключ отсутствовал в исходном JSON. |
 | 0.2.61 | **`sheet_list_columns.rules[].show`:** опциональный флаг видимости колонки в таблице списка (по умолчанию **`true`**); при **`false`** колонка не рендерится, правило остаётся в конфиге. Реализация: **`app._visible_sheet_list_columns`**, **`_sheet_list_columns_for_sheet`**; **`validate_sheet_list_column_values`** проверяет тип **`show`**. README **разделы 4, 6c.1, 6c.6**. |
 | 0.2.62 | **REWARD список:** добавлена колонка **`CONTEST_CODE`** по цепочке **REWARD_CODE → REWARD-LINK → CONTEST_CODE** (поле **`reward_contest_codes_col`** в `display_for_sheet_row`, проброс через `app.sheet_list`, правило в `sheet_list_columns` для листа REWARD). Обновлён `search_blob` и документация разделов 2, 6c.1, 6c.7, 8. |
+| 0.2.63 | **INDICATOR список:** для колонки названия конкурса добавлен отдельный ключ **`indicator_contest_name_col`** с `lookup` по `contest_full` (чтобы не зависеть от спец-рендера `title_line`). В `sheet_list.html` двухстрочный вывод `title_line + subtitle_line` ограничен листом **INDICATOR**; для остальных ключей действует обычный вывод `r.get(c.key)`. Обновлены подписи в `config.json` для списка TOURNAMENT-SCHEDULE: «Код конкурса», «Название конкурса». |
 
 ---
 

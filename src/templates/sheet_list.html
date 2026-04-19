@@ -197,7 +197,8 @@
           <td class="col-idx">{{ r.row_index }}</td>
           {% for c in list_columns %}
           <td class="{{ c.cell_class }}">
-            {% if c.key == "title_line" and r.subtitle_line %}
+            {# INDICATOR: только при key=title_line и непустом subtitle_line — две строки из display_for_sheet_row; иначе значение берётся из правила колонки (в т.ч. уникальный key без привязки к title_line). #}
+            {% if sheet_code == "INDICATOR" and c.key == "title_line" and r.subtitle_line %}
             {{ r.title_line }}<br><span class="muted">{{ r.subtitle_line }}</span>
             {% else %}
             {{ r.get(c.key, "") }}

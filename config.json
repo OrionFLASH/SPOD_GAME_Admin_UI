@@ -85,7 +85,7 @@
       },
       "rules": [
         {"key": "contest_code", "label": "Код конкурса", "cell_class": "cell-code cell-h-left cell-w-strong", "show": true, "value": {"kind": "cell", "column": "CONTEST_CODE"}},
-        {"key": "title_line", "label": "Название / описание", "cell_class": "cell-wrap cell-shrink-wrap cell-h-left cell-w-medium", "show": true, "value": {"kind": "display_field", "field": "title_line"}},
+        {"key": "indicator_contest_name_col", "label": "Название конкурса", "cell_class": "cell-wrap cell-shrink-wrap cell-h-left cell-w-medium", "show": true, "value": {"kind": "lookup", "lookup_id": "contest_full", "key_from_column": "CONTEST_CODE"}},
         {"key": "indicator_code_col", "label": "Код индикатора", "cell_class": "cell-mono cell-h-left cell-w-medium", "show": true, "value": {"kind": "cell", "column": "INDICATOR_CODE"}},
         {"key": "add_calc_type", "label": "Настройка вычисления", "cell_class": "cell-wrap cell-shrink-ellipsis cell-h-left cell-w-medium", "show": true, "value": {"kind": "cell", "column": "INDICATOR_ADD_CALC_TYPE"}},
         {"key": "relations_line", "label": "Связи", "cell_class": "cell-wrap cell-muted cell-relations-pre cell-shrink-wrap cell-h-left cell-w-thin", "show": true, "value": {"kind": "display_field", "field": "relations_line"}}
@@ -132,8 +132,8 @@
       "rules": [
         {"key": "preview", "label": "Код турнира", "cell_class": "cell-code cell-h-left cell-w-strong", "show": true, "value": {"kind": "cell", "column": "TOURNAMENT_CODE"}},
         {"key": "schedule_tournament_status_col", "label": "Статус", "cell_class": "cell-wrap cell-shrink-ellipsis cell-h-left cell-w-medium", "show": true, "value": {"kind": "cell", "column": "TOURNAMENT_STATUS"}},
-        {"key": "schedule_contest_code_col", "label": "CONTEST_CODE", "cell_class": "cell-code cell-h-left cell-w-strong", "show": true, "value": {"kind": "cell", "column": "CONTEST_CODE"}},
-        {"key": "schedule_contest_name_col", "label": "Конкурс (CONTEST-DATA.FULL_NAME)", "cell_class": "cell-wrap cell-shrink-wrap cell-h-left cell-w-medium", "show": true, "value": {"kind": "lookup", "lookup_id": "contest_full", "key_from_column": "CONTEST_CODE"}},
+        {"key": "schedule_contest_code_col", "label": "Код конкурса", "cell_class": "cell-code cell-h-left cell-w-strong", "show": true, "value": {"kind": "cell", "column": "CONTEST_CODE"}},
+        {"key": "schedule_contest_name_col", "label": "Название конкурса", "cell_class": "cell-wrap cell-shrink-wrap cell-h-left cell-w-medium", "show": true, "value": {"kind": "lookup", "lookup_id": "contest_full", "key_from_column": "CONTEST_CODE"}},
         {"key": "schedule_period_col", "label": "Период", "cell_class": "cell-wrap cell-shrink-ellipsis cell-h-left cell-w-medium", "show": true, "value": {"kind": "display_field", "field": "schedule_period_col"}},
         {"key": "schedule_season_col", "label": "Сезон", "cell_class": "cell-mono cell-h-left cell-w-medium", "show": true, "value": {"kind": "json_leaf", "column": "TARGET_TYPE", "path": ["seasonCode"]}},
         {"key": "relations_line", "label": "Связанные награды", "cell_class": "cell-wrap cell-muted cell-relations-pre cell-shrink-wrap cell-h-left cell-w-thin", "show": true, "value": {"kind": "display_field", "field": "relations_line"}}
