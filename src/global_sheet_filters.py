@@ -76,7 +76,8 @@ _REWARD_PATHS: Tuple[Tuple[str, Tuple[str, ...]], ...] = (
 )
 _REWARD_PATHS_MAP: Dict[str, Tuple[str, ...]] = dict(_REWARD_PATHS)
 
-# Подписи в UI (короткие).
+# Подписи блоков глобальных фильтров по умолчанию, если в config.json не задан global_filter_labels[dim].
+# Актуальные строки для продакшена задаются в config.json → global_filter_labels (строка или { "label_ru": "..." }).
 DIM_LABEL_RU: Dict[str, str] = {
     "contest_type": "Тип конкурса",
     "product_group": "Продукт. группа",
@@ -665,6 +666,139 @@ def _human_label_for_token(cfg: Dict[str, Any], dim: str, tok: str) -> str:
     return _label_from_token(tok)
 
 
+def _sheet_title_for_code(cfg: Dict[str, Any], sheet_code: str) -> str:
+    """Заголовок листа из config.json (sheets[].title), иначе код листа."""
+    sc = (sheet_code or "").strip()
+    if not sc:
+        return ""
+    for s in cfg.get("sheets") or []:
+        if not isinstance(s, dict):
+            continue
+        if str(s.get("code") or "").strip() != sc:
+            continue
+        t = str(s.get("title") or "").strip()
+        return t if t else sc
+    return sc
+
+
+def _column_ref_from_binding(bind: Dict[str, Any]) -> str:
+    """
+    Короткое имя поля для скобок в заголовке блока фильтра.
+    Плоская колонка — её имя; поле внутри JSON — только путь по ключам (без имени колонки-обёртки),
+    например ``hidden`` вместо ``REWARD_ADD_DATA.hidden``.
+    """
+    col = str(bind.get("column") or "").strip()
+    jp = bind.get("json_path")
+    if not isinstance(jp, list) or not jp:
+        return col
+    tail = ".".join(str(p) for p in jp)
+    return tail if tail else col
+
+
+def _human_label_redundant_with_column(human: str, col_only: str, col_ref: str) -> bool:
+    """
+    True, если строка DIM_LABEL_RU не должна выводиться отдельно от (поле):
+    совпадает с колонкой/путём, либо последний сегмент после « · » повторяет имя колонки
+    или конечный фрагмент пути (как в GROUP · GROUP_CODE или … · seasonItem при col_ref *.seasonItem).
+    """
+    h = (human or "").strip()
+    co = (col_only or "").strip()
+    cr = (col_ref or "").strip()
+    if not h:
+        return True
+    if not co and not cr:
+        return False
+    hu, cou, cru = h.upper(), co.upper(), cr.upper()
+    if hu == cou or hu == cru:
+        return True
+    ref_tail = cr.split(".")[-1] if "." in cr else cr
+    normalized = h.replace("·", " · ").replace("  ", " ")
+    parts = [p.strip() for p in normalized.split(" · ") if p.strip()]
+    if len(parts) >= 2:
+        last_core = parts[-1].split("(")[0].strip()
+        if last_core.upper() == cou:
+            return True
+        if ref_tail and last_core.upper() == ref_tail.upper():
+            return True
+    return False
+
+
+def _editor_field_ui_label_for_binding(cfg: Dict[str, Any], bind: Dict[str, Any]) -> str:
+    """
+    Подпись поля из editor_field_ui для той же связки лист/колонка/json_path, что и у измерения фильтра.
+    Совпадение с flatten_editor_field_ui (в т.ч. развёртка paths → отдельные json_path).
+    """
+    from src import editor_config
+
+    want_sheet = str(bind.get("sheet_code") or "").strip()
+    want_col = str(bind.get("column") or "").strip()
+    want_path = bind.get("json_path")
+    want_list = list(want_path) if isinstance(want_path, list) else None
+
+    for rule in editor_config.flatten_editor_field_ui(cfg):
+        if str(rule.get("sheet_code") or "").strip() != want_sheet:
+            continue
+        if str(rule.get("column") or "").strip() != want_col:
+            continue
+        rp = rule.get("json_path")
+        rule_list = list(rp) if isinstance(rp, list) else None
+        if want_list is None:
+            if rule_list:
+                continue
+        else:
+            if rule_list != want_list:
+                continue
+        lab = str(rule.get("label") or "").strip()
+        if lab:
+            return lab
+    return ""
+
+
+def _dim_label_ru_from_cfg(cfg: Dict[str, Any], dim: str) -> str:
+    """
+    Короткая подпись для заголовка блока фильтра. Порядок:
+    1) **editor_field_ui** — label того же поля, что и в DIM_ENUM_RULE_BINDINGS (карточка строки);
+    2) **global_filter_labels** — строка или { label_ru, comment_ru };
+    3) **DIM_LABEL_RU** в коде (запас).
+    """
+    bind = DIM_ENUM_RULE_BINDINGS.get(dim)
+    if bind:
+        ui = _editor_field_ui_label_for_binding(cfg, bind)
+        if ui:
+            return ui
+    raw = cfg.get("global_filter_labels")
+    if isinstance(raw, dict) and dim in raw:
+        val = raw.get(dim)
+        if isinstance(val, str):
+            s = val.strip()
+            if s:
+                return s
+        if isinstance(val, dict):
+            s = str(val.get("label_ru") or val.get("label") or "").strip()
+            if s:
+                return s
+    return (DIM_LABEL_RU.get(dim) or dim).strip()
+
+
+def _filter_block_heading_label(cfg: Dict[str, Any], dim: str) -> str:
+    """
+    Подпись блока глобального фильтра в UI: [лист] · пояснение (поле).
+    В скобках **(поле)**: плоская колонка — её имя; для **json_path** — только ключи пути внутри JSON
+    (см. **`_column_ref_from_binding`**). Пояснение (global_filter_labels или DIM_LABEL_RU) не выводится,
+    если пусто, полностью совпадает с полем или дублирует имя колонки/хвост пути в скобках — тогда только [лист]: (поле).
+    """
+    bind = DIM_ENUM_RULE_BINDINGS.get(dim)
+    if not bind:
+        return _dim_label_ru_from_cfg(cfg, dim) or dim
+    sheet_title = _sheet_title_for_code(cfg, str(bind.get("sheet_code") or ""))
+    col_ref = _column_ref_from_binding(bind)
+    col_only = str(bind.get("column") or "").strip()
+    human = _dim_label_ru_from_cfg(cfg, dim)
+    if not human or _human_label_redundant_with_column(human, col_only, col_ref):
+        return f"[{sheet_title}]: ({col_ref})"
+    return f"[{sheet_title}]: {human} ({col_ref})"
+
+
 def _dim_prefers_toggle(cfg: Dict[str, Any], dim: str) -> bool:
     """
     True, если правило enum для измерения помечено input_display=toggle
@@ -701,7 +835,7 @@ def filter_blocks_for_template(
         blocks.append(
             {
                 "dim": dim,
-                "label": DIM_LABEL_RU.get(dim, dim),
+                "label": _filter_block_heading_label(cfg, dim),
                 "param": DIM_QUERY_PARAM[dim],
                 "filter_key": dim,
                 "options": opts,

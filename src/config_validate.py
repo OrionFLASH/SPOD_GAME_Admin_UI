@@ -138,6 +138,34 @@ def validate_sheet_list_column_values(cfg: Dict[str, Any]) -> List[str]:
     return out
 
 
+def validate_global_filter_labels(cfg: Dict[str, Any]) -> List[str]:
+    """
+    Проверяет global_filter_labels: ключи — внутренние имена измерений gf_*;
+    значение — строка подписи или объект с label_ru / label (опционально comment_ru).
+    """
+    from src.global_sheet_filters import DIMENSION_ORDER
+
+    raw = cfg.get("global_filter_labels")
+    if raw is None:
+        return []
+    if not isinstance(raw, dict):
+        return ["global_filter_labels: ожидается объект"]
+    known = set(DIMENSION_ORDER)
+    out: List[str] = []
+    for k, v in raw.items():
+        dim = str(k).strip()
+        if not dim:
+            continue
+        if dim not in known:
+            out.append(f"global_filter_labels: неизвестное измерение «{dim}»")
+        if isinstance(v, str):
+            continue
+        if isinstance(v, dict):
+            continue
+        out.append(f"global_filter_labels: «{dim}» — ожидается строка или объект (label_ru, опционально comment_ru)")
+    return out
+
+
 def validate_sheet_bindings(cfg: Dict[str, Any]) -> List[str]:
     """
     Сверяет sheet_bindings с sheets[]: один код листа — одна запись, заголовок по желанию.

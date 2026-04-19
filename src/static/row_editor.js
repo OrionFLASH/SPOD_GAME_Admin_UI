@@ -2937,6 +2937,32 @@
           rowK.appendChild(buildDatePickerShell(dispLeaf, null, null, true));
           return;
         }
+        /* Поля json_object_array — всегда string; числовой формат из editor_field_numeric до field_enums. */
+        var numDefOA = findNumericRuleDef(bootstrapLocal, colLocal, pathPartsItem);
+        if (numDefOA) {
+          var inpNOA = document.createElement("input");
+          inpNOA.type = "text";
+          inpNOA.className = "json-leaf-input spod-leaf-control";
+          var initNOA = disp != null ? String(disp) : "";
+          var flatGOA = flatGridFor(bootstrapLocal);
+          var activeNOA = resolveActiveNumericSpec(numDefOA, function (wc) {
+            return readFlatControlValue(flatGOA, wc, bootstrapLocal.flat || {}, "data-col");
+          });
+          var resNOA = applyNumericFormatToValue(initNOA, activeNOA);
+          inpNOA.value = resNOA.ok ? resNOA.value : initNOA;
+          var numPairOA = attachNumericFlatInput(
+            inpNOA,
+            flatGOA,
+            bootstrapLocal,
+            colLocal,
+            "data-col",
+            null,
+            pathPartsItem
+          );
+          rowK.appendChild(inpNOA);
+          rowK.appendChild(numPairOA.warnEl);
+          return;
+        }
         var enumRule = findFieldEnum(bootstrapLocal, colLocal, pathPartsItem);
         if (enumRule && enumRuleUsesWhitelistValidatedText(enumRule)) {
           rowK.setAttribute("data-json-whitelist-text", "1");
@@ -3358,6 +3384,31 @@
             var dispLeaf = leaf.display != null ? String(leaf.display) : "";
             row.appendChild(buildDatePickerShell(dispLeaf, null, null, true));
           } else {
+            /* Строковый лист JSON: при наличии editor_field_numeric — числовой ввод (напр. путь хранится как строка). */
+            var numDefStr = findNumericRuleDef(bootstrap, col, leaf.parts);
+            if (numDefStr) {
+              var inpNS = document.createElement("input");
+              inpNS.type = "text";
+              inpNS.className = "json-leaf-input spod-leaf-control";
+              var initNS = leaf.display != null ? String(leaf.display) : "";
+              var flatGS = flatGridFor(bootstrap);
+              var activeNS = resolveActiveNumericSpec(numDefStr, function (wc) {
+                return readFlatControlValue(flatGS, wc, bootstrap.flat || {}, "data-col");
+              });
+              var resNS = applyNumericFormatToValue(initNS, activeNS);
+              inpNS.value = resNS.ok ? resNS.value : initNS;
+              var numPairS = attachNumericFlatInput(
+                inpNS,
+                flatGS,
+                bootstrap,
+                col,
+                "data-col",
+                null,
+                leaf.parts
+              );
+              row.appendChild(inpNS);
+              row.appendChild(numPairS.warnEl);
+            } else {
             var enumRule = findFieldEnum(bootstrap, col, leaf.parts);
             if (enumRule && enumRuleUsesWhitelistValidatedText(enumRule)) {
               row.setAttribute("data-json-whitelist-text", "1");
@@ -3411,6 +3462,7 @@
                 inpStr.value = leaf.display;
                 row.appendChild(inpStr);
               }
+            }
             }
           }
         }

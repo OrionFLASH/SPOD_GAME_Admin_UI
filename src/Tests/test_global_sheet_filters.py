@@ -91,6 +91,60 @@ class TestGlobalSheetFilters(unittest.TestCase):
         self.assertTrue(row_matches_native_global_filters("TOURNAMENT-SCHEDULE", row_ok, sel))
         self.assertFalse(row_matches_native_global_filters("TOURNAMENT-SCHEDULE", row_wrong, sel))
 
+    def test_filter_heading_label_sheet_and_column(self) -> None:
+        """Подпись блока: [title листа] · пояснение (колонка/путь); если пояснение = колонка — только [лист]: (поле)."""
+        cfg = {
+            "sheets": [
+                {"code": "CONTEST-DATA", "title": "Конкурсы"},
+                {"code": "INDICATOR", "title": "Показатели"},
+            ]
+        }
+        ct = gsf._filter_block_heading_label(cfg, "contest_type")
+        self.assertIn("Конкурсы", ct)
+        self.assertIn("CONTEST_TYPE", ct)
+        self.assertIn("Тип конкурса", ct)
+        ind = gsf._filter_block_heading_label(cfg, "indicator_code")
+        self.assertIn("Показатели", ind)
+        self.assertIn("INDICATOR_CODE", ind)
+        self.assertNotIn("INDICATOR_CODE", ind.split("(")[0])  # дубль «человеческой» части не повторяем
+
+    def test_filter_heading_group_code_last_segment_equals_column(self) -> None:
+        """GROUP · GROUP_CODE не дублирует (GROUP_CODE) в заголовке."""
+        cfg = {"sheets": [{"code": "GROUP", "title": "Группы / уровни"}]}
+        lbl = gsf._filter_block_heading_label(cfg, "group_code")
+        self.assertEqual(lbl, "[Группы / уровни]: (GROUP_CODE)")
+
+    def test_filter_heading_reward_season_item_tail_matches_path(self) -> None:
+        """В скобках — только путь в JSON; «REWARD_ADD_DATA · seasonItem» совпадает с хвостом — без дубля пояснения."""
+        cfg = {"sheets": [{"code": "REWARD", "title": "Награды"}]}
+        lbl = gsf._filter_block_heading_label(cfg, "r_season_item")
+        self.assertEqual(lbl, "[Награды]: (seasonItem)")
+
+    def test_filter_heading_json_field_shows_inner_keys_in_parens(self) -> None:
+        """Для фильтра по ключу внутри JSON в скобках не дублируется имя колонки-обёртки."""
+        cfg = {"sheets": [{"code": "REWARD", "title": "Награды"}]}
+        self.assertEqual(gsf._column_ref_from_binding(gsf.DIM_ENUM_RULE_BINDINGS["r_hidden"]), "hidden")
+        lbl = gsf._filter_block_heading_label(cfg, "r_hidden")
+        self.assertIn("(hidden)", lbl)
+        self.assertNotIn("REWARD_ADD_DATA.hidden", lbl)
+
+    def test_dim_label_prefers_editor_field_ui_over_global_filter_labels(self) -> None:
+        """Средняя часть заголовка блока: label из editor_field_ui важнее global_filter_labels."""
+        cfg = {
+            "sheets": [{"code": "TOURNAMENT-SCHEDULE", "title": "Расписание турниров"}],
+            "editor_field_ui": [
+                {
+                    "sheet_code": "TOURNAMENT-SCHEDULE",
+                    "rules": [{"column": "TOURNAMENT_STATUS", "label": "Статус турнира"}],
+                }
+            ],
+            "global_filter_labels": {"sch_status": "Расписание · статус"},
+        }
+        self.assertEqual(gsf._dim_label_ru_from_cfg(cfg, "sch_status"), "Статус турнира")
+        heading = gsf._filter_block_heading_label(cfg, "sch_status")
+        self.assertIn("Статус турнира", heading)
+        self.assertNotIn("Расписание · статус", heading)
+
 
 if __name__ == "__main__":
     unittest.main()

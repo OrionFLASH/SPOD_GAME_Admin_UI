@@ -305,6 +305,8 @@ async def lifespan(app: FastAPI):
         logging.warning("%s", msg)
     for msg in config_validate.validate_sheet_list_lookups(CFG):
         logging.warning("%s", msg)
+    for msg in config_validate.validate_global_filter_labels(CFG):
+        logging.warning("%s", msg)
     for msg in config_validate.validate_sheet_list_column_values(CFG):
         logging.warning("%s", msg)
     DB_PATH = db.get_db_path(ROOT, CFG)
