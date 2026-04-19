@@ -357,11 +357,13 @@ def display_for_sheet_row(sheet_code: str, cells: Dict[str, str], lu: Dict[str, 
                 contest_titles.append(t)
         title_line = " · ".join(contest_titles)
         relations_line = "Конкурс: " + ", ".join(contests) if contests else ""
+        reward_contest_codes_col = ", ".join(contests)
         group_codes_col = ", ".join(groups)
         return {
             "primary_key": pk,
             "reward_name_col": reward_name,
             "title_line": title_line,
+            "reward_contest_codes_col": reward_contest_codes_col,
             "group_codes_col": group_codes_col,
             "relations_line": relations_line,
         }
@@ -536,6 +538,7 @@ def search_blob(cells: Dict[str, str], disp: Dict[str, str]) -> str:
             "add_calc_type",
             "indicator_code_col",
             "reward_name_col",
+            "reward_contest_codes_col",
             "group_codes_col",
             "reward_link_reward_code",
             "reward_link_reward_name",

@@ -92,7 +92,8 @@ def validate_sheet_list_lookups(cfg: Dict[str, Any]) -> List[str]:
 
 def validate_sheet_list_column_values(cfg: Dict[str, Any]) -> List[str]:
     """
-    Проверяет sheet_list_columns.rules[].value: допустимый kind, ссылки lookup_id на sheet_list_lookups.
+    Проверяет sheet_list_columns.rules: поле show (если есть) — boolean;
+    rules[].value: допустимый kind, ссылки lookup_id на sheet_list_lookups.
     """
     lookup_ids: set[str] = set()
     for block in cfg.get("sheet_list_lookups") or []:
@@ -109,6 +110,10 @@ def validate_sheet_list_column_values(cfg: Dict[str, Any]) -> List[str]:
         for rule in block.get("rules") or []:
             if not isinstance(rule, dict):
                 continue
+            if "show" in rule and not isinstance(rule.get("show"), bool):
+                out.append(
+                    f"sheet_list_columns: лист «{scode}», key={rule.get('key')!r} — поле show должно быть boolean (true/false)"
+                )
             spec = rule.get("value")
             if not isinstance(spec, dict):
                 continue

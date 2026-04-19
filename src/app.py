@@ -162,6 +162,13 @@ def _load_config() -> Dict[str, Any]:
         return json.load(f)
 
 
+def _visible_sheet_list_columns(columns: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    """
+    Оставляет только колонки с show=true (по умолчанию колонка видима, если show не задан).
+    """
+    return [c for c in columns if c.get("show", True)]
+
+
 def _sheet_list_columns_for_sheet(cfg: Dict[str, Any], sheet_code: str) -> List[Dict[str, Any]]:
     """
     Колонки списка листа из config.json (sheet_list_columns):
@@ -169,6 +176,8 @@ def _sheet_list_columns_for_sheet(cfg: Dict[str, Any], sheet_code: str) -> List[
       {"sheet_code": "TOURNAMENT-SCHEDULE", "rules": [{"key":"preview","label":"Код турнира"}, ...]},
       ...
     ]
+    У каждого правила может быть show (bool): показывать ли колонку в таблице; по умолчанию true.
+    Значения для скрытых колонок по-прежнему считаются (apply_configured_list_column_values по полному списку).
     Если блок для листа не задан — используется запасной набор.
     """
     raw = cfg.get("sheet_list_columns")
@@ -188,10 +197,13 @@ def _sheet_list_columns_for_sheet(cfg: Dict[str, Any], sheet_code: str) -> List[
                 key = str(r.get("key") or "").strip()
                 if not key:
                     continue
+                show_raw = r.get("show")
+                show = True if show_raw is None else bool(show_raw)
                 item: Dict[str, Any] = {
                     "key": key,
                     "label": str(r.get("label") or key),
                     "cell_class": str(r.get("cell_class") or "cell-wrap"),
+                    "show": show,
                 }
                 val = r.get("value")
                 if isinstance(val, dict) and str(val.get("kind") or "").strip():
@@ -200,9 +212,14 @@ def _sheet_list_columns_for_sheet(cfg: Dict[str, Any], sheet_code: str) -> List[
             if out:
                 return out
     return [
-        {"key": "preview", "label": "Ключ", "cell_class": "cell-mono"},
-        {"key": "title_line", "label": "Название / описание", "cell_class": "cell-wrap"},
-        {"key": "relations_line", "label": "Связи", "cell_class": "cell-wrap cell-muted cell-relations-pre"},
+        {"key": "preview", "label": "Ключ", "cell_class": "cell-mono", "show": True},
+        {"key": "title_line", "label": "Название / описание", "cell_class": "cell-wrap", "show": True},
+        {
+            "key": "relations_line",
+            "label": "Связи",
+            "cell_class": "cell-wrap cell-muted cell-relations-pre",
+            "show": True,
+        },
     ]
 
 
@@ -464,7 +481,8 @@ def sheet_list(request: Request, code: str, q: str = ""):
     apply_gf = any(bool(gf_sel[k]) for k in gf_sel)
     allowed_cc = global_sheet_filters.matching_contests(gf_ix, gf_sel) if apply_gf else None
     global_filter_blocks = global_sheet_filters.filter_blocks_for_template(gf_ix, gf_sel, CFG)
-    list_columns = _sheet_list_columns_for_sheet(CFG, code)
+    list_columns_cfg = _sheet_list_columns_for_sheet(CFG, code)
+    list_columns = _visible_sheet_list_columns(list_columns_cfg)
     consistency_column = _sheet_list_consistency_column_for_sheet(CFG, code)
     if code == "GROUP":
         # Одна строка списка на конкурс: код + название из CONTEST-DATA; «Связи» — все уровни GROUP (GROUP_CODE : GROUP_VALUE).
@@ -523,7 +541,7 @@ def sheet_list(request: Request, code: str, q: str = ""):
                 "errors": [],
             }
             sheet_list_column_values.apply_configured_list_column_values(
-                list_columns,
+                list_columns_cfg,
                 row_g,
                 cells=None,
                 lu=lu,
@@ -573,6 +591,7 @@ def sheet_list(request: Request, code: str, q: str = ""):
                 row_out["indicator_code_col"] = disp.get("indicator_code_col", "")
             if code == "REWARD":
                 row_out["reward_name_col"] = disp.get("reward_name_col", "")
+                row_out["reward_contest_codes_col"] = disp.get("reward_contest_codes_col", "")
                 row_out["group_codes_col"] = disp.get("group_codes_col", "")
             if code == "REWARD-LINK":
                 row_out["reward_link_reward_code"] = disp.get("reward_link_reward_code", "")
@@ -589,7 +608,7 @@ def sheet_list(request: Request, code: str, q: str = ""):
             if code == "CONTEST-DATA":
                 row_out["contest_type_col"] = disp.get("contest_type_col", "")
             sheet_list_column_values.apply_configured_list_column_values(
-                list_columns,
+                list_columns_cfg,
                 row_out,
                 cells=cells,
                 lu=lu,
