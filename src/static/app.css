@@ -207,6 +207,11 @@ table.data td:last-child {
   min-width: 720px;
 }
 
+.data-list-wide th,
+.data-list-wide td {
+  vertical-align: middle !important;
+}
+
 .data-list-wide .col-idx {
   width: 3rem;
   white-space: nowrap;
@@ -303,10 +308,11 @@ table.data td:last-child {
   word-break: break-word;
 }
 
-/* Список REWARD-LINK: узкие колонки кодов, широкие — названия награды и конкурса (таблица с table-layout: fixed). */
+/* Список REWARD-LINK: авто-раскладка без наложений; при нехватке места таблица уходит в горизонтальный скролл контейнера. */
 .data-list-reward-link {
-  table-layout: fixed;
-  width: 100%;
+  table-layout: auto;
+  width: max-content;
+  min-width: 100%;
 }
 
 .data-list-reward-link th,
@@ -316,16 +322,25 @@ table.data td:last-child {
 }
 
 .data-list-reward-link .col-reward-link-code {
-  width: 18ch;
-  min-width: 18ch;
-  max-width: 18ch;
+  width: max-content;
+  min-width: max-content;
+  max-width: none;
   white-space: nowrap !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
 }
 
 .data-list-reward-link .col-reward-link-level {
   width: 14ch;
+  max-width: 18ch;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.data-list-reward-link .col-reward-link-contest-code {
+  width: 16ch;
+  min-width: 16ch;
   max-width: 18ch;
   white-space: nowrap;
   overflow: hidden;
@@ -388,6 +403,41 @@ table.data td:last-child {
 .data-list-wide td.cell-code {
   vertical-align: middle !important;
   line-height: 1.2;
+}
+
+.data-list-wide th.cell-h-left,
+.data-list-wide td.cell-h-left {
+  text-align: left !important;
+}
+
+.data-list-wide th.cell-h-center,
+.data-list-wide td.cell-h-center {
+  text-align: center !important;
+}
+
+.data-list-wide th.cell-h-right,
+.data-list-wide td.cell-h-right {
+  text-align: right !important;
+}
+
+.data-list-wide td.cell-w-strong {
+  font-weight: 900 !important;
+}
+
+.data-list-wide td.cell-w-medium {
+  font-weight: 500 !important;
+}
+
+.data-list-wide td.cell-w-thin {
+  font-weight: 400 !important;
+}
+
+.cell-code-noshrink {
+  white-space: nowrap !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+  word-break: keep-all !important;
+  overflow-wrap: normal !important;
 }
 
 .cell-shrink-wrap {
