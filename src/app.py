@@ -299,6 +299,8 @@ async def lifespan(app: FastAPI):
     global CFG, CONN, DB_PATH
     CFG = _load_config()
     _setup_logging()
+    for msg in config_validate.validate_editor_field_definitions(CFG):
+        log.warning("Конфиг: %s", msg)
     for msg in config_validate.validate_sheet_bindings(CFG):
         logging.warning("%s", msg)
     for msg in config_validate.validate_field_enum_sheet_options(CFG):

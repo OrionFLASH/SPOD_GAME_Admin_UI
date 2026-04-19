@@ -1,16 +1,19 @@
 # -*- coding: utf-8 -*-
 """
-Одноразовая/повторная генерация блока editor_field_ui в config.json.
+Одноразовая/повторная генерация подписей полей (исторически блок editor_field_ui в config.json).
+
+В текущем репозитории метаданные редактора хранятся в объединённом ключе editor_field_definitions
+(секция ui на правило). Этот скрипт по-прежнему может выводить структуру правил для последующего
+переноса в editor_field_definitions.rules[].ui (либо временно задавать legacy editor_field_ui —
+см. editor_config: при пустом editor_field_definitions читаются четыре старых ключа).
 
 Берёт заголовки CSV листа и объединяет пути листьев JSON по всем строкам выборки
 для колонок из sheets[].json_columns (через spod_json.try_parse_cell).
 Подписи и описания по умолчанию совпадают с именем колонки / путём; show_description: false.
-После генерации можно вручную править label, description и show_description в config.json.
 
 Формат вывода для JSON-колонок — плоский: отдельное правило на каждый путь (поля column и json_path).
-В рабочем config.json длинные блоки удобно сворачивать в одну запись с тем же column и массивом paths
-(в каждом элементе paths — json_path, label, description и пр.); развёртка в плоский список для UI —
-в editor_config.flatten_editor_field_ui (см. README).
+В рабочем config.json длинные блоки удобно сворачивать в одну запись с тем же column и массивом paths;
+развёртка в плоский список — в editor_config.flatten_editor_field_ui (см. README).
 """
 
 from __future__ import annotations
@@ -21,9 +24,14 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(ROOT / "src"))
+sys.path.insert(0, str(ROOT))
 
-from spod_json import try_parse_cell  # noqa: E402
+from src.editor_config import (  # noqa: E402
+    _LEGACY_EDITOR_KEYS,
+    build_editor_field_definitions_from_legacy,
+    expand_editor_field_definitions_to_legacy_dict,
+)
+from src.spod_json import try_parse_cell  # noqa: E402
 
 
 def format_path(parts: list) -> str:
@@ -172,6 +180,15 @@ def main() -> None:
         print(code, "правил:", len(rules))
 
     cfg["editor_field_ui"] = blocks
+    # Если в конфиге объединённый блок — подмешиваем сгенерированный ui и пересобираем definitions.
+    if cfg.get("editor_field_definitions"):
+        leg = expand_editor_field_definitions_to_legacy_dict(cfg["editor_field_definitions"])
+        cfg.update(leg)
+        cfg["editor_field_ui"] = blocks
+        cfg.pop("editor_field_definitions", None)
+        cfg["editor_field_definitions"] = build_editor_field_definitions_from_legacy(cfg)
+        for k in _LEGACY_EDITOR_KEYS:
+            cfg.pop(k, None)
     cfg_path.write_text(json.dumps(cfg, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     print("записано:", cfg_path)
 

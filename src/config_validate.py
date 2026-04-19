@@ -9,6 +9,50 @@ from src import editor_config
 from src.field_enum_sheet_options import _sql_ident, label_template_placeholders
 
 
+def validate_editor_field_definitions(cfg: Dict[str, Any]) -> List[str]:
+    """
+    Проверяет структуру ``editor_field_definitions``: блоки с sheet_code и rules;
+    у каждого правила — column и хотя бы одна секция ui / enum / numeric / textarea (или paths).
+    """
+    raw = cfg.get("editor_field_definitions")
+    if raw is None:
+        return []
+    if not isinstance(raw, list):
+        return ["editor_field_definitions: ожидается массив"]
+    out: List[str] = []
+    for bi, block in enumerate(raw):
+        if not isinstance(block, dict):
+            out.append(f"editor_field_definitions[{bi}]: ожидается объект")
+            continue
+        sc = str(block.get("sheet_code") or "").strip()
+        if not sc:
+            out.append(f"editor_field_definitions[{bi}]: нет sheet_code")
+        rules = block.get("rules")
+        if not isinstance(rules, list):
+            out.append(f"editor_field_definitions[{bi}] ({sc}): rules должен быть массивом")
+            continue
+        for ri, rule in enumerate(rules):
+            if not isinstance(rule, dict):
+                out.append(f"editor_field_definitions[{bi}].rules[{ri}]: ожидается объект")
+                continue
+            col = str(rule.get("column") or "").strip()
+            if not col:
+                out.append(f"editor_field_definitions[{bi}].rules[{ri}]: нет column")
+            has_paths = rule.get("paths") is not None
+            parts = (
+                bool(rule.get("ui")),
+                bool(rule.get("enum")),
+                bool(rule.get("numeric")),
+                bool(rule.get("textarea")),
+                has_paths,
+            )
+            if not any(parts):
+                out.append(
+                    f"editor_field_definitions[{bi}] ({sc}): rules[{ri}] — задайте ui, enum, numeric, textarea или paths"
+                )
+    return out
+
+
 def validate_field_enum_sheet_options(cfg: Dict[str, Any]) -> List[str]:
     """
     Проверяет блок ``options_from_sheet`` у правил field_enums: лист из sheets, имена колонок.
