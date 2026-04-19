@@ -117,7 +117,7 @@
         {"key": "reward_link_reward_code", "label": "Код награды", "cell_class": "cell-mono col-reward-link-code", "value": {"kind": "cell", "column": "REWARD_CODE"}},
         {"key": "reward_link_group_code", "label": "Уровень", "cell_class": "cell-mono col-reward-link-level", "value": {"kind": "cell", "column": "GROUP_CODE"}},
         {"key": "reward_link_reward_name", "label": "Название награды", "cell_class": "cell-wrap col-reward-link-name col-reward-link-name--reward", "value": {"kind": "lookup", "lookup_id": "reward_full", "key_from_column": "REWARD_CODE"}},
-        {"key": "reward_link_contest_name", "label": "Название турнира", "cell_class": "cell-wrap col-reward-link-name col-reward-link-name--contest", "value": {"kind": "lookup", "lookup_id": "contest_full", "key_from_column": "CONTEST_CODE"}}
+        {"key": "reward_link_contest_name", "label": "Название конкурса", "cell_class": "cell-wrap col-reward-link-name col-reward-link-name--contest", "value": {"kind": "lookup", "lookup_id": "contest_full", "key_from_column": "CONTEST_CODE"}}
       ]
     },
     {
