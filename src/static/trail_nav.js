@@ -34,11 +34,13 @@
   }
 
   function currentListHref(meta) {
-    return "/sheet/" + encodeURIComponent(meta.dataset.sheetCode);
+    var base = "/sheet/" + encodeURIComponent(meta.dataset.sheetCode);
+    var q = meta.dataset.listQuery || "";
+    return q ? base + "?" + q : base;
   }
 
   function pushCurrentToTrail(meta) {
-    var href = window.location.pathname;
+    var href = window.location.pathname + (window.location.search || "");
     var title =
       meta.dataset.trailCurrentTitle ||
       meta.dataset.sheetCode + " · #" + meta.dataset.rowIndex;
@@ -93,7 +95,13 @@
         if (!meta) return;
         e.preventDefault();
         pushCurrentToTrail(meta);
-        window.location.href = a.getAttribute("href");
+        var href = a.getAttribute("href") || "";
+        var q = meta.dataset.listQuery || "";
+        if (q) {
+          var sep = href.indexOf("?") >= 0 ? "&" : "?";
+          href = href + sep + "list_qs=" + encodeURIComponent(q);
+        }
+        window.location.href = href;
       });
     });
   }

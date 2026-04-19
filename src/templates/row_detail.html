@@ -10,6 +10,7 @@
   data-row-id="{{ row_id }}"
   data-row-index="{{ row_index }}"
   data-sheet-title="{{ sheet_title | e }}"
+  data-list-query="{{ list_query | e }}"
   {% if sheet_code == "GROUP" and group_contest_code %}
   data-trail-current-title="GROUP · конкурс {{ group_contest_code }}"
   data-group-contest-code="{{ group_contest_code | e }}"
@@ -173,7 +174,7 @@
     <button type="button" class="btn btn-primary" id="btn-save" disabled>Сохранить в базу</button>
     <button type="button" class="btn btn-secondary" id="btn-save-draft" disabled>Сохранить черновик</button>
     <button type="button" class="btn btn-ghost" id="btn-cancel" disabled>Отменить правку</button>
-    <a class="btn btn-ghost spod-trail-clear-to-list" href="/sheet/{{ sheet_code }}">Назад к списку</a>
+    <a class="btn btn-ghost spod-trail-clear-to-list" href="/sheet/{{ sheet_code }}{% if list_query %}?{{ list_query | e }}{% endif %}">Назад к списку</a>
   </div>
 </div>
 

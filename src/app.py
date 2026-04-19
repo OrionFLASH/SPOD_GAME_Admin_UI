@@ -11,6 +11,7 @@ from contextlib import asynccontextmanager
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List
+from urllib.parse import quote, quote_plus
 
 from fastapi import Body, FastAPI, HTTPException, Request
 from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, RedirectResponse
@@ -40,7 +41,7 @@ ROOT = Path(__file__).resolve().parent.parent
 CFG: Dict[str, Any] = {}
 CONN: sqlite3.Connection | None = None
 DB_PATH: Path | None = None
-STATIC_ASSET_VERSION = "20260419_04"
+STATIC_ASSET_VERSION = "20260419_05"
 
 
 def _cells_canonical_json(cells: Dict[str, str]) -> str:
@@ -230,6 +231,37 @@ def _sheet_list_consistency_column_for_sheet(cfg: Dict[str, Any], sheet_code: st
     return {"show": default_show, "label": "Консистентность", "cell_class": "col-flag"}
 
 
+def _topbar_sheet_links(current_sheet_code: str = "", list_query: str = "") -> List[Dict[str, str]]:
+    """Кнопки переключения листов в верхней панели."""
+    out: List[Dict[str, str]] = []
+    q = (list_query or "").strip()
+    suffix = f"?{q}" if q else ""
+    for s in CFG.get("sheets") or []:
+        if not isinstance(s, dict):
+            continue
+        code = str(s.get("code") or "").strip()
+        if not code:
+            continue
+        out.append(
+            {
+                "code": code,
+                "title": str(s.get("title") or code).strip() or code,
+                "href": f"/sheet/{quote(code)}{suffix}",
+                "active": code == current_sheet_code,
+            }
+        )
+    return out
+
+
+def _base_ctx(*, current_sheet_code: str = "", list_query: str = "") -> Dict[str, Any]:
+    """Общие параметры шаблонов для верхней панели."""
+    return {
+        "topbar_sheet_links": _topbar_sheet_links(current_sheet_code=current_sheet_code, list_query=list_query),
+        "topbar_current_sheet_code": current_sheet_code,
+        "topbar_list_query": list_query,
+    }
+
+
 def _setup_logging() -> None:
     global CFG
     log_dir = ROOT / CFG["paths"]["logs"]
@@ -309,7 +341,7 @@ def index(request: Request):
     return templates.TemplateResponse(
         request,
         "index.html",
-        {"sheets": sheets, "title": "Панель турниров SPOD"},
+        {"sheets": sheets, "title": "Панель турниров SPOD", **_base_ctx()},
     )
 
 
@@ -323,6 +355,7 @@ def wizard_new_contest(request: Request):
         {
             "title": "Создать конкурс",
             "wizard_schema_json": _json_for_script_tag(sch),
+            **_base_ctx(),
         },
     )
 
@@ -564,6 +597,8 @@ def sheet_list(request: Request, code: str, q: str = ""):
                 agg=None,
             )
             rows_out.append(row_out)
+    current_query = str(request.url.query or "")
+    list_qs_encoded = quote_plus(current_query) if current_query else ""
     return templates.TemplateResponse(
         request,
         "sheet_list.html",
@@ -575,6 +610,8 @@ def sheet_list(request: Request, code: str, q: str = ""):
             "consistency_column": consistency_column,
             "q": q,
             "global_filter_blocks": global_filter_blocks,
+            "list_qs_encoded": list_qs_encoded,
+            **_base_ctx(current_sheet_code=code, list_query=current_query),
         },
     )
 
@@ -657,6 +694,7 @@ def row_detail(request: Request, code: str, row_id: int):
     editor_bootstrap = _editor_bootstrap_for_row_cells(conn, code, row_id, cells, json_cols)
     row_edit_draft = _fetch_row_edit_draft(conn, code, row_id)
     sheet_title = str(spec.get("title") or code)
+    list_query = str(request.query_params.get("list_qs") or "")
     return templates.TemplateResponse(
         request,
         "row_detail.html",
@@ -680,6 +718,8 @@ def row_detail(request: Request, code: str, row_id: int):
             "group_editor_bootstraps_json": _json_for_script_tag(group_editor_bootstraps),
             "group_contest_code": group_contest_code,
             "group_contest_name": group_contest_name,
+            "list_query": list_query,
+            **_base_ctx(current_sheet_code=code, list_query=list_query),
         },
     )
 
