@@ -188,7 +188,13 @@ table.data td {
   padding: 0.5rem 0.65rem;
   text-align: left;
   border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  border-right: 1px dotted rgba(20, 40, 70, 0.14);
   vertical-align: top;
+}
+
+table.data th:last-child,
+table.data td:last-child {
+  border-right: none;
 }
 
 .table-scroll {
@@ -229,17 +235,17 @@ table.data td {
 }
 
 .data-list-contests .col-contest-code {
-  width: 19ch;
-  min-width: 19ch;
-  max-width: 19ch;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  word-break: normal;
+  width: 18ch;
+  min-width: 18ch;
+  max-width: 18ch;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  word-break: normal !important;
 }
 
-.data-list-contests .cell-mono.col-contest-code {
-  max-width: 19ch;
+.data-list-contests .cell-code.col-contest-code {
+  max-width: none;
 }
 
 .data-list-contests .col-contest-name {
@@ -270,15 +276,17 @@ table.data td {
 
 /* CONTEST-DATA: колонка «Связи» убрана — больше места под код и название; код с переносом вместо узкого ellipsis. */
 .data-list-contests--contest-data .col-contest-code {
-  width: 34%;
-  min-width: 22ch;
-  max-width: none;
-  white-space: normal;
-  overflow-wrap: anywhere;
-  word-break: break-word;
+  width: 18ch;
+  min-width: 18ch;
+  max-width: 18ch;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  overflow-wrap: normal !important;
+  word-break: normal !important;
 }
 
-.data-list-contests--contest-data .cell-mono.col-contest-code {
+.data-list-contests--contest-data .cell-code.col-contest-code {
   max-width: none;
 }
 
@@ -308,11 +316,12 @@ table.data td {
 }
 
 .data-list-reward-link .col-reward-link-code {
-  width: 22ch;
-  max-width: 28ch;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  width: 18ch;
+  min-width: 18ch;
+  max-width: 18ch;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
 }
 
 .data-list-reward-link .col-reward-link-level {
@@ -354,11 +363,45 @@ table.data td {
   max-width: min(40rem, 38vw);
 }
 
+.data-list-wide .cell-code {
+  max-width: none;
+  width: auto;
+}
+
 .cell-mono {
   font-family: ui-monospace, monospace;
   font-size: 0.82rem;
   max-width: 14rem;
   word-break: break-all;
+}
+
+.cell-code {
+  font-family: ui-monospace, monospace;
+  font-size: 0.84rem;
+  font-weight: 900 !important;
+  white-space: nowrap;
+  word-break: normal;
+  overflow-wrap: normal;
+  text-align: left !important;
+}
+
+.data-list-wide td.cell-code {
+  vertical-align: middle !important;
+  line-height: 1.2;
+}
+
+.cell-shrink-wrap {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  white-space: normal;
+}
+
+.cell-shrink-ellipsis {
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .cell-wrap {
