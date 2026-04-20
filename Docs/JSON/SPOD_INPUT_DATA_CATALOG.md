@@ -50,6 +50,7 @@
 - Всего строк в реестре: **161** (после дедупликации путей JSON и нормализации повторов).
 - Полей/путей, которые есть в CSV, но не найдены в обоих каталогах (ПКАП и Структура БД): **2**.
 - Для `INDICATOR_FILTER` добавлены под-поля (`filtered_attribute_code`, `filtered_attribute_type`, `filtered_attribute_match`, `filtered_attribute_value`, `filtered_attribute_dt`, `filtered_attribute_condition`) с отдельной проверкой наличия в каталогах.
+- Для `INDICATOR_FILTER` в Admin UI зафиксирована каскадная зависимость: `INDICATOR_CODE` → `filtered_attribute_code` → (`filtered_attribute_type`, `filtered_attribute_match`) → (`filtered_attribute_condition` / `filtered_attribute_dt` / `filtered_attribute_value`) с применением ограничений `min/max`, если они заданы в `indicator_filter_catalog`.
 - Варианты значений в реестре нормализованы: для пар `label/value` в итоговой колонке оставляется только `value`.
 
 Поля, найденные только в CSV:
@@ -98,6 +99,10 @@
 | `REWARD.REWARD_ADD_DATA` | `getCondition.rewards[].rewardCode` | «Код требуемой награды (BADGE)» | whitelist-ввод; проверка по кодам `REWARD` c фильтром `REWARD_TYPE=BADGE` |
 | `REWARD.REWARD_ADD_DATA` | `getCondition.rewards[].amount` | «Количество (1 / 2 / 3)» | фиксированные значения: `1`, `2`, `3` |
 | `REWARD.REWARD_ADD_DATA` | `itemGroupAmount[].itemParam` | «Месяц группового лимита» | перечисление месяцев `Январь`…`Декабрь` |
+| `INDICATOR.INDICATOR_FILTER` | `[i].filtered_attribute_code` | «Код атрибута фильтра» | список строится по `indicator_filter_catalog.by_indicator_code[INDICATOR_CODE]`; смена `INDICATOR_CODE` пересобирает блоки фильтра |
+| `INDICATOR.INDICATOR_FILTER` | `[i].filtered_attribute_type`, `[i].filtered_attribute_match` | «Тип атрибута», «Оператор фильтра» | значения ограничены по паре (`INDICATOR_CODE`, `filtered_attribute_code`); недопустимое/пустое значение заменяется на первое допустимое |
+| `INDICATOR.INDICATOR_FILTER` | `[i].filtered_attribute_condition` | «Список значений фильтра» | для `condition_options` с непустыми значениями применяется whitelist-ввод (подсветка valid/invalid); значения вне списка отбрасываются при пересборке |
+| `INDICATOR.INDICATOR_FILTER` | `[i].filtered_attribute_dt`, `[i].filtered_attribute_value` | «Дата фильтра», «Числовое значение фильтра» | для `DATE*` используются `filtered_attribute_min_date/max_date`; для чисел — `filtered_attribute_min_value/max_value` |
 | `TOURNAMENT-SCHEDULE.FILTER_PERIOD_ARR` | `[0].period_code` | «Код периода» | значения: `0`, `1` |
 | `TOURNAMENT-SCHEDULE.FILTER_PERIOD_ARR` | `[0].criterion_mark_type` | «Оператор критерия участия» | `>=`, `>`, `=`, `<=`, `<`, `<>`, `(пусто)` |
 | `TOURNAMENT-SCHEDULE.TARGET_TYPE` | `seasonCode` | «Сезон турнира» | enum с человекочитаемыми подписями (`SEASON_2025_1`, `SEASON_f_2025` и др.) |
@@ -831,6 +836,7 @@ _Смысловые трактовки — рабочие гипотезы по 
 | 1.0 | 2026-01-31 | Первичная выгрузка справочника по полям на основе анализа файла `REWARD (PROM) 20-03 v0.csv` (598 строк). Описания «смысла» полей — рабочие гипотезы по именам и значениям, не официальная ТЗ СПОД. |
 | 1.1 | 2026-04-18 | Дополнено описание блоков **`getCondition`** (массивы **`nonRewards`** / **`rewards`**) и **`itemGroupAmount`**: как поля отображаются в Admin UI (**`json_object_array`**, **`field_enums`**, **`whitelist_validated_input`**, канонические **`paths`** в **`editor_field_ui`**). Согласовано с релизом приложения **0.2.47** (**`README.md`**, §**8**). |
 | 1.2 | 2026-04-20 | Обновлён сводный реестр полей по `17-04 v0`: выполнены дедупликация JSON-путей, нормализация вариантов `value`, отдельный разбор `INDICATOR_FILTER` (включая `filtered_attribute_dt` и `filtered_attribute_value`), а также синхронизация итогов по файлам `SPOD_FIELD_REGISTRY.csv` / `SPOD_FIELD_REGISTRY.xlsx` / `SPOD_FIELDS_ONLY_IN_CSV.csv`. |
+| 1.3 | 2026-04-21 | Уточнена логика каскадной валидации `INDICATOR_FILTER` в Admin UI: зависимость от `INDICATOR_CODE`, ограничение `filtered_attribute_code` и пары `type/match`, whitelist для `filtered_attribute_condition`, а также применение `min/max` к `filtered_attribute_dt` и `filtered_attribute_value`. |
 
 <a id="contest-prom-23-03-v3"></a>
 
