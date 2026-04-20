@@ -51,6 +51,7 @@
 - Полей/путей, которые есть в CSV, но не найдены в обоих каталогах (ПКАП и Структура БД): **2**.
 - Для `INDICATOR_FILTER` добавлены под-поля (`filtered_attribute_code`, `filtered_attribute_type`, `filtered_attribute_match`, `filtered_attribute_value`, `filtered_attribute_dt`, `filtered_attribute_condition`) с отдельной проверкой наличия в каталогах.
 - Для `INDICATOR_FILTER` в Admin UI зафиксирована каскадная зависимость: `INDICATOR_CODE` → `filtered_attribute_code` → (`filtered_attribute_type`, `filtered_attribute_match`) → (`filtered_attribute_condition` / `filtered_attribute_dt` / `filtered_attribute_value`) с применением ограничений `min/max`, если они заданы в `indicator_filter_catalog`.
+- Для `INDICATOR_FILTER` подтверждён источник допустимых `condition_options`: `Docs/ПКАП параметры/06-04-2026 dm_gamification_filteredattribute_dic.xlsx` (агрегация в `config.json`), включая список валют `ccy_code` (31 значение) и другие справочные значения по атрибутам.
 - Варианты значений в реестре нормализованы: для пар `label/value` в итоговой колонке оставляется только `value`.
 
 Поля, найденные только в CSV:
@@ -103,6 +104,8 @@
 | `INDICATOR.INDICATOR_FILTER` | `[i].filtered_attribute_type`, `[i].filtered_attribute_match` | «Тип атрибута», «Оператор фильтра» | значения ограничены по паре (`INDICATOR_CODE`, `filtered_attribute_code`); недопустимое/пустое значение заменяется на первое допустимое |
 | `INDICATOR.INDICATOR_FILTER` | `[i].filtered_attribute_condition` | «Список значений фильтра» | для `condition_options` с непустыми значениями применяется whitelist-ввод (подсветка valid/invalid); значения вне списка отбрасываются при пересборке |
 | `INDICATOR.INDICATOR_FILTER` | `[i].filtered_attribute_dt`, `[i].filtered_attribute_value` | «Дата фильтра», «Числовое значение фильтра» | для `DATE*` используются `filtered_attribute_min_date/max_date`; для чисел — `filtered_attribute_min_value/max_value` |
+| `INDICATOR.INDICATOR_FILTER` | `[i].filtered_attribute_condition` (UX) | «Список значений фильтра» | для whitelist-полей в UI отображается datalist (выпадающие варианты), включая коды из справочника (`ccy_code`, `segment_mk` и др.) |
+| `INDICATOR.INDICATOR_FILTER` | `[i].filtered_attribute_dt` (UX) | «Дата фильтра» | при типах `DATE` / `DATETIME` / `TIMESTAMP` рендерится datepicker; в итоговый JSON сохраняется ключ `filtered_attribute_dt` |
 | `TOURNAMENT-SCHEDULE.FILTER_PERIOD_ARR` | `[0].period_code` | «Код периода» | значения: `0`, `1` |
 | `TOURNAMENT-SCHEDULE.FILTER_PERIOD_ARR` | `[0].criterion_mark_type` | «Оператор критерия участия» | `>=`, `>`, `=`, `<=`, `<`, `<>`, `(пусто)` |
 | `TOURNAMENT-SCHEDULE.TARGET_TYPE` | `seasonCode` | «Сезон турнира» | enum с человекочитаемыми подписями (`SEASON_2025_1`, `SEASON_f_2025` и др.) |
@@ -837,6 +840,7 @@ _Смысловые трактовки — рабочие гипотезы по 
 | 1.1 | 2026-04-18 | Дополнено описание блоков **`getCondition`** (массивы **`nonRewards`** / **`rewards`**) и **`itemGroupAmount`**: как поля отображаются в Admin UI (**`json_object_array`**, **`field_enums`**, **`whitelist_validated_input`**, канонические **`paths`** в **`editor_field_ui`**). Согласовано с релизом приложения **0.2.47** (**`README.md`**, §**8**). |
 | 1.2 | 2026-04-20 | Обновлён сводный реестр полей по `17-04 v0`: выполнены дедупликация JSON-путей, нормализация вариантов `value`, отдельный разбор `INDICATOR_FILTER` (включая `filtered_attribute_dt` и `filtered_attribute_value`), а также синхронизация итогов по файлам `SPOD_FIELD_REGISTRY.csv` / `SPOD_FIELD_REGISTRY.xlsx` / `SPOD_FIELDS_ONLY_IN_CSV.csv`. |
 | 1.3 | 2026-04-21 | Уточнена логика каскадной валидации `INDICATOR_FILTER` в Admin UI: зависимость от `INDICATOR_CODE`, ограничение `filtered_attribute_code` и пары `type/match`, whitelist для `filtered_attribute_condition`, а также применение `min/max` к `filtered_attribute_dt` и `filtered_attribute_value`. |
+| 1.4 | 2026-04-21 | Детализирован UX `INDICATOR_FILTER`: подтверждено происхождение списков `condition_options` из `dm_gamification_filteredattribute_dic.xlsx`, добавлены правила отображения datalist для whitelist-полей, datepicker для `filtered_attribute_dt` и фиксация типозависимого ключа в итоговом JSON (`condition` / `value` / `dt`). |
 
 <a id="contest-prom-23-03-v3"></a>
 

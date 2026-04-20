@@ -440,11 +440,23 @@
 **`filtered_attribute_code`**, **`filtered_attribute_type`**, **`filtered_attribute_match`**, **`filtered_attribute_value`**, **`filtered_attribute_dt`**, **`filtered_attribute_condition`**.
 
 - Один объект фильтра = один визуальный блок со своими кнопками «Добавить/Удалить».
-- Доступные коды **`filtered_attribute_code`** зависят от текущего **`INDICATOR_CODE`** строки (через `options_by_parent_column`).
+- Доступные коды **`filtered_attribute_code`** зависят от текущего **`INDICATOR_CODE`** строки (через `indicator_filter_catalog.by_indicator_code`).
+- При изменении **`INDICATOR_CODE`** в плоской сетке карточки все блоки `INDICATOR_FILTER` пересобираются: список кодов, допустимые типы/операторы и нижнее поле значения синхронизируются с новым каталогом.
 - Тип **`filtered_attribute_type`** управляет составом видимых полей и операторов:
   - строковые: `filtered_attribute_condition[]`;
   - числовые: `filtered_attribute_value` + ограничения `min_value`/`max_value`;
   - даты: `filtered_attribute_dt` + границы `min_date`/`max_date`.
+- Для `filtered_attribute_condition`:
+  - источник вариантов — `condition_options` из `indicator_filter_catalog`;
+  - ввод проверяется по whitelist (подсветка валидности);
+  - в поле подключён datalist с вариантами, поэтому оператор может выбирать значения из выпадающего списка (например, валюты для `ccy_code`).
+- Для даты:
+  - если выбран тип `DATE`/`DATETIME`/`TIMESTAMP`, поле `filtered_attribute_dt` рендерится через datepicker (аналогично `RESULT_DT`);
+  - при наличии границ показывается допустимый диапазон и предупреждение при выходе за `min/max`.
+- При сохранении в JSON и БД используется типозависимый ключ:
+  - `filtered_attribute_condition` — для строковых фильтров;
+  - `filtered_attribute_value` — для числовых;
+  - `filtered_attribute_dt` — для дат.
 - Источник матрицы зависимостей и границ: справочник **`dm_gamification_filteredattribute_dic.xlsx`**, агрегированный в `config.json` (раздел `indicator_filter_catalog`).
 
 #### Связка модулей
@@ -1181,6 +1193,7 @@ python main.py
 | 0.2.67 | **`config.json`:** объединённый ключ **`editor_field_definitions`** (секции **`ui`**, **`enum`**, **`numeric`**, **`textarea`** на поле); развёртка в прежние плоские списки в **`editor_config.py`** (**`_effective_editor_cfg`**). Legacy четыре ключа поддерживаются, если объединённый блок отсутствует или пуст. Валидация **`validate_editor_field_definitions`**, тесты **`test_editor_config_definitions`**, скрипт **`scripts/migrate_editor_field_definitions.py`**. README **раздел 4**, таблица ключей. |
 | 0.2.68 | Документация полей конфигурации: добавлены **раздел 4.6** (детальная структура **`editor_field_definitions`**: уровни **`sheet_code` / `rules`**, секции **`ui` / `enum` / `numeric` / `textarea`**, **`paths`**, правила валидации, развёртка **`_effective_editor_cfg`**, обратная сборка **`build_editor_field_definitions_from_legacy`**) и **раздел 4.7** (оформление массивов **`options`** в файле, порог **120** символов без пробелов, скрипт **`scripts/format_config_options_lines.py`**, таблица функций скрипта). Обновлены **оглавление**, таблица ключей **`config.json`** (ссылка на 4.6), **раздел 3** (строка про **`format_config_options_lines.py`**). Расширены комментарии в **`scripts/format_config_options_lines.py`**. |
 | 0.2.69 | Документация обновлена под текущую конфигурацию `INDICATOR_FILTER`: добавлено описание зависимых полей (`filtered_attribute_code/type/match/value/dt/condition`), логики границ `min/max` для `DATE` и числовых типов, и источника метаданных (`dm_gamification_filteredattribute_dic.xlsx` → `indicator_filter_catalog` в `config.json`). В `Docs/JSON/SPOD_INPUT_DATA_CATALOG.md` обновлён сводный реестр полей (дедупликация JSON-путей, нормализация вариантов `value`, версия 1.2). |
+| 0.2.70 | Документация синхронизирована с текущим UI `INDICATOR_FILTER`: зафиксированы пересборка блоков при смене `INDICATOR_CODE`, datepicker для `filtered_attribute_dt` при типах `DATE/DATETIME/TIMESTAMP`, whitelist + datalist для `filtered_attribute_condition` и правила, какой ключ (`condition`/`value`/`dt`) сохраняется в итоговый JSON и БД. Актуализированы `README.md`, `Docs/JSON/SPOD_INPUT_DATA_CATALOG.md`, `Docs/JSON/SPOD_FIELD_REGISTRY.csv/.xlsx`, `Docs/JSON/README.md`. |
 
 ---
 
