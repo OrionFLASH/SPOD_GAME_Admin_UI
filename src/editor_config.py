@@ -35,10 +35,11 @@ def _norm_json_path_tuple(jp: Any) -> Tuple[Any, ...]:
     return (jp,)
 
 
-def _make_field_key(r: Dict[str, Any]) -> Tuple[str, str, Tuple[Any, ...]]:
+def _make_field_key(r: Dict[str, Any]) -> Tuple[str, str, bool, Tuple[Any, ...]]:
     sc = str(r.get("sheet_code") or "").strip()
     col = str(r.get("column") or "").strip()
-    return (sc, col, _norm_json_path_tuple(r.get("json_path")))
+    has_json_path = "json_path" in r
+    return (sc, col, has_json_path, _norm_json_path_tuple(r.get("json_path")))
 
 
 def _strip_to_part(rule: Dict[str, Any]) -> Dict[str, Any]:
@@ -141,9 +142,13 @@ def _append_atomic_rule_parts(
     if not col:
         return
     base: Dict[str, Any] = {"column": col}
-    jp = rule.get("json_path")
-    if isinstance(jp, list) and len(jp) > 0:
-        base["json_path"] = jp
+    # Важно сохранять даже json_path == []:
+    # это валидный путь к корню JSON-ячейки (используется, например, для
+    # json_object_array на уровне всей колонки INDICATOR_FILTER).
+    if "json_path" in rule:
+        jp = rule.get("json_path")
+        if isinstance(jp, list):
+            base["json_path"] = jp
 
     ui = rule.get("ui")
     if isinstance(ui, dict) and ui:
@@ -173,10 +178,10 @@ def build_editor_field_definitions_from_legacy(cfg: Dict[str, Any]) -> List[Dict
     eff = _effective_editor_cfg(cfg)
     eff.pop("editor_field_definitions", None)
 
-    index: Dict[Tuple[str, str, Tuple[Any, ...]], Dict[str, Any]] = {}
-    order: List[Tuple[str, str, Tuple[Any, ...]]] = []
+    index: Dict[Tuple[str, str, bool, Tuple[Any, ...]], Dict[str, Any]] = {}
+    order: List[Tuple[str, str, bool, Tuple[Any, ...]]] = []
 
-    def ensure_key(k: Tuple[str, str, Tuple[Any, ...]]) -> None:
+    def ensure_key(k: Tuple[str, str, bool, Tuple[Any, ...]]) -> None:
         if k not in index:
             index[k] = {}
             order.append(k)
@@ -209,12 +214,12 @@ def build_editor_field_definitions_from_legacy(cfg: Dict[str, Any]) -> List[Dict
     by_sheet: Dict[str, List[Dict[str, Any]]] = {sc: [] for sc in sheet_order}
 
     for k in order:
-        sc, col, jpt = k
+        sc, col, has_json_path, jpt = k
         parts = index.get(k) or {}
         if not parts:
             continue
         row: Dict[str, Any] = {"column": col}
-        if jpt:
+        if has_json_path:
             row["json_path"] = list(jpt)
         if parts.get("ui"):
             row["ui"] = parts["ui"]

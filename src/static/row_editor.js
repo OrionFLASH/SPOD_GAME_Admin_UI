@@ -222,6 +222,88 @@
     });
   }
 
+  /**
+   * Для INDICATOR_FILTER скрывает нерелевантные поля по filtered_attribute_type.
+   * Поля с уже заполненными данными оставляет видимыми, чтобы не потерять информацию.
+   */
+  function filterIndicatorFilterLeaves(leaves, column, bootstrap, parsedRoot) {
+    if (bootstrap.sheetCode !== "INDICATOR" || column !== "INDICATOR_FILTER") {
+      return leaves;
+    }
+    if (!Array.isArray(parsedRoot)) {
+      return leaves;
+    }
+    return leaves.filter(function (leaf) {
+      var parts = leaf.parts || [];
+      if (!parts.length || typeof parts[0] !== "number") {
+        return true;
+      }
+      var idx = parts[0];
+      var item = parsedRoot[idx];
+      if (!item || typeof item !== "object") {
+        return true;
+      }
+      function normType(rawType) {
+        var t0 = String(rawType || "").trim().toUpperCase();
+        if (!t0) {
+          return "";
+        }
+        var m = t0.match(/^[A-Z_]+/);
+        t0 = m ? m[0] : t0;
+        if (t0 === "INT") {
+          return "INTEGER";
+        }
+        if (t0 === "NUMERIC") {
+          return "DECIMAL";
+        }
+        return t0;
+      }
+      var t = normType(item.filtered_attribute_type);
+      if (!t) {
+        return true;
+      }
+      var key = parts.length > 1 && typeof parts[1] === "string" ? parts[1] : "";
+      if (!key) {
+        return true;
+      }
+      var hasValue = rewardAddDataLeafHasMeaningfulValue(leaf);
+      var isCondition =
+        key === "filtered_attribute_condition" || key.indexOf("filtered_attribute_condition.") === 0;
+      var isNumeric =
+        key === "filtered_attribute_value" ||
+        key === "filtered_attribute_min_value" ||
+        key === "filtered_attribute_max_value";
+      var isDate = key === "filtered_attribute_min_date" || key === "filtered_attribute_max_date";
+      var isDateValue = key === "filtered_attribute_dt";
+
+      if (t === "STRING") {
+        if (isNumeric || isDate || isDateValue) {
+          return hasValue;
+        }
+        return true;
+      }
+      if (t === "INTEGER" || t === "INT" || t === "DECIMAL" || t === "NUMBER") {
+        if (isCondition || isDate || isDateValue) {
+          return hasValue;
+        }
+        return true;
+      }
+      if (t === "DATE" || t === "DATETIME" || t === "TIMESTAMP") {
+        if (isNumeric || isDate) {
+          return hasValue;
+        }
+        return true;
+      }
+      return true;
+    });
+  }
+
+  function applyJsonLeafFilters(leaves, column, bootstrap, parsedRoot) {
+    var out = filterRewardAddDataLeaves(leaves, column, bootstrap);
+    out = filterIndicatorFilterLeaves(out, column, bootstrap, parsedRoot);
+    return out;
+  }
+
   function formatPath(parts) {
     var s = "";
     parts.forEach(function (p) {
@@ -256,6 +338,38 @@
   /** У правила есть поле json_path (даже [] для примитива в корне ячейки). */
   function ruleHasJsonPath(r) {
     return Object.prototype.hasOwnProperty.call(r, "json_path");
+  }
+
+  /**
+   * Для enum-правил с options_by_parent_column выбирает options по значению родительской колонки.
+   */
+  function enumRuleWithResolvedParentOptions(rule, bootstrap) {
+    if (!rule || !bootstrap) {
+      return rule;
+    }
+    var bind = rule.options_by_parent_column;
+    if (!bind || typeof bind !== "object") {
+      return rule;
+    }
+    var parentCol = String(bind.column || "").trim();
+    if (!parentCol) {
+      return rule;
+    }
+    var parentVal = "";
+    if (bootstrap.flat && bootstrap.flat[parentCol] != null) {
+      parentVal = String(bootstrap.flat[parentCol]);
+    } else if (bootstrap.fullRow && bootstrap.fullRow[parentCol] != null) {
+      parentVal = String(bootstrap.fullRow[parentCol]);
+    }
+    parentVal = parentVal.trim();
+    var optsMap = bind.map || {};
+    var options = optsMap[parentVal];
+    if (!Array.isArray(options)) {
+      options = Array.isArray(bind.fallback) ? bind.fallback : [];
+    }
+    var cloned = Object.assign({}, rule);
+    cloned.options = options;
+    return cloned;
   }
 
   /**
@@ -303,7 +417,7 @@
         hit = matchInList(collapsed);
       }
     }
-    return hit || null;
+    return hit ? enumRuleWithResolvedParentOptions(hit, bootstrap) : null;
   }
 
   /** Подсказка по min_rows/max_rows для textarea (плоское поле или путь в JSON). Записи-календарь пропускаются. */
@@ -373,7 +487,7 @@
    * Подсказка editor_textareas: массив объектов по json_path к корню массива.
    */
   function jsonObjectArrayHintForPath(bootstrap, column, pathToArray) {
-    if (!bootstrap || !pathToArray || !pathToArray.length) {
+    if (!bootstrap || !Array.isArray(pathToArray)) {
       return null;
     }
     var list = bootstrap.editorTextareas || [];
@@ -441,7 +555,7 @@
    * Опционально: array_max_items (число), array_allows_empty (по умолчанию true).
    */
   function jsonScalarArrayHintForPath(bootstrap, column, pathToArray) {
-    if (!bootstrap || !pathToArray || !pathToArray.length) {
+    if (!bootstrap || !Array.isArray(pathToArray)) {
       return null;
     }
     var list = bootstrap.editorTextareas || [];
@@ -456,6 +570,13 @@
         continue;
       }
       if (partsMatchJsonPath(pathToArray, h.json_path)) {
+        return h;
+      }
+      /* Для вложенных массивов под индексом object-array: [0,"field"] -> ["field"]. */
+      var collapsed = (pathToArray || []).filter(function (p) {
+        return typeof p !== "number";
+      });
+      if (collapsed.length && partsMatchJsonPath(collapsed, h.json_path)) {
         return h;
       }
     }
@@ -1828,7 +1949,6 @@
       if (
         boot &&
         col &&
-        pathParts.length &&
         jsonScalarArrayHintForPath(boot, col, pathParts) &&
         (value.length === 0 || isPrimitiveScalarArray(value))
       ) {
@@ -1841,8 +1961,7 @@
         });
         return;
       }
-      var oaHint =
-        boot && col && pathParts.length ? jsonObjectArrayHintForPath(boot, col, pathParts) : null;
+      var oaHint = boot && col ? jsonObjectArrayHintForPath(boot, col, pathParts) : null;
       if (oaHint && (value.length === 0 || isObjectArrayValueForHint(value, oaHint))) {
         var keysNorm = objectArrayItemKeysFromHint(oaHint);
         var normalizedObjs = value.map(function (it) {
@@ -1850,7 +1969,7 @@
           var ki;
           for (ki = 0; ki < keysNorm.length; ki++) {
             var kk = keysNorm[ki];
-            o[kk] = it && Object.prototype.hasOwnProperty.call(it, kk) && it[kk] != null ? String(it[kk]) : "";
+            o[kk] = it && Object.prototype.hasOwnProperty.call(it, kk) && it[kk] != null ? it[kk] : "";
           }
           return o;
         });
@@ -2256,7 +2375,13 @@
       } catch (eH) {
         return;
       }
-      if (!baseParts || !baseParts.length) {
+      if (!baseParts) {
+        return;
+      }
+      if (!baseParts.length) {
+        if (!Array.isArray(root)) {
+          root = [];
+        }
         return;
       }
       if (getDeepValue(root, baseParts) === undefined) {
@@ -2276,7 +2401,7 @@
       } catch (eOb) {
         return;
       }
-      if (!baseParts || !baseParts.length) {
+      if (!baseParts) {
         return;
       }
       var keysRaw = host.getAttribute("data-object-array-keys") || "[\"nonRewardCode\"]";
@@ -2300,11 +2425,26 @@
             obj[kk] = "";
             continue;
           }
+          if (row.getAttribute("data-indicator-condition-array") === "1") {
+            var arrVals = [];
+            row.querySelectorAll(".js-indicator-cond-item").forEach(function (inp) {
+              var v = String((inp && inp.value) || "").trim();
+              if (v !== "") {
+                arrVals.push(v);
+              }
+            });
+            obj[kk] = arrVals;
+            continue;
+          }
           obj[kk] = coerceLeafValue(row);
         }
         arr.push(obj);
       }
-      setDeep(root, baseParts, arr);
+      if (!baseParts.length) {
+        root = arr;
+      } else {
+        setDeep(root, baseParts, arr);
+      }
     });
 
     return JSON.stringify(root);
@@ -2466,7 +2606,7 @@
 
     var leaves = [];
     flattenLeaves(parsed, [], leaves, bootstrap, col);
-    leaves = filterRewardAddDataLeaves(leaves, col, bootstrap);
+    leaves = applyJsonLeafFilters(leaves, col, bootstrap, parsed);
 
     var grid = document.createElement("div");
     grid.className = "json-field-grid";
@@ -2797,6 +2937,11 @@
       var bi;
       for (bi = 0; bi < bands.length; bi++) {
         var band = bands[bi];
+        band.setAttribute("data-oa-index", String(bi));
+        var titleEl = band.querySelector(".json-object-array-line-title");
+        if (titleEl) {
+          titleEl.textContent = "Блок " + String(bi + 1);
+        }
         var rows = band.querySelectorAll(".json-leaf-row[data-oa-key][data-json-path]");
         var ri;
         for (ri = 0; ri < rows.length; ri++) {
@@ -2843,6 +2988,8 @@
     function appendOneJsonObjectArrayHost(grid, leaf, bootstrapLocal, colLocal, thrLocal, jsonColumnEl) {
       var basePath = leaf.parts || [];
       var arrayHint = leaf.objectArrayHint || jsonObjectArrayHintForPath(bootstrapLocal, colLocal, basePath) || {};
+      var isIndicatorFilterArray =
+        bootstrapLocal.sheetCode === "INDICATOR" && colLocal === "INDICATOR_FILTER" && basePath.length === 0;
       var keys = objectArrayItemKeysFromHint(arrayHint);
       var orderedKeys = keys.slice();
       if (orderedKeys.length > 1) {
@@ -2918,7 +3065,153 @@
       var lines = document.createElement("div");
       lines.className = "json-object-array-lines";
 
-      function appendStringLeafControls(rowK, pathPartsItem, disp) {
+      function indicatorFilterCatalogMeta() {
+        if (bootstrapLocal.sheetCode !== "INDICATOR" || colLocal !== "INDICATOR_FILTER") {
+          return null;
+        }
+        return (arrayHint && arrayHint.indicator_filter_catalog) || null;
+      }
+
+      function indicatorFilterLineMeta(objLine) {
+        var cat = indicatorFilterCatalogMeta();
+        if (!cat || !objLine || typeof objLine !== "object") {
+          return null;
+        }
+        var indCode = "";
+        if (bootstrapLocal.flat && bootstrapLocal.flat.INDICATOR_CODE != null) {
+          indCode = String(bootstrapLocal.flat.INDICATOR_CODE).trim();
+        } else if (bootstrapLocal.fullRow && bootstrapLocal.fullRow.INDICATOR_CODE != null) {
+          indCode = String(bootstrapLocal.fullRow.INDICATOR_CODE).trim();
+        }
+        var byInd = (cat.by_indicator_code || {})[indCode] || {};
+        var fCode = String(objLine.filtered_attribute_code || "").trim();
+        if (!fCode) {
+          return null;
+        }
+        return byInd[fCode] || null;
+      }
+
+      function normalizeIndicatorFilterType(rawType) {
+        var t0 = String(rawType || "").trim().toUpperCase();
+        if (!t0) {
+          return "";
+        }
+        var m = t0.match(/^[A-Z_]+/);
+        t0 = m ? m[0] : t0;
+        if (t0 === "INT") {
+          return "INTEGER";
+        }
+        if (t0 === "NUMERIC") {
+          return "DECIMAL";
+        }
+        return t0;
+      }
+
+      function normalizeConditionArrayValue(rawVal) {
+        if (Array.isArray(rawVal)) {
+          return rawVal.map(function (x) {
+            return String(x == null ? "" : x);
+          });
+        }
+        if (rawVal == null) {
+          return [];
+        }
+        var s = String(rawVal).trim();
+        if (!s) {
+          return [];
+        }
+        try {
+          var parsed = JSON.parse(s);
+          if (Array.isArray(parsed)) {
+            return parsed.map(function (x) {
+              return String(x == null ? "" : x);
+            });
+          }
+        } catch (e) {}
+        return s
+          .split(",")
+          .map(function (x) {
+            return String(x || "").trim();
+          })
+          .filter(function (x) {
+            return x !== "";
+          });
+      }
+
+      function appendStringLeafControls(rowK, pathPartsItem, disp, objLine) {
+        var keyName =
+          pathPartsItem && pathPartsItem.length && typeof pathPartsItem[pathPartsItem.length - 1] === "string"
+            ? pathPartsItem[pathPartsItem.length - 1]
+            : "";
+        var lineMeta = indicatorFilterLineMeta(objLine);
+        if (lineMeta && keyName === "filtered_attribute_condition") {
+          rowK.setAttribute("data-indicator-condition-array", "1");
+          var cWrap = document.createElement("div");
+          cWrap.className = "json-indicator-cond-wrap";
+          var cItems = document.createElement("div");
+          cItems.className = "json-indicator-cond-items";
+          var condInit = normalizeConditionArrayValue(disp);
+          var condType = normalizeIndicatorFilterType(objLine && objLine.filtered_attribute_type);
+          var condOpts =
+            lineMeta.by_type && condType
+              ? (lineMeta.by_type[condType] || {}).condition_options || []
+              : [];
+          var dlId = "if-cond-" + Math.random().toString(36).slice(2);
+          var dlist = null;
+          if (condOpts && condOpts.length) {
+            dlist = document.createElement("datalist");
+            dlist.id = dlId;
+            condOpts.forEach(function (o) {
+              var opt = document.createElement("option");
+              opt.value = String(o.value != null ? o.value : "");
+              dlist.appendChild(opt);
+            });
+          }
+          function addCondItem(v) {
+            var line = document.createElement("div");
+            line.className = "json-indicator-cond-line";
+            var inp = document.createElement("input");
+            inp.type = "text";
+            inp.className = "json-leaf-input spod-leaf-control js-indicator-cond-item";
+            inp.value = v != null ? String(v) : "";
+            if (dlist) {
+              inp.setAttribute("list", dlId);
+            }
+            var rm = document.createElement("button");
+            rm.type = "button";
+            rm.className = "btn btn-ghost btn-sm";
+            rm.textContent = "Удалить";
+            rm.addEventListener("click", function () {
+              line.remove();
+              document.dispatchEvent(new Event("spod-editor-change"));
+            });
+            line.appendChild(inp);
+            line.appendChild(rm);
+            cItems.appendChild(line);
+          }
+          if (condInit.length) {
+            condInit.forEach(function (v) {
+              addCondItem(v);
+            });
+          } else {
+            addCondItem("");
+          }
+          var add = document.createElement("button");
+          add.type = "button";
+          add.className = "btn btn-ghost btn-sm";
+          add.textContent = "Добавить значение";
+          add.addEventListener("click", function () {
+            addCondItem("");
+            document.dispatchEvent(new Event("spod-editor-change"));
+          });
+          cWrap.appendChild(cItems);
+          cWrap.appendChild(add);
+          if (dlist) {
+            cWrap.appendChild(dlist);
+          }
+          rowK.appendChild(cWrap);
+          return;
+        }
         var dateHj = findDatePickerHint(bootstrapLocal, colLocal, pathPartsItem);
         if (dateHj) {
           rowK.setAttribute("data-json-date", "1");
@@ -2934,11 +3227,65 @@
             labEl.appendChild(fmtLab);
           }
           var dispLeaf = disp != null ? String(disp) : "";
-          rowK.appendChild(buildDatePickerShell(dispLeaf, null, null, true));
+          var dateShell = buildDatePickerShell(dispLeaf, null, null, true);
+          rowK.appendChild(dateShell);
+          if (lineMeta && keyName === "filtered_attribute_dt") {
+            var tDate = normalizeIndicatorFilterType(objLine && objLine.filtered_attribute_type);
+            var btDate = (lineMeta.by_type && lineMeta.by_type[tDate]) || {};
+            var minD = String(btDate.filtered_attribute_min_date || "").trim();
+            var maxD = String(btDate.filtered_attribute_max_date || "").trim();
+            if (minD || maxD) {
+              var dateBounds = document.createElement("span");
+              dateBounds.className = "muted spod-date-format-hint";
+              dateBounds.textContent = " · диапазон " + (minD || "…") + " … " + (maxD || "…");
+              if (topJ) {
+                topJ.appendChild(dateBounds);
+              } else if (labEl) {
+                labEl.appendChild(dateBounds);
+              }
+              var rawInput = dateShell.querySelector(".spod-date-raw-input");
+              var warn = document.createElement("div");
+              warn.className = "numeric-warn";
+              warn.style.display = "none";
+              rowK.appendChild(warn);
+              function checkDateBounds() {
+                var v = String((rawInput && rawInput.value) || "").trim();
+                var bad =
+                  (v && minD && v < minD) || (v && maxD && v > maxD);
+                if (bad) {
+                  warn.style.display = "";
+                  warn.textContent = "Дата вне диапазона: " + (minD || "…") + " … " + (maxD || "…");
+                } else {
+                  warn.style.display = "none";
+                  warn.textContent = "";
+                }
+              }
+              if (rawInput) {
+                rawInput.addEventListener("input", checkDateBounds);
+                rawInput.addEventListener("change", checkDateBounds);
+                checkDateBounds();
+              }
+            }
+          }
           return;
         }
         /* Поля json_object_array — всегда string; числовой формат из editor_field_numeric до field_enums. */
         var numDefOA = findNumericRuleDef(bootstrapLocal, colLocal, pathPartsItem);
+        if (lineMeta && keyName === "filtered_attribute_value") {
+          var tNum = normalizeIndicatorFilterType(objLine && objLine.filtered_attribute_type);
+          var btNum = (lineMeta.by_type && lineMeta.by_type[tNum]) || {};
+          var hasMin = Object.prototype.hasOwnProperty.call(btNum, "filtered_attribute_min_value");
+          var hasMax = Object.prototype.hasOwnProperty.call(btNum, "filtered_attribute_max_value");
+          if (hasMin || hasMax) {
+            numDefOA = Object.assign({}, numDefOA || { format: "decimal" });
+            if (hasMin) {
+              numDefOA.min = Number(btNum.filtered_attribute_min_value);
+            }
+            if (hasMax) {
+              numDefOA.max = Number(btNum.filtered_attribute_max_value);
+            }
+          }
+        }
         if (numDefOA) {
           var inpNOA = document.createElement("input");
           inpNOA.type = "text";
@@ -2964,6 +3311,26 @@
           return;
         }
         var enumRule = findFieldEnum(bootstrapLocal, colLocal, pathPartsItem);
+        if (lineMeta && keyName === "filtered_attribute_type" && Array.isArray(lineMeta.types)) {
+          var tOpts = lineMeta.types.map(function (t) {
+            return { value: String(t), label: String(t) };
+          });
+          if (tOpts.length) {
+            enumRule = Object.assign({}, enumRule || { allow_custom: false }, { options: tOpts });
+            if ((!disp || String(disp).trim() === "") && tOpts.length === 1) {
+              disp = tOpts[0].value;
+            }
+          }
+        }
+        if (lineMeta && keyName === "filtered_attribute_match") {
+          var typeNow = normalizeIndicatorFilterType(objLine && objLine.filtered_attribute_type);
+          var cat = indicatorFilterCatalogMeta() || {};
+          var mByType = cat.match_options_by_type || {};
+          var mo = mByType[typeNow] || mByType.STRING || [];
+          if (Array.isArray(mo) && mo.length) {
+            enumRule = Object.assign({}, enumRule || { allow_custom: false }, { options: mo });
+          }
+        }
         if (enumRule && enumRuleUsesWhitelistValidatedText(enumRule)) {
           rowK.setAttribute("data-json-whitelist-text", "1");
           appendWhitelistValidatedTextControl(rowK, enumRule, disp != null ? String(disp) : "");
@@ -3020,13 +3387,18 @@
       function buildObjectLine(objVals, lineIndex) {
         var obj = objVals && typeof objVals === "object" && !Array.isArray(objVals) ? objVals : {};
         var line = document.createElement("div");
-        line.className = "json-object-array-line";
+        line.className = "json-object-array-line json-object-array-line--boxed";
+        if (isIndicatorFilterArray) {
+          line.classList.add("json-object-array-line--indicator-filter");
+        }
+        line.setAttribute("data-oa-index", String(lineIndex));
         var fieldsCol = document.createElement("div");
         fieldsCol.className = "json-object-array-line-fields";
+        var rowByKey = Object.create(null);
         var ki;
         for (ki = 0; ki < orderedKeys.length; ki++) {
           var keyK = orderedKeys[ki];
-          var disp = obj[keyK] != null ? String(obj[keyK]) : "";
+          var disp = obj[keyK] != null ? obj[keyK] : "";
           var pathPartsItem = basePath.concat(lineIndex, keyK);
           var rowK = document.createElement("div");
           rowK.className = "json-leaf-row grid-cell";
@@ -3044,13 +3416,71 @@
             formatPath(basePath.concat(keyK))
           );
           rowK.appendChild(labK);
-          appendStringLeafControls(rowK, pathPartsItem, disp);
-          fieldsCol.appendChild(rowK);
+          appendStringLeafControls(rowK, pathPartsItem, disp, obj);
+          rowByKey[keyK] = rowK;
+        }
+        if (isIndicatorFilterArray) {
+          var title = document.createElement("div");
+          title.className = "json-object-array-line-title";
+          title.textContent = "Блок " + String(lineIndex + 1);
+          fieldsCol.appendChild(title);
+
+          var topRow = document.createElement("div");
+          topRow.className = "json-indicator-filter-top-row";
+          ["filtered_attribute_code", "filtered_attribute_type", "filtered_attribute_match"].forEach(function (kTop) {
+            if (rowByKey[kTop]) {
+              topRow.appendChild(rowByKey[kTop]);
+            }
+          });
+          fieldsCol.appendChild(topRow);
+
+          var tNow = normalizeIndicatorFilterType(obj && obj.filtered_attribute_type);
+          var secondKey = "filtered_attribute_condition";
+          if (tNow === "DATE" || tNow === "DATETIME" || tNow === "TIMESTAMP") {
+            secondKey = "filtered_attribute_dt";
+          } else if (tNow === "INTEGER" || tNow === "INT" || tNow === "DECIMAL" || tNow === "NUMBER") {
+            secondKey = "filtered_attribute_value";
+          }
+
+          var bottomRow = document.createElement("div");
+          bottomRow.className = "json-indicator-filter-bottom-row";
+          if (rowByKey[secondKey]) {
+            bottomRow.appendChild(rowByKey[secondKey]);
+          }
+          fieldsCol.appendChild(bottomRow);
+
+          var hidden = document.createElement("div");
+          hidden.className = "json-indicator-filter-hidden";
+          orderedKeys.forEach(function (kAll) {
+            var node = rowByKey[kAll];
+            if (!node) {
+              return;
+            }
+            if (
+              kAll === "filtered_attribute_code" ||
+              kAll === "filtered_attribute_type" ||
+              kAll === "filtered_attribute_match" ||
+              kAll === secondKey
+            ) {
+              return;
+            }
+            hidden.appendChild(node);
+          });
+          if (hidden.children.length) {
+            fieldsCol.appendChild(hidden);
+          }
+        } else {
+          for (ki = 0; ki < orderedKeys.length; ki++) {
+            var rowNode = rowByKey[orderedKeys[ki]];
+            if (rowNode) {
+              fieldsCol.appendChild(rowNode);
+            }
+          }
         }
         var rm = document.createElement("button");
         rm.type = "button";
         rm.className = "btn btn-ghost btn-sm js-json-object-array-remove";
-        rm.textContent = "Удалить";
+        rm.textContent = isIndicatorFilterArray ? "Удалить блок" : "Удалить";
         rm.addEventListener("click", function () {
           var cnt = host.querySelectorAll(".json-object-array-line").length;
           if (cnt <= 1 && !jsonObjectArrayHostAllowsEmpty(host)) {
@@ -3061,8 +3491,68 @@
           updateJsonObjectArrayAddButton(host);
           document.dispatchEvent(new Event("spod-editor-change"));
         });
-        line.appendChild(fieldsCol);
-        line.appendChild(rm);
+        if (isIndicatorFilterArray) {
+          var headerRow = document.createElement("div");
+          headerRow.className = "json-indicator-filter-block-header";
+          var titleNode = fieldsCol.querySelector(".json-object-array-line-title");
+          if (titleNode) {
+            headerRow.appendChild(titleNode);
+          }
+          headerRow.appendChild(rm);
+          fieldsCol.insertBefore(headerRow, fieldsCol.firstChild);
+          line.appendChild(fieldsCol);
+        } else {
+          line.appendChild(fieldsCol);
+          line.appendChild(rm);
+        }
+
+        /* При смене кода/типа фильтра пересобираем строку, чтобы обновить зависимые поля и варианты. */
+        line.addEventListener("change", function (ev) {
+          var t = ev.target;
+          if (!t) {
+            return;
+          }
+          var keyChanged = "";
+          var rowHit = t.closest ? t.closest(".json-leaf-row[data-oa-key]") : null;
+          if (rowHit) {
+            keyChanged = String(rowHit.getAttribute("data-oa-key") || "");
+          }
+          if (keyChanged !== "filtered_attribute_code" && keyChanged !== "filtered_attribute_type") {
+            return;
+          }
+          var idx = Array.prototype.indexOf.call(lines.children, line);
+          if (idx < 0) {
+            return;
+          }
+          var curObj = {};
+          for (var ki2 = 0; ki2 < orderedKeys.length; ki2++) {
+            var k2 = String(orderedKeys[ki2]);
+            var r2 = line.querySelector('.json-leaf-row[data-oa-key="' + k2 + '"]');
+            if (!r2) {
+              curObj[k2] = "";
+              continue;
+            }
+            if (r2.getAttribute("data-indicator-condition-array") === "1") {
+              var arr = [];
+              r2.querySelectorAll(".js-indicator-cond-item").forEach(function (inp) {
+                var v = String((inp && inp.value) || "").trim();
+                if (v !== "") {
+                  arr.push(v);
+                }
+              });
+              curObj[k2] = arr;
+            } else {
+              curObj[k2] = coerceLeafValue(r2);
+            }
+          }
+          var rebuilt = buildObjectLine(curObj, idx);
+          lines.replaceChild(rebuilt, line);
+          reindexJsonObjectArrayItems(host);
+          if (jsonColumnEl) {
+            wireJsonLeafPostRender(jsonColumnEl);
+          }
+          document.dispatchEvent(new Event("spod-editor-change"));
+        });
         return line;
       }
 
@@ -3074,7 +3564,7 @@
       var addBtn = document.createElement("button");
       addBtn.type = "button";
       addBtn.className = "btn btn-ghost btn-sm js-json-object-array-add";
-      addBtn.textContent = "Добавить запись";
+      addBtn.textContent = "Добавить блок";
       addBtn.addEventListener("click", function () {
         var cnt0 = host.querySelectorAll(".json-object-array-line").length;
         var max0 = jsonObjectArrayHostMaxItems(host);
@@ -3529,7 +4019,7 @@
       }
       var newLeaves = [];
       flattenLeaves(newParsed, [], newLeaves, bootstrap, col);
-      newLeaves = filterRewardAddDataLeaves(newLeaves, col, bootstrap);
+      newLeaves = applyJsonLeafFilters(newLeaves, col, bootstrap, newParsed);
       fieldsWrap.innerHTML = "";
       var newGrid = document.createElement("div");
       newGrid.className = "json-field-grid";

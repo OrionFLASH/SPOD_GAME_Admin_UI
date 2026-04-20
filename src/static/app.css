@@ -1395,10 +1395,27 @@ table.data th {
   gap: 0.5rem;
 }
 
+.json-field-grid > .json-object-array-host {
+  grid-column: 1 / -1;
+}
+
 .json-object-array-line {
   display: flex;
   align-items: flex-start;
   gap: 0.4rem;
+}
+
+.json-object-array-line--boxed {
+  border: 1px solid #d6dbe6;
+  border-radius: 0.5rem;
+  padding: 0.55rem 0.6rem;
+  background: #fafbfe;
+}
+
+.json-object-array-line--indicator-filter {
+  border-color: #c6d3ea;
+  background: #f6f9ff;
+  display: block;
 }
 
 .json-object-array-line-fields {
@@ -1414,8 +1431,71 @@ table.data th {
   margin-top: 0.12rem;
 }
 
+.json-object-array-line-title {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #35527d;
+  margin: 0;
+}
+
+.json-indicator-filter-block-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.45rem;
+  margin-bottom: 0.15rem;
+}
+
+.json-indicator-filter-top-row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(180px, 1fr));
+  gap: 0.45rem 0.5rem;
+}
+
+.json-indicator-filter-bottom-row {
+  display: block;
+}
+
+.json-indicator-filter-bottom-row .json-leaf-row {
+  margin-top: 0.15rem;
+}
+
+.json-indicator-filter-hidden {
+  display: none;
+}
+
 .json-object-array-host .js-json-object-array-add {
   align-self: flex-start;
+}
+
+@media (max-width: 1200px) {
+  .json-indicator-filter-top-row {
+    grid-template-columns: repeat(2, minmax(180px, 1fr));
+  }
+}
+
+@media (max-width: 820px) {
+  .json-indicator-filter-top-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+.json-indicator-cond-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.json-indicator-cond-items {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.json-indicator-cond-line {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.35rem;
 }
 
 /* field_enums whitelist_validated_input: ввод текста, подсветка по списку допустимых REWARD_CODE и т.п. */
