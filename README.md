@@ -434,6 +434,19 @@
 
 Для **`getCondition.rewards.amount`** используется обычный **`field_enums`** без whitelist — **`select`** с вариантами **`1`**, **`2`**, **`3`**.
 
+#### `INDICATOR_FILTER`: зависимые поля и границы ввода
+
+Для листа **`INDICATOR`** колонка **`INDICATOR_FILTER`** настраивается как **`json_object_array`** c ключами элемента:
+**`filtered_attribute_code`**, **`filtered_attribute_type`**, **`filtered_attribute_match`**, **`filtered_attribute_value`**, **`filtered_attribute_dt`**, **`filtered_attribute_condition`**.
+
+- Один объект фильтра = один визуальный блок со своими кнопками «Добавить/Удалить».
+- Доступные коды **`filtered_attribute_code`** зависят от текущего **`INDICATOR_CODE`** строки (через `options_by_parent_column`).
+- Тип **`filtered_attribute_type`** управляет составом видимых полей и операторов:
+  - строковые: `filtered_attribute_condition[]`;
+  - числовые: `filtered_attribute_value` + ограничения `min_value`/`max_value`;
+  - даты: `filtered_attribute_dt` + границы `min_date`/`max_date`.
+- Источник матрицы зависимостей и границ: справочник **`dm_gamification_filteredattribute_dic.xlsx`**, агрегированный в `config.json` (раздел `indicator_filter_catalog`).
+
 #### Связка модулей
 
 - **`src/field_enum_sheet_options.py`** — **`label_template_placeholders`**, **`format_label_from_template`**, выборка **`label_column`** или шаблона в **`_fetch_options_from_sheet`**.
@@ -1167,6 +1180,7 @@ python main.py
 | 0.2.66 | В скобках заголовка блока **`gf_*`** для полей внутри JSON: только путь по ключам (**`hidden`**, **`seasonItem`**, …), без префикса имени колонки (**`_column_ref_from_binding`**). Тест **`test_filter_heading_json_field_shows_inner_keys_in_parens`**. README **раздел 8**. |
 | 0.2.67 | **`config.json`:** объединённый ключ **`editor_field_definitions`** (секции **`ui`**, **`enum`**, **`numeric`**, **`textarea`** на поле); развёртка в прежние плоские списки в **`editor_config.py`** (**`_effective_editor_cfg`**). Legacy четыре ключа поддерживаются, если объединённый блок отсутствует или пуст. Валидация **`validate_editor_field_definitions`**, тесты **`test_editor_config_definitions`**, скрипт **`scripts/migrate_editor_field_definitions.py`**. README **раздел 4**, таблица ключей. |
 | 0.2.68 | Документация полей конфигурации: добавлены **раздел 4.6** (детальная структура **`editor_field_definitions`**: уровни **`sheet_code` / `rules`**, секции **`ui` / `enum` / `numeric` / `textarea`**, **`paths`**, правила валидации, развёртка **`_effective_editor_cfg`**, обратная сборка **`build_editor_field_definitions_from_legacy`**) и **раздел 4.7** (оформление массивов **`options`** в файле, порог **120** символов без пробелов, скрипт **`scripts/format_config_options_lines.py`**, таблица функций скрипта). Обновлены **оглавление**, таблица ключей **`config.json`** (ссылка на 4.6), **раздел 3** (строка про **`format_config_options_lines.py`**). Расширены комментарии в **`scripts/format_config_options_lines.py`**. |
+| 0.2.69 | Документация обновлена под текущую конфигурацию `INDICATOR_FILTER`: добавлено описание зависимых полей (`filtered_attribute_code/type/match/value/dt/condition`), логики границ `min/max` для `DATE` и числовых типов, и источника метаданных (`dm_gamification_filteredattribute_dic.xlsx` → `indicator_filter_catalog` в `config.json`). В `Docs/JSON/SPOD_INPUT_DATA_CATALOG.md` обновлён сводный реестр полей (дедупликация JSON-путей, нормализация вариантов `value`, версия 1.2). |
 
 ---
 

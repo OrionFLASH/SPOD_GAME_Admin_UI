@@ -6,6 +6,57 @@
 
 **Примеры JSON:** каталог **`Docs/JSON/examples/`** — один CSV выгрузки → один `.json` с тем же именем; см. **`Docs/JSON/README.md`**. Команда: `python src/Tools/export_spod_json_examples.py`.
 
+## Сводный реестр полей (CSV + ПКАП + Структура БД)
+
+Проведена полная сверка по следующим источникам:
+
+- `IN/SPOD/CONTEST (PROM) 17-04 v0.csv`
+- `IN/SPOD/GROUP (PROM) 17-04 v0.csv`
+- `IN/SPOD/INDICATOR (PROM) 17-04 v0.csv`
+- `IN/SPOD/REWARD (PROM) 17-04 v0.csv`
+- `IN/SPOD/REWARD-LINK (PROM) 17-04 v0.csv`
+- `IN/SPOD/SCHEDULE (PROM) 17-04 v0.csv`
+- `config.json` (блоки `sheets`, `editor_field_definitions`)
+- `Docs/ПКАП параметры/(GAME) [HDP] Справочники по геймификации` (HTML + PDF)
+- `Docs/Структура БД Фабрика/Структура БД Геймификации-v16-20260420_1648` (HTML)
+- `Docs/Структура БД Фабрика/Структура БД Геймификации-v16-20260420_164930.pdf`
+
+Сформированы итоговые файлы:
+
+- `Docs/JSON/SPOD_FIELD_REGISTRY.csv`
+- `Docs/JSON/SPOD_FIELD_REGISTRY.xlsx`
+- `Docs/JSON/SPOD_FIELDS_ONLY_IN_CSV.csv`
+
+Состав колонок в `SPOD_FIELD_REGISTRY.*` соответствует заданию:
+
+- ИМЯ ЛИСТА
+- ИМЯ ФАЙЛА
+- ИМЯ ПОЛЯ
+- признка json
+- имя ключа внутри json (лист с полным путем от верха (кроме названия колонки самой)
+- label если есть
+- description если есть
+- имеющиеся даныне о типе поля
+- имеющиеся данные об ограничениях ввода
+- имеющиеся данные о вариантах значений
+- наличие поля в CSV файлах не пустые значений (кол-во)
+- наличие поля в CSV файлах пустые значений (кол-во)
+- признак того что поле есть в CSV
+- признак того что поле упоминается в ПКАП параметры
+- признак того что поле упоминается в Стурктура БД Фабрика
+
+Итоги сверки:
+
+- Всего строк в реестре: **161** (после дедупликации путей JSON и нормализации повторов).
+- Полей/путей, которые есть в CSV, но не найдены в обоих каталогах (ПКАП и Структура БД): **2**.
+- Для `INDICATOR_FILTER` добавлены под-поля (`filtered_attribute_code`, `filtered_attribute_type`, `filtered_attribute_match`, `filtered_attribute_value`, `filtered_attribute_dt`, `filtered_attribute_condition`) с отдельной проверкой наличия в каталогах.
+- Варианты значений в реестре нормализованы: для пар `label/value` в итоговой колонке оставляется только `value`.
+
+Поля, найденные только в CSV:
+
+- `INDICATOR (PROM) 17-04 v0.csv` → `N`
+- `SCHEDULE (PROM) 17-04 v0.csv` → `TRN_INDICATOR_FILTER`
+
 ## Оглавление
 
 - [Актуализация по `config.json` (названия полей в UI)](#актуализация-по-configjson-названия-полей-в-ui)
@@ -779,6 +830,7 @@ _Смысловые трактовки — рабочие гипотезы по 
 |--------|------|-----------|
 | 1.0 | 2026-01-31 | Первичная выгрузка справочника по полям на основе анализа файла `REWARD (PROM) 20-03 v0.csv` (598 строк). Описания «смысла» полей — рабочие гипотезы по именам и значениям, не официальная ТЗ СПОД. |
 | 1.1 | 2026-04-18 | Дополнено описание блоков **`getCondition`** (массивы **`nonRewards`** / **`rewards`**) и **`itemGroupAmount`**: как поля отображаются в Admin UI (**`json_object_array`**, **`field_enums`**, **`whitelist_validated_input`**, канонические **`paths`** в **`editor_field_ui`**). Согласовано с релизом приложения **0.2.47** (**`README.md`**, §**8**). |
+| 1.2 | 2026-04-20 | Обновлён сводный реестр полей по `17-04 v0`: выполнены дедупликация JSON-путей, нормализация вариантов `value`, отдельный разбор `INDICATOR_FILTER` (включая `filtered_attribute_dt` и `filtered_attribute_value`), а также синхронизация итогов по файлам `SPOD_FIELD_REGISTRY.csv` / `SPOD_FIELD_REGISTRY.xlsx` / `SPOD_FIELDS_ONLY_IN_CSV.csv`. |
 
 <a id="contest-prom-23-03-v3"></a>
 
